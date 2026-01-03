@@ -35,7 +35,9 @@ test('coinbase import: fixture → preview → commit → portfolio + transactio
   await resetApp(page, request);
   await onboardAndRegister(page);
 
-  await page.goto('/imports');
+  // Use SPA navigation to keep the in-memory vault state (avoid full reload).
+  await page.getByTestId('nav-imports').click();
+  await expect(page.getByTestId('form-coinbase-keyname')).toBeVisible();
 
   await page.getByTestId('form-coinbase-keyname').fill('FIXTURE:basic');
   await page.getByTestId('form-coinbase-privatekey').fill('FIXTURE:basic');

@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { AlertSchema, MirrorStateSchema, evaluateServerAlert } from '@kp/core';
-import { buildPushPayload, type PushSubscription, type PushMessage, type VapidKeys } from '@block65/webcrypto-web-push';
+import { buildWebPushRequest, type VapidKeys, type WebPushSubscription } from '../_lib/webPush';
 import { json, readJson } from '../_lib/http';
 import { getSql, HOSTED_SCHEMA_SQL, type Env } from '../_lib/db';
 import { hashPassword, normalizeEmail, newId, requireAuth, signToken } from '../_lib/auth';
@@ -12,6 +12,11 @@ import {
   coinbaseListTransactionsPage,
   coinbaseShowTransaction
 } from '../_lib/coinbaseV2Client';
+
+type PushMessage = {
+  data: string;
+  options?: { ttl?: number };
+};
 
 type Bindings = Env;
 
@@ -441,9 +446,9 @@ async function sendWebPushToUser(
 
   for (const r of rows) {
     attempted++;
-    let sub: PushSubscription;
+    let sub: WebPushSubscription;
     try {
-      sub = JSON.parse(String(r.subscription_json)) as PushSubscription;
+      sub = JSON.parse(String(r.subscription_json)) as WebPushSubscription;
     } catch {
       failed++;
       await sql`
@@ -456,8 +461,11 @@ async function sendWebPushToUser(
     }
 
     try {
-      const payload = await buildPushPayload(message, sub, vapid);
-      const res = await fetch(sub.endpoint, payload as any);
+      const { url, init } = await buildWebPushRequest(sub, vapid, {
+        data: message.data,
+        ttl: message.options?.ttl,
+      });
+      const res = await fetch(url, init);
 
       if (res.status >= 200 && res.status < 300) {
         delivered++;

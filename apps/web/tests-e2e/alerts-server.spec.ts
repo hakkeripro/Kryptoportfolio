@@ -32,7 +32,9 @@ async function onboardAndRegister(page: any) {
 }
 
 async function runFixtureImport(page: any) {
-  await page.goto('/imports');
+  // Use SPA navigation to keep the in-memory vault state (avoid full reload).
+  await page.getByTestId('nav-imports').click();
+  await expect(page.getByTestId('form-coinbase-keyname')).toBeVisible();
   await page.getByTestId('form-coinbase-keyname').fill('FIXTURE:basic');
   await page.getByTestId('form-coinbase-privatekey').fill('FIXTURE:basic');
   await page.getByTestId('btn-coinbase-connect').click();

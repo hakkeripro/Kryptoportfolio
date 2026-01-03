@@ -136,7 +136,10 @@ export async function coinbaseListAllAccounts(cred: CoinbaseCredentials): Promis
   let next: string | null = '/v2/accounts';
   const out: CoinbaseAccount[] = [];
   while (next) {
-    const resp = await coinbaseGetJson<CoinbaseListResponse<CoinbaseAccount>>(cred, next);
+    const resp: CoinbaseListResponse<CoinbaseAccount> = await coinbaseGetJson<CoinbaseListResponse<CoinbaseAccount>>(
+      cred,
+      next
+    );
     out.push(...(resp.data ?? []));
     next = resp.pagination?.next_uri ?? null;
   }
@@ -150,7 +153,10 @@ export async function coinbaseListTransactionsPage(
   limit = 100
 ): Promise<{ items: CoinbaseTransaction[]; nextUri: string | null }> {
   const path = nextUri ?? `/v2/accounts/${accountId}/transactions?limit=${limit}`;
-  const resp = await coinbaseGetJson<CoinbaseListResponse<CoinbaseTransaction>>(cred, path);
+  const resp: CoinbaseListResponse<CoinbaseTransaction> = await coinbaseGetJson<CoinbaseListResponse<CoinbaseTransaction>>(
+    cred,
+    path
+  );
   return { items: resp.data ?? [], nextUri: resp.pagination?.next_uri ?? null };
 }
 
