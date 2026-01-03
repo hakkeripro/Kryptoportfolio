@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build workspace deps
+        run: pnpm -w build:deps
+
+      - name: Unit tests
+        run: pnpm test
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: test
+    # To skip e2e, define a repo variable SKIP_E2E=1
+    if: ${{ vars.SKIP_E2E != '1' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Install Playwright browsers
+        run: pnpm --filter @kp/web exec playwright install --with-deps
+
+      - name: E2E tests
+        env:
+          CI: '1'
+        run: pnpm test:e2e

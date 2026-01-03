@@ -1,0 +1,11 @@
+name = "kryptoportfolio-alert-runner"
+main = "src/index.ts"
+compatibility_date = "2025-12-31"
+
+# Run every 15 minutes (adjust as needed)
+triggers = { crons = ["*/15 * * * *"] }
+
+[vars]
+# Pages Functions base URL (must include /api)
+API_BASE_URL = "https://kryptoportfolio.pages.dev/api"
+BATCH_LIMIT = "200"

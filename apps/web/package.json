@@ -1,0 +1,41 @@
+{
+  "name": "@kp/web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "predev": "pnpm -w build:deps",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run --passWithNoTests",
+    "pretest:e2e": "pnpm -w build:deps",
+    "test:e2e": "playwright test --reporter=list"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.0",
+    "zustand": "^4.5.5",
+    "recharts": "^2.15.0",
+    "decimal.js": "^10.4.3",
+    "date-fns": "^4.1.0",
+    "zod": "^3.23.8",
+    "@kp/core": "workspace:*",
+    "@kp/platform-web": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.15",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11",
+    "vite-plugin-pwa": "^0.20.5",
+    "vitest": "^2.1.9",
+    "@playwright/test": "^1.49.1",
+    "jsdom": "^24.0.0"
+  }
+}
