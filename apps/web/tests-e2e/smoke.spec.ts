@@ -1,5 +1,18 @@
 import { test, expect } from '@playwright/test';
 
+async function waitForToken(page: any) {
+  await page.waitForFunction(() => {
+    const raw = localStorage.getItem('kp_app_state_v3');
+    if (!raw) return false;
+    try {
+      const obj = JSON.parse(raw);
+      return !!obj?.state?.token;
+    } catch {
+      return false;
+    }
+  }, null, { timeout: 10_000 });
+}
+
 test('smoke: onboarding + vault + register + dashboard', async ({ page, request }) => {
   // Reset API (TEST_MODE)
   await request.post('http://localhost:8788/__test/reset');
@@ -30,6 +43,9 @@ test('smoke: onboarding + vault + register + dashboard', async ({ page, request 
   await page.getByTestId('form-auth-password').fill('supersecret1');
   await expect(page.getByTestId('btn-register')).toBeEnabled();
   await page.getByTestId('btn-register').click();
+  // Wait until auth token is persisted (register/login completed)
+  await waitForToken(page);
+
 
   await page.getByTestId('btn-finish-onboarding').click();
   await expect(page.getByTestId('nav-dashboard')).toBeVisible();

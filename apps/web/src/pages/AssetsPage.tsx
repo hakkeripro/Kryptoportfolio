@@ -63,8 +63,9 @@ export default function AssetsPage() {
     setMsg(null);
     setSearchLoading(true);
     try {
-      const r = await coingeckoSearch(apiBase, query.trim());
-      setResults(r.coins);
+      // coingeckoSearch returns an array of coins
+      const coins = await coingeckoSearch(apiBase, query.trim());
+      setResults(coins);
     } catch (e: any) {
       setMsg(String(e?.message ?? e ?? 'search_failed'));
     } finally {
@@ -85,9 +86,6 @@ export default function AssetsPage() {
         updatedAtISO: now
       });
       setMsg(`Linked ${selected.symbol} → ${coin.id}`);
-      // Auto advance to next unmapped
-      const next = unmapped.find((a) => a.id !== selected.id);
-      if (next) setSelectedId(next.id);
     } catch (e: any) {
       setMsg(String(e?.message ?? e ?? 'link_failed'));
     } finally {
@@ -240,14 +238,13 @@ export default function AssetsPage() {
                   void doSearch();
                 }}
                 className="flex gap-2 flex-wrap"
-                data-testid="form-coingecko-search"
               >
                 <input
                   className="flex-1 min-w-[220px] rounded-lg border border-slate-800 bg-slate-950/40 px-3 py-2 text-sm"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Search CoinGecko (e.g. bitcoin, ethereum)"
-                  data-testid="input-coingecko-query"
+                  data-testid="form-coingecko-search"
                 />
                 <button
                   className="rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium hover:bg-white disabled:opacity-50"

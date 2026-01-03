@@ -64,7 +64,7 @@ export async function registerImportRoutes(app: FastifyInstance) {
   // Coinbase App (v2) — accounts
   app.post('/v1/import/coinbase/v2/accounts', { preHandler: [requireAuth] }, async (req, reply) => {
     const raw = CoinbaseCredentialsSchema.parse((req as any).body ?? {});
-    if (app.config.TEST_MODE && isCoinbaseV2FixtureCreds(raw)) {
+    if (app.config.testMode && isCoinbaseV2FixtureCreds(raw)) {
       return reply.send({ accounts: fixtureAccounts() });
     }
     const body = normalizeCoinbaseCredentials(raw);
@@ -87,7 +87,7 @@ export async function registerImportRoutes(app: FastifyInstance) {
       })
       .strict();
     const parsed = schema.parse((req as any).body ?? {});
-    if (app.config.TEST_MODE && isCoinbaseV2FixtureCreds(parsed)) {
+    if (app.config.testMode && isCoinbaseV2FixtureCreds(parsed)) {
       const all = fixtureTransactionsByAccount(parsed.accountId);
       // Ignore pagination in the fixture; respect limit.
       const items = all.slice(0, parsed.limit ?? 100);
@@ -112,7 +112,7 @@ export async function registerImportRoutes(app: FastifyInstance) {
       })
       .strict();
     const parsed = schema.parse((req as any).body ?? {});
-    if (app.config.TEST_MODE && isCoinbaseV2FixtureCreds(parsed)) {
+    if (app.config.testMode && isCoinbaseV2FixtureCreds(parsed)) {
       const tx = fixtureFindTransaction(parsed.accountId, parsed.transactionId);
       if (!tx) return reply.status(404).send({ error: 'not_found' });
       return reply.send(tx);

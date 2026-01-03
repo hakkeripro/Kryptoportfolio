@@ -1,7 +1,23 @@
 import { test, expect } from '@playwright/test';
 
+async function waitForToken(page: any) {
+  await page.waitForFunction(() => {
+    const raw = localStorage.getItem('kp_app_state_v3');
+    if (!raw) return false;
+    try {
+      const obj = JSON.parse(raw);
+      return !!obj?.state?.token;
+    } catch {
+      return false;
+    }
+  }, null, { timeout: 10_000 });
+}
+
 async function resetApp(page: any, request: any) {
-  await request.post('http://localhost:8788/__test/reset');
+  const r = await request.post('http://localhost:8788/__test/reset');
+  if (!r.ok()) {
+    throw new Error(`API test mode not enabled (expected /__test/reset 200): ${r.status()} ${await r.text()}`);
+  }
   await page.goto('/onboarding');
   await page.evaluate(async () => {
     localStorage.clear();
@@ -27,6 +43,9 @@ async function onboardAndRegister(page: any) {
   await page.getByTestId('form-auth-email').fill(email);
   await page.getByTestId('form-auth-password').fill('supersecret1');
   await page.getByTestId('btn-register').click();
+  // Wait until auth token is persisted (register/login completed)
+  await waitForToken(page);
+
   await page.getByTestId('btn-finish-onboarding').click();
   await expect(page.getByTestId('nav-dashboard')).toBeVisible();
 }
@@ -42,7 +61,24 @@ test('coinbase import: fixture → preview → commit → portfolio + transactio
   await page.getByTestId('form-coinbase-keyname').fill('FIXTURE:basic');
   await page.getByTestId('form-coinbase-privatekey').fill('FIXTURE:basic');
   await page.getByTestId('btn-coinbase-connect').click();
-  await expect(page.getByTestId('badge-coinbase-connected')).toBeVisible();
+  const connected = page.getByTestId('badge-coinbase-connected');
+  const err = page.getByTestId('alert-import-error');
+  const start = Date.now();
+  while (Date.now() - start < 15_000) {
+    if (await connected.count()) {
+      try { if (await connected.isVisible()) break; } catch {}
+    }
+    if (await err.count()) {
+      try {
+        if (await err.isVisible()) {
+          const msg = (await err.innerText()).trim();
+          throw new Error(`Coinbase connect failed: ${msg}`);
+        }
+      } catch (e) { throw e; }
+    }
+    await page.waitForTimeout(200);
+  }
+  await expect(connected).toBeVisible({ timeout: 5_000 });
 
   // Auto-commit is on by default; fetch all should commit if there are no blocking issues.
   await page.getByTestId('btn-import-run-all').click();

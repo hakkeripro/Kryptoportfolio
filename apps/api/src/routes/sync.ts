@@ -109,7 +109,7 @@ export function registerSyncRoutes(app: FastifyInstance) {
 
   // test-only clear endpoint
   app.post('/__test/reset', async (req, reply) => {
-    if (!app.config.TEST_MODE) return reply.code(404).send({ error: 'not_found' });
+    if (!app.config.testMode) return reply.code(404).send({ error: 'not_found' });
     const tables = [
       'users',
       'devices',

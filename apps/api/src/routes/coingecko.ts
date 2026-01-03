@@ -37,7 +37,7 @@ export function registerCoingeckoRoutes(app: FastifyInstance) {
       .parse(req.query);
 
     // TEST_MODE: deterministic offline stub so Playwright can run without external network.
-    if (app.config.TEST_MODE) {
+    if (app.config.testMode) {
       const qq = q.query.toLowerCase();
       const mk = (id: string, name: string, symbol: string, rank: number) => ({
         id,
@@ -105,7 +105,7 @@ export function registerCoingeckoRoutes(app: FastifyInstance) {
     if (cached) return cached as any;
 
     // TEST_MODE: deterministic prices.
-    if (app.config.TEST_MODE) {
+    if (app.config.testMode) {
       const base: Record<string, number> = {
         bitcoin: 40000,
         ethereum: 2000,

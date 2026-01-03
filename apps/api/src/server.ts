@@ -30,6 +30,16 @@ const EnvSchema = z.object({
 
 const env = EnvSchema.parse(process.env);
 
+const testMode =
+  env.TEST_MODE === '1' ||
+  env.TEST_MODE === 'true' ||
+  env.TEST_MODE === 'yes' ||
+  process.env.NODE_ENV === 'test' ||
+  process.env.CI === 'true' ||
+  process.env.CI === '1' ||
+  String(env.DB_FILE ?? '').includes('e2e.sqlite');
+
+
 const app = Fastify({
   logger: {
     level: process.env.NODE_ENV === 'test' ? 'silent' : 'info'
@@ -58,6 +68,7 @@ app.setErrorHandler((err, _req, reply) => {
 // attach env to instance
 app.decorate('config', {
   ...env,
+  testMode,
   // Default local port is 8788. (8787 is frequently occupied on Windows by HTTP.sys)
   port: Number(env.PORT ?? '8788'),
   // Bind explicitly to IPv4 localhost by default to avoid Windows `localhost`/IPv6/HTTP.sys surprises.

@@ -21,6 +21,7 @@ declare module 'fastify' {
       VAPID_SUBJECT?: string;
       ALERT_RUNNER_INTERVAL_SEC: string;
       TEST_MODE?: string;
+      testMode: boolean;
       port: number;
       host: string;
       alertRunnerIntervalSec: number;

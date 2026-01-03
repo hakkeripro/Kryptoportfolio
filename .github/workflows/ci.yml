@@ -14,7 +14,6 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          # voit myös poistaa version-kentän, koska package.json sisältää packageManagerin
           version: 9.15.4
           run_install: false
 
@@ -34,9 +33,13 @@ jobs:
       - name: Unit tests
         run: pnpm test
 
+      - name: Build
+        run: pnpm build
+
   e2e:
     runs-on: ubuntu-latest
     needs: test
+    # To skip e2e, define a repo variable SKIP_E2E=1
     if: ${{ vars.SKIP_E2E != '1' }}
     steps:
       - name: Checkout

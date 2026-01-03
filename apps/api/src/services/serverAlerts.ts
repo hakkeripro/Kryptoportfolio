@@ -9,7 +9,7 @@ function isPushConfigured(app: FastifyInstance) {
 }
 
 async function sendWebPush(app: FastifyInstance, userId: string, payload: any) {
-  if (app.config.TEST_MODE) return;
+  if (app.config.testMode) return;
   if (!isPushConfigured(app)) return;
 
   webpush.setVapidDetails(
@@ -33,7 +33,7 @@ async function sendWebPush(app: FastifyInstance, userId: string, payload: any) {
 }
 
 async function sendExpoPush(app: FastifyInstance, userId: string, payload: any) {
-  if (app.config.TEST_MODE) return;
+  if (app.config.testMode) return;
   const tokens = app.db.query<any>('SELECT token FROM expo_push_tokens WHERE userId=?', [userId]);
   if (!tokens.length) return;
 

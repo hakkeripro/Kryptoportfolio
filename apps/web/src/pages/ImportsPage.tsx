@@ -86,7 +86,14 @@ export default function ImportsPage() {
   }, [preview?.baseCurrency]);
 
   async function connect() {
-    if (!passphrase || !token) return;
+    if (!passphrase) {
+      setErr('Vault is locked. Unlock vault to connect Coinbase.');
+      return;
+    }
+    if (!token) {
+      setErr('Not authenticated. Please register/login first.');
+      return;
+    }
     setErr(null);
     setLoading('Connecting…');
     try {
@@ -344,10 +351,10 @@ export default function ImportsPage() {
                   <button
                     className="w-full rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
                     onClick={() => void connect()}
-                    disabled={!!loading || !keyName.trim() || !privateKeyPem.trim()}
+                    disabled={!!loading || !passphrase || !token || !keyName.trim() || !privateKeyPem.trim()}
                     data-testid="btn-coinbase-connect"
                   >
-                    {loading ?? 'Connect'}
+                    {loading ? loading : 'Connect'}
                   </button>
                 ) : (
                   <div className="rounded-lg bg-green-50 px-3 py-2 text-sm text-green-800" data-testid="badge-coinbase-connected">

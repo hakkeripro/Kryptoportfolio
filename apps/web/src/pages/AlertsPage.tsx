@@ -84,18 +84,19 @@ export default function AlertsPage() {
   const apiBase = useAppStore((s) => s.apiBase);
   const token = useAppStore((s) => s.token);
 
-  const alertsQ = useDbQuery('alerts', async () => {
-    await ensureWebDbOpen();
-    return await getWebDb().alerts.toArray();
-  });
-  const assetsQ = useDbQuery('assets', async () => {
-    await ensureWebDbOpen();
-    return await getWebDb().assets.toArray();
-  });
-  const settingsQ = useDbQuery('settings', async () => {
-    await ensureWebDbOpen();
-    return await getWebDb().settings.get('settings_1');
-  });
+  // NOTE: useDbQuery is a tiny liveQuery hook (reacts to IndexedDB changes automatically).
+  // Do not rely on manual refetch() here.
+  const alertsQ = useDbQuery(
+    async (db) => {
+      const rows = await db.alerts.toArray();
+      rows.sort((a: any, b: any) => String(b.updatedAtISO || '').localeCompare(String(a.updatedAtISO || '')));
+      return rows as any;
+    },
+    [],
+    [] as any[]
+  );
+  const assetsQ = useDbQuery(async (db) => await db.assets.toArray(), [], [] as any[]);
+  const settingsQ = useDbQuery(async (db) => (await db.settings.get('settings_1')) as any, [], null as any);
 
   const assetsById = useMemo(() => {
     const m: Record<string, Asset> = {};
@@ -178,7 +179,7 @@ export default function AlertsPage() {
     const parsed = AlertSchema.parse(alert);
     await ensureWebDbOpen();
     await getWebDb().alerts.put(parsed as any);
-    await alertsQ.refetch();
+    // liveQuery will re-run automatically when the alerts table changes
   }
 
   async function toggleAlert(id: string, isEnabled: boolean) {
@@ -187,7 +188,7 @@ export default function AlertsPage() {
     const row = (await db.alerts.get(id)) as any;
     if (!row) return;
     await db.alerts.put({ ...row, isEnabled, updatedAtISO: new Date().toISOString() });
-    await alertsQ.refetch();
+    // liveQuery will re-run automatically
   }
 
   async function deleteAlert(id: string) {
@@ -196,7 +197,7 @@ export default function AlertsPage() {
     const row = (await db.alerts.get(id)) as any;
     if (!row) return;
     await db.alerts.put({ ...row, isDeleted: true, isEnabled: false, updatedAtISO: new Date().toISOString() });
-    await alertsQ.refetch();
+    // liveQuery will re-run automatically
   }
 
   async function enableOnServer() {
@@ -292,7 +293,7 @@ export default function AlertsPage() {
   const visibleAlerts = localAlerts.filter((a) => !a.isDeleted);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="panel-alerts">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">Alerts</h1>
         <div className="text-xs text-slate-500">Server alerts require login + sync</div>
