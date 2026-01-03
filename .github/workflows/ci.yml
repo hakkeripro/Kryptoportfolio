@@ -11,20 +11,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          # voit myös poistaa version-kentän, koska package.json sisältää packageManagerin
+          version: 9.15.4
+          run_install: false
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9.15.4
-          run_install: false
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Build workspace deps
         run: pnpm -w build:deps
@@ -35,17 +37,10 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     needs: test
-    # To skip e2e, define a repo variable SKIP_E2E=1
     if: ${{ vars.SKIP_E2E != '1' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -53,13 +48,20 @@ jobs:
           version: 9.15.4
           run_install: false
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Install Playwright browsers
         run: pnpm --filter @kp/web exec playwright install --with-deps
 
       - name: E2E tests
         env:
-          CI: '1'
+          CI: "1"
         run: pnpm test:e2e
