@@ -43,6 +43,8 @@ Testit:
 - Skeema:
   - source of truth: `functions/_lib/db.ts` (`HOSTED_SCHEMA_SQL`)
   - dump tiedostona: `scripts/hosted-schema.sql`
+
+  - migrations: `scripts/migrations/*` (esim. `scripts/migrations/2026-01-03-alert-runner-state.sql` jos saat virheen relation "alert_runner_state" does not exist)
   - komennot: `pnpm schema:hosted` ja `pnpm schema:hosted:file`
 
 ### CI

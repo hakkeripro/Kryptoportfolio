@@ -99,6 +99,6 @@ test('asset catalog mapping: shows unmapped assets and can link CoinGecko id', a
   const btnId = q === 'ethereum' ? 'btn-link-coingecko-ethereum' : 'btn-link-coingecko-bitcoin';
   await page.getByTestId(btnId).click();
 
-await expect(page.getByTestId('txt-current-coingeckoId')).toContainText(q, { timeout: 10_000 });
-
+  // Mapping update is async (Dexie liveQuery refresh), so wait for the UI to reflect the new id.
+  await expect(page.getByTestId('txt-current-coingeckoId')).toContainText(q, { timeout: 10_000 });
 });

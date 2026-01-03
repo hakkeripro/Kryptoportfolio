@@ -411,6 +411,30 @@ function backoffNextAttemptISO(nowISO: string, failureCount: number): string {
   return new Date(new Date(nowISO).getTime() + ms).toISOString();
 }
 
+
+async function ensureAlertRunnerStateTable(sql: any): Promise<void> {
+  try {
+    await sql`SELECT 1 FROM alert_runner_state LIMIT 1`;
+  } catch (e: any) {
+    const msg = String(e?.message ?? e);
+    // Postgres undefined_table error is 42P01; message is enough for serverless drivers.
+    if (msg.includes('alert_runner_state') && msg.includes('does not exist')) {
+      await sql`
+        CREATE TABLE IF NOT EXISTS alert_runner_state (
+          user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+          last_run_at_iso TEXT NOT NULL,
+          last_error TEXT,
+          last_evaluated INTEGER NOT NULL DEFAULT 0,
+          last_triggered INTEGER NOT NULL DEFAULT 0,
+          updated_at_iso TEXT NOT NULL
+        )
+      `;
+    } else {
+      throw e;
+    }
+  }
+}
+
 async function sendWebPushToUser(
   sql: any,
   env: Env,
@@ -537,6 +561,7 @@ app.post('/v1/push/web/subscribe', async (c) => {
   if (!endpoint) return json({ error: 'invalid_subscription' }, { status: 400 });
 
   const sql = getSql(c.env);
+  await ensureAlertRunnerStateTable(sql);
   const nowISO = new Date().toISOString();
 
   const existing = await sql<{ id: string }[]>`
@@ -617,6 +642,7 @@ async function evalAlerts(
   state: any,
   source: string
 ): Promise<{ ok: boolean; evaluated: number; triggered: number }> {
+  await ensureAlertRunnerStateTable(sql);
   const rows = await sql<
     { id: string; alert_json: string; is_enabled: boolean; last_triggered_at_iso: string | null }[]
   >`
@@ -682,6 +708,7 @@ app.post('/v1/alerts/server/enable', async (c) => {
   const { userId } = await requireAuth(c.env.JWT_SECRET, c.req.raw);
   const body = EnableServerAlertsSchema.parse(await readJson(c.req.raw));
   const sql = getSql(c.env);
+  await ensureAlertRunnerStateTable(sql);
   const nowISO = new Date().toISOString();
 
   // Preserve last_triggered_at_iso for cooldown continuity.
@@ -724,6 +751,7 @@ app.post('/v1/alerts/server/state', async (c) => {
   const { userId } = await requireAuth(c.env.JWT_SECRET, c.req.raw);
   const body = MirrorStateBodySchema.parse(await readJson(c.req.raw));
   const sql = getSql(c.env);
+  await ensureAlertRunnerStateTable(sql);
   const nowISO = new Date().toISOString();
 
   await sql`
@@ -740,6 +768,7 @@ app.post('/v1/alerts/server/state', async (c) => {
 app.get('/v1/alerts/server/status', async (c) => {
   const { userId } = await requireAuth(c.env.JWT_SECRET, c.req.raw);
   const sql = getSql(c.env);
+  await ensureAlertRunnerStateTable(sql);
 
   const cnt = await sql<{ total: string; enabled: string }[]>`
     SELECT COUNT(*)::text as total, SUM(CASE WHEN is_enabled THEN 1 ELSE 0 END)::text as enabled
@@ -771,6 +800,7 @@ app.get('/v1/alerts/server/status', async (c) => {
 app.post('/v1/alerts/server/run', async (c) => {
   const { userId } = await requireAuth(c.env.JWT_SECRET, c.req.raw);
   const sql = getSql(c.env);
+  await ensureAlertRunnerStateTable(sql);
   const nowISO = new Date().toISOString();
 
   const stateRow = await sql<{ state_json: string }[]>`

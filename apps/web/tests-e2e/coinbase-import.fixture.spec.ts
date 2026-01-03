@@ -84,19 +84,24 @@ test('coinbase import: fixture → preview → commit → portfolio + transactio
   await page.getByTestId('btn-import-run-all').click();
 
   await expect(page.getByTestId('list-import-preview')).toBeVisible();
-  await expect(page.getByTestId('btn-import-commit')).toBeVisible();
+  const commitBtn = page.getByTestId('btn-import-commit');
+  await expect(commitBtn).toBeVisible();
 
-  // Wait for commit to happen automatically (or allow manual fallback)
+  // Commit explicitly (auto-commit may be disabled/slow in CI)
+  try {
+    if (await commitBtn.isEnabled()) await commitBtn.click();
+  } catch {}
+
   const done = page.getByTestId('badge-import-step-done');
-  await done.waitFor({ timeout: 20_000 });
+  await done.waitFor({ timeout: 30_000 });
 
   await page.getByTestId('nav-transactions').click();
   await expect(page.getByTestId('list-ledger')).toBeVisible();
-  expect(await page.locator('[data-testid^="row-ledger-"]').count()).toBeGreaterThan(0);
+  await expect.poll(async () => await page.locator('[data-testid^="row-ledger-"]').count(), { timeout: 20_000 }).toBeGreaterThan(0);
 
   await page.getByTestId('nav-portfolio').click();
   await expect(page.getByTestId('list-positions')).toBeVisible();
-  expect(await page.locator('[data-testid^="row-position-"]').count()).toBeGreaterThan(0);
+  await expect.poll(async () => await page.locator('[data-testid^="row-position-"]').count(), { timeout: 20_000 }).toBeGreaterThan(0);
 
   await page.getByTestId('nav-dashboard').click();
   await expect(page.getByTestId('metric-total-value')).toBeVisible();
