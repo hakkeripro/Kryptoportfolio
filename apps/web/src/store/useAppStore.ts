@@ -21,7 +21,7 @@ const AuthResponseSchema = z.object({
 });
 
 async function apiFetch<T>(base: string, path: string, init: RequestInit): Promise<T> {
-  const r = await fetch(`${base}${path}`, init);
+  const r = await fetch(`${base}${path}`, { cache: 'no-store', ...init });
   const txt = await r.text();
   const json = txt ? JSON.parse(txt) : {};
   if (!r.ok) throw new Error(`${r.status} ${JSON.stringify(json)}`);
@@ -48,6 +48,8 @@ export type AppState = {
   logout: () => void;
   syncNow: () => Promise<{ uploaded: number; pulled: number } | null>;
 };
+
+const KP_VAULT_PASSPHRASE_SESSION = 'kp_vault_passphrase_session';
 
 const VaultCheckSchema = z.object({ check: z.literal('kp_v3') });
 const SyncPayloadSchema = z.object({
@@ -88,10 +90,35 @@ export const useAppStore = create<AppState>()(
       setPassphrase: (p) => set({ passphrase: p }),
 
       loadVaultStatus: async () => {
-        await ensureWebDbOpen();
-        const blob = await getMeta('vault_blob');
-        set({ vaultReady: true, vaultSetup: !!blob });
-      },
+      await ensureWebDbOpen();
+      const blobJson = await getMeta('vault_blob');
+      const hasBlob = !!blobJson;
+      if (!hasBlob) {
+        set({ vaultReady: true, vaultSetup: false, passphrase: null });
+        return;
+      }
+
+      // Best-effort restore passphrase for this tab (sessionStorage) to avoid jumping back to onboarding.
+      let restored: string | null = null;
+      try {
+        const cached = sessionStorage.getItem(KP_VAULT_PASSPHRASE_SESSION);
+        if (cached && blobJson) {
+          const blob = JSON.parse(blobJson);
+          const payload = await openVaultBlob(cached, blob);
+          VaultCheckSchema.parse(payload);
+          restored = cached;
+        }
+      } catch {
+        // If restore fails (wrong passphrase), wipe the cached value.
+        try {
+          sessionStorage.removeItem(KP_VAULT_PASSPHRASE_SESSION);
+        } catch {
+          /* ignore */
+        }
+      }
+
+      set({ vaultReady: true, vaultSetup: true, passphrase: restored });
+    },
 
       setupVault: async (passphrase: string) => {
         await ensureWebDbOpen();
@@ -111,7 +138,10 @@ export const useAppStore = create<AppState>()(
         set({ passphrase, vaultReady: true, vaultSetup: true });
       },
 
-      lockVault: () => set({ passphrase: null }),
+      lockVault: () => {
+      try { sessionStorage.removeItem(KP_VAULT_PASSPHRASE_SESSION); } catch { /* ignore */ }
+      set({ passphrase: null });
+    },
 
       register: async (email, password) => {
         const base = get().apiBase;

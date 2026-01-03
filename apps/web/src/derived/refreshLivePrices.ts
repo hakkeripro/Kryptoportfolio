@@ -1,6 +1,7 @@
-import { ensureWebDbOpen, getWebDb } from '@kp/platform-web';
+import { ensureWebDbOpen, getWebDb, setMeta } from '@kp/platform-web';
 import type { PricePoint } from '@kp/core';
 import { coingeckoSimplePrice } from '../integrations/coingecko/coingeckoApi';
+import { rebuildDerivedCaches } from './rebuildDerived';
 
 // CoinGecko free tier has practical request limits; chunk ids to avoid long URLs.
 const CHUNK = 100;
@@ -50,6 +51,12 @@ export async function refreshLivePrices(apiBase: string, baseCurrency: string): 
       await db.pricePoints.bulkPut(points);
       stored += points.length;
     }
+  }
+
+  if (stored > 0) {
+    await setMeta('prices:lastRefreshISO', timestampISO);
+    // Keep portfolio/dashboards consistent without requiring a full page reload.
+    await rebuildDerivedCaches({ daysBack: 365 });
   }
 
   return { fetched, stored, timestampISO };

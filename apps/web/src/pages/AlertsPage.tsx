@@ -8,6 +8,8 @@ import { AlertSchema, uuid } from '@kp/core';
 import { useAppStore } from '../store/useAppStore';
 import { useDbQuery } from '../hooks/useDbQuery';
 import { buildMirrorState } from '../alerts/buildMirrorState';
+import { refreshLivePrices } from '../derived/refreshLivePrices';
+import { rebuildDerivedCaches } from '../derived/rebuildDerived';
 import {
   enableServerAlerts,
   getServerAlertLog,
@@ -209,6 +211,10 @@ export default function AlertsPage() {
     setServerMsg(null);
     try {
       const active = localAlerts.filter((a) => !a.isDeleted && a.isEnabled && (a as any).source !== 'foreground');
+      // Ensure mirror state uses fresh prices and derived caches.
+      await refreshLivePrices(apiBase, baseCurrency);
+      await rebuildDerivedCaches({ daysBack: 365 });
+
       const state = await buildMirrorState();
       const res = await enableServerAlerts(apiBase, token, active, state);
       setServerMsg(`Server alerts enabled. Evaluated ${res.evaluated ?? 0}, triggered ${res.triggered ?? 0}.`);
@@ -229,6 +235,10 @@ export default function AlertsPage() {
     setLoading('state');
     setServerMsg(null);
     try {
+      // Ensure mirror state uses fresh prices and derived caches.
+      await refreshLivePrices(apiBase, baseCurrency);
+      await rebuildDerivedCaches({ daysBack: 365 });
+
       const state = await buildMirrorState();
       const res = await updateServerMirrorState(apiBase, token, state);
       setServerMsg(`State updated. Evaluated ${res.evaluated ?? 0}, triggered ${res.triggered ?? 0}.`);
@@ -300,7 +310,7 @@ export default function AlertsPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-xl border bg-white p-4" data-testid="panel-alerts-local">
+        <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4" data-testid="panel-alerts-local">
           <div className="flex items-center justify-between">
             <div className="text-sm font-semibold">Local alert rules</div>
             <div className="text-xs text-slate-500">Base: {baseCurrency}</div>
@@ -308,7 +318,7 @@ export default function AlertsPage() {
 
           <div className="mt-3 space-y-3" data-testid="panel-alerts-form">
             <div className="grid grid-cols-2 gap-2">
-              <label className="text-xs text-slate-600">
+              <label className="text-xs text-slate-400">
                 Type
                 <select
                   className="mt-1 w-full rounded border px-2 py-1 text-sm"
@@ -324,7 +334,7 @@ export default function AlertsPage() {
               </label>
 
               {(formType === 'PORTFOLIO_VALUE' || formType === 'PRICE') && (
-                <label className="text-xs text-slate-600">
+                <label className="text-xs text-slate-400">
                   Direction
                   <select
                     className="mt-1 w-full rounded border px-2 py-1 text-sm"
@@ -339,7 +349,7 @@ export default function AlertsPage() {
               )}
 
               {(formType === 'PRICE' || formType === 'PCT_CHANGE') && (
-                <label className="text-xs text-slate-600">
+                <label className="text-xs text-slate-400">
                   Asset
                   <select
                     className="mt-1 w-full rounded border px-2 py-1 text-sm"
@@ -357,7 +367,7 @@ export default function AlertsPage() {
                 </label>
               )}
 
-              <label className="text-xs text-slate-600">
+              <label className="text-xs text-slate-400">
                 Threshold
                 <input
                   className="mt-1 w-full rounded border px-2 py-1 text-sm"
@@ -368,7 +378,7 @@ export default function AlertsPage() {
                 />
               </label>
 
-              <label className="text-xs text-slate-600">
+              <label className="text-xs text-slate-400">
                 Cooldown (min)
                 <input
                   className="mt-1 w-full rounded border px-2 py-1 text-sm"
@@ -380,7 +390,7 @@ export default function AlertsPage() {
             </div>
 
             <button
-              className="w-full rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800"
+              className="w-full rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700"
               onClick={() => void addAlert()}
               data-testid="btn-save-alert"
             >
@@ -389,7 +399,7 @@ export default function AlertsPage() {
           </div>
 
           <div className="mt-4">
-            <div className="text-xs font-semibold text-slate-600">Existing</div>
+            <div className="text-xs font-semibold text-slate-400">Existing</div>
             <div className="mt-2 space-y-2" data-testid="list-alerts">
               {visibleAlerts.length ? (
                 visibleAlerts.map((a) => (
@@ -412,7 +422,7 @@ export default function AlertsPage() {
                         Enabled
                       </label>
                       <button
-                        className="rounded border px-2 py-1 text-xs hover:bg-slate-50"
+                        className="rounded border px-2 py-1 text-xs hover:bg-slate-700"
                         onClick={() => void deleteAlert(a.id)}
                         data-testid={`btn-delete-alert-${a.id}`}
                       >
@@ -428,31 +438,31 @@ export default function AlertsPage() {
           </div>
         </div>
 
-        <div className="rounded-xl border bg-white p-4" data-testid="panel-alerts-server">
+        <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4" data-testid="panel-alerts-server">
           <div className="text-sm font-semibold">Server alerts (opt-in)</div>
-          <div className="mt-1 text-xs text-slate-600">
+          <div className="mt-1 text-xs text-slate-400">
             Enable to get push notifications even when the app is closed.
           </div>
 
           {!token ? (
-            <div className="mt-3 rounded-lg border bg-slate-50 p-3 text-sm text-slate-700" data-testid="box-alerts-login-required">
+            <div className="mt-3 rounded-lg border bg-slate-950/40 p-3 text-sm text-slate-200" data-testid="box-alerts-login-required">
               Login required to enable server alerts.
             </div>
           ) : (
             <div className="mt-3 space-y-3">
-              <div className="rounded-lg border bg-slate-50 p-3 text-xs" data-testid="box-alerts-server-status">
+              <div className="rounded-lg border bg-slate-950/40 p-3 text-xs" data-testid="box-alerts-server-status">
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-600">Enabled rules</span>
+                  <span className="text-slate-400">Enabled rules</span>
                   <span className="font-mono">{serverStatus ? `${serverStatus.enabled}/${serverStatus.total}` : '—'}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-600">Mirror updated</span>
+                  <span className="text-slate-400">Mirror updated</span>
                   <span className="font-mono">
                     {serverStatus?.mirrorUpdatedAtISO ? new Date(serverStatus.mirrorUpdatedAtISO).toLocaleString() : '—'}
                   </span>
                 </div>
                 <button
-                  className="mt-2 rounded border px-2 py-1 text-xs hover:bg-white"
+                  className="mt-2 rounded border px-2 py-1 text-xs hover:bg-slate-700"
                   onClick={() => void refreshServerStatus()}
                   data-testid="btn-refresh-server-status"
                 >
@@ -462,7 +472,7 @@ export default function AlertsPage() {
 
               <div className="grid grid-cols-2 gap-2">
                 <button
-                  className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+                  className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
                   onClick={() => void enableOnServer()}
                   disabled={loading != null}
                   data-testid="btn-enable-server-alerts"
@@ -470,7 +480,7 @@ export default function AlertsPage() {
                   {loading === 'server' ? 'Enabling…' : 'Enable on server'}
                 </button>
                 <button
-                  className="rounded-lg border px-3 py-2 text-sm hover:bg-slate-50 disabled:opacity-50"
+                  className="rounded-lg border px-3 py-2 text-sm hover:bg-slate-700 disabled:opacity-50"
                   onClick={() => void updateState()}
                   disabled={loading != null}
                   data-testid="btn-update-server-state"
@@ -480,7 +490,7 @@ export default function AlertsPage() {
               </div>
 
               <button
-                className="w-full rounded-lg border px-3 py-2 text-sm hover:bg-slate-50 disabled:opacity-50"
+                className="w-full rounded-lg border px-3 py-2 text-sm hover:bg-slate-700 disabled:opacity-50"
                 onClick={() => void enablePush()}
                 disabled={loading != null}
                 data-testid="btn-enable-push"
@@ -489,7 +499,7 @@ export default function AlertsPage() {
               </button>
 
               <button
-                className="rounded border px-3 py-2 text-sm hover:bg-slate-50 disabled:opacity-50"
+                className="rounded border px-3 py-2 text-sm hover:bg-slate-700 disabled:opacity-50"
                 onClick={() => void testPush()}
                 disabled={loading != null}
                 data-testid="btn-push-test"
@@ -498,16 +508,16 @@ export default function AlertsPage() {
               </button>
 
               {serverMsg ? (
-                <div className="rounded-lg border bg-slate-50 p-3 text-sm text-slate-700" data-testid="txt-alert-server-message">
+                <div className="rounded-lg border bg-slate-950/40 p-3 text-sm text-slate-200" data-testid="txt-alert-server-message">
                   {serverMsg}
                 </div>
               ) : null}
 
               <div>
                 <div className="flex items-center justify-between">
-                  <div className="text-xs font-semibold text-slate-600">Trigger log</div>
+                  <div className="text-xs font-semibold text-slate-400">Trigger log</div>
                   <button
-                    className="rounded border px-2 py-1 text-xs hover:bg-slate-50"
+                    className="rounded border px-2 py-1 text-xs hover:bg-slate-700"
                     onClick={() => void refreshLog()}
                     data-testid="btn-refresh-alert-log"
                   >
@@ -523,7 +533,7 @@ export default function AlertsPage() {
                           <span className="font-mono">{new Date(r.triggeredAtISO).toLocaleString()}</span>
                           <span className="text-slate-500">{r.source}</span>
                         </div>
-                        <div className="mt-1 text-slate-700">
+                        <div className="mt-1 text-slate-200">
                           {r.context?.reason ? String(r.context.reason) : JSON.stringify(r.context)}
                         </div>
                       </div>

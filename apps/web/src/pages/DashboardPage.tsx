@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Decimal from 'decimal.js';
 import { Pie, PieChart, ResponsiveContainer, Tooltip, Cell, Line, LineChart, XAxis, YAxis } from 'recharts';
 import { ensureWebDbOpen, getMeta, getWebDb } from '@kp/platform-web';
@@ -59,6 +59,7 @@ export default function DashboardPage() {
 
   const [status, setStatus] = useState<{ lastRebuildISO: string | null }>({ lastRebuildISO: null });
   const [refreshing, setRefreshing] = useState(false);
+  const refreshLock = useRef(false);
 
   useEffect(() => {
     void (async () => {
@@ -120,7 +121,7 @@ export default function DashboardPage() {
 
     const intervalSec = dbState.data.settings?.autoRefreshIntervalSec ?? 300;
     const ms = Math.max(60_000, intervalSec * 1000);
-    timer = window.setInterval(() => void rebuildDerivedCaches({ daysBack: 365 }), ms);
+    timer = window.setInterval(() => void refreshNow({ silent: true }), ms);
     return () => {
       if (timer) window.clearInterval(timer);
     };
@@ -139,8 +140,10 @@ export default function DashboardPage() {
     await db.settings.put(updated as any);
   }
 
-  async function refreshNow() {
-    setRefreshing(true);
+  async function refreshNow(opts?: { silent?: boolean }) {
+    if (refreshLock.current) return;
+    refreshLock.current = true;
+    if (!opts?.silent) setRefreshing(true);
     try {
       // Best-effort live prices (requires mapped CoinGecko IDs).
       try {
@@ -152,7 +155,8 @@ export default function DashboardPage() {
       const lastRebuildISO = await getMeta('derived:lastRebuildISO');
       setStatus({ lastRebuildISO: lastRebuildISO || new Date().toISOString() });
     } finally {
-      setRefreshing(false);
+      refreshLock.current = false;
+      if (!opts?.silent) setRefreshing(false);
     }
   }
 

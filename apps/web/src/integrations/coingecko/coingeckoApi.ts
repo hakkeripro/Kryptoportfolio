@@ -3,6 +3,7 @@ type ApiError = { error: string };
 async function apiFetch<T>(base: string, path: string, init?: RequestInit): Promise<T> {
   const url = base.replace(/\/$/, '') + path;
   const res = await fetch(url, {
+    cache: 'no-store',
     ...init,
     headers: {
       'content-type': 'application/json',

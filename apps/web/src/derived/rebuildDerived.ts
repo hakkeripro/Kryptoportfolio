@@ -15,7 +15,8 @@ export async function rebuildDerivedCaches(opts?: { daysBack?: number }) {
     const t = String(e.updatedAtISO ?? e.timestampISO ?? '');
     return t > acc ? t : acc;
   }, '');
-  const digest = `${events.length}:${maxUpdatedAtISO}`;
+  const pricesLastRefreshISO = (await getMeta('prices:lastRefreshISO')) ?? '';
+  const digest = `${events.length}:${maxUpdatedAtISO}:${settings.baseCurrency}:${settings.priceProvider}:${pricesLastRefreshISO}`;
   const prev = await getMeta('derived:ledgerDigest');
   if (prev && String(prev) === digest) {
     await setMeta('derived:lastRebuildSkippedISO', new Date().toISOString());

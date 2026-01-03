@@ -42,6 +42,11 @@ Add for Phase 6:
 - `VAPID_SUBJECT` (e.g. `mailto:you@example.com`)
 - `CRON_SECRET` (random long secret; used by the runner to call `/v1/alerts/server/runAll`)
 
+Optional (recommended for live prices):
+
+- `COINGECKO_BASE_URL` (default: `https://api.coingecko.com/api/v3`)
+- `COINGECKO_DEMO_API_KEY` (free demo key from CoinGecko dashboard; enables higher rate limits than anonymous)
+
 ## 3) Deploy the Cloudflare Worker cron runner
 
 The runner project lives in `apps/runner` and calls the hosted Pages Functions endpoint:

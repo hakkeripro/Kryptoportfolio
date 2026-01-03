@@ -54,6 +54,7 @@ function formatApiError(status: number, body: unknown): string {
 
 async function apiFetch<T>(base: string, path: string, token: string | null, init: RequestInit): Promise<T> {
   const r = await fetch(`${base}${path}`, {
+    cache: 'no-store',
     ...init,
     headers: {
       ...(init.headers ?? {}),

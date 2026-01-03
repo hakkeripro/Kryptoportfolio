@@ -31,7 +31,7 @@ const EnableRespSchema = z.object({ ok: z.boolean().optional(), evaluated: z.num
 const VapidSchema = z.object({ enabled: z.boolean(), publicKey: z.string().nullable() });
 
 async function apiFetch<T>(base: string, path: string, init: RequestInit): Promise<T> {
-  const r = await fetch(`${base}${path}`, init);
+  const r = await fetch(`${base}${path}`, { cache: 'no-store', ...init });
   const txt = await r.text();
   const json = txt ? JSON.parse(txt) : {};
   if (!r.ok) throw new Error(`${r.status} ${JSON.stringify(json)}`);

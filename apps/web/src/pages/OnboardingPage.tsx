@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAppStore } from '../store/useAppStore';
 
@@ -41,6 +41,20 @@ export default function OnboardingPage() {
     if (!passphrase) return 'locked';
     return 'unlocked';
   }, [vaultReady, vaultSetup, passphrase]);
+
+  const next = useMemo(() => {
+    const q = new URLSearchParams(location.search).get('next');
+    return q ?? from ?? '/dashboard';
+  }, [location.search, from]);
+
+  useEffect(() => {
+    if (!vaultReady) return;
+    // If a vault already exists, never send the user back to onboarding on reload.
+    if (vaultSetup && !passphrase) {
+      nav(`/unlock?next=${encodeURIComponent(next)}`, { replace: true });
+      return;
+    }
+  }, [vaultReady, vaultSetup, passphrase, next, nav]);
 
   const handleSetup = async () => {
     setVaultError(null);

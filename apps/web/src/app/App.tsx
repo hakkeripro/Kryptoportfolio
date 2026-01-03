@@ -4,6 +4,7 @@ import Shell from '../components/Shell';
 import RequireUnlocked from '../components/RequireUnlocked';
 import { useAppStore } from '../store/useAppStore';
 import OnboardingPage from '../pages/OnboardingPage';
+import UnlockPage from '../pages/UnlockPage';
 import DashboardPage from '../pages/DashboardPage';
 import PortfolioPage from '../pages/PortfolioPage';
 import TransactionsPage from '../pages/TransactionsPage';
@@ -16,6 +17,7 @@ import ImportsPage from '../pages/ImportsPage';
 import TaxPage from '../pages/TaxPage';
 import IntegrationAutoSync from '../components/IntegrationAutoSync';
 import DerivedBootstrap from '../components/DerivedBootstrap';
+import PriceAutoRefresh from '../components/PriceAutoRefresh';
 import ErrorBoundary from '../components/ErrorBoundary';
 
 export default function App() {
@@ -28,10 +30,12 @@ export default function App() {
     <Shell>
       <IntegrationAutoSync />
       <DerivedBootstrap />
+      <PriceAutoRefresh />
       <ErrorBoundary>
         <Routes>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/onboarding" element={<OnboardingPage />} />
+      <Route path="/unlock" element={<UnlockPage />} />
         <Route path="/dashboard" element={<RequireUnlocked><DashboardPage /></RequireUnlocked>} />
         <Route path="/portfolio" element={<RequireUnlocked><PortfolioPage /></RequireUnlocked>} />
         <Route path="/transactions" element={<RequireUnlocked><TransactionsPage /></RequireUnlocked>} />

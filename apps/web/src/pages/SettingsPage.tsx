@@ -13,6 +13,7 @@ function errToMsg(e: unknown) {
 
 async function apiFetch<T>(base: string, path: string, token: string, body: unknown): Promise<T> {
   const r = await fetch(`${base}${path}`, {
+    cache: 'no-store',
     method: 'POST',
     headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
     body: JSON.stringify(body)

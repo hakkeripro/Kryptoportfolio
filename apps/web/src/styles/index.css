@@ -13,3 +13,20 @@ body {
 a {
   @apply text-slate-200 hover:text-white;
 }
+
+
+@layer base {
+  input, textarea, select {
+    @apply border border-slate-800 bg-slate-950/40 text-slate-100;
+  }
+
+  input::placeholder, textarea::placeholder {
+    @apply text-slate-500;
+  }
+
+  /* On dark theme, ensure native <select> options are readable (Windows/Chrome can render white-on-white otherwise). */
+  select option {
+    background-color: #020617; /* slate-950 */
+    color: #f1f5f9; /* slate-100 */
+  }
+}

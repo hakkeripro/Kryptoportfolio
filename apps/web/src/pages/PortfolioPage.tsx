@@ -89,7 +89,7 @@ export default function PortfolioPage() {
     const rows = tokenDetail.data?.prices ?? [];
     return rows
       .slice(-180)
-      .map((p: any) => ({ t: p.timestampISO.slice(0, 10), v: Number(d(p.pricePerUnitBase).toNumber()) }))
+      .map((p: any) => ({ t: p.timestampISO.slice(0, 10), v: Number(d(p.priceBase).toNumber()) }))
       .filter((x) => Number.isFinite(x.v));
   }, [tokenDetail.data?.prices]);
 

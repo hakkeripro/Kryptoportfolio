@@ -435,6 +435,51 @@ async function ensureAlertRunnerStateTable(sql: any): Promise<void> {
   }
 }
 
+
+async function ensureWebPushSubscriptionsTable(sql: any): Promise<void> {
+  try {
+    await sql`SELECT is_active, failure_count, next_attempt_at_iso FROM web_push_subscriptions LIMIT 1`;
+  } catch (e: any) {
+    const msg = String(e?.message ?? e);
+    const missingTable = msg.includes('web_push_subscriptions') && msg.includes('does not exist');
+    const missingColumn = msg.includes('column') && msg.includes('does not exist');
+    if (!missingTable && !missingColumn) throw e;
+
+    const nowISO = new Date().toISOString();
+
+    // Base table (older deployments may have a smaller schema).
+    await sql`
+      CREATE TABLE IF NOT EXISTS web_push_subscriptions (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        endpoint TEXT NOT NULL,
+        subscription_json TEXT NOT NULL,
+        created_at_iso TEXT NOT NULL,
+        updated_at_iso TEXT NOT NULL
+      )
+    `;
+
+    await sql`CREATE UNIQUE INDEX IF NOT EXISTS web_push_subscriptions_user_endpoint_uq ON web_push_subscriptions(user_id, endpoint)`;
+
+    // Phase 6 columns.
+    await sql`ALTER TABLE web_push_subscriptions ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE`;
+    await sql`ALTER TABLE web_push_subscriptions ADD COLUMN IF NOT EXISTS failure_count INTEGER NOT NULL DEFAULT 0`;
+    await sql`ALTER TABLE web_push_subscriptions ADD COLUMN IF NOT EXISTS last_error TEXT`;
+    await sql`ALTER TABLE web_push_subscriptions ADD COLUMN IF NOT EXISTS next_attempt_at_iso TEXT`;
+    await sql`ALTER TABLE web_push_subscriptions ADD COLUMN IF NOT EXISTS last_success_at_iso TEXT`;
+
+    // Backfill timestamps if older rows exist.
+    await sql`ALTER TABLE web_push_subscriptions ADD COLUMN IF NOT EXISTS created_at_iso TEXT`;
+    await sql`ALTER TABLE web_push_subscriptions ADD COLUMN IF NOT EXISTS updated_at_iso TEXT`;
+    await sql`
+      UPDATE web_push_subscriptions
+      SET
+        created_at_iso = COALESCE(created_at_iso, ${nowISO}),
+        updated_at_iso = COALESCE(updated_at_iso, ${nowISO})
+      WHERE created_at_iso IS NULL OR updated_at_iso IS NULL
+    `;
+  }
+}
 async function sendWebPushToUser(
   sql: any,
   env: Env,
@@ -442,6 +487,8 @@ async function sendWebPushToUser(
   message: PushMessage
 ): Promise<{ ok: boolean; attempted: number; delivered: number; deactivated: number; failed: number }> {
   if (!isWebPushConfigured(env)) return { ok: true, attempted: 0, delivered: 0, deactivated: 0, failed: 0 };
+
+  await ensureWebPushSubscriptionsTable(sql);
 
   const nowISO = new Date().toISOString();
   const rows = await sql<
@@ -561,7 +608,7 @@ app.post('/v1/push/web/subscribe', async (c) => {
   if (!endpoint) return json({ error: 'invalid_subscription' }, { status: 400 });
 
   const sql = getSql(c.env);
-  await ensureAlertRunnerStateTable(sql);
+  await ensureWebPushSubscriptionsTable(sql);
   const nowISO = new Date().toISOString();
 
   const existing = await sql<{ id: string }[]>`
@@ -588,6 +635,7 @@ app.post('/v1/push/web/unsubscribe', async (c) => {
   const { userId } = await requireAuth(c.env.JWT_SECRET, c.req.raw);
   const body = WebPushUnsubscribeSchema.parse(await readJson(c.req.raw));
   const sql = getSql(c.env);
+  await ensureWebPushSubscriptionsTable(sql);
   await sql`DELETE FROM web_push_subscriptions WHERE user_id=${userId} AND endpoint=${body.endpoint}`;
   return json({ ok: true });
 });
@@ -595,6 +643,8 @@ app.post('/v1/push/web/unsubscribe', async (c) => {
 app.post('/v1/push/web/test', async (c) => {
   const { userId } = await requireAuth(c.env.JWT_SECRET, c.req.raw);
   const sql = getSql(c.env);
+
+  await ensureWebPushSubscriptionsTable(sql);
 
   if (!isWebPushConfigured(c.env)) {
     return json({ ok: false, error: 'push_not_configured' }, { status: 400 });
@@ -708,7 +758,7 @@ app.post('/v1/alerts/server/enable', async (c) => {
   const { userId } = await requireAuth(c.env.JWT_SECRET, c.req.raw);
   const body = EnableServerAlertsSchema.parse(await readJson(c.req.raw));
   const sql = getSql(c.env);
-  await ensureAlertRunnerStateTable(sql);
+  await ensureWebPushSubscriptionsTable(sql);
   const nowISO = new Date().toISOString();
 
   // Preserve last_triggered_at_iso for cooldown continuity.
@@ -751,7 +801,7 @@ app.post('/v1/alerts/server/state', async (c) => {
   const { userId } = await requireAuth(c.env.JWT_SECRET, c.req.raw);
   const body = MirrorStateBodySchema.parse(await readJson(c.req.raw));
   const sql = getSql(c.env);
-  await ensureAlertRunnerStateTable(sql);
+  await ensureWebPushSubscriptionsTable(sql);
   const nowISO = new Date().toISOString();
 
   await sql`
@@ -800,7 +850,7 @@ app.get('/v1/alerts/server/status', async (c) => {
 app.post('/v1/alerts/server/run', async (c) => {
   const { userId } = await requireAuth(c.env.JWT_SECRET, c.req.raw);
   const sql = getSql(c.env);
-  await ensureAlertRunnerStateTable(sql);
+  await ensureWebPushSubscriptionsTable(sql);
   const nowISO = new Date().toISOString();
 
   const stateRow = await sql<{ state_json: string }[]>`

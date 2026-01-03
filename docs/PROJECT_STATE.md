@@ -72,6 +72,13 @@ pnpm test:e2e
 - Staging runbook: `docs/hosted/PHASE5_HOSTED_STAGING_RUNBOOK.md`
 - Phase 6 runbook: `docs/hosted/PHASE6_ALERTS_PUSH_RUNBOOK.md`
 
+**Hosted env vars (extra):**
+
+- `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` (web push)
+- `CRON_SECRET` (runner auth)
+- `COINGECKO_BASE_URL` (optional; default `https://api.coingecko.com/api/v3`)
+- `COINGECKO_DEMO_API_KEY` (optional demo key)
+
 ## Tunnetut keskeneräiset asiat (seuraava versio)
 
 1) **Pricing/FX production caching**
