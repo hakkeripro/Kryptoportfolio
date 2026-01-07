@@ -22,6 +22,8 @@ export async function refreshLivePrices(apiBase: string, baseCurrency: string): 
     .filter((x) => !!x.cg);
 
   const timestampISO = new Date().toISOString();
+  // Track attempts even if no prices were stored (e.g. missing CoinGecko mappings).
+  await setMeta('prices:lastAttemptISO', timestampISO);
   let fetched = 0;
   let stored = 0;
 

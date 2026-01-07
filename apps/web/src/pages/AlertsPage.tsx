@@ -216,8 +216,23 @@ export default function AlertsPage() {
       await rebuildDerivedCaches({ daysBack: 365 });
 
       const state = await buildMirrorState();
-      const res = await enableServerAlerts(apiBase, token, active, state);
-      setServerMsg(`Server alerts enabled. Evaluated ${res.evaluated ?? 0}, triggered ${res.triggered ?? 0}.`);
+
+      if (!active.length) {
+        const ok = window.confirm(
+          'You have 0 active alerts locally.\n\nIf you continue, this will REPLACE (clear) all server-side rules.\n\nPress Cancel to enable server delivery without clearing existing server rules.'
+        );
+        const res = ok
+          ? await enableServerAlerts(apiBase, token, [], state, { mode: 'replace' })
+          : await enableServerAlerts(apiBase, token, [], state, { mode: 'enable_only' });
+        setServerMsg(
+          ok
+            ? `Server rules replaced. Evaluated ${res.evaluated ?? 0}, triggered ${res.triggered ?? 0}.`
+            : `Server delivery enabled (kept existing rules). Evaluated ${res.evaluated ?? 0}, triggered ${res.triggered ?? 0}.`
+        );
+      } else {
+        const res = await enableServerAlerts(apiBase, token, active, state, { mode: 'replace' });
+        setServerMsg(`Server alerts enabled. Evaluated ${res.evaluated ?? 0}, triggered ${res.triggered ?? 0}.`);
+      }
       await refreshServerStatus();
       await refreshLog();
     } catch (e: any) {

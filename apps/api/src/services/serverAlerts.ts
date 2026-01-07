@@ -60,7 +60,7 @@ async function sendExpoPush(app: FastifyInstance, userId: string, payload: any) 
  * This is called both from the interval runner and from request handlers so the hosted MVP can work
  * without a background job.
  */
-export async function evaluateAndTriggerServerAlerts(app: FastifyInstance, userId: string, stateJson?: string) {
+export async function evaluateAndTriggerServerAlerts(app: FastifyInstance, userId: string, stateJson?: string, opts?: { logEvaluations?: boolean; source?: string }) {
   const stateRow =
     stateJson != null
       ? ({ stateJson } as any)
@@ -79,6 +79,8 @@ export async function evaluateAndTriggerServerAlerts(app: FastifyInstance, userI
     [userId]
   );
 
+  const source = opts?.source ?? 'server';
+
   let evaluated = 0;
   let triggered = 0;
   for (const row of alerts) {
@@ -92,7 +94,16 @@ export async function evaluateAndTriggerServerAlerts(app: FastifyInstance, userI
 
     evaluated++;
     const res = evaluateServerAlert(alert, state);
-    if (!res.triggered) continue;
+    if (!res.triggered) {
+      if (opts?.logEvaluations) {
+        const logId = newId('tr');
+        app.db.exec(
+          'INSERT INTO alert_trigger_logs(id,userId,alertId,triggeredAtISO,source,contextJson) VALUES (?,?,?,?,?,?)',
+          [logId, userId, alert.id, state.nowISO, source, JSON.stringify({ ...res.context, triggered: false })]
+        );
+      }
+      continue;
+    }
 
     // cooldown: if within cooldownMin, skip
     const cooldownMin = alert.cooldownMin ?? 0;
@@ -115,8 +126,8 @@ export async function evaluateAndTriggerServerAlerts(app: FastifyInstance, userI
       userId,
       alert.id,
       triggeredAtISO,
-      'server',
-      JSON.stringify(res.context)
+      source,
+      JSON.stringify({ ...res.context, triggered: true })
     ]);
 
     const payload = {

@@ -41,7 +41,7 @@ export type AppState = {
   setPassphrase: (p: string | null) => void;
   loadVaultStatus: () => Promise<void>;
   setupVault: (passphrase: string) => Promise<void>;
-  unlockVault: (passphrase: string) => Promise<void>;
+  unlockVault: (passphrase: string, opts?: { rememberSession?: boolean }) => Promise<void>;
   lockVault: () => void;
   register: (email: string, password: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
@@ -49,7 +49,18 @@ export type AppState = {
   syncNow: () => Promise<{ uploaded: number; pulled: number } | null>;
 };
 
-const KP_VAULT_PASSPHRASE_SESSION = 'kp_vault_passphrase_session';
+// Session-only cache so a tab refresh does not immediately require re-typing.
+// (This is NOT a durable store; closing the tab/window clears it.)
+const KP_VAULT_PASSPHRASE_SESSION = 'KP_VAULT_PASSPHRASE_SESSION';
+
+function rememberSessionPassphrase(passphrase: string | null) {
+  try {
+    if (!passphrase) sessionStorage.removeItem(KP_VAULT_PASSPHRASE_SESSION);
+    else sessionStorage.setItem(KP_VAULT_PASSPHRASE_SESSION, passphrase);
+  } catch {
+    // Best-effort only.
+  }
+}
 
 const VaultCheckSchema = z.object({ check: z.literal('kp_v3') });
 const SyncPayloadSchema = z.object({
@@ -90,58 +101,61 @@ export const useAppStore = create<AppState>()(
       setPassphrase: (p) => set({ passphrase: p }),
 
       loadVaultStatus: async () => {
-      await ensureWebDbOpen();
-      const blobJson = await getMeta('vault_blob');
-      const hasBlob = !!blobJson;
-      if (!hasBlob) {
-        set({ vaultReady: true, vaultSetup: false, passphrase: null });
-        return;
-      }
-
-      // Best-effort restore passphrase for this tab (sessionStorage) to avoid jumping back to onboarding.
-      let restored: string | null = null;
-      try {
-        const cached = sessionStorage.getItem(KP_VAULT_PASSPHRASE_SESSION);
-        if (cached && blobJson) {
-          const blob = JSON.parse(blobJson);
-          const payload = await openVaultBlob(cached, blob);
-          VaultCheckSchema.parse(payload);
-          restored = cached;
+        await ensureWebDbOpen();
+        const blobJson = await getMeta('vault_blob');
+        const hasBlob = !!blobJson;
+        if (!hasBlob) {
+          set({ vaultReady: true, vaultSetup: false, passphrase: null });
+          return;
         }
-      } catch {
-        // If restore fails (wrong passphrase), wipe the cached value.
+
+        // Best-effort restore passphrase for this tab (sessionStorage) to avoid jumping back to onboarding.
+        let restored: string | null = null;
         try {
-          sessionStorage.removeItem(KP_VAULT_PASSPHRASE_SESSION);
+          const cached = sessionStorage.getItem(KP_VAULT_PASSPHRASE_SESSION);
+          if (cached && blobJson) {
+            const blob = JSON.parse(blobJson);
+            const payload = await openVaultBlob(cached, blob);
+            VaultCheckSchema.parse(payload);
+            restored = cached;
+          }
         } catch {
-          /* ignore */
+          // If restore fails (wrong passphrase), wipe the cached value.
+          try {
+            sessionStorage.removeItem(KP_VAULT_PASSPHRASE_SESSION);
+          } catch {
+            /* ignore */
+          }
         }
-      }
 
-      set({ vaultReady: true, vaultSetup: true, passphrase: restored });
-    },
+        set({ vaultReady: true, vaultSetup: true, passphrase: restored });
+      },
 
       setupVault: async (passphrase: string) => {
         await ensureWebDbOpen();
         // Store an encrypted "check" blob in meta. Passphrase is never stored.
         const blob = await createVaultBlob(passphrase, { check: 'kp_v3' });
         await setMeta('vault_blob', JSON.stringify(blob));
+        // Remember within this browser session (KP-VAULT-001).
+        rememberSessionPassphrase(passphrase);
         set({ passphrase, vaultReady: true, vaultSetup: true });
       },
 
-      unlockVault: async (passphrase: string) => {
+      unlockVault: async (passphrase: string, opts?: { rememberSession?: boolean }) => {
         await ensureWebDbOpen();
         const blobJson = await getMeta('vault_blob');
         if (!blobJson) throw new Error('vault_not_setup');
         const blob = JSON.parse(blobJson);
         const payload = await openVaultBlob(passphrase, blob);
         VaultCheckSchema.parse(payload);
+        if (opts?.rememberSession !== false) rememberSessionPassphrase(passphrase);
         set({ passphrase, vaultReady: true, vaultSetup: true });
       },
 
       lockVault: () => {
-      try { sessionStorage.removeItem(KP_VAULT_PASSPHRASE_SESSION); } catch { /* ignore */ }
-      set({ passphrase: null });
-    },
+        rememberSessionPassphrase(null);
+        set({ passphrase: null });
+      },
 
       register: async (email, password) => {
         const base = get().apiBase;

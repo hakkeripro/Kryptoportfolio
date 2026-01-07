@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef } from 'react';
-import { getWebDb } from '@kp/platform-web';
 import { useAppStore } from '../store/useAppStore';
 import { useDbQuery } from '../hooks/useDbQuery';
 import { ensureDefaultSettings } from '../derived/ensureDefaultSettings';
@@ -20,10 +19,17 @@ export default function PriceAutoRefresh() {
 
   const unlocked = useMemo(() => !!(vaultReady && vaultSetup && passphrase), [vaultReady, vaultSetup, passphrase]);
 
-  const settingsQ = useDbQuery(() => (unlocked ? getWebDb().settings.get('settings') : Promise.resolve(undefined)), [unlocked]);
+  const settingsQ = useDbQuery(
+    async () => {
+      if (!unlocked) return undefined;
+      // Ensure settings exist + migrate legacy keys (KP-UI-002).
+      return ensureDefaultSettings();
+    },
+    [unlocked]
+  );
 
   const intervalSec = settingsQ.data?.autoRefreshIntervalSec ?? 0;
-  const baseCurrency = settingsQ.data?.baseCurrency ?? 'eur';
+  const baseCurrency = String(settingsQ.data?.baseCurrency ?? 'EUR').toUpperCase();
 
   const inFlight = useRef(false);
 

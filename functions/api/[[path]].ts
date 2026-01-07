@@ -665,8 +665,15 @@ app.post('/v1/push/web/test', async (c) => {
 
 // --- Server alerts ---
 
+const EnableModeSchema = z.enum(['enable_only', 'merge', 'replace']);
+
+// NOTE: "enable" can be called in two contexts:
+// 1) "Sync rules" from the Alerts page (replace/merge)
+// 2) "Master toggle" from Settings (enable_only)
+// The default must be SAFE: an empty alert list must NOT delete server rules unless explicitly requested.
 const EnableServerAlertsSchema = z.object({
-  alerts: z.array(AlertSchema),
+  mode: EnableModeSchema.optional(),
+  alerts: z.array(AlertSchema).default([]),
   state: MirrorStateSchema
 });
 
@@ -716,7 +723,18 @@ async function evalAlerts(
 
     evaluated++;
     const res = evaluateServerAlert(alert, state);
-    if (!res.triggered) continue;
+    if (!res.triggered) {
+      // In manual runs (enable/state), record evaluation results so users and E2E can see activity
+      if (source === 'enable' || source === 'state') {
+        try {
+          await sql`
+            INSERT INTO alert_trigger_logs(id,user_id,alert_id,triggered_at_iso,source,context_json)
+            VALUES (${newId('tr')}, ${userId}, ${row.id}, ${state.nowISO}, ${source}, ${JSON.stringify({ ...res.context, triggered: false })})
+          `;
+        } catch {}
+      }
+      continue;
+    }
 
     triggered++;
     const trigISO = String(state.nowISO ?? new Date().toISOString());
@@ -761,29 +779,54 @@ app.post('/v1/alerts/server/enable', async (c) => {
   await ensureWebPushSubscriptionsTable(sql);
   const nowISO = new Date().toISOString();
 
+  const alerts = body.alerts ?? [];
+  const mode = body.mode ?? (alerts.length ? 'replace' : 'enable_only');
+
   // Preserve last_triggered_at_iso for cooldown continuity.
   const existing = await sql<{ id: string; last_triggered_at_iso: string | null }[]>`
     SELECT id, last_triggered_at_iso FROM server_alerts WHERE user_id=${userId}
   `;
   const lastById = new Map(existing.map((r) => [String(r.id), r.last_triggered_at_iso] as const));
 
-  // Replace the full set (append-only is not needed server-side here; user vault remains local).
-  await sql`DELETE FROM server_alerts WHERE user_id=${userId}`;
+  if (mode === 'enable_only') {
+    // Master toggle: re-enable delivery without modifying the rule set.
+    await sql`UPDATE server_alerts SET is_enabled=TRUE, updated_at_iso=${nowISO} WHERE user_id=${userId}`;
+  } else if (mode === 'replace') {
+    // Replace the full set.
+    await sql`DELETE FROM server_alerts WHERE user_id=${userId}`;
 
-  for (const a of body.alerts) {
-    const lastISO = (a as any).lastTriggeredAtISO ?? lastById.get(String(a.id)) ?? null;
-    await sql`
-      INSERT INTO server_alerts(id, user_id, alert_json, is_enabled, created_at_iso, updated_at_iso, last_triggered_at_iso)
-      VALUES (${String(a.id)}, ${userId}, ${JSON.stringify({ ...a, lastTriggeredAtISO: lastISO })}, ${!!a.isEnabled}, ${String(
-        a.createdAtISO
-      )}, ${String(a.updatedAtISO)}, ${lastISO})
-      ON CONFLICT (id) DO UPDATE SET
-        alert_json = EXCLUDED.alert_json,
-        is_enabled = EXCLUDED.is_enabled,
-        updated_at_iso = EXCLUDED.updated_at_iso,
-        last_triggered_at_iso = EXCLUDED.last_triggered_at_iso
-      WHERE server_alerts.user_id = EXCLUDED.user_id
-    `;
+    for (const a of alerts) {
+      const lastISO = (a as any).lastTriggeredAtISO ?? lastById.get(String(a.id)) ?? null;
+      await sql`
+        INSERT INTO server_alerts(id, user_id, alert_json, is_enabled, created_at_iso, updated_at_iso, last_triggered_at_iso)
+        VALUES (${String(a.id)}, ${userId}, ${JSON.stringify({ ...a, lastTriggeredAtISO: lastISO })}, ${!!a.isEnabled}, ${String(
+          a.createdAtISO
+        )}, ${String(a.updatedAtISO)}, ${lastISO})
+        ON CONFLICT (id) DO UPDATE SET
+          alert_json = EXCLUDED.alert_json,
+          is_enabled = EXCLUDED.is_enabled,
+          updated_at_iso = EXCLUDED.updated_at_iso,
+          last_triggered_at_iso = EXCLUDED.last_triggered_at_iso
+        WHERE server_alerts.user_id = EXCLUDED.user_id
+      `;
+    }
+  } else {
+    // merge: upsert provided alerts but keep existing rules not mentioned.
+    for (const a of alerts) {
+      const lastISO = (a as any).lastTriggeredAtISO ?? lastById.get(String(a.id)) ?? null;
+      await sql`
+        INSERT INTO server_alerts(id, user_id, alert_json, is_enabled, created_at_iso, updated_at_iso, last_triggered_at_iso)
+        VALUES (${String(a.id)}, ${userId}, ${JSON.stringify({ ...a, lastTriggeredAtISO: lastISO })}, ${!!a.isEnabled}, ${String(
+          a.createdAtISO
+        )}, ${String(a.updatedAtISO)}, ${lastISO})
+        ON CONFLICT (id) DO UPDATE SET
+          alert_json = EXCLUDED.alert_json,
+          is_enabled = EXCLUDED.is_enabled,
+          updated_at_iso = EXCLUDED.updated_at_iso,
+          last_triggered_at_iso = EXCLUDED.last_triggered_at_iso
+        WHERE server_alerts.user_id = EXCLUDED.user_id
+      `;
+    }
   }
 
   await sql`
@@ -795,6 +838,14 @@ app.post('/v1/alerts/server/enable', async (c) => {
 
   const r = await evalAlerts(sql, c.env, userId, body.state, 'enable');
   return json({ ok: true, ...r });
+});
+
+app.post('/v1/alerts/server/disable', async (c) => {
+  const { userId } = await requireAuth(c.env.JWT_SECRET, c.req.raw);
+  const sql = getSql(c.env);
+  const nowISO = new Date().toISOString();
+  await sql`UPDATE server_alerts SET is_enabled=FALSE, updated_at_iso=${nowISO} WHERE user_id=${userId}`;
+  return json({ ok: true });
 });
 
 app.post('/v1/alerts/server/state', async (c) => {

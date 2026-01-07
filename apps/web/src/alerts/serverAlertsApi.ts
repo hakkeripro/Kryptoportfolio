@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import type { Alert, MirrorState } from '@kp/core';
 
+export type ServerAlertsEnableMode = 'enable_only' | 'merge' | 'replace';
+
 const StatusSchemaA = z.object({
   ok: z.boolean().optional(),
   enabledCount: z.number().int().nonnegative().optional(),
@@ -75,13 +77,28 @@ export async function getServerAlertsStatus(apiBase: string, token: string | nul
   return { enabled: 0, total: 0, mirrorUpdatedAtISO: null, runnerLastRunAtISO: null, runnerLastError: null, runnerLastEvaluated: null, runnerLastTriggered: null };
 }
 
-export async function enableServerAlerts(apiBase: string, token: string, alerts: Alert[], state: MirrorState) {
+export async function enableServerAlerts(
+  apiBase: string,
+  token: string,
+  alerts: Alert[],
+  state: MirrorState,
+  opts?: { mode?: ServerAlertsEnableMode }
+) {
+  const mode = opts?.mode ?? (alerts.length ? 'replace' : 'enable_only');
   const raw = await apiFetch<any>(apiBase, '/v1/alerts/server/enable', {
     method: 'POST',
     headers: { 'content-type': 'application/json', ...authHeaders(token) },
-    body: JSON.stringify({ alerts, state })
+    body: JSON.stringify({ mode, alerts, state })
   });
   return EnableRespSchema.parse(raw);
+}
+
+export async function disableServerAlerts(apiBase: string, token: string) {
+  return apiFetch<any>(apiBase, '/v1/alerts/server/disable', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', ...authHeaders(token) },
+    body: JSON.stringify({})
+  });
 }
 
 export async function updateServerMirrorState(apiBase: string, token: string, state: MirrorState) {

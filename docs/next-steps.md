@@ -1,26 +1,25 @@
 # Next steps
 
-## Next release (recommended)
+Päivitetty: 2026-01-06
 
-1. **Asset catalog mapping UX**
-   - “Unmapped assets” queue in UI
-   - Manual mapping to provider id (coingeckoId). No symbol guessing.
+Tämä tiedosto on “korkean tason” ohjain. Tarkemmat listat löytyvät:
+- **Bugit ja tuoteaukot:** `docs/ISSUE_LOG.md`
+- **Backlog & prioriteetit:** `docs/BACKLOG.md`
+- **UI-spec + acceptance:** `docs/UI_MOCK_SPEC.md` ja `docs/UX_ACCEPTANCE_CRITERIA.md`
 
-2. **Autosync polish (Coinbase)**
-   - Foreground autosync status (last run, last commit, last error)
-   - Cursor strategy + dedupe telemetry
-   - Better retry/backoff and rate limit UI messaging
+## Recommended order (v3.next)
 
-3. **Server alerts (opt-in) end-to-end**
-   - Export portfolio mirror state (prices, totals, positions)
-   - Server evaluation runner + push send
-   - Trigger log UI & settings
+1) Auth/Vault UX (Passkey + yksi Vault Passphrase per käyttäjä) + fixit (KP-UI-001)
+2) Prices freshness (KP-UI-002) + “Last price update”
+3) Alerts reliability (KP-ALERT-001) + diagnostiikka + test notification
+4) Imports registry + wizard (Binance/MEXC/Bitvavo/Ledger/MetaMask)
+5) Branding + token ikonit
+6) Strategy MVP
+7) Billing stub + feature gating
 
-4. **Performance & UX**
-   - Incremental derived rebuild (avoid full rebuild on every small change)
-   - Virtualize large lists (ledger)
-   - Offline “cached” indicators in dashboard
+## Definition of Done (next release)
 
-- Treidausbot (MEXC) paper trading -> opt-in -> live trade (kill switch + audit)
-- Laajenna importteja (lisää pörssejä ja chain-lähteitä)
-- Lisää tax profiles (maakohtaiset raporttipohjat ja säännöt)
+- Multi-device: sama vault passphrase toimii (desktop + mobile)
+- Hälytykset: device + server toimivat ja diagnostiikka kertoo tilanteen
+- Imports: uusi provider lisättävissä ilman imports root UI -refaktoria
+- Premium: feature gating näkyy ja toimii (stub riittää)

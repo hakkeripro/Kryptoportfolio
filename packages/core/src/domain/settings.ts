@@ -14,7 +14,15 @@ export const Settings = z.object({
   priceProvider: PriceProvider,
   autoRefreshIntervalSec: z.union([z.literal(0), z.literal(60), z.literal(300), z.literal(900)]),
   taxProfile: TaxProfile,
-  privacy: z.object({ telemetryOptIn: z.boolean() })
+  privacy: z.object({ telemetryOptIn: z.boolean() }),
+  // Notification-related preferences live in the (local) vault and sync across devices.
+  // Server-side delivery still requires explicit opt-in per server (see /alerts + /settings UI).
+  notifications: z
+    .object({
+      serverAlertsEnabled: z.boolean().optional(),
+      devicePushEnabled: z.boolean().optional()
+    })
+    .optional()
 });
 
 export type Settings = z.infer<typeof Settings>;

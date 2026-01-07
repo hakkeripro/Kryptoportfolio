@@ -1,5 +1,12 @@
 # Coinbase integration (CDP Secret API Keys)
 
+## Key formats
+
+- **Recommended:** paste the downloaded **JSON key file** content (Coinbase CDP Secret API Key).
+- The app can extract `key_name` and `private_key` from JSON. If you prefer manual entry, paste just the private key and provide the key name.
+
+⚠️ If the UI currently insists on a `keyName` field even when pasting JSON, track it as **KP-IMPORT-001** in `docs/ISSUE_LOG.md` (planned fix).
+
 This repo uses **Coinbase CDP “Secret API Keys”** (JWT / ES256) to read **accounts + transactions** and import them into the append-only ledger.
 
 ## Create a read-only key

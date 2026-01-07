@@ -104,3 +104,38 @@ test('server alerts: create alert → enable server → log shows triggers', asy
   const n = await page.locator('[data-testid^="row-trigger-log-"]').count();
   expect(n).toBeGreaterThan(0);
 });
+
+test('server alerts: empty local list does not clear server rules when cancelled', async ({ page, request }) => {
+  await resetApp(page, request);
+  await onboardAndRegister(page);
+  await runFixtureImport(page);
+
+  await page.getByTestId('nav-alerts').click();
+  await expect(page.getByTestId('panel-alerts')).toBeVisible();
+
+  // Create a single alert and sync to the server.
+  await page.getByTestId('form-alert-type').selectOption('PORTFOLIO_VALUE');
+  await page.getByTestId('form-alert-direction').selectOption('ABOVE');
+  await page.getByTestId('form-alert-threshold').fill('1');
+  await page.getByTestId('btn-save-alert').click();
+  await expect(page.locator('[data-testid^="row-alert-"]')).toHaveCount(1);
+
+  await page.getByTestId('btn-enable-server-alerts').click();
+  await expect(page.getByTestId('txt-alert-server-message')).toBeVisible({ timeout: 20_000 });
+
+  // Delete locally, making the "active" local list empty.
+  const row = page.locator('[data-testid^="row-alert-"]').first();
+  const rowId = await row.getAttribute('data-testid');
+  const id = String(rowId ?? '').replace('row-alert-', '');
+  await page.getByTestId(`btn-delete-alert-${id}`).click();
+
+  // Re-enable on server: should show a confirm dialog. Cancel should NOT clear server rules.
+  page.once('dialog', async (d) => {
+    await d.dismiss();
+  });
+  await page.getByTestId('btn-enable-server-alerts').click();
+  await expect(page.getByTestId('txt-alert-server-message')).toContainText('kept existing rules');
+
+  await page.getByTestId('btn-refresh-server-status').click();
+  await expect(page.getByTestId('box-alerts-server-status')).toContainText('1/1');
+});

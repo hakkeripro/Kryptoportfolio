@@ -101,3 +101,11 @@ pnpm test:e2e
 - Dexie schema: `packages/platform-web/src/db/webDb.ts`
 - Hosted API: `functions/api/[[path]].ts`
 - Hosted schema: `functions/_lib/db.ts` + `scripts/hosted-schema.sql`
+
+
+## Current focus (Jan 2026)
+
+- Korjaa P0:t `docs/ISSUE_LOG.md`: erityisesti vault passphrase session ja price auto-refresh.
+- Toteuta uusi Auth/Vault UX: Passkey + yksi Vault Passphrase per käyttäjä (ADR-018, UI_MOCK_SPEC).
+- Refaktoroi Imports registry -malliin (ADR-019) ja lisää uudet providerit.
+- Huomioi maksulliset ominaisuudet (ADR-020).

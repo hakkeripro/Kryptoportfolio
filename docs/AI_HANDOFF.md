@@ -69,7 +69,29 @@ CI is wired in `.github/workflows/ci.yml`.
 - Server alerts UI: mirror push + trigger log
 - Hosted runner (Cloudflare Worker Cron) + web push sending end-to-end (see `docs/hosted/PHASE6_ALERTS_PUSH_RUNBOOK.md`)
 
+
+## Product direction (Jan 2026)
+
+- **Auth/Vault UX:** Passkey/WebAuthn + **yksi Vault Passphrase per käyttäjä** (multi-device). Katso:
+  - `docs/adr/ADR-018-auth-vault-ux.md`
+  - `docs/UI_MOCK_SPEC.md`
+  - `docs/UX_ACCEPTANCE_CRITERIA.md`
+- **Imports:** siirry provider registry + wizard -malliin (Binance/MEXC/Bitvavo/Ledger/MetaMask). Katso:
+  - `docs/adr/ADR-019-imports-plugin-registry.md`
+- **Billing:** premium + feature gating huomioidaan heti (aluksi stub). Katso:
+  - `docs/adr/ADR-020-billing-feature-gating.md`
+
+## Issue log (triage)
+
+Aloita korjaukset tästä järjestyksessä:
+1) P0: `docs/ISSUE_LOG.md`
+2) Backlog: `docs/BACKLOG.md`
+
 ## Known limitations / gaps
+
+- **KP-UI-001:** vault passphrase session bug (onboarding/unlock)
+- **KP-UI-002:** price auto-refresh settings key mismatch
+- **KP-ALERT-001:** server alerts enable/replace semantics can wipe rules
 
 - **Pricing/FX**: production caching & rate limit handling needs tuning.
 - **Billing**: Stripe + feature gating not implemented (kept out to avoid costs until needed).
@@ -91,10 +113,14 @@ Copy/paste this into a new chat:
 > Read and follow docs:
 > - `docs/AI_HANDOFF.md`
 > - `docs/PROJECT_STATE.md`
+> - `docs/ISSUE_LOG.md`
+> - `docs/BACKLOG.md`
+> - `docs/UI_MOCK_SPEC.md`
+> - `docs/UX_ACCEPTANCE_CRITERIA.md`
+> - `docs/EXCHANGE_INTEGRATION_PLAYBOOK.md`
 > - `docs/hosted-mvp-cloudflare-pages.md`
 > - `docs/hosted/PHASE5_HOSTED_STAGING_RUNBOOK.md`
-> - `docs/EXCHANGE_INTEGRATION_PLAYBOOK.md`
-> - `SPEKSI_V3_FULL_PRODUCT.md` and attachments A–D (acceptance criteria, roadmap, ADR, data model)
+> - `docs/hosted/PHASE6_ALERTS_PUSH_RUNBOOK.md`
 >
 > Current state:
 > - Web (React+Vite PWA) + IndexedDB vault

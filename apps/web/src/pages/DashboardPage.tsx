@@ -57,14 +57,22 @@ export default function DashboardPage() {
     { settings: null as any, latest: null as any, snaps: [] as any[], assets: [] as any[] }
   );
 
-  const [status, setStatus] = useState<{ lastRebuildISO: string | null }>({ lastRebuildISO: null });
+  const [status, setStatus] = useState<{ lastRebuildISO: string | null; lastPriceAttemptISO: string | null; lastPriceRefreshISO: string | null }>(
+    { lastRebuildISO: null, lastPriceAttemptISO: null, lastPriceRefreshISO: null }
+  );
   const [refreshing, setRefreshing] = useState(false);
   const refreshLock = useRef(false);
 
   useEffect(() => {
     void (async () => {
       const lastRebuildISO = await getMeta('derived:lastRebuildISO');
-      setStatus({ lastRebuildISO: lastRebuildISO || null });
+      const lastPriceAttemptISO = await getMeta('prices:lastAttemptISO');
+      const lastPriceRefreshISO = await getMeta('prices:lastRefreshISO');
+      setStatus({
+        lastRebuildISO: lastRebuildISO || null,
+        lastPriceAttemptISO: lastPriceAttemptISO || null,
+        lastPriceRefreshISO: lastPriceRefreshISO || null
+      });
     })();
   }, [dbState.data.latest?.dayISO]);
 
@@ -153,7 +161,13 @@ export default function DashboardPage() {
       }
       await rebuildDerivedCaches({ daysBack: 365 });
       const lastRebuildISO = await getMeta('derived:lastRebuildISO');
-      setStatus({ lastRebuildISO: lastRebuildISO || new Date().toISOString() });
+      const lastPriceAttemptISO = await getMeta('prices:lastAttemptISO');
+      const lastPriceRefreshISO = await getMeta('prices:lastRefreshISO');
+      setStatus({
+        lastRebuildISO: lastRebuildISO || new Date().toISOString(),
+        lastPriceAttemptISO: lastPriceAttemptISO || null,
+        lastPriceRefreshISO: lastPriceRefreshISO || null
+      });
     } finally {
       refreshLock.current = false;
       if (!opts?.silent) setRefreshing(false);
@@ -209,6 +223,14 @@ export default function DashboardPage() {
           <span data-testid="badge-price-status" className="text-xs rounded bg-slate-800 px-2 py-1">
             {statusText}
           </span>
+        </div>
+        <div className="mt-2 grid gap-1 text-sm text-slate-200">
+          <div data-testid="metric-last-price-update">
+            Last price update: {status.lastPriceRefreshISO ? new Date(status.lastPriceRefreshISO).toLocaleString() : '—'}
+          </div>
+          <div data-testid="metric-last-price-attempt" className="text-slate-400">
+            Last price attempt: {status.lastPriceAttemptISO ? new Date(status.lastPriceAttemptISO).toLocaleString() : '—'}
+          </div>
         </div>
         {dbState.error ? <div className="text-sm text-red-300 mt-2">{dbState.error}</div> : null}
       </div>
