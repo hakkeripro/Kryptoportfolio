@@ -1,13 +1,15 @@
 ---
 name: release
-description: Full release pipeline — local checks, preview deploy, DB migrations, smoke test, production merge to Cloudflare Pages.
+description: Full release pipeline — local checks, preview deploy, monitoring, DB migrations, production deploy with rollback plan.
 disable-model-invocation: true
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Agent, TodoWrite, WebFetch
 ---
 
 # Release Pipeline
 
-Taysi julkaisupipeline: tarkistukset → preview → DB-migraatiot → smoke test → tuotanto.
+Taysi julkaisupipeline: tarkistukset → preview → seuranta → DB-migraatiot → tuotanto → vahvistus.
+
+**TARKEA:** Tuotantoon ei koskaan deployta suoraan. Preview-deploy + seuranta AINA ensin.
 
 ## Vaihe 0: Esitarkistukset
 
@@ -83,23 +85,16 @@ Jos DB-muutoksia loytyy:
 1. Lue muutetut migraatiotiedostot (`scripts/migrations/*.sql`)
 2. Lue `functions/_lib/db.ts` — tarkista HOSTED_SCHEMA_SQL
 3. Aja `pnpm schema:hosted:file` — varmista generoidun skeeman ajantasaisuus
-4. **NAYTA migraatio-SQL kayttajalle** ja kysy vahvistus ennen ajamista
+4. **NAYTA migraatio-SQL kayttajalle** ja kysy vahvistus
 
-**HUOM:** Migraatiot ajetaan Neon-tietokantaan ENNEN preview-deployta. Kerro kayttajalle:
-- Mita SQL ajetaan
-- Onko muutokset taaksepain-yhteensopivia (vanha koodi toimii viela)
-- Suosittele: aja ensin preview-kantaan, sitten tuotantokantaan
+**HUOM:** Migraatiot ajetaan **migration runnerilla** — ei manuaalisesti.
 
-Jos kayttajalla on `psql` kaytettavissa:
+### 2a. Tarkista migraatioiden tila
+
 ```bash
-# Preview-kanta
-psql "$PREVIEW_DATABASE_URL" -f scripts/migrations/YYYY-MM-DD-kuvaus.sql
-
-# TAI koko skeema alusta (uusi ymparisto)
-psql "$DATABASE_URL" -f scripts/hosted-schema.sql
+# Tarkista mita migraatioita on odottamassa
+DATABASE_URL="$DATABASE_URL" pnpm migrate:status
 ```
-
-Jos `psql` ei kaytettavissa → ohjaa Neon Dashboard SQL Editor -kayttoliittymaan.
 
 ## Vaihe 3: Preview-deploy
 
@@ -127,29 +122,38 @@ Jos CI failaa:
 Cloudflare Pages luo automaattisesti preview-deployn jokaiselle branchille.
 
 ```bash
-# Tarkista Cloudflare deployment status
 # Preview URL: https://<branch>.kryptoportfolio.pages.dev
 # TAI: katso GitHub PR:n kommenteista Cloudflare-botti
 ```
 
 Odota deployn valmistumista ja raportoi URL kayttajalle.
 
-## Vaihe 4: Preview-smoke test
+## Vaihe 4: Preview-seuranta ja smoke test
 
-Testaa preview-ymparistossa:
+**TARKEA: Tama vaihe on pakollinen ennen tuotantoon vientia.**
 
 ### 4a. API health check
 
 ```bash
 # Korvaa URL oikealla preview-osoitteella
-curl -s https://<preview-url>/api/health | cat
+PREVIEW_URL="https://<branch>.kryptoportfolio.pages.dev"
+curl -sf "${PREVIEW_URL}/api/health" | cat
 ```
 
 Odotettu vastaus: `{"ok":true}`
 
-### 4b. Toiminnallinen tarkistus
+### 4b. Aja DB-migraatiot preview-kantaan (jos tarpeen)
 
-Kysy kayttajalta haluaako han testata manuaalisesti vai automaattisesti. Raportoi testattavat asiat:
+Jos vaiheessa 2 tunnistettiin DB-muutoksia:
+
+```bash
+# Aja odottavat migraatiot preview-/staging-kantaan
+DATABASE_URL="$PREVIEW_DATABASE_URL" pnpm migrate:run
+```
+
+### 4c. Toiminnallinen tarkistus
+
+Kysy kayttajalta haluaako han testata manuaalisesti. Raportoi testattavat asiat:
 
 - [ ] `/api/health` vastaa `{"ok":true}`
 - [ ] Etusivu latautuu (ei blank page)
@@ -158,7 +162,26 @@ Kysy kayttajalta haluaako han testata manuaalisesti vai automaattisesti. Raporto
 - [ ] Halytykset toimivat (jos alert-muutoksia)
 - [ ] Web push toimii (jos push-muutoksia)
 
-### 4c. Runner-tarkistus (jos runner-muutoksia)
+### 4d. Seurantajakso
+
+Odota preview-deployn seuranta-aikaa:
+
+1. **Tarkista preview-lokit** Cloudflaresta virheidentunnistusta varten:
+   ```bash
+   # Jos wrangler on kaytettavissa
+   pnpm dlx wrangler pages deployment tail --project-name kryptoportfolio
+   ```
+
+2. **Tarkista health uudelleen** muutaman minuutin kuluttua:
+   ```bash
+   curl -sf "${PREVIEW_URL}/api/health" | cat
+   ```
+
+3. Kysy kayttajalta: **"Preview on toiminut X minuuttia ilman virheita. Jatketaanko tuotantoon?"**
+
+**ALA JATKA VAIHEESEEN 5 ILMAN KAYTTAJAN VAHVISTUSTA.**
+
+### 4e. Runner-tarkistus (jos runner-muutoksia)
 
 Jos `apps/runner/` on muuttunut:
 ```bash
@@ -166,20 +189,27 @@ cd apps/runner
 pnpm dlx wrangler deploy --dry-run
 ```
 
-## Vaihe 5: Tuotantoon vienti
-
-### 5a. DB-migraatiot tuotantoon
+## Vaihe 5: Tuotanto-DB-migraatiot
 
 Jos vaiheessa 2 tunnistettiin DB-muutoksia JA preview-testit menivat lapi:
 
 1. **KYSY VAHVISTUS** kayttajalta ennen tuotanto-DB:n muuttamista
-2. Nayta uudelleen ajettava SQL
-3. Aja migraatio tuotantokantaan:
+2. Nayta ajettava SQL (migraatioiden nimet + sisalto)
+3. Aja migraatiot:
+
 ```bash
-psql "$DATABASE_URL" -f scripts/migrations/YYYY-MM-DD-kuvaus.sql
+DATABASE_URL="$DATABASE_URL" pnpm migrate:run
 ```
 
-### 5b. Merge main-branchiin (jos feature-branch)
+4. Vahvista migraation onnistuminen:
+
+```bash
+DATABASE_URL="$DATABASE_URL" pnpm migrate:status
+```
+
+## Vaihe 6: Tuotantoon vienti
+
+### 6a. Merge main-branchiin (jos feature-branch)
 
 Jos tyoskennellaan feature-branchilla:
 ```bash
@@ -188,6 +218,7 @@ gh pr create --title "Release: <lyhyt kuvaus>" --body "$(cat <<'EOF'
 ## Release checklist
 - [x] Local checks passed (typecheck, lint, test, build)
 - [x] Preview deploy verified
+- [x] Preview monitoring OK (no errors)
 - [x] DB migrations applied (if any)
 - [ ] Production smoke test
 
@@ -205,7 +236,7 @@ Jos tyoskennellaan suoraan mainilla:
 git push origin main
 ```
 
-### 5c. Seuraa tuotanto-deploya
+### 6b. Seuraa tuotanto-deploya
 
 ```bash
 # GitHub Actions
@@ -215,7 +246,9 @@ gh run watch
 # Cloudflare Pages tuotanto-deploy kaynnistyy automaattisesti main-pushista
 ```
 
-### 5d. Runner-deploy (jos tarpeen)
+**Odota CI:n ja Cloudflare-deployn valmistumista ennen seuraavaa vaihetta.**
+
+### 6c. Runner-deploy (jos tarpeen)
 
 Jos `apps/runner/` on muuttunut:
 ```bash
@@ -228,21 +261,36 @@ Varmista CRON_SECRET on asetettu:
 pnpm dlx wrangler secret list
 ```
 
-## Vaihe 6: Tuotanto-smoke test
+## Vaihe 7: Tuotanto-smoke test ja vahvistus
+
+### 7a. Health check
 
 ```bash
-# Health check
-curl -s https://kryptoportfolio.pages.dev/api/health | cat
+curl -sf https://kryptoportfolio.pages.dev/api/health | cat
 ```
 
-Raportoi kayttajalle:
+### 7b. Toiminnallinen tarkistus
+
+Raportoi kayttajalle ja odota vahvistus:
+
 - [ ] API health OK
 - [ ] Etusivu latautuu
 - [ ] Perustoiminnot toimivat
+- [ ] Ei virheita konsolissa
 
-## Vaihe 7: Viimeistely
+### 7c. Rollback-suunnitelma
 
-### 7a. Tagaa release (valinnainen)
+Jos tuotanto-smoke test failaa, ohjeista kayttajaa:
+
+1. **Revert-commit:** `git revert HEAD && git push origin main` → Cloudflare deployttaa automaattisesti
+2. **DB rollback:** Jos migraatio aiheutti ongelman, luo korjausmigraatio (kayta `IF EXISTS` -patternia)
+3. **Runner rollback:** `cd apps/runner && git stash && pnpm dlx wrangler deploy` (edellinen versio)
+
+**ALA poista dataa tai droppa tauluja ilman kayttajan nimenomaista lupaa.**
+
+## Vaihe 8: Viimeistely
+
+### 8a. Tagaa release (valinnainen)
 
 Kysy kayttajalta haluaako tagata:
 ```bash
@@ -250,12 +298,12 @@ git tag -a v$(date +%Y.%m.%d) -m "Release $(date +%Y-%m-%d)"
 git push origin --tags
 ```
 
-### 7b. Paivita seurantadokumentit
+### 8b. Paivita seurantadokumentit
 
 1. `docs/SESSION_CONTEXT.md` — Merkitse release tehty
 2. `docs/ISSUE_LOG.md` — Merkitse releasen mukana korjatut bugit
 
-### 7c. Yhteenveto
+### 8c. Yhteenveto
 
 Tulosta kayttajalle:
 - Mita deploytiin (committien maara + paasisalto)
@@ -272,10 +320,10 @@ Tulosta kayttajalle:
 → Tarkista build output, wrangler.jsonc, env vars
 
 ### DB-migraatio failaa
-→ **ALA JATKA DEPLOYTA.** Raportoi virhe kayttajalle. Migraatiot ovat idempoentteja (IF NOT EXISTS), joten uudelleenajo on turvallista.
+→ **ALA JATKA DEPLOYTA.** Raportoi virhe kayttajalle. Tarkista `pnpm migrate:status` tilanne.
 
 ### Tuotanto-smoke test failaa
-→ Tarkista Cloudflare Pages lokit, Neon DB status, env vars. Raportoi kayttajalle valittomasti.
+→ **Aloita rollback-suunnitelma (Vaihe 7c).** Raportoi kayttajalle valittomasti.
 
 ### Runner ei kaynnisty
 → `pnpm dlx wrangler tail kryptoportfolio-alert-runner` — seuraa reaaliaikaiset lokit

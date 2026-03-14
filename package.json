@@ -19,6 +19,9 @@
     "zip": "node scripts/zip.mjs",
     "schema:hosted": "node scripts/print-hosted-schema.mjs",
     "schema:hosted:file": "node scripts/print-hosted-schema.mjs > scripts/hosted-schema.sql",
+    "migrate:status": "node scripts/migrate.mjs status",
+    "migrate:run": "node scripts/migrate.mjs run",
+    "migrate:create": "node scripts/migrate.mjs create",
     "test:coverage": "pnpm --filter @kp/core test:coverage",
     "size": "size-limit",
     "audit:ci": "pnpm audit --prod --audit-level=high"

@@ -25,6 +25,9 @@ pnpm build            # Build kaikki
 pnpm test             # Vitest unit testit
 pnpm test:e2e         # Playwright e2e (web + api)
 pnpm schema:hosted    # Tulosta hosted DB skeema
+pnpm migrate:status   # Nayta ajetut/odottavat Neon-migraatiot (vaatii DATABASE_URL)
+pnpm migrate:run      # Aja odottavat migraatiot Neon-kantaan
+pnpm migrate:create <nimi>  # Luo uusi migraatiotiedosto
 ```
 
 ## Kriittiset polut
@@ -106,7 +109,7 @@ Jos havaitset ristiriitoja dokumentaation, koodin tai ominaisuuksien valilla:
 | `/fix-bugs [id/prioriteetti]` | Korjaa bugeja ISSUE_LOG:sta prioriteettijarjestyksessa |
 | `/generate-feature-summary <nro>` | Luo CHEAT_SHEET.md + TODO.md isosta speksista (kontekstin tiivistys) |
 | `/update-session` | Session lopussa: paivittaa SESSION_CONTEXT.md, FEATURES_TODO.md, ISSUE_LOG.md |
-| `/release` | **Julkaisu:** Tarkistukset → preview → DB-migraatiot → smoke test → tuotanto (Cloudflare Pages) |
+| `/release` | **Julkaisu:** Tarkistukset → preview → seuranta → DB-migraatiot → tuotanto (Cloudflare Pages) |
 
 ## Session-tyoskentely
 
@@ -138,6 +141,7 @@ Jos havaitset ristiriitoja dokumentaation, koodin tai ominaisuuksien valilla:
 - **Cloudflare MCP:** Ei kaytossa — `wrangler` CLI riittaa deployihin ja logien tarkistukseen
 - **GitHub MCP:** Ei kaytossa — `gh` CLI kattaa issue/PR-hallinnan
 - **CoinGecko API MCP:** Ei kaytossa — testifixturet ja proxy-stubit riittavat kehitykseen
+- **Neon MCP:** Ei kaytossa — `scripts/migrate.mjs` hoitaa migraatiot, ei tarvetta ad hoc -kyselyille
 - **Paatos:** MCP:t lisaavat monimutkaisuutta ilman merkittavaa hyotya tassa projektissa. Arvioidaan uudelleen jos tarpeet muuttuvat.
 
 ## Tyoskentelytavat
@@ -166,8 +170,10 @@ Jos havaitset ristiriitoja dokumentaation, koodin tai ominaisuuksien valilla:
 
 ### Tietokantamuutokset (hosted)
 1. Muokkaa `functions/_lib/db.ts` (`HOSTED_SCHEMA_SQL`)
-2. Luo migraatio: `scripts/migrations/YYYY-MM-DD-kuvaus.sql`
+2. Luo migraatio: `pnpm migrate:create <kuvaus>` (tai manuaalisesti `scripts/migrations/YYYY-MM-DD-kuvaus.sql`)
 3. Aja `pnpm schema:hosted:file` (paivittaa `scripts/hosted-schema.sql`)
+4. Tarkista tila: `DATABASE_URL="..." pnpm migrate:status`
+5. Aja migraatiot: `DATABASE_URL="..." pnpm migrate:run`
 
 ## Dokumenttien paivitys (session lopussa)
 - `docs/SESSION_CONTEXT.md` — Muutosloki + status (AINA)
