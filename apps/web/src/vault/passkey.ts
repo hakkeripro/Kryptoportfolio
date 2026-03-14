@@ -3,8 +3,10 @@
 // Goal: "one user = one Vault Passphrase" across devices, while allowing
 // passphrase-less unlock on devices where a Passkey has been enabled.
 //
-// This uses WebAuthn's "hmac-secret" extension (when available) to derive a
-// stable per-credential secret that never leaves the authenticator.
+// Uses WebAuthn PRF extension (modern, widely supported) with hmac-secret
+// fallback for older authenticators.
+
+type SecretMethod = 'prf' | 'hmac';
 
 type StoredWrap = {
   version: 1;
@@ -13,10 +15,11 @@ type StoredWrap = {
   nonceBase64: string;
   ciphertextBase64: string;
   createdAtISO: string;
+  /** Which extension was used. Defaults to 'hmac' for legacy wraps. */
+  method?: SecretMethod;
 };
 
 const LS_KEY_PREFIX = 'kp_vault_passkey_wrap_v1';
-// Legacy single-key for backward compat
 const LS_KEY = LS_KEY_PREFIX;
 
 function b64Encode(buf: ArrayBuffer): string {
@@ -41,7 +44,8 @@ function randomBytes(n: number): Uint8Array {
 
 export function isPasskeySupported(): boolean {
   return (
-    typeof window !== 'undefined' && typeof (window as any).PublicKeyCredential !== 'undefined'
+    typeof window !== 'undefined' &&
+    typeof (window as any).PublicKeyCredential !== 'undefined'
   );
 }
 
@@ -66,10 +70,15 @@ export function clearPasskeyWrap(): void {
 }
 
 /** List all stored passkey wraps (currently max 1, future: multi). */
-export function listPasskeyWraps(): Array<{ credIdBase64: string; createdAtISO: string }> {
+export function listPasskeyWraps(): Array<{
+  credIdBase64: string;
+  createdAtISO: string;
+}> {
   const stored = getStoredPasskeyWrap();
   if (!stored) return [];
-  return [{ credIdBase64: stored.credIdBase64, createdAtISO: stored.createdAtISO }];
+  return [
+    { credIdBase64: stored.credIdBase64, createdAtISO: stored.createdAtISO },
+  ];
 }
 
 /** Remove a specific passkey wrap by credential ID. */
@@ -80,31 +89,59 @@ export function removePasskeyWrap(credIdBase64: string): boolean {
   return true;
 }
 
-async function deriveHmacSecret(credId: Uint8Array, salt: Uint8Array): Promise<Uint8Array> {
-  // The hmac-secret output is returned via getClientExtensionResults().
+// ---------------------------------------------------------------------------
+// Secret derivation via PRF or hmac-secret
+// ---------------------------------------------------------------------------
+
+async function deriveSecretPrf(
+  credId: Uint8Array,
+  salt: Uint8Array,
+): Promise<Uint8Array> {
   const assertion = (await navigator.credentials.get({
     publicKey: {
       challenge: randomBytes(32),
       allowCredentials: [{ type: 'public-key', id: credId }],
       userVerification: 'preferred',
-      extensions: { hmacGetSecret: { salt1: salt } as any },
+      extensions: { prf: { eval: { first: salt } } },
     } as any,
   })) as PublicKeyCredential | null;
 
   if (!assertion) throw new Error('passkey_cancelled');
 
-  const ext: any = (assertion as any).getClientExtensionResults?.() ?? {};
-  const h = ext.hmacGetSecret;
-  const out1: ArrayBuffer | undefined = h?.output1;
+  const ext: any = assertion.getClientExtensionResults?.() ?? {};
+  const result: ArrayBuffer | undefined = ext.prf?.results?.first;
+  if (!result) throw new Error('passkey_prf_not_supported');
+  return new Uint8Array(result);
+}
+
+async function deriveSecretHmac(
+  credId: Uint8Array,
+  salt: Uint8Array,
+): Promise<Uint8Array> {
+  const assertion = (await navigator.credentials.get({
+    publicKey: {
+      challenge: randomBytes(32),
+      allowCredentials: [{ type: 'public-key', id: credId }],
+      userVerification: 'preferred',
+      extensions: { hmacGetSecret: { salt1: salt } } as any,
+    } as any,
+  })) as PublicKeyCredential | null;
+
+  if (!assertion) throw new Error('passkey_cancelled');
+
+  const ext: any = assertion.getClientExtensionResults?.() ?? {};
+  const out1: ArrayBuffer | undefined = ext.hmacGetSecret?.output1;
   if (!out1) throw new Error('passkey_hmac_secret_not_supported');
   return new Uint8Array(out1);
 }
 
 async function importAesGcmKey(secret32: Uint8Array): Promise<CryptoKey> {
   if (secret32.byteLength < 32) throw new Error('passkey_secret_too_short');
-  // Use the first 32 bytes (AES-256).
   const raw = secret32.slice(0, 32);
-  return crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+  return crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, false, [
+    'encrypt',
+    'decrypt',
+  ]);
 }
 
 async function encryptString(
@@ -134,10 +171,16 @@ async function decryptString(
   return new TextDecoder().decode(pt);
 }
 
-export async function createOrReplacePasskeyWrap(passphrase: string): Promise<void> {
+// ---------------------------------------------------------------------------
+// Registration: detect PRF support, fall back to hmac-secret
+// ---------------------------------------------------------------------------
+
+export async function createOrReplacePasskeyWrap(
+  passphrase: string,
+): Promise<void> {
   if (!isPasskeySupported()) throw new Error('passkey_not_supported');
 
-  // Create a new credential with the hmac-secret extension enabled.
+  // Try creating with PRF extension first
   const cred = (await navigator.credentials.create({
     publicKey: {
       rp: { name: 'Kryptoportfolio' },
@@ -147,18 +190,35 @@ export async function createOrReplacePasskeyWrap(passphrase: string): Promise<vo
         displayName: 'Vault',
       },
       challenge: randomBytes(32),
-      pubKeyCredParams: [{ type: 'public-key', alg: -7 }],
+      pubKeyCredParams: [
+        { type: 'public-key', alg: -7 },
+        { type: 'public-key', alg: -257 },
+      ],
       authenticatorSelection: { userVerification: 'preferred' },
-      timeout: 60_000,
-      extensions: { hmacCreateSecret: true } as any,
+      timeout: 120_000,
+      extensions: {
+        prf: {},
+        hmacCreateSecret: true,
+      } as any,
     } as any,
   })) as PublicKeyCredential | null;
 
   if (!cred) throw new Error('passkey_cancelled');
 
+  const ext: any = cred.getClientExtensionResults?.() ?? {};
+  const prfEnabled = ext.prf?.enabled === true;
+  const hmacEnabled = ext.hmacCreateSecret === true;
+
+  if (!prfEnabled && !hmacEnabled) {
+    throw new Error('passkey_hmac_secret_not_supported');
+  }
+
+  const method: SecretMethod = prfEnabled ? 'prf' : 'hmac';
   const credId = new Uint8Array(cred.rawId);
   const salt = randomBytes(32);
-  const secret = await deriveHmacSecret(credId, salt);
+
+  const deriveFn = method === 'prf' ? deriveSecretPrf : deriveSecretHmac;
+  const secret = await deriveFn(credId, salt);
   const key = await importAesGcmKey(secret);
   const { nonce, ciphertext } = await encryptString(key, passphrase);
 
@@ -169,10 +229,15 @@ export async function createOrReplacePasskeyWrap(passphrase: string): Promise<vo
     nonceBase64: b64Encode(nonce.buffer as ArrayBuffer),
     ciphertextBase64: b64Encode(ciphertext),
     createdAtISO: new Date().toISOString(),
+    method,
   };
 
   localStorage.setItem(LS_KEY, JSON.stringify(stored));
 }
+
+// ---------------------------------------------------------------------------
+// Unlock: use stored method (defaults to hmac for legacy wraps)
+// ---------------------------------------------------------------------------
 
 export async function unwrapPassphraseWithPasskey(): Promise<string> {
   if (!isPasskeySupported()) throw new Error('passkey_not_supported');
@@ -184,7 +249,9 @@ export async function unwrapPassphraseWithPasskey(): Promise<string> {
   const nonce = b64Decode(stored.nonceBase64);
   const ciphertext = b64Decode(stored.ciphertextBase64);
 
-  const secret = await deriveHmacSecret(credId, salt);
+  const method: SecretMethod = stored.method ?? 'hmac';
+  const deriveFn = method === 'prf' ? deriveSecretPrf : deriveSecretHmac;
+  const secret = await deriveFn(credId, salt);
   const key = await importAesGcmKey(secret);
   return decryptString(key, nonce, ciphertext);
 }
