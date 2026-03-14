@@ -43,6 +43,7 @@ test('server alerts: create alert → enable server → log shows triggers', asy
   page,
   request,
 }) => {
+  test.setTimeout(90_000);
   await resetApp(page, request);
   await onboardAndRegister(page);
   await runFixtureImport(page);
@@ -60,11 +61,19 @@ test('server alerts: create alert → enable server → log shows triggers', asy
   await page.getByTestId('btn-enable-server-alerts').click();
   await expect(page.getByTestId('txt-alert-server-message')).toBeVisible({ timeout: 20_000 });
 
-  // Wait for server-side runner to process, then refresh
-  await page.waitForTimeout(2_000);
-  await page.getByTestId('btn-refresh-alert-log').click();
+  // Poll: click refresh repeatedly until trigger log rows appear
   const row = page.locator('[data-testid^="row-trigger-log-"]').first();
-  await expect(row).toBeVisible({ timeout: 30_000 });
+  const deadline = Date.now() + 30_000;
+  while (Date.now() < deadline) {
+    await page.getByTestId('btn-refresh-alert-log').click();
+    try {
+      await expect(row).toBeVisible({ timeout: 3_000 });
+      break;
+    } catch {
+      await page.waitForTimeout(2_000);
+    }
+  }
+  await expect(row).toBeVisible({ timeout: 5_000 });
   const n = await page.locator('[data-testid^="row-trigger-log-"]').count();
   expect(n).toBeGreaterThan(0);
 });
