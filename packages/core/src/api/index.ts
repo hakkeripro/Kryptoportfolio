@@ -10,17 +10,9 @@ export {
   changePassword,
 } from './authCrypto.js';
 
-export {
-  signToken,
-  verifyToken,
-  requireAuth,
-  type AuthPayload,
-} from './authJwt.js';
+export { signToken, verifyToken, requireAuth, type AuthPayload } from './authJwt.js';
 
-export {
-  classifyCoinbaseError,
-  type ApiErrorResponse,
-} from './apiErrors.js';
+export { classifyCoinbaseError, type ApiErrorResponse } from './apiErrors.js';
 
 export {
   DeviceSchema,

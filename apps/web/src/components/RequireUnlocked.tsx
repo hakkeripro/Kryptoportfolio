@@ -18,7 +18,8 @@ export default function RequireUnlocked({ children }: { children: React.ReactNod
   const next = `${location.pathname}${location.search}${location.hash}`;
 
   if (!vaultSetup) return <Navigate to={`/welcome?next=${encodeURIComponent(next)}`} replace />;
-  if (!passphrase) return <Navigate to={`/vault/unlock?next=${encodeURIComponent(next)}`} replace />;
+  if (!passphrase)
+    return <Navigate to={`/vault/unlock?next=${encodeURIComponent(next)}`} replace />;
 
   return <>{children}</>;
 }

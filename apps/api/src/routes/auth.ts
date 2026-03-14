@@ -1,6 +1,12 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { hashPassword, normalizeEmail, verifyPassword, newId, changePassword } from '../services/auth.js';
+import {
+  hashPassword,
+  normalizeEmail,
+  verifyPassword,
+  newId,
+  changePassword,
+} from '../services/auth.js';
 import { signToken, requireAuth, getUserId } from '../services/authHooks.js';
 
 const RegisterSchema = z.object({

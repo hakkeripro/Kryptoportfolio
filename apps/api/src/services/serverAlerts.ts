@@ -1,7 +1,13 @@
 import type { FastifyInstance } from 'fastify';
 import webpush from 'web-push';
 import { fetch } from 'undici';
-import { AlertSchema, evaluateServerAlert, MirrorStateSchema, isAlertInCooldown, newId } from '@kp/core';
+import {
+  AlertSchema,
+  evaluateServerAlert,
+  MirrorStateSchema,
+  isAlertInCooldown,
+  newId,
+} from '@kp/core';
 
 function isPushConfigured(app: FastifyInstance) {
   return !!(app.config.VAPID_PUBLIC_KEY && app.config.VAPID_PRIVATE_KEY);

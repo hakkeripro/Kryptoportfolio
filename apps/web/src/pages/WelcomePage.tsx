@@ -53,8 +53,8 @@ export default function WelcomePage() {
               leaves your device.
             </p>
             <p>
-              The server never sees your passphrase or unencrypted data. The same passphrase works on
-              all your devices.
+              The server never sees your passphrase or unencrypted data. The same passphrase works
+              on all your devices.
             </p>
             <p className="text-slate-400">
               If you lose your passphrase, your data cannot be recovered.

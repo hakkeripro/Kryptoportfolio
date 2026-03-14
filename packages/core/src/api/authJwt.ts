@@ -17,11 +17,7 @@ async function jwtSecretKey(secret: string) {
  * Sign a JWT with HS256 containing `sub` (userId) and `email` claims.
  * Expires in 30 days.
  */
-export async function signToken(
-  secret: string,
-  userId: string,
-  email: string,
-): Promise<string> {
+export async function signToken(secret: string, userId: string, email: string): Promise<string> {
   const key = await jwtSecretKey(secret);
   return new SignJWT({ email })
     .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
@@ -40,7 +36,10 @@ export interface AuthPayload {
  * Verify a Bearer JWT from the Authorization header.
  * Throws if the token is missing, invalid, or expired.
  */
-export async function verifyToken(secret: string, authorizationHeader: string | null): Promise<AuthPayload> {
+export async function verifyToken(
+  secret: string,
+  authorizationHeader: string | null,
+): Promise<AuthPayload> {
   const h = authorizationHeader ?? '';
   const m = h.match(/^Bearer\s+(.+)$/i);
   if (!m || !m[1]) throw new Error('unauthorized');

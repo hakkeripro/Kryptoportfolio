@@ -236,7 +236,11 @@ export default function OnboardingPage() {
               Login
             </button>
           </div>
-          {authError && <div data-testid="auth-error" className="text-sm text-rose-300">{authError}</div>}
+          {authError && (
+            <div data-testid="auth-error" className="text-sm text-rose-300">
+              {authError}
+            </div>
+          )}
         </div>
 
         <div className="pt-2">

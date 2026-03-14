@@ -25,8 +25,7 @@ export function usePortfolioData() {
   return useDbQuery<PortfolioData>(
     async (db) => {
       await ensureWebDbOpen();
-      const settings =
-        (await db.settings.get('settings_1')) ?? (await ensureDefaultSettings());
+      const settings = (await db.settings.get('settings_1')) ?? (await ensureDefaultSettings());
       const baseCurrency = String(settings.baseCurrency ?? 'EUR').toUpperCase();
       const accounts = await db.accounts.toArray();
       const assets = await db.assets.toArray();

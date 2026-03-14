@@ -122,10 +122,7 @@ export function testSearchCoins(query: string): { coins: CoinSearchResult[] } {
   return { coins };
 }
 
-export function testSimplePrices(
-  ids: string[],
-  vsCurrency: string,
-): SimplePricesResult {
+export function testSimplePrices(ids: string[], vsCurrency: string): SimplePricesResult {
   const base: Record<string, number> = {
     bitcoin: 40000,
     ethereum: 2000,

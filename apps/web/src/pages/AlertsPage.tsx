@@ -598,7 +598,9 @@ export default function AlertsPage() {
                 disabled={loading != null}
                 data-testid="btn-enable-delivery"
               >
-                {loading === 'enableDelivery' ? 'Enabling…' : 'Enable delivery (keep existing rules)'}
+                {loading === 'enableDelivery'
+                  ? 'Enabling…'
+                  : 'Enable delivery (keep existing rules)'}
               </button>
 
               <button

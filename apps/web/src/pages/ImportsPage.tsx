@@ -433,9 +433,7 @@ export default function ImportsPage() {
                   />
                 </label>
                 <label className="block">
-                  <div className="text-xs text-slate-400">
-                    Private key (PEM or JSON key file)
-                  </div>
+                  <div className="text-xs text-slate-400">Private key (PEM or JSON key file)</div>
                   <textarea
                     className="mt-1 h-28 w-full rounded-lg border px-3 py-2 font-mono text-xs"
                     value={privateKeyPem}

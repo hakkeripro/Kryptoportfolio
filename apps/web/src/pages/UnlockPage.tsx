@@ -11,7 +11,8 @@ function errToMsg(e: unknown): string {
   const msg = e instanceof Error ? e.message : String(e);
   if (msg.includes('Decryption') || msg.includes('decrypt')) return 'Wrong passphrase. Try again.';
   if (msg.includes('passkey_cancelled')) return 'Passkey authentication was cancelled.';
-  if (msg.includes('hmac_secret_not_supported')) return 'Passkeys are not supported on this device.';
+  if (msg.includes('hmac_secret_not_supported'))
+    return 'Passkeys are not supported on this device.';
   return msg;
 }
 

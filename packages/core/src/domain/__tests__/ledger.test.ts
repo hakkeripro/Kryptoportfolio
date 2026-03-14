@@ -38,10 +38,7 @@ describe('normalizeActiveLedger', () => {
   });
 
   it('excludes isDeleted events (tombstones)', () => {
-    const events = [
-      ev({ id: 'e_keep' }),
-      ev({ id: 'e_deleted', isDeleted: true }),
-    ];
+    const events = [ev({ id: 'e_keep' }), ev({ id: 'e_deleted', isDeleted: true })];
     const active = normalizeActiveLedger(events);
     expect(active).toHaveLength(1);
     expect(active[0].id).toBe('e_keep');
@@ -93,9 +90,7 @@ describe('normalizeActiveLedger', () => {
   });
 
   it('replacement of non-existent event still includes replacement', () => {
-    const events = [
-      ev({ id: 'e_orphan_repl', replacesEventId: 'e_nonexistent' }),
-    ];
+    const events = [ev({ id: 'e_orphan_repl', replacesEventId: 'e_nonexistent' })];
     const active = normalizeActiveLedger(events);
     expect(active).toHaveLength(1);
     expect(active[0].id).toBe('e_orphan_repl');
@@ -104,10 +99,7 @@ describe('normalizeActiveLedger', () => {
 
 describe('buildLedgerView', () => {
   it('returns replacedById mapping', () => {
-    const events = [
-      ev({ id: 'e_orig' }),
-      ev({ id: 'e_repl', replacesEventId: 'e_orig' }),
-    ];
+    const events = [ev({ id: 'e_orig' }), ev({ id: 'e_repl', replacesEventId: 'e_orig' })];
     const view = buildLedgerView(events);
     expect(view.replacedById['e_orig']).toBe('e_repl');
     expect(view.allEvents).toHaveLength(2);
@@ -149,14 +141,14 @@ describe('assertFeeInvariants', () => {
   });
 
   it('throws when token fee has no feeAmount', () => {
-    expect(() =>
-      assertFeeInvariants(ev({ feeAssetId: 'asset_btc', feeValueBase: '10' })),
-    ).toThrow('ledger_fee_missing_amount');
+    expect(() => assertFeeInvariants(ev({ feeAssetId: 'asset_btc', feeValueBase: '10' }))).toThrow(
+      'ledger_fee_missing_amount',
+    );
   });
 
   it('throws when token fee has no value base', () => {
-    expect(() =>
-      assertFeeInvariants(ev({ feeAssetId: 'asset_btc', feeAmount: '0.001' })),
-    ).toThrow('ledger_fee_missing_value_base');
+    expect(() => assertFeeInvariants(ev({ feeAssetId: 'asset_btc', feeAmount: '0.001' }))).toThrow(
+      'ledger_fee_missing_value_base',
+    );
   });
 });

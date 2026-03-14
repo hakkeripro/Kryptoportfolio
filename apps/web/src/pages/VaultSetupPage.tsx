@@ -127,9 +127,7 @@ export default function VaultSetupPage() {
                 className="w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-sm"
                 placeholder="Confirm passphrase"
               />
-              {mismatch && (
-                <p className="text-xs text-rose-400 mt-1">Passphrases do not match</p>
-              )}
+              {mismatch && <p className="text-xs text-rose-400 mt-1">Passphrases do not match</p>}
             </div>
 
             <label className="flex items-center gap-2 text-sm text-slate-300">

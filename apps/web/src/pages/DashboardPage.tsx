@@ -127,8 +127,16 @@ export default function DashboardPage() {
       const lastPriceAttemptISO = await getMeta('prices:lastAttemptISO');
       const lastPriceRefreshISO = await getMeta('prices:lastRefreshISO');
       setStatus((prev) => {
-        if (prev.lastPriceAttemptISO === lastPriceAttemptISO && prev.lastPriceRefreshISO === lastPriceRefreshISO) return prev;
-        return { ...prev, lastPriceAttemptISO: lastPriceAttemptISO || null, lastPriceRefreshISO: lastPriceRefreshISO || null };
+        if (
+          prev.lastPriceAttemptISO === lastPriceAttemptISO &&
+          prev.lastPriceRefreshISO === lastPriceRefreshISO
+        )
+          return prev;
+        return {
+          ...prev,
+          lastPriceAttemptISO: lastPriceAttemptISO || null,
+          lastPriceRefreshISO: lastPriceRefreshISO || null,
+        };
       });
     };
     const id = setInterval(() => void poll(), 15_000);
@@ -140,9 +148,13 @@ export default function DashboardPage() {
     const db = getWebDb();
     const s = (await db.settings.get('settings_1')) ?? (await ensureDefaultSettings());
     const interval = next
-      ? (s.autoRefreshIntervalSec || 300) as typeof s.autoRefreshIntervalSec
-      : 0 as const;
-    await db.settings.put({ ...s, updatedAtISO: new Date().toISOString(), autoRefreshIntervalSec: interval });
+      ? ((s.autoRefreshIntervalSec || 300) as typeof s.autoRefreshIntervalSec)
+      : (0 as const);
+    await db.settings.put({
+      ...s,
+      updatedAtISO: new Date().toISOString(),
+      autoRefreshIntervalSec: interval,
+    });
   }
 
   async function refreshNow(opts?: { silent?: boolean }) {

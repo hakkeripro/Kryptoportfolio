@@ -1,8 +1,22 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { z } from 'zod';
-import { ensureWebDbOpen, getWebDb, createSyncEnvelope, openSyncEnvelope, pullEnvelopes, uploadEnvelope } from '@kp/platform-web';
-import { uuid, Asset as AssetSchema, Account as AccountSchema, Settings as SettingsSchema, LedgerEvent as LedgerEventSchema, AlertSchema } from '@kp/core';
+import {
+  ensureWebDbOpen,
+  getWebDb,
+  createSyncEnvelope,
+  openSyncEnvelope,
+  pullEnvelopes,
+  uploadEnvelope,
+} from '@kp/platform-web';
+import {
+  uuid,
+  Asset as AssetSchema,
+  Account as AccountSchema,
+  Settings as SettingsSchema,
+  LedgerEvent as LedgerEventSchema,
+  AlertSchema,
+} from '@kp/core';
 import { rebuildDerivedCaches } from '../derived/rebuildDerived';
 import { useAuthStore } from './useAuthStore';
 import { useVaultStore } from './useVaultStore';
@@ -63,7 +77,10 @@ export const useSyncStore = create<SyncState>()(
 
         const afterCursor0 = get().lastSyncCursor;
         const env = await createSyncEnvelope({
-          passphrase, deviceId: get().deviceId, id: `env_${uuid()}`, payload,
+          passphrase,
+          deviceId: get().deviceId,
+          id: `env_${uuid()}`,
+          payload,
         });
         const up = await uploadEnvelope(apiBase, token, env);
         const pulled = await pullEnvelopes(apiBase, token, afterCursor0);

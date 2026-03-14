@@ -47,7 +47,14 @@ export default function PortfolioSettingsCard({ settings, loading, error, busy, 
       (settings.taxProfile ?? 'GENERIC') !== taxProfile ||
       (settings.autoRefreshIntervalSec ?? 300) !== autoRefreshIntervalSec
     );
-  }, [settings, baseCurrency, lotMethodDefault, rewardsCostBasisMode, taxProfile, autoRefreshIntervalSec]);
+  }, [
+    settings,
+    baseCurrency,
+    lotMethodDefault,
+    rewardsCostBasisMode,
+    taxProfile,
+    autoRefreshIntervalSec,
+  ]);
 
   const save = async () => {
     setSaveMsg('');

@@ -52,10 +52,7 @@ export default function TokenDetailDrawer({
     async (db) => {
       if (!assetId) return null;
       await ensureWebDbOpen();
-      const prices = await db.pricePoints
-        .where('assetId')
-        .equals(assetId)
-        .sortBy('timestampISO');
+      const prices = await db.pricePoints.where('assetId').equals(assetId).sortBy('timestampISO');
       return { prices };
     },
     [assetId],
@@ -72,10 +69,7 @@ export default function TokenDetailDrawer({
 
   const lots: Lot[] = useMemo(() => {
     if (!assetId || !events.length) return [];
-    const replay = replayLedgerToLotsAndDisposals(
-      events,
-      settings ?? ({} as Settings),
-    );
+    const replay = replayLedgerToLotsAndDisposals(events, settings ?? ({} as Settings));
     return replay.lotsByAssetId[assetId] ?? [];
   }, [events, settings, assetId]);
 
@@ -92,11 +86,7 @@ export default function TokenDetailDrawer({
   }, [events, assetId]);
 
   return (
-    <div
-      data-testid="drawer-tokendetail"
-      className="fixed inset-0 z-20"
-      aria-hidden="false"
-    >
+    <div data-testid="drawer-tokendetail" className="fixed inset-0 z-20" aria-hidden="false">
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
       <div className="absolute right-0 top-0 h-full w-full max-w-2xl bg-slate-950 border-l border-slate-800 p-4 overflow-y-auto">
         <div className="flex items-start justify-between gap-3">
@@ -121,9 +111,7 @@ export default function TokenDetailDrawer({
             </div>
             <div className="rounded-lg bg-slate-900/40 border border-slate-800 p-3">
               <div className="text-xs text-slate-400">Value</div>
-              <div className="text-sm font-mono">
-                {fmtMoney(position.valueBase, baseCurrency)}
-              </div>
+              <div className="text-sm font-mono">{fmtMoney(position.valueBase, baseCurrency)}</div>
             </div>
             <div className="rounded-lg bg-slate-900/40 border border-slate-800 p-3">
               <div className="text-xs text-slate-400">Unrealized</div>
@@ -227,8 +215,8 @@ export default function TokenDetailDrawer({
         </div>
 
         <div className="mt-4 text-xs text-slate-500">
-          Account filter is currently informational (snapshots are aggregated). Detailed
-          per-account holdings will be added later.
+          Account filter is currently informational (snapshots are aggregated). Detailed per-account
+          holdings will be added later.
         </div>
       </div>
     </div>

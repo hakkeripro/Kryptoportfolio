@@ -87,9 +87,7 @@ export default function SignupPage() {
               onChange={(e) => setConfirm(e.target.value)}
               className="w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-sm"
             />
-            {pwMismatch && (
-              <p className="text-xs text-rose-400 mt-1">Passwords do not match</p>
-            )}
+            {pwMismatch && <p className="text-xs text-rose-400 mt-1">Passwords do not match</p>}
           </div>
 
           <button
