@@ -44,8 +44,7 @@ function randomBytes(n: number): Uint8Array {
 
 export function isPasskeySupported(): boolean {
   return (
-    typeof window !== 'undefined' &&
-    typeof (window as any).PublicKeyCredential !== 'undefined'
+    typeof window !== 'undefined' && typeof (window as any).PublicKeyCredential !== 'undefined'
   );
 }
 
@@ -76,9 +75,7 @@ export function listPasskeyWraps(): Array<{
 }> {
   const stored = getStoredPasskeyWrap();
   if (!stored) return [];
-  return [
-    { credIdBase64: stored.credIdBase64, createdAtISO: stored.createdAtISO },
-  ];
+  return [{ credIdBase64: stored.credIdBase64, createdAtISO: stored.createdAtISO }];
 }
 
 /** Remove a specific passkey wrap by credential ID. */
@@ -93,10 +90,7 @@ export function removePasskeyWrap(credIdBase64: string): boolean {
 // Secret derivation via PRF or hmac-secret
 // ---------------------------------------------------------------------------
 
-async function deriveSecretPrf(
-  credId: Uint8Array,
-  salt: Uint8Array,
-): Promise<Uint8Array> {
+async function deriveSecretPrf(credId: Uint8Array, salt: Uint8Array): Promise<Uint8Array> {
   const assertion = (await navigator.credentials.get({
     publicKey: {
       challenge: randomBytes(32),
@@ -114,10 +108,7 @@ async function deriveSecretPrf(
   return new Uint8Array(result);
 }
 
-async function deriveSecretHmac(
-  credId: Uint8Array,
-  salt: Uint8Array,
-): Promise<Uint8Array> {
+async function deriveSecretHmac(credId: Uint8Array, salt: Uint8Array): Promise<Uint8Array> {
   const assertion = (await navigator.credentials.get({
     publicKey: {
       challenge: randomBytes(32),
@@ -138,10 +129,7 @@ async function deriveSecretHmac(
 async function importAesGcmKey(secret32: Uint8Array): Promise<CryptoKey> {
   if (secret32.byteLength < 32) throw new Error('passkey_secret_too_short');
   const raw = secret32.slice(0, 32);
-  return crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, false, [
-    'encrypt',
-    'decrypt',
-  ]);
+  return crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
 }
 
 async function encryptString(
@@ -175,9 +163,7 @@ async function decryptString(
 // Registration: detect PRF support, fall back to hmac-secret
 // ---------------------------------------------------------------------------
 
-export async function createOrReplacePasskeyWrap(
-  passphrase: string,
-): Promise<void> {
+export async function createOrReplacePasskeyWrap(passphrase: string): Promise<void> {
   if (!isPasskeySupported()) throw new Error('passkey_not_supported');
 
   // Try creating with PRF extension first
