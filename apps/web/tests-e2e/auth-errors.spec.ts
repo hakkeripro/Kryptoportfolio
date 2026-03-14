@@ -15,8 +15,17 @@ test.describe('auth error paths', () => {
     await page.getByTestId('btn-signup').click();
     await waitForToken(page);
 
-    // Reset browser and try same email
-    await resetApp(page, request);
+    // Clear only client state (keep API DB so the email stays registered)
+    await page.evaluate(async () => {
+      localStorage.clear();
+      sessionStorage.clear();
+      await new Promise<void>((resolve) => {
+        const req = indexedDB.deleteDatabase('kp_web_v3');
+        req.onsuccess = () => resolve();
+        req.onerror = () => resolve();
+        req.onblocked = () => resolve();
+      });
+    });
 
     await page.goto('/auth/signup');
     await page.getByTestId('form-email').fill(email);

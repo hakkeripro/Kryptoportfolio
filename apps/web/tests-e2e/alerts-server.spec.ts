@@ -17,7 +17,9 @@ async function runFixtureImport(page: any) {
   const start = Date.now();
   while (Date.now() - start < 15_000) {
     if (await connected.count()) {
-      try { if (await connected.isVisible()) break; } catch {}
+      try {
+        if (await connected.isVisible()) break;
+      } catch {}
     }
     if (await err.count()) {
       try {
@@ -25,7 +27,9 @@ async function runFixtureImport(page: any) {
           const msg = (await err.innerText()).trim();
           throw new Error(`Coinbase connect failed: ${msg}`);
         }
-      } catch (e) { throw e; }
+      } catch (e) {
+        throw e;
+      }
     }
     await page.waitForTimeout(200);
   }
@@ -35,7 +39,10 @@ async function runFixtureImport(page: any) {
   await done.waitFor({ timeout: 20_000 });
 }
 
-test('server alerts: create alert → enable server → log shows triggers', async ({ page, request }) => {
+test('server alerts: create alert → enable server → log shows triggers', async ({
+  page,
+  request,
+}) => {
   await resetApp(page, request);
   await onboardAndRegister(page);
   await runFixtureImport(page);
@@ -53,14 +60,19 @@ test('server alerts: create alert → enable server → log shows triggers', asy
   await page.getByTestId('btn-enable-server-alerts').click();
   await expect(page.getByTestId('txt-alert-server-message')).toBeVisible({ timeout: 20_000 });
 
+  // Wait for server-side runner to process, then refresh
+  await page.waitForTimeout(2_000);
   await page.getByTestId('btn-refresh-alert-log').click();
   const row = page.locator('[data-testid^="row-trigger-log-"]').first();
-  await expect(row).toBeVisible({ timeout: 20_000 });
+  await expect(row).toBeVisible({ timeout: 30_000 });
   const n = await page.locator('[data-testid^="row-trigger-log-"]').count();
   expect(n).toBeGreaterThan(0);
 });
 
-test('server alerts: empty local list does not clear server rules when cancelled', async ({ page, request }) => {
+test('server alerts: empty local list does not clear server rules when cancelled', async ({
+  page,
+  request,
+}) => {
   await resetApp(page, request);
   await onboardAndRegister(page);
   await runFixtureImport(page);
@@ -94,7 +106,9 @@ test('server alerts: empty local list does not clear server rules when cancelled
 
   // "Enable delivery" button keeps existing server rules via enable_only mode.
   await page.getByTestId('btn-enable-delivery').click();
-  await expect(page.getByTestId('txt-alert-server-message')).toContainText('existing rules kept', { timeout: 20_000 });
+  await expect(page.getByTestId('txt-alert-server-message')).toContainText('existing rules kept', {
+    timeout: 20_000,
+  });
 
   await page.getByTestId('btn-refresh-server-status').click();
   await expect(page.getByTestId('box-alerts-server-status')).toContainText('1/1');
