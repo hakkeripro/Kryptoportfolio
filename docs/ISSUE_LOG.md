@@ -10,25 +10,29 @@ Prioriteetit:
 
 ## P0
 
-### KP-UI-001: Vault passphrase ei pysy muistissa edes yhden istunnon ajan
-**Oire:** onboardingissa luodun vaultin jälkeen refresh tai reitti-/reload voi vaatia passphrasea uudelleen.  
-**Syy (kooditaso):** onboarding luo vaultin, mutta passphrasea ei talleteta `sessionStorage`en avaimella `KP_VAULT_PASSPHRASE_SESSION`.  
-**Vaikutus:** onboarding koetaan epäloogiseksi ja turhauttavaksi.  
-**Korjaus:** tallenna passphrase sessioniin onnistuneen setupin jälkeen (tai Passkey unlock -polku), ja lisää “Unlock your vault” -selitys.
+### ~~KP-UI-001: Vault passphrase ei pysy muistissa edes yhden istunnon ajan~~ ✅ KORJATTU
+**Oire:** onboardingissa luodun vaultin jälkeen refresh tai reitti-/reload voi vaatia passphrasea uudelleen.
+**Syy (kooditaso):** onboarding luo vaultin, mutta passphrasea ei talleteta `sessionStorage`en avaimella `KP_VAULT_PASSPHRASE_SESSION`.
+**Vaikutus:** onboarding koetaan epäloogiseksi ja turhauttavaksi.
+**Korjaus:** `useVaultStore.setupVault()` tallentaa passphrasen sessionStorageen (`rememberSessionPassphrase`), ja `loadVaultStatus()` palauttaa sen reloadissa. E2e-testi: `smoke.spec.ts` “KP-UI-001”.
+**Korjattu:** 2026-03-14
 
-### KP-UI-002: Price auto-refresh ei käynnisty (asetukset haetaan väärällä ID:llä)
-**Syy:** `PriceAutoRefresh.tsx` hakee `db.settings.get('settings')`, mutta käytössä on `settings_1`.  
-**Vaikutus:** hinnat eivät päivity automaattisesti → “hinnat väärin / stale”.  
-**Korjaus:** korjaa avain + lisää näkyvä “Last price update” UI:hin.
+### ~~KP-UI-002: Price auto-refresh ei käynnisty (asetukset haetaan väärällä ID:llä)~~ ✅ KORJATTU
+**Syy:** `PriceAutoRefresh.tsx` haki `db.settings.get('settings')`, mutta käytössä oli `settings_1`.
+**Vaikutus:** hinnat eivät päivittyneet automaattisesti → “hinnat väärin / stale”.
+**Korjaus:** Settings-avain korjattu kaikkialle (`settings_1`), `ensureDefaultSettings()` migroi vanhan avaimen. “Last price update” UI DashboardPage:lla. DashboardPage:n duplikaatti auto-refresh timer poistettu (PriceAutoRefresh hoitaa globaalin).
+**Korjattu:** 2026-03-14
 
-### KP-ALERT-001: “Enable server alerts” voi tyhjentää server-alertit ja/tai ei persistoidu oikein
-**Syy:** settings-sivu voi kutsua enable-endpointia tyhjällä alert-listalla → server tekee `DELETE` + insert (0 kpl) = kaikki pois.  
-**Vaikutus:** käyttäjä kokee että hälytykset “ei toimi” tai “asetus ei pysy”.  
-**Korjaus:** erottele “enable” vs “replace rules”; älä ikinä lähetä tyhjää listaa ilman explicit “reset”; persistoi tila.
+### ~~KP-ALERT-001: “Enable server alerts” voi tyhjentää server-alertit ja/tai ei persistoidu oikein~~ ✅ KORJATTU
+**Syy:** settings-sivu voi kutsua enable-endpointia tyhjällä alert-listalla → server tekee `DELETE` + insert (0 kpl) = kaikki pois.
+**Vaikutus:** käyttäjä kokee että hälytykset “ei toimi” tai “asetus ei pysy”.
+**Korjaus:** AlertsPage: eroteltu kaksi toimintoa: “Sync rules to server” (replace-mode, vaatii confirm jos 0 alerttia) ja “Enable delivery” (enable_only-mode, ei koske olemassa oleviin sääntöihin). E2E-testi päivitetty.
+**Korjattu:** 2026-03-14
 
-### KP-IMPORT-001: Coinbase JSON key -flow ristiriidassa UI-validoinnin kanssa
-**Oire:** docs/tausta tukee JSON-keyfilea, mutta UI vaatii `keyName`/kenttiä.  
-**Korjaus:** hyväksy JSON paste UI:ssa ja extractaa `keyName/privateKey` automaattisesti; anna selkeä copy.
+### ~~KP-IMPORT-001: Coinbase JSON key -flow ristiriidassa UI-validoinnin kanssa~~ ✅ KORJATTU
+**Oire:** docs/tausta tukee JSON-keyfilea, mutta UI vaatii `keyName`/kenttiä.
+**Korjaus:** ImportsPage: private key -kenttä tunnistaa JSON key file -sisällön automaattisesti. Paste-JSON extractaa `name`/`keyName` → keyName-kenttään ja `privateKey`/`private_key`/`key_secret`/`api_secret` → PEM-kenttään. Escaped newlines normalisoidaan. Placeholder päivitetty ohjeistamaan JSON-paste.
+**Korjattu:** 2026-03-14
 
 ## P1
 

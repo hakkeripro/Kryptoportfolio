@@ -12,7 +12,10 @@ export type RefreshLivePricesResult = {
   timestampISO: string;
 };
 
-export async function refreshLivePrices(apiBase: string, baseCurrency: string): Promise<RefreshLivePricesResult> {
+export async function refreshLivePrices(
+  apiBase: string,
+  baseCurrency: string,
+): Promise<RefreshLivePricesResult> {
   await ensureWebDbOpen();
   const db = getWebDb();
 
@@ -39,13 +42,14 @@ export async function refreshLivePrices(apiBase: string, baseCurrency: string): 
       if (typeof p !== 'number') continue;
       points.push({
         id: `pp_live_cg_${it.assetId}_${timestampISO}`,
+        schemaVersion: 1,
         assetId: it.assetId,
         provider: 'coingecko',
         source: 'live',
         timestampISO,
         priceBase: String(p),
         createdAtISO: timestampISO,
-        updatedAtISO: timestampISO
+        updatedAtISO: timestampISO,
       });
     }
 

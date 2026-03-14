@@ -15,9 +15,13 @@ type DbQueryState<T> = {
 export function useDbQuery<T>(
   query: (db: WebDb) => Promise<T>,
   deps: unknown[],
-  initial: T
+  initial: T,
 ): DbQueryState<T> {
-  const [state, setState] = useState<DbQueryState<T>>({ data: initial, loading: true, error: null });
+  const [state, setState] = useState<DbQueryState<T>>({
+    data: initial,
+    loading: true,
+    error: null,
+  });
   const reqId = useRef(0);
 
   const key = useMemo(() => JSON.stringify(deps), deps); // stable-ish
@@ -46,7 +50,7 @@ export function useDbQuery<T>(
             if (cancelled) return;
             const msg = e instanceof Error ? e.message : String(e);
             setState((s) => ({ ...s, loading: false, error: msg }));
-          }
+          },
         });
       } catch (e) {
         if (cancelled) return;

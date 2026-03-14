@@ -1,12 +1,22 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Decimal from 'decimal.js';
-import { Pie, PieChart, ResponsiveContainer, Tooltip, Cell, Line, LineChart, XAxis, YAxis } from 'recharts';
+import {
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  Cell,
+  Line,
+  LineChart,
+  XAxis,
+  YAxis,
+} from 'recharts';
 import { ensureWebDbOpen, getMeta, getWebDb } from '@kp/platform-web';
 import { rebuildDerivedCaches } from '../derived/rebuildDerived';
 import { refreshLivePrices } from '../derived/refreshLivePrices';
 import { ensureDefaultSettings } from '../derived/ensureDefaultSettings';
-import { useDbQuery } from '../hooks/useDbQuery';
-import { useAppStore } from '../store/useAppStore';
+import { useDashboardData } from '../hooks/useDashboardData';
+import { useAuthStore } from '../store/useAuthStore';
 
 function d(s: string | undefined | null): Decimal {
   if (!s) return new Decimal(0);
@@ -18,8 +28,7 @@ function d(s: string | undefined | null): Decimal {
 }
 
 function fmtMoney(val: string | undefined | null, currency: string): string {
-  const x = d(val);
-  const rounded = x.toDecimalPlaces(2);
+  const rounded = d(val).toDecimalPlaces(2);
   return `${rounded.toFixed()} ${currency}`;
 }
 
@@ -33,33 +42,24 @@ const PALETTE = [
   '#22d3ee',
   '#c084fc',
   '#4ade80',
-  '#f97316'
+  '#f97316',
 ];
 
 function colorForKey(key: string): string {
   let h = 0;
   for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) >>> 0;
-  return PALETTE[h % PALETTE.length];
+  return PALETTE[h % PALETTE.length]!;
 }
 
 export default function DashboardPage() {
-  const apiBase = useAppStore((s) => s.apiBase);
-  const dbState = useDbQuery(
-    async (db) => {
-      await ensureWebDbOpen();
-      const settings = ((await db.settings.get('settings_1')) as any) ?? (await ensureDefaultSettings());
-      const latest = await db.portfolioSnapshots.orderBy('dayISO').last();
-      const snaps = await db.portfolioSnapshots.orderBy('dayISO').reverse().limit(120).toArray(); // ~4 months
-      const assets = await db.assets.toArray();
-      return { settings, latest, snaps: snaps.reverse(), assets };
-    },
-    [],
-    { settings: null as any, latest: null as any, snaps: [] as any[], assets: [] as any[] }
-  );
+  const apiBase = useAuthStore((s) => s.apiBase);
+  const dbState = useDashboardData();
 
-  const [status, setStatus] = useState<{ lastRebuildISO: string | null; lastPriceAttemptISO: string | null; lastPriceRefreshISO: string | null }>(
-    { lastRebuildISO: null, lastPriceAttemptISO: null, lastPriceRefreshISO: null }
-  );
+  const [status, setStatus] = useState<{
+    lastRebuildISO: string | null;
+    lastPriceAttemptISO: string | null;
+    lastPriceRefreshISO: string | null;
+  }>({ lastRebuildISO: null, lastPriceAttemptISO: null, lastPriceRefreshISO: null });
   const [refreshing, setRefreshing] = useState(false);
   const refreshLock = useRef(false);
 
@@ -71,7 +71,7 @@ export default function DashboardPage() {
       setStatus({
         lastRebuildISO: lastRebuildISO || null,
         lastPriceAttemptISO: lastPriceAttemptISO || null,
-        lastPriceRefreshISO: lastPriceRefreshISO || null
+        lastPriceRefreshISO: lastPriceRefreshISO || null,
       });
     })();
   }, [dbState.data.latest?.dayISO]);
@@ -83,19 +83,19 @@ export default function DashboardPage() {
     return {
       totalValueBase: latest?.totalValueBase ?? '0',
       realizedPnlBaseToDate: latest?.realizedPnlBaseToDate ?? '0',
-      unrealizedPnlBase: latest?.unrealizedPnlBase ?? '0'
+      unrealizedPnlBase: latest?.unrealizedPnlBase ?? '0',
     };
   }, [dbState.data.latest]);
 
   const allocation = useMemo(() => {
     const latest = dbState.data.latest;
-    if (!latest?.positions?.length) return [] as { name: string; value: number; assetId: string }[];
-    const nameById = new Map(dbState.data.assets.map((a: any) => [a.id, a.symbol]));
+    if (!latest?.positions?.length) return [];
+    const nameById = new Map(dbState.data.assets.map((a) => [a.id, a.symbol]));
     return latest.positions
-      .map((p: any) => ({
+      .map((p) => ({
         assetId: p.assetId,
         name: nameById.get(p.assetId) ?? p.assetId,
-        value: Number(d(p.valueBase).toNumber())
+        value: Number(d(p.valueBase).toNumber()),
       }))
       .filter((x) => Number.isFinite(x.value) && x.value > 0)
       .sort((a, b) => b.value - a.value)
@@ -104,48 +104,45 @@ export default function DashboardPage() {
 
   const topPositions = useMemo(() => {
     const latest = dbState.data.latest;
-    if (!latest?.positions?.length) return [] as any[];
-    const byId = new Map(dbState.data.assets.map((a: any) => [a.id, a]));
+    if (!latest?.positions?.length) return [];
+    const byId = new Map(dbState.data.assets.map((a) => [a.id, a]));
     return [...latest.positions]
-      .sort((a: any, b: any) => d(b.valueBase).cmp(d(a.valueBase)))
+      .sort((a, b) => d(b.valueBase).cmp(d(a.valueBase)))
       .slice(0, 8)
-      .map((p: any) => ({ ...p, symbol: byId.get(p.assetId)?.symbol ?? p.assetId }));
+      .map((p) => ({ ...p, symbol: byId.get(p.assetId)?.symbol ?? p.assetId }));
   }, [dbState.data.latest, dbState.data.assets]);
 
   const valueSeries = useMemo(() => {
-    return dbState.data.snaps.map((s: any) => ({ day: s.dayISO, value: Number(d(s.totalValueBase).toNumber()) }));
+    return dbState.data.snaps.map((s) => ({
+      day: s.dayISO,
+      value: Number(d(s.totalValueBase).toNumber()),
+    }));
   }, [dbState.data.snaps]);
 
   const autoRefreshEnabled = (dbState.data.settings?.autoRefreshIntervalSec ?? 0) > 0;
-  const [autoRefresh, setAutoRefresh] = useState(autoRefreshEnabled);
 
+  // Poll meta values so "Last price update" stays current after PriceAutoRefresh ticks.
   useEffect(() => {
-    setAutoRefresh(autoRefreshEnabled);
-  }, [autoRefreshEnabled]);
-
-  useEffect(() => {
-    let timer: number | null = null;
-    if (!autoRefresh) return;
-
-    const intervalSec = dbState.data.settings?.autoRefreshIntervalSec ?? 300;
-    const ms = Math.max(60_000, intervalSec * 1000);
-    timer = window.setInterval(() => void refreshNow({ silent: true }), ms);
-    return () => {
-      if (timer) window.clearInterval(timer);
+    const poll = async () => {
+      const lastPriceAttemptISO = await getMeta('prices:lastAttemptISO');
+      const lastPriceRefreshISO = await getMeta('prices:lastRefreshISO');
+      setStatus((prev) => {
+        if (prev.lastPriceAttemptISO === lastPriceAttemptISO && prev.lastPriceRefreshISO === lastPriceRefreshISO) return prev;
+        return { ...prev, lastPriceAttemptISO: lastPriceAttemptISO || null, lastPriceRefreshISO: lastPriceRefreshISO || null };
+      });
     };
-  }, [autoRefresh, dbState.data.settings?.autoRefreshIntervalSec]);
+    const id = setInterval(() => void poll(), 15_000);
+    return () => clearInterval(id);
+  }, []);
 
   async function toggleAutoRefresh(next: boolean) {
-    setAutoRefresh(next);
     await ensureWebDbOpen();
     const db = getWebDb();
-    const s = ((await db.settings.get('settings_1')) as any) ?? (await ensureDefaultSettings());
-    const updated = {
-      ...s,
-      updatedAtISO: new Date().toISOString(),
-      autoRefreshIntervalSec: next ? (s.autoRefreshIntervalSec && s.autoRefreshIntervalSec !== 0 ? s.autoRefreshIntervalSec : 300) : 0
-    };
-    await db.settings.put(updated as any);
+    const s = (await db.settings.get('settings_1')) ?? (await ensureDefaultSettings());
+    const interval = next
+      ? (s.autoRefreshIntervalSec || 300) as typeof s.autoRefreshIntervalSec
+      : 0 as const;
+    await db.settings.put({ ...s, updatedAtISO: new Date().toISOString(), autoRefreshIntervalSec: interval });
   }
 
   async function refreshNow(opts?: { silent?: boolean }) {
@@ -153,11 +150,10 @@ export default function DashboardPage() {
     refreshLock.current = true;
     if (!opts?.silent) setRefreshing(true);
     try {
-      // Best-effort live prices (requires mapped CoinGecko IDs).
       try {
         await refreshLivePrices(apiBase, baseCurrency);
       } catch {
-        // Ignore live price fetch failures; snapshot rebuild still works from imported valuations.
+        // Ignore live price fetch failures
       }
       await rebuildDerivedCaches({ daysBack: 365 });
       const lastRebuildISO = await getMeta('derived:lastRebuildISO');
@@ -166,7 +162,7 @@ export default function DashboardPage() {
       setStatus({
         lastRebuildISO: lastRebuildISO || new Date().toISOString(),
         lastPriceAttemptISO: lastPriceAttemptISO || null,
-        lastPriceRefreshISO: lastPriceRefreshISO || null
+        lastPriceRefreshISO: lastPriceRefreshISO || null,
       });
     } finally {
       refreshLock.current = false;
@@ -174,7 +170,9 @@ export default function DashboardPage() {
     }
   }
 
-  const statusText = status.lastRebuildISO ? `last rebuild: ${new Date(status.lastRebuildISO).toLocaleString()}` : 'cached';
+  const statusText = status.lastRebuildISO
+    ? `last rebuild: ${new Date(status.lastRebuildISO).toLocaleString()}`
+    : 'cached';
 
   return (
     <div className="space-y-4">
@@ -190,7 +188,11 @@ export default function DashboardPage() {
             {refreshing ? 'Refreshing…' : 'Refresh'}
           </button>
           <label className="flex items-center gap-2 text-sm" data-testid="toggle-auto-refresh">
-            <input type="checkbox" checked={autoRefresh} onChange={(e) => void toggleAutoRefresh(e.target.checked)} />
+            <input
+              type="checkbox"
+              checked={autoRefreshEnabled}
+              onChange={(e) => void toggleAutoRefresh(e.target.checked)}
+            />
             Auto refresh
           </label>
         </div>
@@ -226,24 +228,39 @@ export default function DashboardPage() {
         </div>
         <div className="mt-2 grid gap-1 text-sm text-slate-200">
           <div data-testid="metric-last-price-update">
-            Last price update: {status.lastPriceRefreshISO ? new Date(status.lastPriceRefreshISO).toLocaleString() : '—'}
+            Last price update:{' '}
+            {status.lastPriceRefreshISO
+              ? new Date(status.lastPriceRefreshISO).toLocaleString()
+              : '—'}
           </div>
           <div data-testid="metric-last-price-attempt" className="text-slate-400">
-            Last price attempt: {status.lastPriceAttemptISO ? new Date(status.lastPriceAttemptISO).toLocaleString() : '—'}
+            Last price attempt:{' '}
+            {status.lastPriceAttemptISO
+              ? new Date(status.lastPriceAttemptISO).toLocaleString()
+              : '—'}
           </div>
         </div>
         {dbState.error ? <div className="text-sm text-red-300 mt-2">{dbState.error}</div> : null}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div data-testid="chart-allocation" className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
+        <div
+          data-testid="chart-allocation"
+          className="rounded-xl border border-slate-800 bg-slate-900/40 p-4"
+        >
           <div className="font-medium mb-2">Allocation</div>
           {allocation.length ? (
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Tooltip />
-                  <Pie data={allocation} dataKey="value" nameKey="name" innerRadius={50} outerRadius={90}>
+                  <Pie
+                    data={allocation}
+                    dataKey="value"
+                    nameKey="name"
+                    innerRadius={50}
+                    outerRadius={90}
+                  >
                     {allocation.map((x) => (
                       <Cell key={x.assetId} fill={colorForKey(x.assetId)} />
                     ))}
@@ -252,11 +269,16 @@ export default function DashboardPage() {
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="text-sm text-slate-400">No data yet. Import transactions to build snapshots.</div>
+            <div className="text-sm text-slate-400">
+              No data yet. Import transactions to build snapshots.
+            </div>
           )}
         </div>
 
-        <div data-testid="chart-portfolio-value" className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
+        <div
+          data-testid="chart-portfolio-value"
+          className="rounded-xl border border-slate-800 bg-slate-900/40 p-4"
+        >
           <div className="font-medium mb-2">Portfolio value</div>
           {valueSeries.length ? (
             <div className="h-64">
@@ -275,12 +297,15 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div data-testid="card-portfolio-top" className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
+      <div
+        data-testid="card-portfolio-top"
+        className="rounded-xl border border-slate-800 bg-slate-900/40 p-4"
+      >
         <div className="font-medium mb-2">Top positions</div>
         <div data-testid="list-top-positions">
           {topPositions.length ? (
             <ul className="divide-y divide-slate-800">
-              {topPositions.map((p: any) => (
+              {topPositions.map((p) => (
                 <li key={p.assetId} className="py-2 flex items-center justify-between">
                   <div className="text-sm">{p.symbol}</div>
                   <div className="text-sm font-mono">{fmtMoney(p.valueBase, baseCurrency)}</div>

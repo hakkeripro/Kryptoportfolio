@@ -1,0 +1,90 @@
+import { expect } from '@playwright/test';
+
+export async function waitForToken(page: any) {
+  await page.waitForFunction(
+    () => {
+      const raw = localStorage.getItem('kp_auth_v3');
+      if (!raw) return false;
+      try {
+        const obj = JSON.parse(raw);
+        return !!obj?.state?.token;
+      } catch {
+        return false;
+      }
+    },
+    null,
+    { timeout: 10_000 },
+  );
+}
+
+export async function resetApp(page: any, request: any) {
+  const r = await request.post('http://localhost:8788/__test/reset');
+  if (!r.ok()) {
+    throw new Error(
+      `API test mode not enabled (expected /__test/reset 200): ${r.status()} ${await r.text()}`,
+    );
+  }
+  await page.goto('/welcome');
+  await page.evaluate(async () => {
+    localStorage.clear();
+    sessionStorage.clear();
+    await new Promise<void>((resolve) => {
+      const req = indexedDB.deleteDatabase('kp_web_v3');
+      req.onsuccess = () => resolve();
+      req.onerror = () => resolve();
+      req.onblocked = () => resolve();
+    });
+  });
+}
+
+/**
+ * New auth flow: signup → vault setup → skip passkey → dashboard
+ */
+export async function signupAndSetupVault(page: any) {
+  const email = `e2e_${Date.now()}@example.com`;
+
+  // Signup
+  await page.goto('/auth/signup');
+  await page.getByTestId('form-email').fill(email);
+  await page.getByTestId('form-password').fill('supersecret1');
+  await page.getByTestId('form-password-confirm').fill('supersecret1');
+  await page.getByTestId('btn-signup').click();
+
+  // Wait for redirect to vault setup
+  await expect(page.getByTestId('page-vault-setup')).toBeVisible({ timeout: 10_000 });
+  await waitForToken(page);
+
+  // Vault setup: passphrase
+  await page.getByTestId('form-vault-passphrase').fill('passphrase123');
+  await page.getByTestId('form-vault-passphrase-confirm').fill('passphrase123');
+  await page.getByTestId('form-saved-checkbox').check();
+  await page.getByTestId('btn-create-vault').click();
+
+  // Skip passkey step
+  await page.getByTestId('btn-skip-passkey').click();
+
+  // Done → go to dashboard
+  await page.getByTestId('btn-go-dashboard').click();
+  await expect(page.getByTestId('nav-dashboard')).toBeVisible({ timeout: 10_000 });
+
+  return email;
+}
+
+/**
+ * Setup vault only (offline mode, no registration)
+ */
+export async function setupVaultOffline(page: any) {
+  await page.goto('/vault/setup?offline=1');
+
+  await page.getByTestId('form-vault-passphrase').fill('passphrase123');
+  await page.getByTestId('form-vault-passphrase-confirm').fill('passphrase123');
+  await page.getByTestId('form-saved-checkbox').check();
+  await page.getByTestId('btn-create-vault').click();
+
+  // Skip passkey
+  await page.getByTestId('btn-skip-passkey').click();
+
+  // Done → dashboard
+  await page.getByTestId('btn-go-dashboard').click();
+  await expect(page.getByTestId('nav-dashboard')).toBeVisible({ timeout: 10_000 });
+}

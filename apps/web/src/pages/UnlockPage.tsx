@@ -1,11 +1,18 @@
 import { useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useAppStore } from '../store/useAppStore';
-import { getStoredPasskeyWrap, isPasskeySupported, unwrapPassphraseWithPasskey } from '../vault/passkey';
+import { useVaultStore } from '../store/useVaultStore';
+import {
+  getStoredPasskeyWrap,
+  isPasskeySupported,
+  unwrapPassphraseWithPasskey,
+} from '../vault/passkey';
 
 function errToMsg(e: unknown): string {
-  if (e instanceof Error) return e.message;
-  return String(e);
+  const msg = e instanceof Error ? e.message : String(e);
+  if (msg.includes('Decryption') || msg.includes('decrypt')) return 'Wrong passphrase. Try again.';
+  if (msg.includes('passkey_cancelled')) return 'Passkey authentication was cancelled.';
+  if (msg.includes('hmac_secret_not_supported')) return 'Passkeys are not supported on this device.';
+  return msg;
 }
 
 export default function UnlockPage() {
@@ -16,7 +23,7 @@ export default function UnlockPage() {
     return q ?? '/dashboard';
   }, [location.search]);
 
-  const unlockVault = useAppStore((s) => s.unlockVault);
+  const unlockVault = useVaultStore((s) => s.unlockVault);
   const [passphrase, setPassphrase] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -57,7 +64,8 @@ export default function UnlockPage() {
 
       <div className="text-sm text-slate-300">
         Same <span className="font-semibold">Vault Passphrase</span> works on all devices. A{' '}
-        <span className="font-semibold">Passkey</span> is device-specific; enable it per device for quick unlock.
+        <span className="font-semibold">Passkey</span> is device-specific; enable it per device for
+        quick unlock.
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -79,7 +87,8 @@ export default function UnlockPage() {
             {busy ? 'Unlocking…' : 'Unlock with Passkey'}
           </button>
           <div className="text-xs text-slate-400">
-            Tip: enable a passkey in <span className="font-medium">Settings → Security</span> after unlocking.
+            Tip: enable a passkey in <span className="font-medium">Account → Passkeys</span> after
+            unlocking.
           </div>
         </div>
 
@@ -105,7 +114,10 @@ export default function UnlockPage() {
       </div>
 
       {error ? (
-        <div data-testid="alert-unlock-error" className="rounded-lg border border-rose-800 bg-rose-950/30 p-3 text-sm text-rose-200">
+        <div
+          data-testid="alert-unlock-error"
+          className="rounded-lg border border-rose-800 bg-rose-950/30 p-3 text-sm text-rose-200"
+        >
           {error}
         </div>
       ) : null}

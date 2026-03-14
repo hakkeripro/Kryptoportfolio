@@ -7,8 +7,8 @@ async function apiFetch<T>(base: string, path: string, init?: RequestInit): Prom
     ...init,
     headers: {
       'content-type': 'application/json',
-      ...(init?.headers || {})
-    }
+      ...(init?.headers || {}),
+    },
   });
   const txt = await res.text();
   const json = txt ? JSON.parse(txt) : null;
@@ -28,17 +28,23 @@ export type CoingeckoSearchCoin = {
   large?: string;
 };
 
-export async function coingeckoSearch(apiBase: string, query: string): Promise<CoingeckoSearchCoin[]> {
+export async function coingeckoSearch(
+  apiBase: string,
+  query: string,
+): Promise<CoingeckoSearchCoin[]> {
   const q = encodeURIComponent(query.trim());
   if (!q) return [];
-  const r = await apiFetch<{ coins: CoingeckoSearchCoin[] }>(apiBase, `/v1/catalog/coingecko/search?query=${q}`);
+  const r = await apiFetch<{ coins: CoingeckoSearchCoin[] }>(
+    apiBase,
+    `/v1/catalog/coingecko/search?query=${q}`,
+  );
   return r.coins ?? [];
 }
 
 export async function coingeckoSimplePrice(
   apiBase: string,
   ids: string[],
-  vsCurrency: string
+  vsCurrency: string,
 ): Promise<Record<string, number>> {
   const cleaned = ids.filter(Boolean).slice(0, 250);
   if (!cleaned.length) return {};
@@ -46,7 +52,7 @@ export async function coingeckoSimplePrice(
   const vs = encodeURIComponent(vsCurrency.toLowerCase());
   const r = await apiFetch<{ prices: Record<string, number> }>(
     apiBase,
-    `/v1/prices/coingecko/simple?ids=${idsParam}&vs=${vs}`
+    `/v1/prices/coingecko/simple?ids=${idsParam}&vs=${vs}`,
   );
   return r.prices ?? {};
 }

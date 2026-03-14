@@ -1,6 +1,8 @@
 import { NavLink } from 'react-router-dom';
 import React from 'react';
-import { useAppStore } from '../store/useAppStore';
+import { useVaultStore } from '../store/useVaultStore';
+import { useAuthStore } from '../store/useAuthStore';
+import { useSyncStore } from '../store/useSyncStore';
 
 const NavItem = ({ to, testId, label }: { to: string; testId: string; label: string }) => (
   <NavLink
@@ -15,7 +17,9 @@ const NavItem = ({ to, testId, label }: { to: string; testId: string; label: str
 );
 
 export default function Shell({ children }: { children: React.ReactNode }) {
-  const { passphrase, token, syncNow, lockVault } = useAppStore();
+  const { passphrase, lockVault } = useVaultStore();
+  const token = useAuthStore((s) => s.token);
+  const syncNow = useSyncStore((s) => s.syncNow);
   return (
     <div className="min-h-screen">
       <header className="sticky top-0 z-10 bg-slate-950/90 backdrop-blur border-b border-slate-800">
@@ -53,6 +57,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
             <NavItem to="/tax" testId="nav-tax" label="Tax" />
             <NavItem to="/assets" testId="nav-assets" label="Assets" />
             <NavItem to="/accounts" testId="nav-accounts" label="Accounts" />
+            <NavItem to="/account" testId="nav-account" label="Account" />
             <NavItem to="/settings" testId="nav-settings" label="Settings" />
           </div>
         </div>

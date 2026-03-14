@@ -1,6 +1,10 @@
 import Decimal from 'decimal.js';
 import type { LedgerEvent } from '../domain/ledger.js';
-import { assertFeeInvariants, feeValueBaseOrZero, normalizeActiveLedger } from '../domain/ledger.js';
+import {
+  assertFeeInvariants,
+  feeValueBaseOrZero,
+  normalizeActiveLedger,
+} from '../domain/ledger.js';
 import type { Settings } from '../domain/settings.js';
 import type { Disposal, Lot, Position } from '../domain/portfolio.js';
 
@@ -55,7 +59,7 @@ function pickLots(
   lots: Lot[],
   qtyToDispose: Decimal,
   method: Settings['lotMethodDefault'],
-  warnings: string[]
+  warnings: string[],
 ): LotPick {
   const want = qtyToDispose;
   let remaining = want;
@@ -123,7 +127,7 @@ function computePositions(lotsByAssetId: Record<string, Lot[]>): Position[] {
       assetId,
       amount: toFixed(amount),
       avgCostBase: toFixed(avg),
-      costBasisBase: toFixed(cost)
+      costBasisBase: toFixed(cost),
     });
   }
   positions.sort((a, b) => d(b.costBasisBase).cmp(d(a.costBasisBase)));
@@ -140,12 +144,12 @@ export function createLotEngine(settings: Settings): LotEngine {
   const avgPool: Record<string, { amount: Decimal; cost: Decimal }> = {};
 
   const ensureLots = (assetId: string): Lot[] => {
-    (lotsByAssetId[assetId] ??= []);
+    lotsByAssetId[assetId] ??= [];
     return lotsByAssetId[assetId]!;
   };
 
   const ensurePool = (assetId: string): { amount: Decimal; cost: Decimal } => {
-    (avgPool[assetId] ??= { amount: new Decimal(0), cost: new Decimal(0) });
+    avgPool[assetId] ??= { amount: new Decimal(0), cost: new Decimal(0) };
     return avgPool[assetId]!;
   };
 
@@ -165,7 +169,7 @@ export function createLotEngine(settings: Settings): LotEngine {
         acquiredAtISO: e.timestampISO,
         amountRemaining: toFixed(qty),
         costBasisBaseRemaining: toFixed(cost),
-        originEventId: e.id
+        originEventId: e.id,
       };
       const lots = ensureLots(e.assetId);
       const pool = ensurePool(e.assetId);
@@ -193,7 +197,7 @@ export function createLotEngine(settings: Settings): LotEngine {
         acquiredAtISO: e.timestampISO,
         amountRemaining: toFixed(qty),
         costBasisBaseRemaining: toFixed(cost),
-        originEventId: e.id
+        originEventId: e.id,
       };
       const lots = ensureLots(e.assetId);
       const pool = ensurePool(e.assetId);
@@ -245,9 +249,9 @@ export function createLotEngine(settings: Settings): LotEngine {
         lotsMatched: matched.map((m) => ({
           lotId: m.lotId,
           amount: toFixed(m.amount),
-          costBasisBase: toFixed(m.costBasisBase)
+          costBasisBase: toFixed(m.costBasisBase),
         })),
-        taxYear: yearFromISO(e.timestampISO)
+        taxYear: yearFromISO(e.timestampISO),
       });
       return;
     }
@@ -295,9 +299,9 @@ export function createLotEngine(settings: Settings): LotEngine {
         lotsMatched: matched.map((m) => ({
           lotId: m.lotId,
           amount: toFixed(m.amount),
-          costBasisBase: toFixed(m.costBasisBase)
+          costBasisBase: toFixed(m.costBasisBase),
         })),
-        taxYear: yearFromISO(e.timestampISO)
+        taxYear: yearFromISO(e.timestampISO),
       });
 
       // Acquire assetOut (fee is applied to disposal leg only)
@@ -308,7 +312,7 @@ export function createLotEngine(settings: Settings): LotEngine {
         acquiredAtISO: e.timestampISO,
         amountRemaining: toFixed(qtyOut),
         costBasisBaseRemaining: toFixed(gross),
-        originEventId: e.id
+        originEventId: e.id,
       };
       if (!assetOutId) {
         warnings.push(`swap_missing_asset_out:${e.id}`);
@@ -334,7 +338,7 @@ export function createLotEngine(settings: Settings): LotEngine {
           acquiredAtISO: e.timestampISO,
           amountRemaining: toFixed(qty),
           costBasisBaseRemaining: '0',
-          originEventId: e.id
+          originEventId: e.id,
         };
         const lots = ensureLots(e.assetId);
         const pool = ensurePool(e.assetId);
@@ -346,7 +350,7 @@ export function createLotEngine(settings: Settings): LotEngine {
           lots,
           qty,
           settings.lotMethodDefault === 'AVG_COST' ? 'FIFO' : settings.lotMethodDefault,
-          warnings
+          warnings,
         );
         const pool = ensurePool(e.assetId);
         pool.amount = pool.amount.sub(qty);
@@ -361,13 +365,13 @@ export function createLotEngine(settings: Settings): LotEngine {
     getRealizedPnlBaseToDate: () => toFixed(realized),
     getLotsByAssetId: () => lotsByAssetId,
     getDisposals: () => disposals,
-    getWarnings: () => warnings
+    getWarnings: () => warnings,
   };
 }
 
 export function replayLedgerToLotsAndDisposals(
   allEvents: LedgerEvent[],
-  settings: Settings
+  settings: Settings,
 ): ReplayResult {
   const events = normalizeActiveLedger(allEvents);
   const engine = createLotEngine(settings);
@@ -378,6 +382,6 @@ export function replayLedgerToLotsAndDisposals(
     disposals: engine.getDisposals(),
     positions: engine.getPositions(),
     realizedPnlBase: engine.getRealizedPnlBaseToDate(),
-    warnings: engine.getWarnings()
+    warnings: engine.getWarnings(),
   };
 }

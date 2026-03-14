@@ -37,19 +37,32 @@ function buildCsv(report: TaxYearReport, assetsById: Map<string, Asset>): string
   lines.push('');
 
   lines.push('Realized disposals');
-  lines.push(['date', 'asset', 'amount', `proceeds_${cur}`, `costBasis_${cur}`, `fees_${cur}`, `gain_${cur}`, 'eventId'].join(','));
+  lines.push(
+    [
+      'date',
+      'asset',
+      'amount',
+      `proceeds_${cur}`,
+      `costBasis_${cur}`,
+      `fees_${cur}`,
+      `gain_${cur}`,
+      'eventId',
+    ].join(','),
+  );
   for (const d0 of report.disposals) {
     const sym = assetsById.get(d0.assetId)?.symbol ?? d0.assetId;
-    lines.push([
-      d0.disposedAtISO,
-      sym,
-      d0.amount,
-      d0.proceedsBase,
-      d0.costBasisBase,
-      d0.feeBase,
-      d0.realizedGainBase,
-      d0.eventId
-    ].join(','));
+    lines.push(
+      [
+        d0.disposedAtISO,
+        sym,
+        d0.amount,
+        d0.proceedsBase,
+        d0.costBasisBase,
+        d0.feeBase,
+        d0.realizedGainBase,
+        d0.eventId,
+      ].join(','),
+    );
   }
   lines.push('');
   lines.push(`Totals,,,,,${report.totals.feesBase},${report.totals.realizedGainBase},`);
@@ -58,18 +71,16 @@ function buildCsv(report: TaxYearReport, assetsById: Map<string, Asset>): string
   lines.push('');
 
   lines.push('Income (rewards/airdrops)');
-  lines.push(['date', 'type', 'asset', 'amount', `income_${cur}`, `fmv_${cur}`, 'eventId'].join(','));
+  lines.push(
+    ['date', 'type', 'asset', 'amount', `income_${cur}`, `fmv_${cur}`, 'eventId'].join(','),
+  );
   for (const r of report.income) {
     const sym = assetsById.get(r.assetId)?.symbol ?? r.assetId;
-    lines.push([
-      r.timestampISO,
-      r.type,
-      sym,
-      r.amount,
-      r.incomeBase,
-      r.fmvTotalBase ?? '',
-      r.eventId
-    ].join(','));
+    lines.push(
+      [r.timestampISO, r.type, sym, r.amount, r.incomeBase, r.fmvTotalBase ?? '', r.eventId].join(
+        ',',
+      ),
+    );
   }
   lines.push('');
   lines.push(`IncomeTotal,${report.totals.incomeBase}`);
@@ -199,16 +210,20 @@ export default function TaxPage() {
   const dbState = useDbQuery(
     async (db) => {
       await ensureWebDbOpen();
-      const settings = ((await db.settings.get('settings_1')) as any) ?? (await ensureDefaultSettings());
+      const settings =
+        ((await db.settings.get('settings_1')) as any) ?? (await ensureDefaultSettings());
       const assets = (await db.assets.toArray()) as any as Asset[];
       const events = (await db.ledgerEvents.toArray()) as any as LedgerEvent[];
       return { settings: settings as Settings, assets, events };
     },
     [],
-    { settings: null as any, assets: [] as Asset[], events: [] as LedgerEvent[] }
+    { settings: null as any, assets: [] as Asset[], events: [] as LedgerEvent[] },
   );
 
-  const assetsById = useMemo(() => new Map(dbState.data.assets.map((a) => [a.id, a])), [dbState.data.assets]);
+  const assetsById = useMemo(
+    () => new Map(dbState.data.assets.map((a) => [a.id, a])),
+    [dbState.data.assets],
+  );
   const years = useMemo(() => {
     const ys = new Set<number>();
     for (const e of dbState.data.events) {
@@ -224,7 +239,9 @@ export default function TaxPage() {
   const [report, setReport] = useState<TaxYearReport | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [taxProfileOverride, setTaxProfileOverride] = useState<'GENERIC' | 'FINLAND'>('GENERIC');
-  const [lotMethodOverride, setLotMethodOverride] = useState<'FIFO' | 'LIFO' | 'HIFO' | 'AVG_COST'>('FIFO');
+  const [lotMethodOverride, setLotMethodOverride] = useState<'FIFO' | 'LIFO' | 'HIFO' | 'AVG_COST'>(
+    'FIFO',
+  );
 
   useEffect(() => {
     if (!years.length) return;
@@ -250,9 +267,14 @@ export default function TaxPage() {
       if (!settings) throw new Error('settings_missing');
       const effProfile = taxProfileOverride ?? settings.taxProfile;
       const effLot = effProfile === 'FINLAND' ? 'FIFO' : lotMethodOverride;
-      const r = generateTaxYearReport(dbState.data.events, { ...settings, taxProfile: effProfile } as any, year, {
-        lotMethodOverride: effLot
-      });
+      const r = generateTaxYearReport(
+        dbState.data.events,
+        { ...settings, taxProfile: effProfile } as any,
+        year,
+        {
+          lotMethodOverride: effLot,
+        },
+      );
       setReport(r);
     } catch (e) {
       setMsg(e instanceof Error ? e.message : String(e));
@@ -370,23 +392,33 @@ export default function TaxPage() {
         <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
           <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
             <div className="text-xs text-slate-300">Realized gain</div>
-            <div className="text-lg font-semibold">{fmtMoney(report.totals.realizedGainBase, report.baseCurrency)}</div>
+            <div className="text-lg font-semibold">
+              {fmtMoney(report.totals.realizedGainBase, report.baseCurrency)}
+            </div>
           </div>
           <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
             <div className="text-xs text-slate-300">Proceeds</div>
-            <div className="text-lg font-semibold">{fmtMoney(report.totals.proceedsBase, report.baseCurrency)}</div>
+            <div className="text-lg font-semibold">
+              {fmtMoney(report.totals.proceedsBase, report.baseCurrency)}
+            </div>
           </div>
           <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
             <div className="text-xs text-slate-300">Cost basis</div>
-            <div className="text-lg font-semibold">{fmtMoney(report.totals.costBasisBase, report.baseCurrency)}</div>
+            <div className="text-lg font-semibold">
+              {fmtMoney(report.totals.costBasisBase, report.baseCurrency)}
+            </div>
           </div>
           <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
             <div className="text-xs text-slate-300">Fees</div>
-            <div className="text-lg font-semibold">{fmtMoney(report.totals.feesBase, report.baseCurrency)}</div>
+            <div className="text-lg font-semibold">
+              {fmtMoney(report.totals.feesBase, report.baseCurrency)}
+            </div>
           </div>
           <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
             <div className="text-xs text-slate-300">Income</div>
-            <div className="text-lg font-semibold">{fmtMoney(report.totals.incomeBase, report.baseCurrency)}</div>
+            <div className="text-lg font-semibold">
+              {fmtMoney(report.totals.incomeBase, report.baseCurrency)}
+            </div>
           </div>
         </div>
       ) : null}
@@ -396,7 +428,8 @@ export default function TaxPage() {
           <h2 className="text-lg font-semibold">Realized disposals</h2>
           {report ? (
             <div className="text-xs text-slate-300">
-              Profile: <span className="font-semibold">{report.taxProfile}</span> • Lot: <span className="font-semibold">{report.lotMethodUsed}</span>
+              Profile: <span className="font-semibold">{report.taxProfile}</span> • Lot:{' '}
+              <span className="font-semibold">{report.lotMethodUsed}</span>
             </div>
           ) : null}
         </div>
@@ -427,10 +460,18 @@ export default function TaxPage() {
                     <td className="py-2 pr-3 whitespace-nowrap">{r.disposedAtISO}</td>
                     <td className="py-2 pr-3">{sym}</td>
                     <td className="py-2 pl-3 text-right">{r.amount}</td>
-                    <td className="py-2 pl-3 text-right">{fmtMoney(r.proceedsBase, report?.baseCurrency ?? 'EUR')}</td>
-                    <td className="py-2 pl-3 text-right">{fmtMoney(r.costBasisBase, report?.baseCurrency ?? 'EUR')}</td>
-                    <td className="py-2 pl-3 text-right">{fmtMoney(r.feeBase, report?.baseCurrency ?? 'EUR')}</td>
-                    <td className={`py-2 pl-3 text-right ${gain.gte(0) ? 'text-emerald-300' : 'text-rose-300'}`}>
+                    <td className="py-2 pl-3 text-right">
+                      {fmtMoney(r.proceedsBase, report?.baseCurrency ?? 'EUR')}
+                    </td>
+                    <td className="py-2 pl-3 text-right">
+                      {fmtMoney(r.costBasisBase, report?.baseCurrency ?? 'EUR')}
+                    </td>
+                    <td className="py-2 pl-3 text-right">
+                      {fmtMoney(r.feeBase, report?.baseCurrency ?? 'EUR')}
+                    </td>
+                    <td
+                      className={`py-2 pl-3 text-right ${gain.gte(0) ? 'text-emerald-300' : 'text-rose-300'}`}
+                    >
                       {fmtMoney(r.realizedGainBase, report?.baseCurrency ?? 'EUR')}
                     </td>
                   </tr>
@@ -474,12 +515,17 @@ export default function TaxPage() {
                   {report.income.map((r) => {
                     const sym = assetsById.get(r.assetId)?.symbol ?? r.assetId;
                     return (
-                      <tr key={r.eventId} className="border-b border-slate-900 hover:bg-slate-950/40">
+                      <tr
+                        key={r.eventId}
+                        className="border-b border-slate-900 hover:bg-slate-950/40"
+                      >
                         <td className="py-2 pr-3 whitespace-nowrap">{r.timestampISO}</td>
                         <td className="py-2 pr-3">{r.type}</td>
                         <td className="py-2 pr-3">{sym}</td>
                         <td className="py-2 pl-3 text-right">{r.amount}</td>
-                        <td className="py-2 pl-3 text-right">{fmtMoney(r.incomeBase, report.baseCurrency)}</td>
+                        <td className="py-2 pl-3 text-right">
+                          {fmtMoney(r.incomeBase, report.baseCurrency)}
+                        </td>
                       </tr>
                     );
                   })}
@@ -510,10 +556,15 @@ export default function TaxPage() {
                   {report.yearEndHoldings.map((h) => {
                     const sym = assetsById.get(h.assetId)?.symbol ?? h.assetId;
                     return (
-                      <tr key={h.assetId} className="border-b border-slate-900 hover:bg-slate-950/40">
+                      <tr
+                        key={h.assetId}
+                        className="border-b border-slate-900 hover:bg-slate-950/40"
+                      >
                         <td className="py-2 pr-3">{sym}</td>
                         <td className="py-2 pl-3 text-right">{h.amount}</td>
-                        <td className="py-2 pl-3 text-right">{fmtMoney(h.costBasisBase, report.baseCurrency)}</td>
+                        <td className="py-2 pl-3 text-right">
+                          {fmtMoney(h.costBasisBase, report.baseCurrency)}
+                        </td>
                       </tr>
                     );
                   })}

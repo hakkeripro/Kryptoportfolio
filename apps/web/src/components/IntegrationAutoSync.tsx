@@ -1,9 +1,21 @@
 import { useEffect, useRef } from 'react';
 import { getMeta, setMeta } from '@kp/platform-web';
-import { useAppStore } from '../store/useAppStore';
-import { loadCoinbaseIntegration, saveCoinbaseIntegration } from '../integrations/coinbase/coinbaseVault';
-import { bestEffortFxToBase, fetchCoinbaseAccounts, fetchNewestTransactionsSince } from '../integrations/coinbase/coinbaseSync';
-import { buildCoinbaseImportPreview, computeCoinbaseDedupe, commitCoinbaseImport } from '../integrations/coinbase/coinbaseImport';
+import { useVaultStore } from '../store/useVaultStore';
+import { useAuthStore } from '../store/useAuthStore';
+import {
+  loadCoinbaseIntegration,
+  saveCoinbaseIntegration,
+} from '../integrations/coinbase/coinbaseVault';
+import {
+  bestEffortFxToBase,
+  fetchCoinbaseAccounts,
+  fetchNewestTransactionsSince,
+} from '../integrations/coinbase/coinbaseSync';
+import {
+  buildCoinbaseImportPreview,
+  computeCoinbaseDedupe,
+  commitCoinbaseImport,
+} from '../integrations/coinbase/coinbaseImport';
 import { rebuildDerivedCaches } from '../derived/rebuildDerived';
 import { ensureDefaultSettings } from '../derived/ensureDefaultSettings';
 
@@ -14,9 +26,9 @@ import { ensureDefaultSettings } from '../derived/ensureDefaultSettings';
  * if import issues exist (missing FX, missing fee valuation...), we do NOT advance cursors.
  */
 export default function IntegrationAutoSync() {
-  const passphrase = useAppStore((s) => s.passphrase);
-  const token = useAppStore((s) => s.token);
-  const apiBase = useAppStore((s) => s.apiBase);
+  const passphrase = useVaultStore((s) => s.passphrase);
+  const token = useAuthStore((s) => s.token);
+  const apiBase = useAuthStore((s) => s.apiBase);
 
   const inFlight = useRef(false);
   const timer = useRef<number | null>(null);
@@ -57,7 +69,10 @@ export default function IntegrationAutoSync() {
   useEffect(() => {
     let cancelled = false;
 
-    async function buildFxRatesToBase(items: { tx: any }[], baseCurrency: string): Promise<Record<string, string>> {
+    async function buildFxRatesToBase(
+      items: { tx: any }[],
+      baseCurrency: string,
+    ): Promise<Record<string, string>> {
       const base = baseCurrency.toUpperCase();
       const currencies = new Set<string>([base]);
 
@@ -98,7 +113,12 @@ export default function IntegrationAutoSync() {
         if (!cfg.credentials) return;
         if (!cfg.settings.autoSync && !opts?.force) return;
 
-        await writeStatus({ inFlight: true, lastRunISO: nowISO, lastMode: opts?.force ? 'manual' : 'autosync', lastError: null });
+        await writeStatus({
+          inFlight: true,
+          lastRunISO: nowISO,
+          lastMode: opts?.force ? 'manual' : 'autosync',
+          lastError: null,
+        });
 
         const settings = await ensureDefaultSettings();
         const baseCurrency = settings.baseCurrency || 'EUR';
@@ -109,10 +129,13 @@ export default function IntegrationAutoSync() {
           token,
           cfg.credentials,
           accounts,
-          cfg.settings.lastSeenTxIdByAccount
+          cfg.settings.lastSeenTxIdByAccount,
         );
 
-        await writeStatus({ lastFetchedCount: newest.length, lastCursorByAccount: { ...cfg.settings.lastSeenTxIdByAccount } });
+        await writeStatus({
+          lastFetchedCount: newest.length,
+          lastCursorByAccount: { ...cfg.settings.lastSeenTxIdByAccount },
+        });
 
         if (!newest.length) {
           // Success: nothing to do.
@@ -137,7 +160,7 @@ export default function IntegrationAutoSync() {
           items: newest,
           baseCurrency,
           settings,
-          overrides: { fxRatesToBase }
+          overrides: { fxRatesToBase },
         });
         const preview = await computeCoinbaseDedupe(preview0);
 
@@ -146,7 +169,7 @@ export default function IntegrationAutoSync() {
           await writeStatus({
             lastSuccessISO: nowISO,
             consecutiveFailures: 0,
-            lastError: preview.issues.length ? `blocked:${preview.issues[0].type}` : null
+            lastError: preview.issues.length ? `blocked:${preview.issues[0]!.type}` : null,
           });
           const baseMs = Math.max(60_000, (cfg.settings.intervalMinutes ?? 10) * 60_000);
           nextRunAtMs.current = Date.now() + baseMs;
@@ -161,11 +184,16 @@ export default function IntegrationAutoSync() {
         const updated = { ...cfg };
         for (const acc of accounts) {
           const firstForAcc = newest.find((x) => x.accountId === acc.id);
-          if (firstForAcc) updated.settings.lastSeenTxIdByAccount[acc.id] = firstForAcc.tx.id;
+          if (firstForAcc) updated.settings.lastSeenTxIdByAccount[acc.id] = firstForAcc.tx.id!;
         }
         await saveCoinbaseIntegration(passphrase, updated);
 
-        await writeStatus({ lastSuccessISO: nowISO, lastCommitISO: nowISO, consecutiveFailures: 0, lastError: null });
+        await writeStatus({
+          lastSuccessISO: nowISO,
+          lastCommitISO: nowISO,
+          consecutiveFailures: 0,
+          lastError: null,
+        });
 
         const baseMs = Math.max(60_000, (cfg.settings.intervalMinutes ?? 10) * 60_000);
         nextRunAtMs.current = Date.now() + baseMs;
@@ -184,7 +212,7 @@ export default function IntegrationAutoSync() {
           lastRunISO: nowISO,
           lastError: String(e?.message ?? e ?? 'unknown_error'),
           consecutiveFailures: failures,
-          nextRunISO: new Date(nextRunAtMs.current).toISOString()
+          nextRunISO: new Date(nextRunAtMs.current).toISOString(),
         });
       } finally {
         inFlight.current = false;

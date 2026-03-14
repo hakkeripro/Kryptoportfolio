@@ -1,4 +1,9 @@
-import { createVaultBlob, openVaultBlob, type VaultBlob, type VaultKdfParams } from '../vault/webVault.js';
+import {
+  createVaultBlob,
+  openVaultBlob,
+  type VaultBlob,
+  type VaultKdfParams,
+} from '../vault/webVault.js';
 
 export type SyncEnvelope = {
   id: string;
@@ -27,16 +32,19 @@ export async function createSyncEnvelope(opts: {
     version: blob.version,
     kdf: blob.kdf,
     ciphertextBase64: blob.ciphertextBase64,
-    nonceBase64: blob.nonceBase64
+    nonceBase64: blob.nonceBase64,
   };
 }
 
-export async function openSyncEnvelope(opts: { passphrase: string; envelope: SyncEnvelope }): Promise<any> {
+export async function openSyncEnvelope(opts: {
+  passphrase: string;
+  envelope: SyncEnvelope;
+}): Promise<any> {
   const blob: VaultBlob = {
     version: opts.envelope.version,
     kdf: opts.envelope.kdf,
     nonceBase64: opts.envelope.nonceBase64,
-    ciphertextBase64: opts.envelope.ciphertextBase64
+    ciphertextBase64: opts.envelope.ciphertextBase64,
   };
   return openVaultBlob(opts.passphrase, blob);
 }
@@ -50,11 +58,16 @@ async function apiFetch<T>(url: string, init: RequestInit): Promise<T> {
   return r.json() as any;
 }
 
-export async function registerDevice(apiBase: string, token: string, deviceId: string, name?: string) {
+export async function registerDevice(
+  apiBase: string,
+  token: string,
+  deviceId: string,
+  name?: string,
+) {
   return apiFetch(`${apiBase}/v1/devices/register`, {
     method: 'POST',
     headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
-    body: JSON.stringify({ deviceId, name })
+    body: JSON.stringify({ deviceId, name }),
   });
 }
 
@@ -62,14 +75,22 @@ export async function uploadEnvelope(apiBase: string, token: string, env: SyncEn
   return apiFetch<{ ok: boolean; cursor: number }>(`${apiBase}/v1/sync/envelopes`, {
     method: 'POST',
     headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
-    body: JSON.stringify(env)
+    body: JSON.stringify(env),
   });
 }
 
-export async function pullEnvelopes(apiBase: string, token: string, afterCursor: number, limit = 200) {
+export async function pullEnvelopes(
+  apiBase: string,
+  token: string,
+  afterCursor: number,
+  limit = 200,
+) {
   const qs = new URLSearchParams({ afterCursor: String(afterCursor), limit: String(limit) });
-  return apiFetch<{ envelopes: Array<SyncEnvelope & { cursor: number }> }>(`${apiBase}/v1/sync/envelopes?${qs}`, {
-    method: 'GET',
-    headers: { authorization: `Bearer ${token}` }
-  });
+  return apiFetch<{ envelopes: Array<SyncEnvelope & { cursor: number }> }>(
+    `${apiBase}/v1/sync/envelopes?${qs}`,
+    {
+      method: 'GET',
+      headers: { authorization: `Bearer ${token}` },
+    },
+  );
 }

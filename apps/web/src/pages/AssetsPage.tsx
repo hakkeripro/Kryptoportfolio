@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ensureWebDbOpen, getWebDb } from '@kp/platform-web';
 import type { Asset } from '@kp/core';
-import { useAppStore } from '../store/useAppStore';
+import { useAuthStore } from '../store/useAuthStore';
 import { useDbQuery } from '../hooks/useDbQuery';
 import { coingeckoSearch, type CoingeckoSearchCoin } from '../integrations/coingecko/coingeckoApi';
 import { ensureDefaultSettings } from '../derived/ensureDefaultSettings';
@@ -14,7 +14,7 @@ function kindLabel(a: Asset): string {
 }
 
 export default function AssetsPage() {
-  const apiBase = useAppStore((s) => s.apiBase);
+  const apiBase = useAuthStore((s) => s.apiBase);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<CoingeckoSearchCoin[]>([]);
@@ -29,7 +29,7 @@ export default function AssetsPage() {
       return assets;
     },
     [],
-    [] as Asset[]
+    [] as Asset[],
   );
 
   const { unmapped, mapped } = useMemo(() => {
@@ -48,13 +48,17 @@ export default function AssetsPage() {
   // Auto-select first unmapped
   useEffect(() => {
     if (selectedId) return;
-    if (unmapped.length) setSelectedId(unmapped[0].id);
+    if (unmapped.length) setSelectedId(unmapped[0]!.id);
   }, [selectedId, unmapped]);
 
   // Suggest query
   useEffect(() => {
     if (!selected) return;
-    setQuery(selected.providerRef?.coingeckoId ? selected.providerRef.coingeckoId : selected.symbol || selected.name || '');
+    setQuery(
+      selected.providerRef?.coingeckoId
+        ? selected.providerRef.coingeckoId
+        : selected.symbol || selected.name || '',
+    );
     setResults([]);
   }, [selected?.id]);
 
@@ -82,7 +86,7 @@ export default function AssetsPage() {
       const now = new Date().toISOString();
       await db.assets.update(selected.id, {
         providerRef: { ...(selected.providerRef ?? {}), coingeckoId: coin.id },
-        updatedAtISO: now
+        updatedAtISO: now,
       });
       setMsg(`Linked ${selected.symbol} → ${coin.id}`);
     } catch (e: any) {
@@ -102,7 +106,7 @@ export default function AssetsPage() {
       const now = new Date().toISOString();
       await db.assets.update(selected.id, {
         providerRef: { ...(selected.providerRef ?? {}), coingeckoId: undefined },
-        updatedAtISO: now
+        updatedAtISO: now,
       });
       setMsg('Unlinked.');
     } catch (e: any) {
@@ -135,7 +139,8 @@ export default function AssetsPage() {
         <div>
           <h1 className="text-xl font-semibold">Assets</h1>
           <div className="text-sm text-slate-500">
-            Map assets to CoinGecko IDs (no symbol guessing). Unmapped assets block live pricing and some imports.
+            Map assets to CoinGecko IDs (no symbol guessing). Unmapped assets block live pricing and
+            some imports.
           </div>
         </div>
         <button
@@ -149,7 +154,10 @@ export default function AssetsPage() {
       </div>
 
       {msg ? (
-        <div className="rounded-lg border bg-slate-950/40 p-3 text-sm" data-testid="toast-assets-msg">
+        <div
+          className="rounded-lg border bg-slate-950/40 p-3 text-sm"
+          data-testid="toast-assets-msg"
+        >
           {msg}
         </div>
       ) : null}
@@ -221,7 +229,10 @@ export default function AssetsPage() {
 
           {selected ? (
             <div className="mt-4 space-y-3">
-              <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-3 text-sm" data-testid="box-current-mapping">
+              <div
+                className="rounded-lg border border-slate-800 bg-slate-950/40 p-3 text-sm"
+                data-testid="box-current-mapping"
+              >
                 <div className="flex items-center justify-between">
                   <span className="text-slate-400">Current coingeckoId</span>
                   <span className="font-mono" data-testid="txt-current-coingeckoId">
@@ -254,7 +265,10 @@ export default function AssetsPage() {
                 </button>
               </form>
 
-              <div className="rounded-lg border border-slate-800" data-testid="list-coingecko-results">
+              <div
+                className="rounded-lg border border-slate-800"
+                data-testid="list-coingecko-results"
+              >
                 {results.length ? (
                   <div className="max-h-[420px] overflow-auto">
                     {results.map((c) => (
@@ -268,7 +282,9 @@ export default function AssetsPage() {
                             <div className="font-medium truncate">{c.name}</div>
                             <div className="text-xs text-slate-400 uppercase">{c.symbol}</div>
                             {typeof c.market_cap_rank === 'number' ? (
-                              <div className="text-[11px] text-slate-400">rank #{c.market_cap_rank}</div>
+                              <div className="text-[11px] text-slate-400">
+                                rank #{c.market_cap_rank}
+                              </div>
                             ) : null}
                           </div>
                           <div className="text-xs text-slate-400 font-mono truncate">{c.id}</div>
@@ -289,10 +305,16 @@ export default function AssetsPage() {
                 )}
               </div>
 
-              <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-3 text-xs text-slate-300" data-testid="box-asset-mapping-help">
+              <div
+                className="rounded-lg border border-slate-800 bg-slate-950/40 p-3 text-xs text-slate-300"
+                data-testid="box-asset-mapping-help"
+              >
                 <div className="font-semibold text-slate-200">Why this matters</div>
                 <ul className="mt-2 list-disc pl-5 space-y-1">
-                  <li>Live prices use CoinGecko IDs. Without mapping, portfolio value may be 0 for that asset.</li>
+                  <li>
+                    Live prices use CoinGecko IDs. Without mapping, portfolio value may be 0 for
+                    that asset.
+                  </li>
                   <li>Fee valuation and reward FMV mode can require deterministic pricing.</li>
                   <li>No symbol guessing: the mapping is explicit and audit-friendly.</li>
                 </ul>
@@ -303,7 +325,10 @@ export default function AssetsPage() {
           {assetsQ.loading ? null : mappedCount ? (
             <div className="mt-6">
               <div className="text-sm font-medium">Mapped assets</div>
-              <div className="mt-2 max-h-[240px] overflow-auto rounded-lg border border-slate-800" data-testid="list-mapped-assets">
+              <div
+                className="mt-2 max-h-[240px] overflow-auto rounded-lg border border-slate-800"
+                data-testid="list-mapped-assets"
+              >
                 {mapped.slice(0, 200).map((a) => (
                   <div
                     key={a.id}
@@ -315,7 +340,9 @@ export default function AssetsPage() {
                         <div className="font-medium">{a.symbol || a.name}</div>
                         <div className="text-xs text-slate-400">{kindLabel(a)}</div>
                       </div>
-                      <div className="text-xs text-slate-400 font-mono truncate">{a.providerRef?.coingeckoId}</div>
+                      <div className="text-xs text-slate-400 font-mono truncate">
+                        {a.providerRef?.coingeckoId}
+                      </div>
                     </div>
                     <button
                       className="rounded-lg border border-slate-800 px-3 py-1.5 text-xs hover:bg-slate-700/50"
@@ -336,9 +363,7 @@ export default function AssetsPage() {
           <div className="mt-3 text-xs text-slate-400" data-testid="box-assets-stats">
             Total assets: {assetsQ.data.length}. Total unmapped: {unmappedCount}.{' '}
             {unmappedCount ? (
-              <span>
-                Estimated impact: {unmappedCount} asset(s) missing live prices.
-              </span>
+              <span>Estimated impact: {unmappedCount} asset(s) missing live prices.</span>
             ) : (
               <span>All set.</span>
             )}

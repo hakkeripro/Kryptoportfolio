@@ -42,7 +42,10 @@ export function VirtualList<T>(props: VirtualListProps<T>) {
           const top = index * itemHeight;
           const key = getKey ? getKey(item, index) : String(index);
           return (
-            <div key={key} style={{ position: 'absolute', top, left: 0, right: 0, height: itemHeight }}>
+            <div
+              key={key}
+              style={{ position: 'absolute', top, left: 0, right: 0, height: itemHeight }}
+            >
               {renderItem(item, index)}
             </div>
           );

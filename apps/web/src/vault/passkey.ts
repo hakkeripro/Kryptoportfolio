@@ -15,12 +15,14 @@ type StoredWrap = {
   createdAtISO: string;
 };
 
-const LS_KEY = 'kp_vault_passkey_wrap_v1';
+const LS_KEY_PREFIX = 'kp_vault_passkey_wrap_v1';
+// Legacy single-key for backward compat
+const LS_KEY = LS_KEY_PREFIX;
 
 function b64Encode(buf: ArrayBuffer): string {
   const bytes = new Uint8Array(buf);
   let bin = '';
-  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]!);
   return btoa(bin);
 }
 
@@ -38,7 +40,9 @@ function randomBytes(n: number): Uint8Array {
 }
 
 export function isPasskeySupported(): boolean {
-  return typeof window !== 'undefined' && typeof (window as any).PublicKeyCredential !== 'undefined';
+  return (
+    typeof window !== 'undefined' && typeof (window as any).PublicKeyCredential !== 'undefined'
+  );
 }
 
 export function getStoredPasskeyWrap(): StoredWrap | null {
@@ -61,6 +65,21 @@ export function clearPasskeyWrap(): void {
   }
 }
 
+/** List all stored passkey wraps (currently max 1, future: multi). */
+export function listPasskeyWraps(): Array<{ credIdBase64: string; createdAtISO: string }> {
+  const stored = getStoredPasskeyWrap();
+  if (!stored) return [];
+  return [{ credIdBase64: stored.credIdBase64, createdAtISO: stored.createdAtISO }];
+}
+
+/** Remove a specific passkey wrap by credential ID. */
+export function removePasskeyWrap(credIdBase64: string): boolean {
+  const stored = getStoredPasskeyWrap();
+  if (!stored || stored.credIdBase64 !== credIdBase64) return false;
+  clearPasskeyWrap();
+  return true;
+}
+
 async function deriveHmacSecret(credId: Uint8Array, salt: Uint8Array): Promise<Uint8Array> {
   // The hmac-secret output is returned via getClientExtensionResults().
   const assertion = (await navigator.credentials.get({
@@ -68,8 +87,8 @@ async function deriveHmacSecret(credId: Uint8Array, salt: Uint8Array): Promise<U
       challenge: randomBytes(32),
       allowCredentials: [{ type: 'public-key', id: credId }],
       userVerification: 'preferred',
-      extensions: { hmacGetSecret: { salt1: salt } as any }
-    } as any
+      extensions: { hmacGetSecret: { salt1: salt } as any },
+    } as any,
   })) as PublicKeyCredential | null;
 
   if (!assertion) throw new Error('passkey_cancelled');
@@ -88,15 +107,30 @@ async function importAesGcmKey(secret32: Uint8Array): Promise<CryptoKey> {
   return crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
 }
 
-async function encryptString(key: CryptoKey, plaintext: string): Promise<{ nonce: Uint8Array; ciphertext: ArrayBuffer }> {
+async function encryptString(
+  key: CryptoKey,
+  plaintext: string,
+): Promise<{ nonce: Uint8Array; ciphertext: ArrayBuffer }> {
   const nonce = randomBytes(12);
   const data = new TextEncoder().encode(plaintext);
-  const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: nonce }, key, data);
+  const ciphertext = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv: new Uint8Array(nonce) },
+    key,
+    new Uint8Array(data),
+  );
   return { nonce, ciphertext };
 }
 
-async function decryptString(key: CryptoKey, nonce: Uint8Array, ciphertext: Uint8Array): Promise<string> {
-  const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: nonce }, key, ciphertext);
+async function decryptString(
+  key: CryptoKey,
+  nonce: Uint8Array,
+  ciphertext: Uint8Array,
+): Promise<string> {
+  const pt = await crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv: new Uint8Array(nonce) },
+    key,
+    new Uint8Array(ciphertext),
+  );
   return new TextDecoder().decode(pt);
 }
 
@@ -110,14 +144,14 @@ export async function createOrReplacePasskeyWrap(passphrase: string): Promise<vo
       user: {
         id: randomBytes(16),
         name: 'vault',
-        displayName: 'Vault'
+        displayName: 'Vault',
       },
       challenge: randomBytes(32),
       pubKeyCredParams: [{ type: 'public-key', alg: -7 }],
       authenticatorSelection: { userVerification: 'preferred' },
       timeout: 60_000,
-      extensions: { hmacCreateSecret: true } as any
-    } as any
+      extensions: { hmacCreateSecret: true } as any,
+    } as any,
   })) as PublicKeyCredential | null;
 
   if (!cred) throw new Error('passkey_cancelled');
@@ -131,10 +165,10 @@ export async function createOrReplacePasskeyWrap(passphrase: string): Promise<vo
   const stored: StoredWrap = {
     version: 1,
     credIdBase64: b64Encode(cred.rawId),
-    saltBase64: b64Encode(salt.buffer),
-    nonceBase64: b64Encode(nonce.buffer),
+    saltBase64: b64Encode(salt.buffer as ArrayBuffer),
+    nonceBase64: b64Encode(nonce.buffer as ArrayBuffer),
     ciphertextBase64: b64Encode(ciphertext),
-    createdAtISO: new Date().toISOString()
+    createdAtISO: new Date().toISOString(),
   };
 
   localStorage.setItem(LS_KEY, JSON.stringify(stored));

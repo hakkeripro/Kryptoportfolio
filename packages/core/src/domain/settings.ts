@@ -20,9 +20,9 @@ export const Settings = z.object({
   notifications: z
     .object({
       serverAlertsEnabled: z.boolean().optional(),
-      devicePushEnabled: z.boolean().optional()
+      devicePushEnabled: z.boolean().optional(),
     })
-    .optional()
+    .optional(),
 });
 
 export type Settings = z.infer<typeof Settings>;

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react';
-import { useAppStore } from '../store/useAppStore';
+import { useVaultStore } from '../store/useVaultStore';
+import { useAuthStore } from '../store/useAuthStore';
 import { useDbQuery } from '../hooks/useDbQuery';
 import { ensureDefaultSettings } from '../derived/ensureDefaultSettings';
 import { refreshLivePrices } from '../derived/refreshLivePrices';
@@ -10,14 +11,17 @@ import { refreshLivePrices } from '../derived/refreshLivePrices';
  * Uses Settings.autoRefreshIntervalSec (default 300). Runs only when vault is unlocked.
  */
 export default function PriceAutoRefresh() {
-  const { vaultReady, vaultSetup, passphrase, apiBase } = useAppStore((s) => ({
+  const { vaultReady, vaultSetup, passphrase } = useVaultStore((s) => ({
     vaultReady: s.vaultReady,
     vaultSetup: s.vaultSetup,
     passphrase: s.passphrase,
-    apiBase: s.apiBase
   }));
+  const apiBase = useAuthStore((s) => s.apiBase);
 
-  const unlocked = useMemo(() => !!(vaultReady && vaultSetup && passphrase), [vaultReady, vaultSetup, passphrase]);
+  const unlocked = useMemo(
+    () => !!(vaultReady && vaultSetup && passphrase),
+    [vaultReady, vaultSetup, passphrase],
+  );
 
   const settingsQ = useDbQuery(
     async () => {
@@ -25,7 +29,8 @@ export default function PriceAutoRefresh() {
       // Ensure settings exist + migrate legacy keys (KP-UI-002).
       return ensureDefaultSettings();
     },
-    [unlocked]
+    [unlocked],
+    undefined as any,
   );
 
   const intervalSec = settingsQ.data?.autoRefreshIntervalSec ?? 0;

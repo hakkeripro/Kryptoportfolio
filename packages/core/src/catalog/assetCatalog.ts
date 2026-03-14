@@ -39,7 +39,7 @@ export const KNOWN_ASSETS: KnownAsset[] = [
   { symbol: 'GBP', name: 'British Pound', type: 'fiat' },
   { symbol: 'SEK', name: 'Swedish Krona', type: 'fiat' },
   { symbol: 'NOK', name: 'Norwegian Krone', type: 'fiat' },
-  { symbol: 'DKK', name: 'Danish Krone', type: 'fiat' }
+  { symbol: 'DKK', name: 'Danish Krone', type: 'fiat' },
 ];
 
 export function lookupKnownAsset(symbol: string): KnownAsset | undefined {

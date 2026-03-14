@@ -21,7 +21,7 @@ describe('auth', () => {
     const reg = await app.inject({
       method: 'POST',
       url: '/v1/auth/register',
-      payload: { email: 'test@example.com', password: 'supersecret1' }
+      payload: { email: 'test@example.com', password: 'supersecret1' },
     });
     expect(reg.statusCode).toBe(200);
     const regBody = reg.json();
@@ -30,7 +30,7 @@ describe('auth', () => {
     const login = await app.inject({
       method: 'POST',
       url: '/v1/auth/login',
-      payload: { email: 'test@example.com', password: 'supersecret1' }
+      payload: { email: 'test@example.com', password: 'supersecret1' },
     });
     expect(login.statusCode).toBe(200);
     const token = login.json().token;
@@ -38,7 +38,7 @@ describe('auth', () => {
     const me = await app.inject({
       method: 'GET',
       url: '/v1/me',
-      headers: { authorization: `Bearer ${token}` }
+      headers: { authorization: `Bearer ${token}` },
     });
     expect(me.statusCode).toBe(200);
     expect(me.json().user.email).toBe('test@example.com');

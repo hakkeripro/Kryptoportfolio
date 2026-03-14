@@ -7,7 +7,7 @@ export const CoinbaseAccountSchema = z
     type: z.string().optional(),
     primary: z.boolean().optional(),
     currency: z.object({ code: z.string(), name: z.string().optional() }).passthrough().optional(),
-    balance: z.object({ amount: z.string(), currency: z.string() }).passthrough().optional()
+    balance: z.object({ amount: z.string(), currency: z.string() }).passthrough().optional(),
   })
   .passthrough();
 
@@ -19,7 +19,7 @@ export const CoinbaseTransactionSchema = z
     created_at: z.string(),
     amount: z.object({ amount: z.string(), currency: z.string() }),
     native_amount: z.object({ amount: z.string(), currency: z.string() }).optional(),
-    details: z.any().optional()
+    details: z.any().optional(),
   })
   .passthrough();
 
@@ -52,33 +52,39 @@ function formatApiError(status: number, body: unknown): string {
   return `${status} ${String(body).trim()}`.trim();
 }
 
-async function apiFetch<T>(base: string, path: string, token: string | null, init: RequestInit): Promise<T> {
+async function apiFetch<T>(
+  base: string,
+  path: string,
+  token: string | null,
+  init: RequestInit,
+): Promise<T> {
   const r = await fetch(`${base}${path}`, {
     cache: 'no-store',
     ...init,
     headers: {
       ...(init.headers ?? {}),
-      ...(token ? { authorization: `Bearer ${token}` } : {})
-    }
+      ...(token ? { authorization: `Bearer ${token}` } : {}),
+    },
   });
 
   const txt = await r.text();
   const body = tryJsonParse(txt);
 
   if (!r.ok) throw new Error(formatApiError(r.status, body));
-  if (typeof body === 'string') throw new Error(`Unexpected non-JSON response: ${body.slice(0, 200)}`);
+  if (typeof body === 'string')
+    throw new Error(`Unexpected non-JSON response: ${body.slice(0, 200)}`);
   return body as T;
 }
 
 export async function coinbaseListAccounts(
   apiBase: string,
   token: string,
-  creds: { keyName: string; privateKeyPem: string }
+  creds: { keyName: string; privateKeyPem: string },
 ): Promise<CoinbaseAccount[]> {
   const r = await apiFetch<any>(apiBase, '/v1/import/coinbase/v2/accounts', token, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify(creds)
+    body: JSON.stringify(creds),
   });
   return z.object({ accounts: z.array(CoinbaseAccountSchema) }).parse(r).accounts;
 }
@@ -86,36 +92,48 @@ export async function coinbaseListAccounts(
 export async function coinbaseTransactionsPage(
   apiBase: string,
   token: string,
-  input: { keyName: string; privateKeyPem: string; accountId: string; nextUri?: string | null; limit?: number }
+  input: {
+    keyName: string;
+    privateKeyPem: string;
+    accountId: string;
+    nextUri?: string | null;
+    limit?: number;
+  },
 ): Promise<{ items: CoinbaseTransaction[]; nextUri: string | null }> {
   const r = await apiFetch<any>(apiBase, '/v1/import/coinbase/v2/transactions/page', token, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify(input)
+    body: JSON.stringify(input),
   });
-  const parsed = z.object({ items: z.array(CoinbaseTransactionSchema), nextUri: z.string().nullable() }).parse(r);
+  const parsed = z
+    .object({ items: z.array(CoinbaseTransactionSchema), nextUri: z.string().nullable() })
+    .parse(r);
   return parsed;
 }
 
 export async function coinbaseShowTransactionRaw(
   apiBase: string,
   token: string,
-  input: { keyName: string; privateKeyPem: string; accountId: string; transactionId: string }
+  input: { keyName: string; privateKeyPem: string; accountId: string; transactionId: string },
 ): Promise<any> {
   return apiFetch<any>(apiBase, '/v1/import/coinbase/v2/transactions/show', token, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify(input)
+    body: JSON.stringify(input),
   });
 }
 
-export async function coinbaseExchangeRates(apiBase: string, currency?: string): Promise<Record<string, string>> {
+export async function coinbaseExchangeRates(
+  apiBase: string,
+  currency?: string,
+): Promise<Record<string, string>> {
   const q = currency ? `?currency=${encodeURIComponent(currency)}` : '';
   const r = await fetch(`${apiBase}/v1/import/coinbase/v2/exchange-rates${q}`);
   const txt = await r.text();
   const body = tryJsonParse(txt);
   if (!r.ok) throw new Error(formatApiError(r.status, body));
-  if (typeof body === 'string') throw new Error(`Unexpected non-JSON response: ${body.slice(0, 200)}`);
+  if (typeof body === 'string')
+    throw new Error(`Unexpected non-JSON response: ${body.slice(0, 200)}`);
 
   const parsed = z
     .object({ data: z.object({ currency: z.string(), rates: z.record(z.string(), z.string()) }) })

@@ -1,111 +1,58 @@
-# Project state (handoff)
+# Project state
 
-Tämä tiedosto on tarkoitettu tekoäly/kehittäjä-handoffiin.
+Tama tiedosto kuvaa projektin nykytilan. Katso myos:
+- **[../CLAUDE.md](../CLAUDE.md)** — AI-kehitysohjeet, monorepo-rakenne, komennot
+- **[features/FEATURES_TODO.md](features/FEATURES_TODO.md)** — Featureiden ja teknisen velan status
+- **[SESSION_CONTEXT.md](SESSION_CONTEXT.md)** — Muutosloki + aktiivinen tila
+- **[ISSUE_LOG.md](ISSUE_LOG.md)** — Bugit (priorisoitu)
 
-## Mitä on valmiina
+## Mita on valmiina
 
 ### Core (`packages/core`)
-- Ledger (append-only) + replacement + tombstone.
-- Coinbase v2 mapping: connect → fetch all/newest → normalize → issues (FX / fee value / reward FMV) → ledger events.
-- Lot engine: FIFO default + veroprofiilit (LIFO/HIFO/AVG_COST).
-- Portfolio snapshots: streaming rebuild + “incremental replace from earliest changed day”.
-- Tax engine (per tax year): realized disposals + income + year-end holdings.
-
-Testit:
-- `vitest` unit testit corelle (coinbase import, lot engine, tax engine).
+- Ledger (append-only) + replacement + tombstone
+- Coinbase v2 mapping: connect → fetch → normalize → issues → ledger events
+- Lot engine: FIFO default + veroprofiilit (LIFO/HIFO/AVG_COST)
+- Portfolio snapshots: streaming rebuild + incremental replace
+- Tax engine (per tax year): realized disposals + income + year-end holdings
 
 ### Web (`apps/web`)
-- React+Vite PWA, Tailwind, Zustand, Dexie vault.
-- Onboarding: vault setup + unlock.
-- Optional login + E2E encrypted sync (server stores ciphertext envelopes).
-- Imports:
-  - Coinbase import stepper: connect → fetch → preview → resolve issues → commit → rebuild derived.
-  - Autosync UI: status (in-flight/last run/next run) + cursor telemetry + “Run now”.
-- Portfolio/Dashboard/Holdings päivittyy commitin jälkeen.
-- Transactions:
-  - virtualized list
-  - detail drawer (raw JSON)
-  - append-only delete (tombstone)
-- Asset catalog mapping UX:
-  - “Unmapped assets” -jono
-  - CoinGecko search + manuaalinen `coingeckoId`-linkitys
-- Alerts:
-  - alert CRUD + mirror state push + trigger log näkymä
-  - web push subscribe/unsubscribe UI (toimii kun VAPID envit asetettu)
+- React+Vite PWA, Tailwind, Zustand, Dexie vault
+- Onboarding: vault setup + unlock
+- Optional login + E2E encrypted sync
+- Coinbase import stepper + autosync
+- Portfolio/Dashboard/Holdings/Transactions/Tax
+- Asset catalog mapping (CoinGecko)
+- Alerts: CRUD + mirror state + trigger log + web push
 
 ### Local API (`apps/api`)
-- Fastify + SQLite (local dev + Playwright e2e).
-- Endpointit vastaavat webin tarpeita (/api proxyn takana).
+- Fastify + SQLite (local dev + Playwright e2e)
 
-### Hosted MVP API (`functions/`)
-- Cloudflare Pages Functions (Hono) → sama-origin `/api/*`.
-- DB: Neon Postgres.
-- Skeema:
-  - source of truth: `functions/_lib/db.ts` (`HOSTED_SCHEMA_SQL`)
-  - dump tiedostona: `scripts/hosted-schema.sql`
-
-  - migrations: `scripts/migrations/*` (esim. `scripts/migrations/2026-01-03-alert-runner-state.sql` jos saat virheen relation "alert_runner_state" does not exist)
-  - komennot: `pnpm schema:hosted` ja `pnpm schema:hosted:file`
+### Hosted MVP (`functions/`)
+- Cloudflare Pages Functions (Hono) + Neon Postgres
+- Skeema: `functions/_lib/db.ts` (`HOSTED_SCHEMA_SQL`)
+- Migraatiot: `scripts/migrations/*.sql`
 
 ### CI
 - GitHub Actions: `.github/workflows/ci.yml`
-  - unit test job
-  - Playwright e2e job (voi ohittaa repo variablella `SKIP_E2E=1`)
+- Unit test + Playwright e2e + lint + typecheck + audit + bundle size
 
-## Miten ajetaan local
-
-```bash
-pnpm install
-pnpm dev
-```
-
-E2E:
+## Miten ajetaan
 
 ```bash
-pnpm test
-pnpm test:e2e
+pnpm install    # Asennus
+pnpm dev        # Dev serverit (web :5173, api :8788)
+pnpm test       # Vitest unit testit
+pnpm test:e2e   # Playwright e2e
 ```
 
 ## Hosted deploy
 
-- Pääohje: `docs/hosted-mvp-cloudflare-pages.md`
-- Staging runbook: `docs/hosted/PHASE5_HOSTED_STAGING_RUNBOOK.md`
-- Phase 6 runbook: `docs/hosted/PHASE6_ALERTS_PUSH_RUNBOOK.md`
+- Paaohje: `docs/hosted-mvp-cloudflare-pages.md`
+- Staging: `docs/hosted/PHASE5_HOSTED_STAGING_RUNBOOK.md`
+- Alerts+push: `docs/hosted/PHASE6_ALERTS_PUSH_RUNBOOK.md`
 
-**Hosted env vars (extra):**
-
-- `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` (web push)
-- `CRON_SECRET` (runner auth)
-- `COINGECKO_BASE_URL` (optional; default `https://api.coingecko.com/api/v3`)
-- `COINGECKO_DEMO_API_KEY` (optional demo key)
-
-## Tunnetut keskeneräiset asiat (seuraava versio)
-
-1) **Pricing/FX production caching**
-- Rate limit handling + cache invalidation.
-
-2) **Billing / maksavat asiakkaat**
-- Stripe + feature gating (ei vielä kuluja ennen kuin aktivoidaan).
-
-3) **Performance**
-- Lot engine fully incremental (per-asset pool state persistence)
-- Ledger: very large datasets (paging + search + grouping).
-
-4) **Native parity**
-- Push + alerts parity mobile (Expo) when native app is brought back.
+**Env vars:** `DATABASE_URL`, `VAPID_PUBLIC_KEY/PRIVATE_KEY/SUBJECT`, `CRON_SECRET`, `COINGECKO_BASE_URL`, `COINGECKO_DEMO_API_KEY`
 
 ## Kriittiset polut
 
-- Coinbase mapping: `packages/core/src/import/coinbaseV2.ts`
-- Portfolio rebuild: `packages/core/src/portfolio/*`
-- Dexie schema: `packages/platform-web/src/db/webDb.ts`
-- Hosted API: `functions/api/[[path]].ts`
-- Hosted schema: `functions/_lib/db.ts` + `scripts/hosted-schema.sql`
-
-
-## Current focus (Jan 2026)
-
-- Korjaa P0:t `docs/ISSUE_LOG.md`: erityisesti vault passphrase session ja price auto-refresh.
-- Toteuta uusi Auth/Vault UX: Passkey + yksi Vault Passphrase per käyttäjä (ADR-018, UI_MOCK_SPEC).
-- Refaktoroi Imports registry -malliin (ADR-019) ja lisää uudet providerit.
-- Huomioi maksulliset ominaisuudet (ADR-020).
+Katso `CLAUDE.md` → "Kriittiset polut" -taulukko.

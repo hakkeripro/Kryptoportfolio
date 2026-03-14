@@ -4,7 +4,7 @@ import { BaseEntityFields } from './common.js';
 export const AssetType = z.enum(['crypto', 'stable', 'fiat', 'lp', 'other']);
 
 export const ProviderRef = z.object({
-  coingeckoId: z.string().min(1).optional()
+  coingeckoId: z.string().min(1).optional(),
 });
 
 export const Asset = z.object({
@@ -19,9 +19,9 @@ export const Asset = z.object({
   metadata: z
     .object({
       tags: z.array(z.string()).optional(),
-      notes: z.string().optional()
+      notes: z.string().optional(),
     })
-    .optional()
+    .optional(),
 });
 
 export type Asset = z.infer<typeof Asset>;

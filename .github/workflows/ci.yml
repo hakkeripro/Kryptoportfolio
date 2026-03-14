@@ -5,7 +5,43 @@ on:
   pull_request:
 
 jobs:
+  quality:
+    name: Typecheck + Lint + Format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+          run_install: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build workspace deps
+        run: pnpm -w build:deps
+
+      - name: TypeScript type check
+        run: pnpm typecheck
+
+      - name: ESLint
+        run: pnpm lint --max-warnings 346
+
+      - name: Prettier
+        run: pnpm format
+
   test:
+    name: Unit tests + Coverage
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -33,10 +69,74 @@ jobs:
       - name: Unit tests
         run: pnpm test
 
+      - name: Coverage report (core) — threshold 30%
+        run: pnpm test:coverage
+
       - name: Build
         run: pnpm build
 
+  audit:
+    name: Security audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+          run_install: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Security audit
+        run: pnpm audit:ci
+        continue-on-error: true
+
+  bundle-size:
+    name: Bundle size check
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+          run_install: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build workspace deps
+        run: pnpm -w build:deps
+
+      - name: Build web app
+        run: pnpm --filter @kp/web build
+
+      - name: Check bundle size
+        run: pnpm size
+
   e2e:
+    name: E2E tests
     runs-on: ubuntu-latest
     needs: test
     # To skip e2e, define a repo variable SKIP_E2E=1

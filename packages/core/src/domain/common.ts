@@ -16,5 +16,5 @@ export const BaseEntityFields = {
   createdAtISO: IsoString,
   updatedAtISO: IsoString,
   schemaVersion: z.number().int().nonnegative(),
-  isDeleted: z.boolean().optional()
+  isDeleted: z.boolean().optional(),
 };

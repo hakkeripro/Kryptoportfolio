@@ -6,7 +6,9 @@ import { ensureDefaultSettings } from './ensureDefaultSettings';
 export async function rebuildDerivedCaches(opts?: { daysBack?: number }) {
   await ensureWebDbOpen();
   const db = getWebDb();
-  const settings = ((await db.settings.get('settings_1')) as Settings | undefined) ?? (await ensureDefaultSettings());
+  const settings =
+    ((await db.settings.get('settings_1')) as Settings | undefined) ??
+    (await ensureDefaultSettings());
 
   const events = await db.ledgerEvents.toArray();
 
@@ -45,7 +47,7 @@ export async function rebuildDerivedCaches(opts?: { daysBack?: number }) {
 
     const snaps = rebuildPortfolioSnapshots(events, settings, allPrices, {
       daysBack: opts?.daysBack ?? 365,
-      rangeStartDayISO: earliestChangedDayISO
+      rangeStartDayISO: earliestChangedDayISO,
     });
 
     // If we have an incremental range, replace only that suffix. If not, do a full rebuild.

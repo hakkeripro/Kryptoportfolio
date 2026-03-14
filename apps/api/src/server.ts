@@ -1,6 +1,5 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
-import jwt from '@fastify/jwt';
 import rateLimit from '@fastify/rate-limit';
 import { z } from 'zod';
 import { ZodError } from 'zod';
@@ -25,7 +24,7 @@ const EnvSchema = z.object({
   VAPID_PRIVATE_KEY: z.string().optional(),
   VAPID_SUBJECT: z.string().optional(),
   ALERT_RUNNER_INTERVAL_SEC: z.string().default('30'),
-  TEST_MODE: z.string().optional()
+  TEST_MODE: z.string().optional(),
 });
 
 const env = EnvSchema.parse(process.env);
@@ -39,11 +38,10 @@ const testMode =
   process.env.CI === '1' ||
   String(env.DB_FILE ?? '').includes('e2e.sqlite');
 
-
 const app = Fastify({
   logger: {
-    level: process.env.NODE_ENV === 'test' ? 'silent' : 'info'
-  }
+    level: process.env.NODE_ENV === 'test' ? 'silent' : 'info',
+  },
 });
 
 // Normalize validation/auth errors into consistent HTTP responses
@@ -53,11 +51,8 @@ app.setErrorHandler((err, _req, reply) => {
     return reply.status(400).send({ error: 'validation_error', issues: err.issues });
   }
 
-  // jwt/auth errors
-  if ((err as any)?.code === 'FST_JWT_NO_AUTHORIZATION_IN_HEADER') {
-    return reply.status(401).send({ error: 'unauthorized' });
-  }
-  if ((err as any)?.code === 'FST_JWT_AUTHORIZATION_TOKEN_INVALID') {
+  // auth errors (jose-based)
+  if (err instanceof Error && err.message === 'unauthorized') {
     return reply.status(401).send({ error: 'unauthorized' });
   }
 
@@ -74,21 +69,17 @@ app.decorate('config', {
   // Bind explicitly to IPv4 localhost by default to avoid Windows `localhost`/IPv6/HTTP.sys surprises.
   // Override with HOST env var if you want 0.0.0.0 for LAN access.
   host: env.HOST ?? '127.0.0.1',
-  alertRunnerIntervalSec: Number(env.ALERT_RUNNER_INTERVAL_SEC)
+  alertRunnerIntervalSec: Number(env.ALERT_RUNNER_INTERVAL_SEC),
 });
 
 app.register(cors, {
   origin: env.CORS_ORIGIN === '*' ? true : env.CORS_ORIGIN.split(',').map((s) => s.trim()),
-  credentials: true
+  credentials: true,
 });
 
 app.register(rateLimit, {
   max: 100,
-  timeWindow: '1 minute'
-});
-
-app.register(jwt, {
-  secret: env.JWT_SECRET
+  timeWindow: '1 minute',
 });
 
 app.decorate('db', await initDb(env.DB_FILE));
@@ -102,7 +93,6 @@ registerPushRoutes(app);
 registerAlertRoutes(app);
 registerImportRoutes(app);
 registerCoingeckoRoutes(app);
-
 
 // Runner (server-side alerts)
 startAlertRunner(app);

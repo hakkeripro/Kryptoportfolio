@@ -1,53 +1,8 @@
 import { test, expect } from '@playwright/test';
-
-async function waitForToken(page: any) {
-  await page.waitForFunction(() => {
-    const raw = localStorage.getItem('kp_app_state_v3');
-    if (!raw) return false;
-    try {
-      const obj = JSON.parse(raw);
-      return !!obj?.state?.token;
-    } catch {
-      return false;
-    }
-  }, null, { timeout: 10_000 });
-}
-
-async function resetApp(page: any, request: any) {
-  const r = await request.post('http://localhost:8788/__test/reset');
-  if (!r.ok()) {
-    throw new Error(`API test mode not enabled (expected /__test/reset 200): ${r.status()} ${await r.text()}`);
-  }
-  await page.goto('/onboarding');
-  await page.evaluate(async () => {
-    localStorage.clear();
-    sessionStorage.clear();
-    await new Promise<void>((resolve) => {
-      const req = indexedDB.deleteDatabase('kp_web_v3');
-      req.onsuccess = () => resolve();
-      req.onerror = () => resolve();
-      req.onblocked = () => resolve();
-    });
-  });
-}
+import { resetApp, signupAndSetupVault } from './helpers';
 
 async function onboardAndRegister(page: any) {
-  await page.goto('/onboarding');
-
-  await page.getByTestId('form-vault-passphrase').fill('passphrase123');
-  await page.getByTestId('form-vault-passphrase-confirm').fill('passphrase123');
-  await page.getByTestId('btn-create-vault').click();
-  await expect(page.getByTestId('badge-unlocked')).toBeVisible();
-
-  const email = `e2e_${Date.now()}@example.com`;
-  await page.getByTestId('form-auth-email').fill(email);
-  await page.getByTestId('form-auth-password').fill('supersecret1');
-  await page.getByTestId('btn-register').click();
-  // Wait until auth token is persisted (register/login completed)
-  await waitForToken(page);
-
-  await page.getByTestId('btn-finish-onboarding').click();
-  await expect(page.getByTestId('nav-dashboard')).toBeVisible();
+  await signupAndSetupVault(page);
 }
 
 async function runFixtureImport(page: any) {
@@ -129,12 +84,17 @@ test('server alerts: empty local list does not clear server rules when cancelled
   const id = String(rowId ?? '').replace('row-alert-', '');
   await page.getByTestId(`btn-delete-alert-${id}`).click();
 
-  // Re-enable on server: should show a confirm dialog. Cancel should NOT clear server rules.
+  // "Sync rules to server" with 0 local alerts shows confirm dialog. Dismissing cancels the action.
   page.once('dialog', async (d) => {
     await d.dismiss();
   });
   await page.getByTestId('btn-enable-server-alerts').click();
-  await expect(page.getByTestId('txt-alert-server-message')).toContainText('kept existing rules');
+  // No server message should appear (action was cancelled)
+  await page.waitForTimeout(500);
+
+  // "Enable delivery" button keeps existing server rules via enable_only mode.
+  await page.getByTestId('btn-enable-delivery').click();
+  await expect(page.getByTestId('txt-alert-server-message')).toContainText('existing rules kept', { timeout: 20_000 });
 
   await page.getByTestId('btn-refresh-server-status').click();
   await expect(page.getByTestId('box-alerts-server-status')).toContainText('1/1');

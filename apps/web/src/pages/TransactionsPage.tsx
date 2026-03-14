@@ -33,7 +33,7 @@ const EVENT_TYPES: LedgerEvent['type'][] = [
   'TRANSFER',
   'REWARD',
   'STAKING_REWARD',
-  'AIRDROP'
+  'AIRDROP',
 ];
 
 type FormState = {
@@ -75,7 +75,7 @@ function blankForm(baseCurrencyAssetId: string): FormState {
     feeAmount: '',
     feeValueBase: '',
     externalRef: '',
-    notes: ''
+    notes: '',
   };
 }
 
@@ -89,7 +89,8 @@ export default function TransactionsPage() {
   const dbState = useDbQuery(
     async (db) => {
       await ensureWebDbOpen();
-      const settings = ((await db.settings.get('settings_1')) as any) ?? (await ensureDefaultSettings());
+      const settings =
+        ((await db.settings.get('settings_1')) as any) ?? (await ensureDefaultSettings());
       const baseCurrency = String(settings.baseCurrency ?? 'EUR').toUpperCase();
       const baseCurrencyAssetId = `asset_${baseCurrency.toLowerCase()}`;
 
@@ -122,13 +123,19 @@ export default function TransactionsPage() {
       assets: [] as any[],
       accounts: [] as any[],
       events: [] as any[],
-      replacedBy: new Map<string, string>()
-    }
+      replacedBy: new Map<string, string>(),
+    },
   );
 
   const baseCurrency = dbState.data.baseCurrency;
-  const assetsById = useMemo(() => new Map(dbState.data.assets.map((a: any) => [a.id, a])), [dbState.data.assets]);
-  const accountsById = useMemo(() => new Map(dbState.data.accounts.map((a: any) => [a.id, a])), [dbState.data.accounts]);
+  const assetsById = useMemo(
+    () => new Map(dbState.data.assets.map((a: any) => [a.id, a])),
+    [dbState.data.assets],
+  );
+  const accountsById = useMemo(
+    () => new Map(dbState.data.accounts.map((a: any) => [a.id, a])),
+    [dbState.data.accounts],
+  );
 
   const [form, setForm] = useState<FormState>(() => blankForm(dbState.data.baseCurrencyAssetId));
   const [saving, setSaving] = useState(false);
@@ -153,7 +160,7 @@ export default function TransactionsPage() {
       feeAmount: fmt((e as any).feeAmount),
       feeValueBase: fmt((e as any).feeValueBase),
       externalRef: (e as any).externalRef ?? '',
-      notes: (e as any).notes ?? ''
+      notes: (e as any).notes ?? '',
     });
   }
 
@@ -170,7 +177,10 @@ export default function TransactionsPage() {
       const now = new Date().toISOString();
 
       const base: any = {
-        id: form.mode === 'edit' && form.targetId ? buildReplacementId(form.targetId) : `ev_manual_${Date.now()}`,
+        id:
+          form.mode === 'edit' && form.targetId
+            ? buildReplacementId(form.targetId)
+            : `ev_manual_${Date.now()}`,
         schemaVersion: 1,
         createdAtISO: now,
         updatedAtISO: now,
@@ -180,11 +190,12 @@ export default function TransactionsPage() {
         assetId: form.assetId,
         amount: form.amount.trim() || '0',
         ...(form.notes.trim() ? { notes: form.notes.trim() } : {}),
-        ...(form.externalRef.trim() ? { externalRef: form.externalRef.trim() } : {})
+        ...(form.externalRef.trim() ? { externalRef: form.externalRef.trim() } : {}),
       };
 
       // Optional accountId override if the user has only one exchange account.
-      if (dbState.data.accounts.some((a: any) => a.id === 'acct_coinbase')) base.accountId = 'acct_coinbase';
+      if (dbState.data.accounts.some((a: any) => a.id === 'acct_coinbase'))
+        base.accountId = 'acct_coinbase';
 
       if (form.type === 'BUY' || form.type === 'SELL') {
         base.pricePerUnitBase = form.pricePerUnitBase.trim() || '0';
@@ -199,7 +210,11 @@ export default function TransactionsPage() {
       if (form.feeBase.trim()) base.feeBase = form.feeBase.trim();
 
       // Optional token-fee fields
-      if (form.feeAssetId && form.feeAssetId !== dbState.data.baseCurrencyAssetId && form.feeAmount.trim()) {
+      if (
+        form.feeAssetId &&
+        form.feeAssetId !== dbState.data.baseCurrencyAssetId &&
+        form.feeAmount.trim()
+      ) {
         base.feeAssetId = form.feeAssetId;
         base.feeAmount = form.feeAmount.trim();
         if (form.feeValueBase.trim()) base.feeValueBase = form.feeValueBase.trim();
@@ -246,7 +261,7 @@ export default function TransactionsPage() {
         timestampISO: now,
         isDeleted: true,
         replacesEventId: String(e.id),
-        notes: e.notes ? `${String(e.notes)} (deleted)` : 'deleted'
+        notes: e.notes ? `${String(e.notes)} (deleted)` : 'deleted',
       };
 
       const parsed = LedgerEventSchema.parse(tomb);
@@ -265,7 +280,7 @@ export default function TransactionsPage() {
     return dbState.data.events.map((e: any) => ({
       ...e,
       assetSym: byId.get(e.assetId)?.symbol ?? e.assetId,
-      accountName: accountsById.get(e.accountId)?.name ?? e.accountId
+      accountName: accountsById.get(e.accountId)?.name ?? e.accountId,
     }));
   }, [dbState.data.events, assetsById, accountsById]);
 
@@ -278,7 +293,9 @@ export default function TransactionsPage() {
     <div className="space-y-4">
       <div className="flex items-end justify-between flex-wrap gap-3">
         <h1 className="text-xl font-semibold">Transactions</h1>
-        <div className="text-xs text-slate-400">Ledger is append-only. Edit = replacement. Delete = tombstone (append-only).</div>
+        <div className="text-xs text-slate-400">
+          Ledger is append-only. Edit = replacement. Delete = tombstone (append-only).
+        </div>
       </div>
 
       {msg ? (
@@ -290,9 +307,14 @@ export default function TransactionsPage() {
         </div>
       ) : null}
 
-      <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4" data-testid="panel-event-form">
+      <div
+        className="rounded-xl border border-slate-800 bg-slate-900/40 p-4"
+        data-testid="panel-event-form"
+      >
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <div className="font-medium">{form.mode === 'edit' ? `Edit (replacement) ${form.targetId}` : 'Add manual event'}</div>
+          <div className="font-medium">
+            {form.mode === 'edit' ? `Edit (replacement) ${form.targetId}` : 'Add manual event'}
+          </div>
           {form.mode === 'edit' ? (
             <button
               className="rounded-lg border border-slate-700 px-3 py-2 text-sm hover:bg-slate-800"
@@ -507,7 +529,10 @@ export default function TransactionsPage() {
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4" data-testid="panel-ledger">
+      <div
+        className="rounded-xl border border-slate-800 bg-slate-900/40 p-4"
+        data-testid="panel-ledger"
+      >
         <div className="flex items-center justify-between">
           <div className="font-medium">Ledger events</div>
           <div className="text-xs text-slate-400">{eventsView.length} events</div>
@@ -523,7 +548,10 @@ export default function TransactionsPage() {
               renderItem={(e: any) => {
                 const replacedBy = dbState.data.replacedBy.get(String(e.id));
                 return (
-                  <div className="h-full bg-slate-950/40 px-3 py-3 flex items-start justify-between gap-3 border-b border-slate-800" data-testid={`row-ledger-${e.id}`}>
+                  <div
+                    className="h-full bg-slate-950/40 px-3 py-3 flex items-start justify-between gap-3 border-b border-slate-800"
+                    data-testid={`row-ledger-${e.id}`}
+                  >
                     <div className="min-w-0 overflow-hidden">
                       <div className="flex items-center gap-2 flex-wrap overflow-hidden">
                         <span className="text-sm font-semibold">{e.type}</span>
@@ -532,23 +560,34 @@ export default function TransactionsPage() {
                         </span>
                         {e.type === 'SWAP' ? (
                           <span className="text-xs text-slate-400 font-mono truncate">
-                            → {fmt((e as any).amountOut)} {assetsById.get((e as any).assetOutId)?.symbol ?? (e as any).assetOutId}
+                            → {fmt((e as any).amountOut)}{' '}
+                            {assetsById.get((e as any).assetOutId)?.symbol ?? (e as any).assetOutId}
                           </span>
                         ) : null}
                         {e.isDeleted ? (
-                          <span className="text-xs rounded bg-red-900/40 px-2 py-0.5" data-testid="badge-ledger-deleted">
+                          <span
+                            className="text-xs rounded bg-red-900/40 px-2 py-0.5"
+                            data-testid="badge-ledger-deleted"
+                          >
                             deleted
                           </span>
                         ) : null}
                         {replacedBy ? (
-                          <span className="text-xs rounded bg-slate-800 px-2 py-0.5" data-testid="badge-ledger-replaced">
+                          <span
+                            className="text-xs rounded bg-slate-800 px-2 py-0.5"
+                            data-testid="badge-ledger-replaced"
+                          >
                             replaced
                           </span>
                         ) : null}
                       </div>
                       <div className="mt-1 text-xs text-slate-400 truncate">
                         {new Date(e.timestampISO).toLocaleString()} • {e.accountName}
-                        {e.externalRef ? <span className="ml-2 font-mono">{String(e.externalRef).slice(0, 26)}</span> : null}
+                        {e.externalRef ? (
+                          <span className="ml-2 font-mono">
+                            {String(e.externalRef).slice(0, 26)}
+                          </span>
+                        ) : null}
                       </div>
                       {e.feeBase || (e as any).feeAssetId ? (
                         <div className="mt-1 text-xs text-slate-400 truncate">
@@ -557,12 +596,18 @@ export default function TransactionsPage() {
                             <>
                               {' '}
                               • token fee: {fmt((e as any).feeAmount)}{' '}
-                              {assetsById.get((e as any).feeAssetId)?.symbol ?? (e as any).feeAssetId} (value {fmt((e as any).feeValueBase)} {baseCurrency})
+                              {assetsById.get((e as any).feeAssetId)?.symbol ??
+                                (e as any).feeAssetId}{' '}
+                              (value {fmt((e as any).feeValueBase)} {baseCurrency})
                             </>
                           ) : null}
                         </div>
                       ) : null}
-                      {replacedBy ? <div className="mt-1 text-xs text-slate-400 truncate">Replaced by: {replacedBy}</div> : null}
+                      {replacedBy ? (
+                        <div className="mt-1 text-xs text-slate-400 truncate">
+                          Replaced by: {replacedBy}
+                        </div>
+                      ) : null}
                     </div>
                     <div className="flex gap-2">
                       <button
@@ -587,7 +632,9 @@ export default function TransactionsPage() {
               }}
             />
           ) : (
-            <div className="text-sm text-slate-400">No events yet. Import from an exchange or add manually above.</div>
+            <div className="text-sm text-slate-400">
+              No events yet. Import from an exchange or add manually above.
+            </div>
           )}
         </div>
       </div>
@@ -605,8 +652,12 @@ export default function TransactionsPage() {
           <div className="w-full max-w-2xl rounded-2xl border border-slate-700 bg-slate-950 p-4 shadow-2xl">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <div className="text-lg font-semibold truncate">{selectedEvent.type} • {selectedEvent.assetSym}</div>
-                <div className="mt-1 text-xs text-slate-400 font-mono truncate">{selectedEvent.id}</div>
+                <div className="text-lg font-semibold truncate">
+                  {selectedEvent.type} • {selectedEvent.assetSym}
+                </div>
+                <div className="mt-1 text-xs text-slate-400 font-mono truncate">
+                  {selectedEvent.id}
+                </div>
               </div>
               <button
                 className="rounded-lg border border-slate-700 px-3 py-2 text-sm hover:bg-slate-800"
@@ -618,20 +669,54 @@ export default function TransactionsPage() {
             </div>
 
             <div className="mt-3 grid gap-2 text-sm">
-              <div className="flex items-center justify-between"><span className="text-slate-400">Time</span><span className="font-mono">{new Date(selectedEvent.timestampISO).toLocaleString()}</span></div>
-              <div className="flex items-center justify-between"><span className="text-slate-400">Account</span><span className="font-mono">{selectedEvent.accountName}</span></div>
-              <div className="flex items-center justify-between"><span className="text-slate-400">Amount</span><span className="font-mono">{fmt(selectedEvent.amount)} {selectedEvent.assetSym}</span></div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-400">Time</span>
+                <span className="font-mono">
+                  {new Date(selectedEvent.timestampISO).toLocaleString()}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-400">Account</span>
+                <span className="font-mono">{selectedEvent.accountName}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-400">Amount</span>
+                <span className="font-mono">
+                  {fmt(selectedEvent.amount)} {selectedEvent.assetSym}
+                </span>
+              </div>
               {(selectedEvent as any).assetOutId ? (
-                <div className="flex items-center justify-between"><span className="text-slate-400">Swap out</span><span className="font-mono">{fmt((selectedEvent as any).amountOut)} {assetsById.get((selectedEvent as any).assetOutId)?.symbol ?? (selectedEvent as any).assetOutId}</span></div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-400">Swap out</span>
+                  <span className="font-mono">
+                    {fmt((selectedEvent as any).amountOut)}{' '}
+                    {assetsById.get((selectedEvent as any).assetOutId)?.symbol ??
+                      (selectedEvent as any).assetOutId}
+                  </span>
+                </div>
               ) : null}
               {(selectedEvent as any).feeBase || (selectedEvent as any).feeAssetId ? (
-                <div className="flex items-center justify-between"><span className="text-slate-400">Fee</span><span className="font-mono">{fmt((selectedEvent as any).feeBase)} {baseCurrency}{(selectedEvent as any).feeAssetId ? ` • ${fmt((selectedEvent as any).feeAmount)} ${assetsById.get((selectedEvent as any).feeAssetId)?.symbol ?? (selectedEvent as any).feeAssetId} (value ${fmt((selectedEvent as any).feeValueBase)} ${baseCurrency})` : ''}</span></div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-400">Fee</span>
+                  <span className="font-mono">
+                    {fmt((selectedEvent as any).feeBase)} {baseCurrency}
+                    {(selectedEvent as any).feeAssetId
+                      ? ` • ${fmt((selectedEvent as any).feeAmount)} ${assetsById.get((selectedEvent as any).feeAssetId)?.symbol ?? (selectedEvent as any).feeAssetId} (value ${fmt((selectedEvent as any).feeValueBase)} ${baseCurrency})`
+                      : ''}
+                  </span>
+                </div>
               ) : null}
               {selectedEvent.externalRef ? (
-                <div className="flex items-center justify-between"><span className="text-slate-400">External ref</span><span className="font-mono">{String(selectedEvent.externalRef)}</span></div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-400">External ref</span>
+                  <span className="font-mono">{String(selectedEvent.externalRef)}</span>
+                </div>
               ) : null}
               {selectedEvent.notes ? (
-                <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-2 text-xs" data-testid="box-ledger-notes">
+                <div
+                  className="rounded-lg border border-slate-800 bg-slate-900/40 p-2 text-xs"
+                  data-testid="box-ledger-notes"
+                >
                   {String(selectedEvent.notes)}
                 </div>
               ) : null}
@@ -659,8 +744,13 @@ export default function TransactionsPage() {
               </button>
             </div>
 
-            <details className="mt-4 rounded-xl border border-slate-800 bg-slate-900/40 p-3" data-testid="details-ledger-raw">
-              <summary className="cursor-pointer select-none text-sm text-slate-200">Raw event JSON</summary>
+            <details
+              className="mt-4 rounded-xl border border-slate-800 bg-slate-900/40 p-3"
+              data-testid="details-ledger-raw"
+            >
+              <summary className="cursor-pointer select-none text-sm text-slate-200">
+                Raw event JSON
+              </summary>
               <pre className="mt-2 max-h-[260px] overflow-auto text-xs text-slate-200">
                 {JSON.stringify(selectedEvent, null, 2)}
               </pre>

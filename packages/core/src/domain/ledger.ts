@@ -15,7 +15,7 @@ export const LedgerEventType = z.enum([
   'LEND_WITHDRAW',
   'BORROW',
   'REPAY',
-  'INTEREST_ACCRUAL'
+  'INTEREST_ACCRUAL',
 ]);
 
 export const LedgerEventBase = z.object({
@@ -33,32 +33,82 @@ export const LedgerEventBase = z.object({
   notes: z.string().optional(),
   externalRef: z.string().optional(),
   tags: z.array(z.string()).optional(),
-  replacesEventId: UuidString.optional()
+  replacesEventId: UuidString.optional(),
 });
 
 // Swap specifics
 export const SwapFields = z.object({
   assetOutId: UuidString,
   amountOut: DecimalString,
-  valuationBase: DecimalString.optional()
+  valuationBase: DecimalString.optional(),
 });
 
 export const LedgerEvent = z.discriminatedUnion('type', [
-  LedgerEventBase.extend({ type: z.literal('BUY'), assetId: UuidString, amount: DecimalString, pricePerUnitBase: DecimalString }),
-  LedgerEventBase.extend({ type: z.literal('SELL'), assetId: UuidString, amount: DecimalString, pricePerUnitBase: DecimalString }),
-  LedgerEventBase.extend({ type: z.literal('SWAP'), assetId: UuidString, amount: DecimalString }).merge(SwapFields),
-  LedgerEventBase.extend({ type: z.literal('TRANSFER'), assetId: UuidString, amount: DecimalString }).extend({ fromAccountId: UuidString.optional(), toAccountId: UuidString.optional() }),
-  LedgerEventBase.extend({ type: z.literal('REWARD'), assetId: UuidString, amount: DecimalString }).extend({ fmvPerUnitBase: DecimalString.optional(), fmvTotalBase: DecimalString.optional() }),
-  LedgerEventBase.extend({ type: z.literal('STAKING_REWARD'), assetId: UuidString, amount: DecimalString }).extend({ fmvPerUnitBase: DecimalString.optional(), fmvTotalBase: DecimalString.optional() }),
-  LedgerEventBase.extend({ type: z.literal('AIRDROP'), assetId: UuidString, amount: DecimalString }).extend({ fmvPerUnitBase: DecimalString.optional(), fmvTotalBase: DecimalString.optional() }),
+  LedgerEventBase.extend({
+    type: z.literal('BUY'),
+    assetId: UuidString,
+    amount: DecimalString,
+    pricePerUnitBase: DecimalString,
+  }),
+  LedgerEventBase.extend({
+    type: z.literal('SELL'),
+    assetId: UuidString,
+    amount: DecimalString,
+    pricePerUnitBase: DecimalString,
+  }),
+  LedgerEventBase.extend({
+    type: z.literal('SWAP'),
+    assetId: UuidString,
+    amount: DecimalString,
+  }).merge(SwapFields),
+  LedgerEventBase.extend({
+    type: z.literal('TRANSFER'),
+    assetId: UuidString,
+    amount: DecimalString,
+  }).extend({ fromAccountId: UuidString.optional(), toAccountId: UuidString.optional() }),
+  LedgerEventBase.extend({
+    type: z.literal('REWARD'),
+    assetId: UuidString,
+    amount: DecimalString,
+  }).extend({ fmvPerUnitBase: DecimalString.optional(), fmvTotalBase: DecimalString.optional() }),
+  LedgerEventBase.extend({
+    type: z.literal('STAKING_REWARD'),
+    assetId: UuidString,
+    amount: DecimalString,
+  }).extend({ fmvPerUnitBase: DecimalString.optional(), fmvTotalBase: DecimalString.optional() }),
+  LedgerEventBase.extend({
+    type: z.literal('AIRDROP'),
+    assetId: UuidString,
+    amount: DecimalString,
+  }).extend({ fmvPerUnitBase: DecimalString.optional(), fmvTotalBase: DecimalString.optional() }),
   // DeFi minimal structures
-  LedgerEventBase.extend({ type: z.literal('LP_DEPOSIT'), assetId: UuidString, amount: DecimalString }),
-  LedgerEventBase.extend({ type: z.literal('LP_WITHDRAW'), assetId: UuidString, amount: DecimalString }),
-  LedgerEventBase.extend({ type: z.literal('LEND_DEPOSIT'), assetId: UuidString, amount: DecimalString }),
-  LedgerEventBase.extend({ type: z.literal('LEND_WITHDRAW'), assetId: UuidString, amount: DecimalString }),
+  LedgerEventBase.extend({
+    type: z.literal('LP_DEPOSIT'),
+    assetId: UuidString,
+    amount: DecimalString,
+  }),
+  LedgerEventBase.extend({
+    type: z.literal('LP_WITHDRAW'),
+    assetId: UuidString,
+    amount: DecimalString,
+  }),
+  LedgerEventBase.extend({
+    type: z.literal('LEND_DEPOSIT'),
+    assetId: UuidString,
+    amount: DecimalString,
+  }),
+  LedgerEventBase.extend({
+    type: z.literal('LEND_WITHDRAW'),
+    assetId: UuidString,
+    amount: DecimalString,
+  }),
   LedgerEventBase.extend({ type: z.literal('BORROW'), assetId: UuidString, amount: DecimalString }),
   LedgerEventBase.extend({ type: z.literal('REPAY'), assetId: UuidString, amount: DecimalString }),
-  LedgerEventBase.extend({ type: z.literal('INTEREST_ACCRUAL'), assetId: UuidString, amount: DecimalString })
+  LedgerEventBase.extend({
+    type: z.literal('INTEREST_ACCRUAL'),
+    assetId: UuidString,
+    amount: DecimalString,
+  }),
 ]);
 
 export type LedgerEvent = z.infer<typeof LedgerEvent>;

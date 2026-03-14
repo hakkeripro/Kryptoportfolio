@@ -17,7 +17,9 @@ export async function buildMirrorState(): Promise<MirrorState> {
 
   const nowISO = new Date().toISOString();
 
-  const snapshots = (await db.portfolioSnapshots.orderBy('dayISO').toArray()) as PortfolioSnapshot[];
+  const snapshots = (await db.portfolioSnapshots
+    .orderBy('dayISO')
+    .toArray()) as PortfolioSnapshot[];
   const latest = snapshots.length ? snapshots[snapshots.length - 1] : null;
 
   let peakValue = new Decimal(0);
@@ -66,8 +68,8 @@ export async function buildMirrorState(): Promise<MirrorState> {
       const first = inWeek[0];
       const lastW = inWeek[inWeek.length - 1];
       priceHistory[assetId] = [
-        { timestampISO: String(first.timestampISO), priceBase: String(first.priceBase) },
-        { timestampISO: String(lastW.timestampISO), priceBase: String(lastW.priceBase) }
+        { timestampISO: String(first!.timestampISO), priceBase: String(first!.priceBase) },
+        { timestampISO: String(lastW!.timestampISO), priceBase: String(lastW!.priceBase) },
       ];
     }
   }
@@ -85,7 +87,7 @@ export async function buildMirrorState(): Promise<MirrorState> {
     portfolioHistory,
     assetPrices,
     priceHistory,
-    allocationPct
+    allocationPct,
   };
 
   // Validate and return normalized output

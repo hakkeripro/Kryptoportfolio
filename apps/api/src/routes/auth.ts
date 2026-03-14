@@ -1,11 +1,11 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { hashPassword, normalizeEmail, verifyPassword, newId } from '../services/auth.js';
+import { hashPassword, normalizeEmail, verifyPassword, newId, changePassword } from '../services/auth.js';
 import { signToken, requireAuth, getUserId } from '../services/authHooks.js';
 
 const RegisterSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(8).max(128)
+  password: z.string().min(8).max(128),
 });
 
 const LoginSchema = RegisterSchema;
@@ -26,7 +26,7 @@ export function registerAuthRoutes(app: FastifyInstance) {
       userId,
       email,
       passwordHash,
-      createdAtISO
+      createdAtISO,
     ]);
 
     const token = await signToken(app, userId, email);
@@ -38,7 +38,7 @@ export function registerAuthRoutes(app: FastifyInstance) {
     const email = normalizeEmail(body.email);
     const user = app.db.getOne<{ id: string; passwordHash: string; createdAtISO: string }>(
       'SELECT id,passwordHash,createdAtISO FROM users WHERE email=?',
-      [email]
+      [email],
     );
     if (!user) return reply.code(401).send({ error: 'invalid_credentials' });
 
@@ -49,11 +49,33 @@ export function registerAuthRoutes(app: FastifyInstance) {
     return reply.send({ user: { id: user.id, email, createdAtISO: user.createdAtISO }, token });
   });
 
+  const ChangePasswordSchema = z.object({
+    currentPassword: z.string().min(1),
+    newPassword: z.string().min(8).max(128),
+  });
+
+  app.put('/v1/auth/password', { preHandler: requireAuth }, async (req, reply) => {
+    const body = ChangePasswordSchema.parse(req.body);
+    const userId = getUserId(req);
+
+    const user = app.db.getOne<{ passwordHash: string }>(
+      'SELECT passwordHash FROM users WHERE id=?',
+      [userId],
+    );
+    if (!user) return reply.code(401).send({ error: 'unauthorized' });
+
+    const newHash = await changePassword(body.currentPassword, body.newPassword, user.passwordHash);
+    if (!newHash) return reply.code(401).send({ error: 'wrong_password' });
+
+    app.db.exec('UPDATE users SET passwordHash=? WHERE id=?', [newHash, userId]);
+    return reply.send({ ok: true });
+  });
+
   app.get('/v1/me', { preHandler: requireAuth }, async (req) => {
     const userId = getUserId(req);
     const user = app.db.getOne<{ id: string; email: string; createdAtISO: string }>(
       'SELECT id,email,createdAtISO FROM users WHERE id=?',
-      [userId]
+      [userId],
     );
     return { user };
   });

@@ -19,14 +19,19 @@ function toFixed(x: Decimal): string {
 
 export function inferImportedPricePointsFromLedger(
   allEvents: LedgerEvent[],
-  opts: { provider?: string }
+  opts: { provider?: string },
 ): PricePoint[] {
   const provider = opts.provider ?? 'import:ledger';
   const events = normalizeActiveLedger(allEvents);
   const out: PricePoint[] = [];
   const now = new Date().toISOString();
 
-  const push = (assetId: string, timestampISO: string, priceBase: Decimal, source: PricePoint['source']) => {
+  const push = (
+    assetId: string,
+    timestampISO: string,
+    priceBase: Decimal,
+    source: PricePoint['source'],
+  ) => {
     if (!priceBase.isFinite() || priceBase.lte(0)) return;
     out.push({
       id: `pp_${provider}_${assetId}_${timestampISO}`,
@@ -37,7 +42,7 @@ export function inferImportedPricePointsFromLedger(
       provider,
       timestampISO,
       priceBase: toFixed(priceBase),
-      source
+      source,
     });
   };
 
@@ -48,8 +53,10 @@ export function inferImportedPricePointsFromLedger(
       const valuation = d((e as any).valuationBase).abs();
       const amtIn = d(e.amount).abs();
       const amtOut = d((e as any).amountOut).abs();
-      if (amtIn.gt(0) && valuation.gt(0)) push(e.assetId, e.timestampISO, valuation.div(amtIn), 'imported');
-      if (amtOut.gt(0) && valuation.gt(0)) push((e as any).assetOutId, e.timestampISO, valuation.div(amtOut), 'imported');
+      if (amtIn.gt(0) && valuation.gt(0))
+        push(e.assetId, e.timestampISO, valuation.div(amtIn), 'imported');
+      if (amtOut.gt(0) && valuation.gt(0))
+        push((e as any).assetOutId, e.timestampISO, valuation.div(amtOut), 'imported');
     } else if (e.type === 'TRANSFER') {
       // Sometimes transfers include a fiat native_amount valuation from the exchange; treat it as an imported price.
       const anyNative = (e as any).nativeAmountBase ? d((e as any).nativeAmountBase) : null;
@@ -73,7 +80,7 @@ export function rebuildPortfolioSnapshots(
   allEvents: LedgerEvent[],
   settings: Settings,
   pricePoints: PricePoint[],
-  opts: { daysBack?: number; rangeStartDayISO?: string }
+  opts: { daysBack?: number; rangeStartDayISO?: string },
 ): PortfolioSnapshot[] {
   const events = normalizeActiveLedger(allEvents);
   if (!events.length) return [];
@@ -100,7 +107,8 @@ export function rebuildPortfolioSnapshots(
   // Index price points per asset sorted
   const pricesByAsset: Record<string, PricePoint[]> = {};
   for (const p of pricePoints) (pricesByAsset[p.assetId] ??= []).push(p);
-  for (const arr of Object.values(pricesByAsset)) arr.sort((a, b) => a.timestampISO.localeCompare(b.timestampISO));
+  for (const arr of Object.values(pricesByAsset))
+    arr.sort((a, b) => a.timestampISO.localeCompare(b.timestampISO));
 
   // Marker index: dayISO -> markers
   const markersByDay: Record<string, TxMarker[]> = {};
@@ -108,9 +116,15 @@ export function rebuildPortfolioSnapshots(
     const fee = d(feeValueBaseOrZero(e)).abs();
     const valueBase = (() => {
       if (e.type === 'BUY' || e.type === 'SELL') {
-        return toFixed(d(e.amount).abs().mul(d(e.pricePerUnitBase).abs()).add(e.type === 'BUY' ? fee : fee.neg()));
+        return toFixed(
+          d(e.amount)
+            .abs()
+            .mul(d(e.pricePerUnitBase).abs())
+            .add(e.type === 'BUY' ? fee : fee.neg()),
+        );
       }
-      if (e.type === 'SWAP') return (e as any).valuationBase ? toFixed(d((e as any).valuationBase).abs()) : undefined;
+      if (e.type === 'SWAP')
+        return (e as any).valuationBase ? toFixed(d((e as any).valuationBase).abs()) : undefined;
       return undefined;
     })();
     const dayISO = e.timestampISO.slice(0, 10);
@@ -119,7 +133,7 @@ export function rebuildPortfolioSnapshots(
       type: e.type,
       timestampISO: e.timestampISO,
       assetId: e.assetId ?? 'unknown',
-      ...(valueBase ? { valueBase } : {})
+      ...(valueBase ? { valueBase } : {}),
     });
   }
 
@@ -175,7 +189,7 @@ export function rebuildPortfolioSnapshots(
         amount: toFixed(amount),
         valueBase: toFixed(value),
         costBasisBase: toFixed(cost),
-        unrealizedPnlBase: toFixed(unrl)
+        unrealizedPnlBase: toFixed(unrl),
       };
     });
 
@@ -189,7 +203,7 @@ export function rebuildPortfolioSnapshots(
       realizedPnlBaseToDate: engine.getRealizedPnlBaseToDate(),
       unrealizedPnlBase: toFixed(unrealized),
       positions: pos,
-      txMarkers: dayMarkers
+      txMarkers: dayMarkers,
     });
   }
 

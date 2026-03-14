@@ -53,7 +53,11 @@ export default class ErrorBoundary extends React.Component<Props, State> {
           </pre>
 
           <div className="mt-4 text-sm text-slate-200">
-            If this keeps happening, go to <a className="underline" href="/onboarding">Onboarding</a> and unlock the vault.
+            If this keeps happening, go to{' '}
+            <a className="underline" href="/onboarding">
+              Onboarding
+            </a>{' '}
+            and unlock the vault.
           </div>
         </div>
       </div>

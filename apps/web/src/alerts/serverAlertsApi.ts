@@ -7,13 +7,13 @@ const StatusSchemaA = z.object({
   ok: z.boolean().optional(),
   enabledCount: z.number().int().nonnegative().optional(),
   totalCount: z.number().int().nonnegative().optional(),
-  mirrorUpdatedAtISO: z.string().datetime().nullable().optional()
+  mirrorUpdatedAtISO: z.string().datetime().nullable().optional(),
 });
 
 const StatusSchemaB = z.object({
   enabled: z.number().int().nonnegative().optional(),
   total: z.number().int().nonnegative().optional(),
-  mirrorUpdatedAtISO: z.string().datetime().nullable().optional()
+  mirrorUpdatedAtISO: z.string().datetime().nullable().optional(),
 });
 
 const TriggerSchema = z.object({
@@ -22,13 +22,19 @@ const TriggerSchema = z.object({
   triggeredAtISO: z.string().datetime(),
   source: z.string().optional(),
   context: z.any().optional(),
-  contextJson: z.string().optional()
+  contextJson: z.string().optional(),
 });
 
 const LogSchemaA = z.object({ logs: z.array(TriggerSchema).optional() });
 const LogSchemaB = z.object({ triggers: z.array(TriggerSchema).optional() });
 
-const EnableRespSchema = z.object({ ok: z.boolean().optional(), evaluated: z.number().optional(), triggered: z.number().optional() }).passthrough();
+const EnableRespSchema = z
+  .object({
+    ok: z.boolean().optional(),
+    evaluated: z.number().optional(),
+    triggered: z.number().optional(),
+  })
+  .passthrough();
 
 const VapidSchema = z.object({ enabled: z.boolean(), publicKey: z.string().nullable() });
 
@@ -47,7 +53,7 @@ function authHeaders(token: string | null): HeadersInit {
 export async function getServerAlertsStatus(apiBase: string, token: string | null) {
   const raw = await apiFetch<any>(apiBase, '/v1/alerts/server/status', {
     method: 'GET',
-    headers: { ...authHeaders(token) }
+    headers: { ...authHeaders(token) },
   });
 
   const a = StatusSchemaA.safeParse(raw);
@@ -60,7 +66,7 @@ export async function getServerAlertsStatus(apiBase: string, token: string | nul
       runnerLastRunAtISO: (a.data as any).runnerLastRunAtISO ?? null,
       runnerLastError: (a.data as any).runnerLastError ?? null,
       runnerLastEvaluated: (a.data as any).runnerLastEvaluated ?? null,
-      runnerLastTriggered: (a.data as any).runnerLastTriggered ?? null
+      runnerLastTriggered: (a.data as any).runnerLastTriggered ?? null,
     };
   }
   if (b.success) {
@@ -71,10 +77,18 @@ export async function getServerAlertsStatus(apiBase: string, token: string | nul
       runnerLastRunAtISO: (b.data as any).runnerLastRunAtISO ?? null,
       runnerLastError: (b.data as any).runnerLastError ?? null,
       runnerLastEvaluated: (b.data as any).runnerLastEvaluated ?? null,
-      runnerLastTriggered: (b.data as any).runnerLastTriggered ?? null
+      runnerLastTriggered: (b.data as any).runnerLastTriggered ?? null,
     };
   }
-  return { enabled: 0, total: 0, mirrorUpdatedAtISO: null, runnerLastRunAtISO: null, runnerLastError: null, runnerLastEvaluated: null, runnerLastTriggered: null };
+  return {
+    enabled: 0,
+    total: 0,
+    mirrorUpdatedAtISO: null,
+    runnerLastRunAtISO: null,
+    runnerLastError: null,
+    runnerLastEvaluated: null,
+    runnerLastTriggered: null,
+  };
 }
 
 export async function enableServerAlerts(
@@ -82,13 +96,13 @@ export async function enableServerAlerts(
   token: string,
   alerts: Alert[],
   state: MirrorState,
-  opts?: { mode?: ServerAlertsEnableMode }
+  opts?: { mode?: ServerAlertsEnableMode },
 ) {
   const mode = opts?.mode ?? (alerts.length ? 'replace' : 'enable_only');
   const raw = await apiFetch<any>(apiBase, '/v1/alerts/server/enable', {
     method: 'POST',
     headers: { 'content-type': 'application/json', ...authHeaders(token) },
-    body: JSON.stringify({ mode, alerts, state })
+    body: JSON.stringify({ mode, alerts, state }),
   });
   return EnableRespSchema.parse(raw);
 }
@@ -97,7 +111,7 @@ export async function disableServerAlerts(apiBase: string, token: string) {
   return apiFetch<any>(apiBase, '/v1/alerts/server/disable', {
     method: 'POST',
     headers: { 'content-type': 'application/json', ...authHeaders(token) },
-    body: JSON.stringify({})
+    body: JSON.stringify({}),
   });
 }
 
@@ -105,16 +119,20 @@ export async function updateServerMirrorState(apiBase: string, token: string, st
   const raw = await apiFetch<any>(apiBase, '/v1/alerts/server/state', {
     method: 'POST',
     headers: { 'content-type': 'application/json', ...authHeaders(token) },
-    body: JSON.stringify({ state })
+    body: JSON.stringify({ state }),
   });
   return EnableRespSchema.parse(raw);
 }
 
 export async function getServerAlertLog(apiBase: string, token: string, limit = 50) {
-  const raw = await apiFetch<any>(apiBase, `/v1/alerts/server/log?limit=${encodeURIComponent(String(limit))}`, {
-    method: 'GET',
-    headers: { ...authHeaders(token) }
-  });
+  const raw = await apiFetch<any>(
+    apiBase,
+    `/v1/alerts/server/log?limit=${encodeURIComponent(String(limit))}`,
+    {
+      method: 'GET',
+      headers: { ...authHeaders(token) },
+    },
+  );
   const a = LogSchemaA.safeParse(raw);
   const b = LogSchemaB.safeParse(raw);
   const rows = a.success ? (a.data.logs ?? []) : b.success ? (b.data.triggers ?? []) : [];
@@ -132,7 +150,7 @@ export async function getServerAlertLog(apiBase: string, token: string, limit = 
       alertId: r.alertId ?? null,
       triggeredAtISO: r.triggeredAtISO,
       source: r.source ?? 'server',
-      context: ctx ?? null
+      context: ctx ?? null,
     };
   });
 }
@@ -141,7 +159,7 @@ export async function runServerAlerts(apiBase: string, token: string) {
   const raw = await apiFetch<any>(apiBase, '/v1/alerts/server/run', {
     method: 'POST',
     headers: { 'content-type': 'application/json', ...authHeaders(token) },
-    body: JSON.stringify({})
+    body: JSON.stringify({}),
   });
   return EnableRespSchema.parse(raw);
 }
@@ -156,16 +174,15 @@ export async function subscribeWebPush(apiBase: string, token: string, subscript
   return apiFetch<any>(apiBase, '/v1/push/web/subscribe', {
     method: 'POST',
     headers: { 'content-type': 'application/json', ...authHeaders(token) },
-    body: JSON.stringify({ subscription })
+    body: JSON.stringify({ subscription }),
   });
 }
-
 
 export async function unsubscribeWebPush(apiBase: string, token: string, endpoint: string) {
   return apiFetch<any>(apiBase, '/v1/push/web/unsubscribe', {
     method: 'POST',
     headers: { 'content-type': 'application/json', ...authHeaders(token) },
-    body: JSON.stringify({ endpoint })
+    body: JSON.stringify({ endpoint }),
   });
 }
 
@@ -173,6 +190,6 @@ export async function sendTestWebPush(apiBase: string, token: string) {
   return apiFetch<any>(apiBase, '/v1/push/web/test', {
     method: 'POST',
     headers: { 'content-type': 'application/json', ...authHeaders(token) },
-    body: JSON.stringify({})
+    body: JSON.stringify({}),
   });
 }

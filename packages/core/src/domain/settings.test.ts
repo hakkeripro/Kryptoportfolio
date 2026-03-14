@@ -17,7 +17,7 @@ describe('Settings schema', () => {
       autoRefreshIntervalSec: 300,
       taxProfile: 'GENERIC',
       privacy: { telemetryOptIn: false },
-      notifications: { serverAlertsEnabled: true, devicePushEnabled: false }
+      notifications: { serverAlertsEnabled: true, devicePushEnabled: false },
     });
     expect(s.notifications?.serverAlertsEnabled).toBe(true);
   });

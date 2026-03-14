@@ -90,7 +90,7 @@ async function coinbaseGetJson<T>(cred: CoinbaseCredentials | null, pathOrUri: s
 
   const headers: Record<string, string> = {
     accept: 'application/json',
-    'user-agent': 'kryptoportfolio-v3/coinbase-import'
+    'user-agent': 'kryptoportfolio-v3/coinbase-import',
   };
 
   if (cred) {
@@ -100,7 +100,7 @@ async function coinbaseGetJson<T>(cred: CoinbaseCredentials | null, pathOrUri: s
       keyName: cred.keyName,
       privateKeyPem: cred.privateKeyPem,
       method: 'GET',
-      requestPath: signPath
+      requestPath: signPath,
     });
     headers.authorization = `Bearer ${jwt}`;
   }
@@ -131,15 +131,16 @@ async function coinbaseGetJson<T>(cred: CoinbaseCredentials | null, pathOrUri: s
   return (body as T) ?? ({} as T);
 }
 
-export async function coinbaseListAllAccounts(cred: CoinbaseCredentials): Promise<CoinbaseAccount[]> {
+export async function coinbaseListAllAccounts(
+  cred: CoinbaseCredentials,
+): Promise<CoinbaseAccount[]> {
   // Keep the "connect" call as simple as possible; pagination uses next_uri.
   let next: string | null = '/v2/accounts';
   const out: CoinbaseAccount[] = [];
   while (next) {
-    const resp: CoinbaseListResponse<CoinbaseAccount> = await coinbaseGetJson<CoinbaseListResponse<CoinbaseAccount>>(
-      cred,
-      next
-    );
+    const resp: CoinbaseListResponse<CoinbaseAccount> = await coinbaseGetJson<
+      CoinbaseListResponse<CoinbaseAccount>
+    >(cred, next);
     out.push(...(resp.data ?? []));
     next = resp.pagination?.next_uri ?? null;
   }
@@ -150,28 +151,29 @@ export async function coinbaseListTransactionsPage(
   cred: CoinbaseCredentials,
   accountId: string,
   nextUri?: string | null,
-  limit = 100
+  limit = 100,
 ): Promise<{ items: CoinbaseTransaction[]; nextUri: string | null }> {
   const path = nextUri ?? `/v2/accounts/${accountId}/transactions?limit=${limit}`;
-  const resp: CoinbaseListResponse<CoinbaseTransaction> = await coinbaseGetJson<CoinbaseListResponse<CoinbaseTransaction>>(
-    cred,
-    path
-  );
+  const resp: CoinbaseListResponse<CoinbaseTransaction> = await coinbaseGetJson<
+    CoinbaseListResponse<CoinbaseTransaction>
+  >(cred, path);
   return { items: resp.data ?? [], nextUri: resp.pagination?.next_uri ?? null };
 }
 
 export async function coinbaseShowTransaction(
   cred: CoinbaseCredentials,
   accountId: string,
-  transactionId: string
+  transactionId: string,
 ): Promise<{ data: CoinbaseTransaction }> {
   return coinbaseGetJson<{ data: CoinbaseTransaction }>(
     cred,
-    `/v2/accounts/${accountId}/transactions/${transactionId}`
+    `/v2/accounts/${accountId}/transactions/${transactionId}`,
   );
 }
 
-export async function coinbaseGetExchangeRates(currency?: string): Promise<CoinbaseExchangeRatesResponse> {
+export async function coinbaseGetExchangeRates(
+  currency?: string,
+): Promise<CoinbaseExchangeRatesResponse> {
   const q = currency ? `?currency=${encodeURIComponent(currency)}` : '';
   return coinbaseGetJson<CoinbaseExchangeRatesResponse>(null, `/v2/exchange-rates${q}`);
 }

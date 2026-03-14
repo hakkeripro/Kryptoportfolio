@@ -1,5 +1,9 @@
 import type { CoinbaseAccount, CoinbaseTransaction } from './coinbaseApi';
-import { coinbaseListAccounts, coinbaseTransactionsPage, coinbaseExchangeRates } from './coinbaseApi';
+import {
+  coinbaseListAccounts,
+  coinbaseTransactionsPage,
+  coinbaseExchangeRates,
+} from './coinbaseApi';
 import Decimal from 'decimal.js';
 
 export type CoinbaseCreds = { keyName: string; privateKeyPem: string };
@@ -10,7 +14,11 @@ export type FetchProgress = {
   fetched: number;
 };
 
-export async function bestEffortFxToBase(apiBase: string, from: string, to: string): Promise<Decimal | null> {
+export async function bestEffortFxToBase(
+  apiBase: string,
+  from: string,
+  to: string,
+): Promise<Decimal | null> {
   const f = from.toUpperCase();
   const t = to.toUpperCase();
   if (f === t) return new Decimal(1);
@@ -24,7 +32,11 @@ export async function bestEffortFxToBase(apiBase: string, from: string, to: stri
   }
 }
 
-export async function fetchCoinbaseAccounts(apiBase: string, token: string, creds: CoinbaseCreds): Promise<CoinbaseAccount[]> {
+export async function fetchCoinbaseAccounts(
+  apiBase: string,
+  token: string,
+  creds: CoinbaseCreds,
+): Promise<CoinbaseAccount[]> {
   return coinbaseListAccounts(apiBase, token, creds);
 }
 
@@ -33,7 +45,7 @@ export async function fetchAllTransactions(
   token: string,
   creds: CoinbaseCreds,
   accounts: CoinbaseAccount[],
-  onProgress?: (p: FetchProgress) => void
+  onProgress?: (p: FetchProgress) => void,
 ): Promise<{ accountId: string; tx: CoinbaseTransaction }[]> {
   const out: { accountId: string; tx: CoinbaseTransaction }[] = [];
   let fetched = 0;
@@ -44,7 +56,7 @@ export async function fetchAllTransactions(
         ...creds,
         accountId: acc.id,
         nextUri,
-        limit: 100
+        limit: 100,
       });
       for (const tx of page.items) out.push({ accountId: acc.id, tx });
       fetched += page.items.length;
@@ -61,7 +73,7 @@ export async function fetchNewestTransactionsSince(
   creds: CoinbaseCreds,
   accounts: CoinbaseAccount[],
   lastSeenByAccount: Record<string, string>,
-  onProgress?: (p: FetchProgress) => void
+  onProgress?: (p: FetchProgress) => void,
 ): Promise<{ accountId: string; tx: CoinbaseTransaction }[]> {
   const out: { accountId: string; tx: CoinbaseTransaction }[] = [];
   let fetched = 0;
@@ -78,7 +90,7 @@ export async function fetchNewestTransactionsSince(
         ...creds,
         accountId: acc.id,
         nextUri,
-        limit: 100
+        limit: 100,
       });
 
       for (const tx of page.items) {

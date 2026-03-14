@@ -25,7 +25,10 @@ export type GenerateTaxReportOptions = {
   lotMethodOverride?: Settings['lotMethodDefault'];
 };
 
-export function lotMethodForTax(settings: Settings, override?: Settings['lotMethodDefault']): Settings['lotMethodDefault'] {
+export function lotMethodForTax(
+  settings: Settings,
+  override?: Settings['lotMethodDefault'],
+): Settings['lotMethodDefault'] {
   if (override) return override;
   if (settings.taxProfile === 'FINLAND') return 'FIFO';
   return settings.lotMethodDefault;
@@ -35,7 +38,7 @@ export function generateTaxYearReport(
   allEvents: LedgerEvent[],
   settings: Settings,
   year: number,
-  opts: GenerateTaxReportOptions = {}
+  opts: GenerateTaxReportOptions = {},
 ): TaxYearReport {
   const active = normalizeActiveLedger(allEvents);
   const lotMethodUsed = lotMethodForTax(settings, opts.lotMethodOverride);
@@ -71,7 +74,7 @@ export function generateTaxYearReport(
       amount: toFixed(qty),
       incomeBase: toFixed(incomeBase),
       ...(fmvTotal ? { fmvTotalBase: toFixed(fmvTotal) } : {}),
-      type: e.type
+      type: e.type,
     });
   }
 
@@ -84,16 +87,20 @@ export function generateTaxYearReport(
     amount: p.amount,
     // Position.costBasisBase is optional (e.g. if valuation pipeline hasn't been run).
     // Tax holdings must be deterministic; default to 0 if missing.
-    costBasisBase: p.costBasisBase ?? '0'
+    costBasisBase: p.costBasisBase ?? '0',
   }));
 
   // Totals
   const totals: TaxYearTotals = {
     proceedsBase: toFixed(disposals.reduce((acc, x) => acc.add(d(x.proceedsBase)), new Decimal(0))),
-    costBasisBase: toFixed(disposals.reduce((acc, x) => acc.add(d(x.costBasisBase)), new Decimal(0))),
+    costBasisBase: toFixed(
+      disposals.reduce((acc, x) => acc.add(d(x.costBasisBase)), new Decimal(0)),
+    ),
     feesBase: toFixed(disposals.reduce((acc, x) => acc.add(d(x.feeBase)), new Decimal(0))),
-    realizedGainBase: toFixed(disposals.reduce((acc, x) => acc.add(d(x.realizedGainBase)), new Decimal(0))),
-    incomeBase: toFixed(income.reduce((acc, x) => acc.add(d(x.incomeBase)), new Decimal(0)))
+    realizedGainBase: toFixed(
+      disposals.reduce((acc, x) => acc.add(d(x.realizedGainBase)), new Decimal(0)),
+    ),
+    incomeBase: toFixed(income.reduce((acc, x) => acc.add(d(x.incomeBase)), new Decimal(0))),
   };
 
   return {
@@ -106,6 +113,6 @@ export function generateTaxYearReport(
     income,
     yearEndHoldings,
     totals,
-    warnings
+    warnings,
   };
 }

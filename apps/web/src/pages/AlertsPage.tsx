@@ -5,7 +5,7 @@ import { ensureWebDbOpen, getWebDb } from '@kp/platform-web';
 import type { Alert, Asset } from '@kp/core';
 import { AlertSchema, uuid } from '@kp/core';
 
-import { useAppStore } from '../store/useAppStore';
+import { useAuthStore } from '../store/useAuthStore';
 import { useDbQuery } from '../hooks/useDbQuery';
 import { buildMirrorState } from '../alerts/buildMirrorState';
 import { refreshLivePrices } from '../derived/refreshLivePrices';
@@ -17,7 +17,7 @@ import {
   getVapidPublicKey,
   subscribeWebPush,
   sendTestWebPush,
-  updateServerMirrorState
+  updateServerMirrorState,
 } from '../alerts/serverAlertsApi';
 
 type FormType = Alert['type'];
@@ -28,8 +28,12 @@ function formatAlert(a: Alert, assetsById: Record<string, Asset>, baseCurrency: 
     return `Portfolio value ${dir} ${a.thresholdBase} ${baseCurrency}`;
   }
   if (a.type === 'PRICE') {
-    const asset = assetsById[a.assetId];
-    const sym = asset?.symbol ?? String(a.assetId ?? '').replace(/^asset_/, '').toUpperCase();
+    const asset = a.assetId ? assetsById[a.assetId] : undefined;
+    const sym =
+      asset?.symbol ??
+      String(a.assetId ?? '')
+        .replace(/^asset_/, '')
+        .toUpperCase();
     const dir = a.direction === 'BELOW' ? 'below' : 'above';
     return `${sym} price ${dir} ${a.thresholdBase} ${baseCurrency}`;
   }
@@ -37,8 +41,12 @@ function formatAlert(a: Alert, assetsById: Record<string, Asset>, baseCurrency: 
     return `Drawdown ≥ ${a.thresholdPct}%`;
   }
   if (a.type === 'PCT_CHANGE') {
-    const asset = assetsById[a.assetId];
-    const sym = asset?.symbol ?? String(a.assetId ?? '').replace(/^asset_/, '').toUpperCase();
+    const asset = a.assetId ? assetsById[a.assetId] : undefined;
+    const sym =
+      asset?.symbol ??
+      String(a.assetId ?? '')
+        .replace(/^asset_/, '')
+        .toUpperCase();
     return `${sym} pct-change ≥ ${a.thresholdPct}%`;
   }
   return a.type;
@@ -51,13 +59,15 @@ const NumberInput = z
 
 async function ensurePushEnabled(apiBase: string, token: string) {
   const vapid = await getVapidPublicKey(apiBase);
-  if (!vapid.enabled || !vapid.publicKey) return { ok: false as const, reason: 'VAPID_NOT_CONFIGURED' };
+  if (!vapid.enabled || !vapid.publicKey)
+    return { ok: false as const, reason: 'VAPID_NOT_CONFIGURED' };
 
   if (!('serviceWorker' in navigator)) return { ok: false as const, reason: 'NO_SW' };
   if (!('PushManager' in window)) return { ok: false as const, reason: 'NO_PUSH' };
 
   // Push requires HTTPS (localhost is ok in most browsers, but we still guide users).
-  const isSecure = window.location.protocol === 'https:' || window.location.hostname === 'localhost';
+  const isSecure =
+    window.location.protocol === 'https:' || window.location.hostname === 'localhost';
   if (!isSecure) return { ok: false as const, reason: 'HTTPS_REQUIRED' };
 
   const perm = await Notification.requestPermission();
@@ -66,7 +76,7 @@ async function ensurePushEnabled(apiBase: string, token: string) {
   const reg = await navigator.serviceWorker.ready;
   const sub = await reg.pushManager.subscribe({
     userVisibleOnly: true,
-    applicationServerKey: urlBase64ToUint8Array(vapid.publicKey)
+    applicationServerKey: urlBase64ToUint8Array(vapid.publicKey),
   });
 
   await subscribeWebPush(apiBase, token, sub.toJSON());
@@ -83,22 +93,28 @@ function urlBase64ToUint8Array(base64String: string) {
 }
 
 export default function AlertsPage() {
-  const apiBase = useAppStore((s) => s.apiBase);
-  const token = useAppStore((s) => s.token);
+  const apiBase = useAuthStore((s) => s.apiBase);
+  const token = useAuthStore((s) => s.token);
 
   // NOTE: useDbQuery is a tiny liveQuery hook (reacts to IndexedDB changes automatically).
   // Do not rely on manual refetch() here.
   const alertsQ = useDbQuery(
     async (db) => {
       const rows = await db.alerts.toArray();
-      rows.sort((a: any, b: any) => String(b.updatedAtISO || '').localeCompare(String(a.updatedAtISO || '')));
+      rows.sort((a: any, b: any) =>
+        String(b.updatedAtISO || '').localeCompare(String(a.updatedAtISO || '')),
+      );
       return rows as any;
     },
     [],
-    [] as any[]
+    [] as any[],
   );
   const assetsQ = useDbQuery(async (db) => await db.assets.toArray(), [], [] as any[]);
-  const settingsQ = useDbQuery(async (db) => (await db.settings.get('settings_1')) as any, [], null as any);
+  const settingsQ = useDbQuery(
+    async (db) => (await db.settings.get('settings_1')) as any,
+    [],
+    null as any,
+  );
 
   const assetsById = useMemo(() => {
     const m: Record<string, Asset> = {};
@@ -114,10 +130,16 @@ export default function AlertsPage() {
   const [formAssetId, setFormAssetId] = useState<string>('');
   const [formCooldown, setFormCooldown] = useState('0');
   const [serverMsg, setServerMsg] = useState<string | null>(null);
-  const [serverStatus, setServerStatus] = useState<{ enabled: number; total: number; mirrorUpdatedAtISO: string | null; runnerLastRunAtISO?: string | null; runnerLastError?: string | null } | null>(null);
-  const [logRows, setLogRows] = useState<{ id: string; alertId: string | null; triggeredAtISO: string; source: string; context: any }[]>(
-    []
-  );
+  const [serverStatus, setServerStatus] = useState<{
+    enabled: number;
+    total: number;
+    mirrorUpdatedAtISO: string | null;
+    runnerLastRunAtISO?: string | null;
+    runnerLastError?: string | null;
+  } | null>(null);
+  const [logRows, setLogRows] = useState<
+    { id: string; alertId: string | null; triggeredAtISO: string; source: string; context: any }[]
+  >([]);
   const [loading, setLoading] = useState<string | null>(null);
 
   const localAlerts = (alertsQ.data ?? []) as Alert[];
@@ -148,7 +170,9 @@ export default function AlertsPage() {
   async function addAlert() {
     setServerMsg(null);
     const now = new Date().toISOString();
-    const cooldownMin = NumberInput.safeParse(formCooldown).success ? Math.max(0, Number(formCooldown)) : 0;
+    const cooldownMin = NumberInput.safeParse(formCooldown).success
+      ? Math.max(0, Number(formCooldown))
+      : 0;
 
     let alert: any = {
       id: `al_${uuid()}`,
@@ -159,16 +183,25 @@ export default function AlertsPage() {
       type: formType,
       isEnabled: true,
       source: 'server',
-      cooldownMin
+      cooldownMin,
     };
 
     if (formType === 'PORTFOLIO_VALUE') {
       const th = NumberInput.parse(formThreshold);
-      alert = { ...alert, thresholdBase: new Decimal(th).abs().toFixed(), direction: formDirection };
+      alert = {
+        ...alert,
+        thresholdBase: new Decimal(th).abs().toFixed(),
+        direction: formDirection,
+      };
     } else if (formType === 'PRICE') {
       if (!formAssetId) throw new Error('asset_required');
       const th = NumberInput.parse(formThreshold);
-      alert = { ...alert, assetId: formAssetId, thresholdBase: new Decimal(th).abs().toFixed(), direction: formDirection };
+      alert = {
+        ...alert,
+        assetId: formAssetId,
+        thresholdBase: new Decimal(th).abs().toFixed(),
+        direction: formDirection,
+      };
     } else if (formType === 'DRAWDOWN') {
       const th = NumberInput.parse(formThreshold);
       alert = { ...alert, thresholdPct: new Decimal(th).abs().toFixed() };
@@ -198,41 +231,70 @@ export default function AlertsPage() {
     const db = getWebDb();
     const row = (await db.alerts.get(id)) as any;
     if (!row) return;
-    await db.alerts.put({ ...row, isDeleted: true, isEnabled: false, updatedAtISO: new Date().toISOString() });
+    await db.alerts.put({
+      ...row,
+      isDeleted: true,
+      isEnabled: false,
+      updatedAtISO: new Date().toISOString(),
+    });
     // liveQuery will re-run automatically
   }
 
-  async function enableOnServer() {
+  async function syncRulesToServer() {
     if (!token) {
-      setServerMsg('Login required to enable server alerts.');
+      setServerMsg('Login required to sync server alerts.');
       return;
     }
     setLoading('server');
     setServerMsg(null);
     try {
-      const active = localAlerts.filter((a) => !a.isDeleted && a.isEnabled && (a as any).source !== 'foreground');
-      // Ensure mirror state uses fresh prices and derived caches.
-      await refreshLivePrices(apiBase, baseCurrency);
-      await rebuildDerivedCaches({ daysBack: 365 });
-
-      const state = await buildMirrorState();
+      const active = localAlerts.filter(
+        (a) => !a.isDeleted && a.isEnabled && (a as any).source !== 'foreground',
+      );
 
       if (!active.length) {
         const ok = window.confirm(
-          'You have 0 active alerts locally.\n\nIf you continue, this will REPLACE (clear) all server-side rules.\n\nPress Cancel to enable server delivery without clearing existing server rules.'
+          'You have 0 active alerts locally.\n\nThis will clear all server-side rules.\n\nAre you sure?',
         );
-        const res = ok
-          ? await enableServerAlerts(apiBase, token, [], state, { mode: 'replace' })
-          : await enableServerAlerts(apiBase, token, [], state, { mode: 'enable_only' });
-        setServerMsg(
-          ok
-            ? `Server rules replaced. Evaluated ${res.evaluated ?? 0}, triggered ${res.triggered ?? 0}.`
-            : `Server delivery enabled (kept existing rules). Evaluated ${res.evaluated ?? 0}, triggered ${res.triggered ?? 0}.`
-        );
-      } else {
-        const res = await enableServerAlerts(apiBase, token, active, state, { mode: 'replace' });
-        setServerMsg(`Server alerts enabled. Evaluated ${res.evaluated ?? 0}, triggered ${res.triggered ?? 0}.`);
+        if (!ok) {
+          setLoading(null);
+          return;
+        }
       }
+
+      await refreshLivePrices(apiBase, baseCurrency);
+      await rebuildDerivedCaches({ daysBack: 365 });
+      const state = await buildMirrorState();
+
+      const res = await enableServerAlerts(apiBase, token, active, state, { mode: 'replace' });
+      setServerMsg(
+        `Server rules synced (${active.length} rules). Evaluated ${res.evaluated ?? 0}, triggered ${res.triggered ?? 0}.`,
+      );
+      await refreshServerStatus();
+      await refreshLog();
+    } catch (e: any) {
+      setServerMsg(String(e?.message ?? e));
+    } finally {
+      setLoading(null);
+    }
+  }
+
+  async function enableDelivery() {
+    if (!token) {
+      setServerMsg('Login required to enable server alerts.');
+      return;
+    }
+    setLoading('enableDelivery');
+    setServerMsg(null);
+    try {
+      await refreshLivePrices(apiBase, baseCurrency);
+      await rebuildDerivedCaches({ daysBack: 365 });
+      const state = await buildMirrorState();
+
+      const res = await enableServerAlerts(apiBase, token, [], state, { mode: 'enable_only' });
+      setServerMsg(
+        `Server delivery enabled (existing rules kept). Evaluated ${res.evaluated ?? 0}, triggered ${res.triggered ?? 0}.`,
+      );
       await refreshServerStatus();
       await refreshLog();
     } catch (e: any) {
@@ -256,7 +318,9 @@ export default function AlertsPage() {
 
       const state = await buildMirrorState();
       const res = await updateServerMirrorState(apiBase, token, state);
-      setServerMsg(`State updated. Evaluated ${res.evaluated ?? 0}, triggered ${res.triggered ?? 0}.`);
+      setServerMsg(
+        `State updated. Evaluated ${res.evaluated ?? 0}, triggered ${res.triggered ?? 0}.`,
+      );
       await refreshServerStatus();
       await refreshLog();
     } catch (e: any) {
@@ -307,7 +371,6 @@ export default function AlertsPage() {
     }
   }
 
-
   // light refresh on first render
   useEffect(() => {
     void refreshServerStatus();
@@ -325,7 +388,10 @@ export default function AlertsPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4" data-testid="panel-alerts-local">
+        <div
+          className="rounded-xl border border-slate-800 bg-slate-900/40 p-4"
+          data-testid="panel-alerts-local"
+        >
           <div className="flex items-center justify-between">
             <div className="text-sm font-semibold">Local alert rules</div>
             <div className="text-xs text-slate-500">Base: {baseCurrency}</div>
@@ -388,7 +454,11 @@ export default function AlertsPage() {
                   className="mt-1 w-full rounded border px-2 py-1 text-sm"
                   value={formThreshold}
                   onChange={(e) => setFormThreshold(e.target.value)}
-                  placeholder={formType === 'PCT_CHANGE' || formType === 'DRAWDOWN' ? 'Percent' : 'Base currency'}
+                  placeholder={
+                    formType === 'PCT_CHANGE' || formType === 'DRAWDOWN'
+                      ? 'Percent'
+                      : 'Base currency'
+                  }
                   data-testid="form-alert-threshold"
                 />
               </label>
@@ -424,11 +494,16 @@ export default function AlertsPage() {
                     data-testid={`row-alert-${a.id}`}
                   >
                     <div className="min-w-0">
-                      <div className="text-sm font-medium truncate">{formatAlert(a, assetsById, baseCurrency)}</div>
+                      <div className="text-sm font-medium truncate">
+                        {formatAlert(a, assetsById, baseCurrency)}
+                      </div>
                       <div className="text-xs text-slate-500">Cooldown: {a.cooldownMin ?? 0}m</div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <label className="flex items-center gap-2 text-xs" data-testid={`toggle-alert-${a.id}`}>
+                      <label
+                        className="flex items-center gap-2 text-xs"
+                        data-testid={`toggle-alert-${a.id}`}
+                      >
                         <input
                           type="checkbox"
                           checked={!!a.isEnabled}
@@ -453,27 +528,40 @@ export default function AlertsPage() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4" data-testid="panel-alerts-server">
+        <div
+          className="rounded-xl border border-slate-800 bg-slate-900/40 p-4"
+          data-testid="panel-alerts-server"
+        >
           <div className="text-sm font-semibold">Server alerts (opt-in)</div>
           <div className="mt-1 text-xs text-slate-400">
             Enable to get push notifications even when the app is closed.
           </div>
 
           {!token ? (
-            <div className="mt-3 rounded-lg border bg-slate-950/40 p-3 text-sm text-slate-200" data-testid="box-alerts-login-required">
+            <div
+              className="mt-3 rounded-lg border bg-slate-950/40 p-3 text-sm text-slate-200"
+              data-testid="box-alerts-login-required"
+            >
               Login required to enable server alerts.
             </div>
           ) : (
             <div className="mt-3 space-y-3">
-              <div className="rounded-lg border bg-slate-950/40 p-3 text-xs" data-testid="box-alerts-server-status">
+              <div
+                className="rounded-lg border bg-slate-950/40 p-3 text-xs"
+                data-testid="box-alerts-server-status"
+              >
                 <div className="flex items-center justify-between">
                   <span className="text-slate-400">Enabled rules</span>
-                  <span className="font-mono">{serverStatus ? `${serverStatus.enabled}/${serverStatus.total}` : '—'}</span>
+                  <span className="font-mono">
+                    {serverStatus ? `${serverStatus.enabled}/${serverStatus.total}` : '—'}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-slate-400">Mirror updated</span>
                   <span className="font-mono">
-                    {serverStatus?.mirrorUpdatedAtISO ? new Date(serverStatus.mirrorUpdatedAtISO).toLocaleString() : '—'}
+                    {serverStatus?.mirrorUpdatedAtISO
+                      ? new Date(serverStatus.mirrorUpdatedAtISO).toLocaleString()
+                      : '—'}
                   </span>
                 </div>
                 <button
@@ -488,11 +576,11 @@ export default function AlertsPage() {
               <div className="grid grid-cols-2 gap-2">
                 <button
                   className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
-                  onClick={() => void enableOnServer()}
+                  onClick={() => void syncRulesToServer()}
                   disabled={loading != null}
                   data-testid="btn-enable-server-alerts"
                 >
-                  {loading === 'server' ? 'Enabling…' : 'Enable on server'}
+                  {loading === 'server' ? 'Syncing…' : 'Sync rules to server'}
                 </button>
                 <button
                   className="rounded-lg border px-3 py-2 text-sm hover:bg-slate-700 disabled:opacity-50"
@@ -503,6 +591,15 @@ export default function AlertsPage() {
                   {loading === 'state' ? 'Updating…' : 'Update mirror state'}
                 </button>
               </div>
+
+              <button
+                className="w-full rounded-lg border px-3 py-2 text-sm hover:bg-slate-700 disabled:opacity-50"
+                onClick={() => void enableDelivery()}
+                disabled={loading != null}
+                data-testid="btn-enable-delivery"
+              >
+                {loading === 'enableDelivery' ? 'Enabling…' : 'Enable delivery (keep existing rules)'}
+              </button>
 
               <button
                 className="w-full rounded-lg border px-3 py-2 text-sm hover:bg-slate-700 disabled:opacity-50"
@@ -523,7 +620,10 @@ export default function AlertsPage() {
               </button>
 
               {serverMsg ? (
-                <div className="rounded-lg border bg-slate-950/40 p-3 text-sm text-slate-200" data-testid="txt-alert-server-message">
+                <div
+                  className="rounded-lg border bg-slate-950/40 p-3 text-sm text-slate-200"
+                  data-testid="txt-alert-server-message"
+                >
                   {serverMsg}
                 </div>
               ) : null}
@@ -542,10 +642,15 @@ export default function AlertsPage() {
                 <div className="mt-2 space-y-2" data-testid="list-trigger-log">
                   {logRows.length ? (
                     logRows.map((r) => (
-                      <div key={r.id} className="rounded-lg border p-3 text-xs" data-testid={`row-trigger-log-${r.id}`}
+                      <div
+                        key={r.id}
+                        className="rounded-lg border p-3 text-xs"
+                        data-testid={`row-trigger-log-${r.id}`}
                       >
                         <div className="flex items-center justify-between">
-                          <span className="font-mono">{new Date(r.triggeredAtISO).toLocaleString()}</span>
+                          <span className="font-mono">
+                            {new Date(r.triggeredAtISO).toLocaleString()}
+                          </span>
                           <span className="text-slate-500">{r.source}</span>
                         </div>
                         <div className="mt-1 text-slate-200">

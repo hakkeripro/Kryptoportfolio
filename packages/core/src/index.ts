@@ -9,6 +9,7 @@ export * from './domain/alert.js';
 export * from './alerts/serverAlertEval.js';
 export * from './utils/time.js';
 export * from './utils/uuid.js';
+export * from './utils/passphraseGenerator.js';
 
 export * from './portfolio/lotEngine.js';
 export * from './portfolio/snapshots.js';
@@ -18,3 +19,6 @@ export * from './tax/taxEngine.js';
 export * from './catalog/assetCatalog.js';
 
 export * from './import/coinbaseV2.js';
+
+// Shared API business logic (auth, sync, alerts, coingecko, push schemas)
+export * from './api/index.js';

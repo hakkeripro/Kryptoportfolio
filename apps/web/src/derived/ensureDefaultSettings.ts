@@ -27,8 +27,8 @@ export async function ensureDefaultSettings(): Promise<Settings> {
       privacy: { telemetryOptIn: !!raw?.privacy?.telemetryOptIn },
       notifications: {
         serverAlertsEnabled: !!raw?.notifications?.serverAlertsEnabled,
-        devicePushEnabled: !!raw?.notifications?.devicePushEnabled
-      }
+        devicePushEnabled: !!raw?.notifications?.devicePushEnabled,
+      },
     };
     return next as any;
   };
@@ -69,7 +69,7 @@ export async function ensureDefaultSettings(): Promise<Settings> {
     autoRefreshIntervalSec: 300,
     taxProfile: 'GENERIC',
     privacy: { telemetryOptIn: false },
-    notifications: { serverAlertsEnabled: false, devicePushEnabled: false }
+    notifications: { serverAlertsEnabled: false, devicePushEnabled: false },
   };
   await db.settings.add(s as any);
   return s;

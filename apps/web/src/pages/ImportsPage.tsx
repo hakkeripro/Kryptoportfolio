@@ -1,9 +1,26 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useAppStore } from '../store/useAppStore';
-import { clearCoinbaseIntegration, loadCoinbaseIntegration, saveCoinbaseIntegration } from '../integrations/coinbase/coinbaseVault';
-import { fetchAllTransactions, fetchCoinbaseAccounts, fetchNewestTransactionsSince, bestEffortFxToBase, type CoinbaseCreds } from '../integrations/coinbase/coinbaseSync';
+import { useVaultStore } from '../store/useVaultStore';
+import { useAuthStore } from '../store/useAuthStore';
+import {
+  clearCoinbaseIntegration,
+  loadCoinbaseIntegration,
+  saveCoinbaseIntegration,
+} from '../integrations/coinbase/coinbaseVault';
+import {
+  fetchAllTransactions,
+  fetchCoinbaseAccounts,
+  fetchNewestTransactionsSince,
+  bestEffortFxToBase,
+  type CoinbaseCreds,
+} from '../integrations/coinbase/coinbaseSync';
 import type { CoinbaseAccount, CoinbaseTransaction } from '../integrations/coinbase/coinbaseApi';
-import { buildCoinbaseImportPreview, commitCoinbaseImport, computeCoinbaseDedupe, type CoinbaseImportOverrides, type CoinbaseImportPreview } from '../integrations/coinbase/coinbaseImport';
+import {
+  buildCoinbaseImportPreview,
+  commitCoinbaseImport,
+  computeCoinbaseDedupe,
+  type CoinbaseImportOverrides,
+  type CoinbaseImportPreview,
+} from '../integrations/coinbase/coinbaseImport';
 import { rebuildDerivedCaches } from '../derived/rebuildDerived';
 import { ensureDefaultSettings } from '../derived/ensureDefaultSettings';
 import type { ImportIssue } from '@kp/core';
@@ -14,7 +31,13 @@ function CoinbaseLogo() {
     <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" className="text-blue-600">
       <circle cx="12" cy="12" r="12" fill="currentColor" opacity="0.15" />
       <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" strokeWidth="2" />
-      <path d="M14.5 8.5a4.5 4.5 0 1 0 0 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path
+        d="M14.5 8.5a4.5 4.5 0 1 0 0 7"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -22,9 +45,9 @@ function CoinbaseLogo() {
 type Step = 'connect' | 'fetch' | 'preview' | 'done';
 
 export default function ImportsPage() {
-  const passphrase = useAppStore((s) => s.passphrase);
-  const token = useAppStore((s) => s.token);
-  const apiBase = useAppStore((s) => s.apiBase);
+  const passphrase = useVaultStore((s) => s.passphrase);
+  const token = useAuthStore((s) => s.token);
+  const apiBase = useAuthStore((s) => s.apiBase);
 
   const [step, setStep] = useState<Step>('connect');
   const [loading, setLoading] = useState<string | null>(null);
@@ -45,8 +68,12 @@ export default function ImportsPage() {
   // User-provided overrides for resolving import issues.
   const [fxRatesToBase, setFxRatesToBase] = useState<Record<string, string>>({});
   const [feeValueBaseByRefKey, setFeeValueBaseByRefKey] = useState<Record<string, string>>({});
-  const [tradeValuationBaseByTradeKey, setTradeValuationBaseByTradeKey] = useState<Record<string, string>>({});
-  const [rewardFmvTotalBaseByTxId, setRewardFmvTotalBaseByTxId] = useState<Record<string, string>>({});
+  const [tradeValuationBaseByTradeKey, setTradeValuationBaseByTradeKey] = useState<
+    Record<string, string>
+  >({});
+  const [rewardFmvTotalBaseByTxId, setRewardFmvTotalBaseByTxId] = useState<Record<string, string>>(
+    {},
+  );
 
   const [commitResult, setCommitResult] = useState<any>(null);
 
@@ -61,7 +88,7 @@ export default function ImportsPage() {
       }
     },
     [],
-    null
+    null,
   );
 
   useEffect(() => {
@@ -85,6 +112,47 @@ export default function ImportsPage() {
     return (preview?.baseCurrency ?? 'EUR').toUpperCase();
   }, [preview?.baseCurrency]);
 
+  function tryExtractJsonKey(input: string): { keyName?: string; privateKeyPem?: string } | null {
+    const t = input.trim();
+    if (!(t.startsWith('{') && t.endsWith('}'))) return null;
+    try {
+      const obj = JSON.parse(t) as Record<string, unknown>;
+      const name =
+        typeof obj.name === 'string'
+          ? obj.name
+          : typeof obj.keyName === 'string'
+            ? obj.keyName
+            : undefined;
+      const pem =
+        typeof obj.privateKey === 'string'
+          ? obj.privateKey
+          : typeof obj.private_key === 'string'
+            ? obj.private_key
+            : typeof obj.key_secret === 'string'
+              ? obj.key_secret
+              : typeof obj.api_secret === 'string'
+                ? obj.api_secret
+                : undefined;
+      if (name || pem) return { keyName: name, privateKeyPem: pem };
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
+  function handlePrivateKeyChange(value: string) {
+    const extracted = tryExtractJsonKey(value);
+    if (extracted) {
+      if (extracted.keyName) setKeyName(extracted.keyName);
+      if (extracted.privateKeyPem) {
+        // Normalize escaped newlines from JSON
+        setPrivateKeyPem(extracted.privateKeyPem.replace(/\\n/g, '\n'));
+      }
+    } else {
+      setPrivateKeyPem(value);
+    }
+  }
+
   async function connect() {
     if (!passphrase) {
       setErr('Vault is locked. Unlock vault to connect Coinbase.');
@@ -105,7 +173,7 @@ export default function ImportsPage() {
       const updated = {
         ...cfg,
         credentials: creds,
-        settings: { ...cfg.settings, autoCommit, autoSync }
+        settings: { ...cfg.settings, autoCommit, autoSync },
       };
       await saveCoinbaseIntegration(passphrase, updated);
       setStep('fetch');
@@ -121,7 +189,7 @@ export default function ImportsPage() {
     setErr(null);
     setLoading('Disconnecting…');
     try {
-      await clearCoinbaseIntegration(passphrase);
+      await clearCoinbaseIntegration();
       setConnected(false);
       setAccounts([]);
       setItems([]);
@@ -183,7 +251,13 @@ export default function ImportsPage() {
       const fetched =
         kind === 'all'
           ? await fetchAllTransactions(apiBase, token, creds, accs)
-          : await fetchNewestTransactionsSince(apiBase, token, creds, accs, cfg.settings.lastSeenTxIdByAccount);
+          : await fetchNewestTransactionsSince(
+              apiBase,
+              token,
+              creds,
+              accs,
+              cfg.settings.lastSeenTxIdByAccount,
+            );
 
       setItems(fetched);
 
@@ -192,10 +266,15 @@ export default function ImportsPage() {
         fxRatesToBase: { ...fxAuto, ...fxRatesToBase },
         feeValueBaseByRefKey,
         tradeValuationBaseByTradeKey,
-        rewardFmvTotalBaseByTxId
+        rewardFmvTotalBaseByTxId,
       };
 
-      const p0 = buildCoinbaseImportPreview({ items: fetched, baseCurrency: base, settings, overrides });
+      const p0 = buildCoinbaseImportPreview({
+        items: fetched,
+        baseCurrency: base,
+        settings,
+        overrides,
+      });
       const p = await computeCoinbaseDedupe(p0);
       setPreview(p);
       setStep('preview');
@@ -214,7 +293,11 @@ export default function ImportsPage() {
     }
   }
 
-  async function doCommit(p: CoinbaseImportPreview, accs: CoinbaseAccount[], fetched: { accountId: string; tx: CoinbaseTransaction }[]) {
+  async function doCommit(
+    p: CoinbaseImportPreview,
+    accs: CoinbaseAccount[],
+    fetched: { accountId: string; tx: CoinbaseTransaction }[],
+  ) {
     if (!passphrase) return;
     setErr(null);
     setLoading('Committing…');
@@ -234,7 +317,12 @@ export default function ImportsPage() {
       await saveCoinbaseIntegration(passphrase, updated);
       setLastSeenByAccount(updated.settings.lastSeenTxIdByAccount);
 
-      setCommitResult({ ...r, fetched: fetched.length, mapped: p.events.length, newEvents: p.newEvents.length });
+      setCommitResult({
+        ...r,
+        fetched: fetched.length,
+        mapped: p.events.length,
+        newEvents: p.newEvents.length,
+      });
       setStep('done');
     } finally {
       setLoading(null);
@@ -252,7 +340,7 @@ export default function ImportsPage() {
         fxRatesToBase: { ...fxRatesToBase, [base.toUpperCase()]: '1' },
         feeValueBaseByRefKey,
         tradeValuationBaseByTradeKey,
-        rewardFmvTotalBaseByTxId
+        rewardFmvTotalBaseByTxId,
       };
       const p0 = buildCoinbaseImportPreview({ items, baseCurrency: base, settings, overrides });
       const p = await computeCoinbaseDedupe(p0);
@@ -273,7 +361,8 @@ export default function ImportsPage() {
     for (const i of issues) {
       if (i.type === 'FX_MISSING') fx.set(i.currency, [...(fx.get(i.currency) ?? []), i]);
       if (i.type === 'FEE_VALUE_MISSING') fee.set(i.refKey, [...(fee.get(i.refKey) ?? []), i]);
-      if (i.type === 'SWAP_VALUATION_MISSING') swap.set(i.tradeKey, [...(swap.get(i.tradeKey) ?? []), i]);
+      if (i.type === 'SWAP_VALUATION_MISSING')
+        swap.set(i.tradeKey, [...(swap.get(i.tradeKey) ?? []), i]);
       if (i.type === 'REWARD_FMV_MISSING') reward.set(i.txId, [...(reward.get(i.txId) ?? []), i]);
     }
     return { fx, fee, swap, reward };
@@ -286,18 +375,26 @@ export default function ImportsPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-xl font-semibold">Imports</h1>
-          <p className="text-sm text-slate-400">Connect exchanges and import transactions into the append-only ledger.</p>
+          <p className="text-sm text-slate-400">
+            Connect exchanges and import transactions into the append-only ledger.
+          </p>
         </div>
       </div>
 
       {err ? (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800" data-testid="alert-import-error">
+        <div
+          className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+          data-testid="alert-import-error"
+        >
           {err}
         </div>
       ) : null}
 
       <div className="grid gap-4" data-testid="list-import-sources">
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-5 shadow-sm" data-testid="card-import-coinbase">
+        <div
+          className="rounded-2xl border border-slate-800 bg-slate-900/40 p-5 shadow-sm"
+          data-testid="card-import-coinbase"
+        >
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <CoinbaseLogo />
@@ -336,12 +433,14 @@ export default function ImportsPage() {
                   />
                 </label>
                 <label className="block">
-                  <div className="text-xs text-slate-400">Private key (PEM) or JSON key file contents</div>
+                  <div className="text-xs text-slate-400">
+                    Private key (PEM or JSON key file)
+                  </div>
                   <textarea
                     className="mt-1 h-28 w-full rounded-lg border px-3 py-2 font-mono text-xs"
                     value={privateKeyPem}
-                    onChange={(e) => setPrivateKeyPem(e.target.value)}
-                    placeholder="-----BEGIN EC PRIVATE KEY-----\n...\n-----END EC PRIVATE KEY-----"
+                    onChange={(e) => handlePrivateKeyChange(e.target.value)}
+                    placeholder='Paste PEM or JSON key file contents ({"name":"...","privateKey":"..."})'
                     disabled={!!loading || connected}
                     data-testid="form-coinbase-privatekey"
                   />
@@ -351,13 +450,18 @@ export default function ImportsPage() {
                   <button
                     className="w-full rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
                     onClick={() => void connect()}
-                    disabled={!!loading || !passphrase || !token || !keyName.trim() || !privateKeyPem.trim()}
+                    disabled={
+                      !!loading || !passphrase || !token || !keyName.trim() || !privateKeyPem.trim()
+                    }
                     data-testid="btn-coinbase-connect"
                   >
                     {loading ? loading : 'Connect'}
                   </button>
                 ) : (
-                  <div className="rounded-lg bg-green-50 px-3 py-2 text-sm text-green-800" data-testid="badge-coinbase-connected">
+                  <div
+                    className="rounded-lg bg-green-50 px-3 py-2 text-sm text-green-800"
+                    data-testid="badge-coinbase-connected"
+                  >
                     Connected
                   </div>
                 )}
@@ -368,7 +472,10 @@ export default function ImportsPage() {
               <div className="text-xs font-semibold text-slate-400">Step 2: Fetch</div>
               <div className="mt-2 space-y-3">
                 <div className="flex items-center justify-between">
-                  <label className="flex items-center gap-2 text-sm" data-testid="toggle-import-autocommit">
+                  <label
+                    className="flex items-center gap-2 text-sm"
+                    data-testid="toggle-import-autocommit"
+                  >
                     <input
                       type="checkbox"
                       checked={autoCommit}
@@ -379,8 +486,16 @@ export default function ImportsPage() {
                   </label>
                 </div>
                 <div className="flex items-center justify-between">
-                  <label className="flex items-center gap-2 text-sm" data-testid="toggle-import-autosync">
-                    <input type="checkbox" checked={autoSync} onChange={(e) => setAutoSync(e.target.checked)} disabled={!!loading} />
+                  <label
+                    className="flex items-center gap-2 text-sm"
+                    data-testid="toggle-import-autosync"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={autoSync}
+                      onChange={(e) => setAutoSync(e.target.checked)}
+                      disabled={!!loading}
+                    />
                     Auto-sync while app is open
                   </label>
                 </div>
@@ -402,7 +517,10 @@ export default function ImportsPage() {
                   Fetch all history
                 </button>
 
-                <div className="rounded-lg border bg-slate-950/40 p-3 text-xs" data-testid="box-coinbase-autosync-status">
+                <div
+                  className="rounded-lg border bg-slate-950/40 p-3 text-xs"
+                  data-testid="box-coinbase-autosync-status"
+                >
                   <div className="flex items-center justify-between">
                     <span className="text-slate-400">Auto-sync status</span>
                     <span
@@ -413,30 +531,72 @@ export default function ImportsPage() {
                     </span>
                   </div>
                   <div className="mt-2 grid gap-1">
-                    <div className="flex items-center justify-between"><span className="text-slate-400">Last run</span><span className="font-mono">{cbStatus.data?.lastRunISO ? new Date(cbStatus.data.lastRunISO).toLocaleString() : '—'}</span></div>
-                  <div className="flex items-center justify-between"><span className="text-slate-400">Last commit</span><span className="font-mono">{cbStatus.data?.lastCommitISO ? new Date(cbStatus.data.lastCommitISO).toLocaleString() : '—'}</span></div>
-                  <div className="flex items-center justify-between"><span className="text-slate-400">Next run</span><span className="font-mono">{cbStatus.data?.nextRunISO ? new Date(cbStatus.data.nextRunISO).toLocaleString() : '—'}</span></div>
-                  <div className="flex items-center justify-between"><span className="text-slate-400">Fetched last time</span><span className="font-mono">{typeof cbStatus.data?.lastFetchedCount === 'number' ? cbStatus.data.lastFetchedCount : '—'}</span></div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-400">Last run</span>
+                      <span className="font-mono">
+                        {cbStatus.data?.lastRunISO
+                          ? new Date(cbStatus.data.lastRunISO).toLocaleString()
+                          : '—'}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-400">Last commit</span>
+                      <span className="font-mono">
+                        {cbStatus.data?.lastCommitISO
+                          ? new Date(cbStatus.data.lastCommitISO).toLocaleString()
+                          : '—'}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-400">Next run</span>
+                      <span className="font-mono">
+                        {cbStatus.data?.nextRunISO
+                          ? new Date(cbStatus.data.nextRunISO).toLocaleString()
+                          : '—'}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-400">Fetched last time</span>
+                      <span className="font-mono">
+                        {typeof cbStatus.data?.lastFetchedCount === 'number'
+                          ? cbStatus.data.lastFetchedCount
+                          : '—'}
+                      </span>
+                    </div>
                   </div>
                   <div className="mt-2 flex items-center justify-between">
                     <button
                       className="rounded-md border border-slate-700 bg-slate-950 px-2 py-1 text-[11px] hover:bg-slate-700 disabled:opacity-50"
-                      onClick={() => window.dispatchEvent(new Event('kp_coinbase_autosync_run_now'))}
+                      onClick={() =>
+                        window.dispatchEvent(new Event('kp_coinbase_autosync_run_now'))
+                      }
                       disabled={!connected || !!cbStatus.data?.inFlight}
                       data-testid="btn-coinbase-autosync-run-now"
                     >
                       Run now
                     </button>
-                    <span className="text-[11px] text-slate-400" data-testid="text-coinbase-autosync-duration">
-                      {typeof cbStatus.data?.lastDurationMs === 'number' ? `${cbStatus.data.lastDurationMs}ms` : ''}
+                    <span
+                      className="text-[11px] text-slate-400"
+                      data-testid="text-coinbase-autosync-duration"
+                    >
+                      {typeof cbStatus.data?.lastDurationMs === 'number'
+                        ? `${cbStatus.data.lastDurationMs}ms`
+                        : ''}
                     </span>
                   </div>
                   {cbStatus.data?.consecutiveFailures ? (
-                    <div className="mt-2 rounded-md bg-amber-100 px-2 py-1 text-amber-900" data-testid="badge-coinbase-autosync-backoff">
-                      Backoff: {cbStatus.data.consecutiveFailures} consecutive failure(s){cbStatus.data.lastError ? ` — ${cbStatus.data.lastError}` : ''}
+                    <div
+                      className="mt-2 rounded-md bg-amber-100 px-2 py-1 text-amber-900"
+                      data-testid="badge-coinbase-autosync-backoff"
+                    >
+                      Backoff: {cbStatus.data.consecutiveFailures} consecutive failure(s)
+                      {cbStatus.data.lastError ? ` — ${cbStatus.data.lastError}` : ''}
                     </div>
                   ) : cbStatus.data?.lastError ? (
-                    <div className="mt-2 rounded-md bg-amber-100 px-2 py-1 text-amber-900" data-testid="badge-coinbase-autosync-info">
+                    <div
+                      className="mt-2 rounded-md bg-amber-100 px-2 py-1 text-amber-900"
+                      data-testid="badge-coinbase-autosync-info"
+                    >
                       {String(cbStatus.data.lastError)}
                     </div>
                   ) : null}
@@ -444,15 +604,26 @@ export default function ImportsPage() {
 
                 <div className="text-xs text-slate-400">
                   Last seen cursors:
-                  <div className="mt-1 rounded-lg bg-slate-950/40 p-2 font-mono text-[11px]" data-testid="box-cb-cursors">
-                    {Object.keys(lastSeenByAccount).length ? JSON.stringify(lastSeenByAccount, null, 2) : '—'}
+                  <div
+                    className="mt-1 rounded-lg bg-slate-950/40 p-2 font-mono text-[11px]"
+                    data-testid="box-cb-cursors"
+                  >
+                    {Object.keys(lastSeenByAccount).length
+                      ? JSON.stringify(lastSeenByAccount, null, 2)
+                      : '—'}
                   </div>
                 </div>
 
-                <details className="rounded-lg border bg-slate-950/40 p-3 text-xs" data-testid="details-coinbase-cursor-telemetry">
-                  <summary className="cursor-pointer select-none text-slate-200">Cursor telemetry (last autosync)</summary>
+                <details
+                  className="rounded-lg border bg-slate-950/40 p-3 text-xs"
+                  data-testid="details-coinbase-cursor-telemetry"
+                >
+                  <summary className="cursor-pointer select-none text-slate-200">
+                    Cursor telemetry (last autosync)
+                  </summary>
                   <div className="mt-2 rounded-lg bg-slate-950 p-2 font-mono text-[11px]">
-                    {cbStatus.data?.lastCursorByAccount && Object.keys(cbStatus.data.lastCursorByAccount).length
+                    {cbStatus.data?.lastCursorByAccount &&
+                    Object.keys(cbStatus.data.lastCursorByAccount).length
                       ? JSON.stringify(cbStatus.data.lastCursorByAccount, null, 2)
                       : '—'}
                   </div>
@@ -461,15 +632,35 @@ export default function ImportsPage() {
             </div>
 
             <div className="md:col-span-1">
-              <div className="text-xs font-semibold text-slate-400">Step 3: Preview &amp; commit</div>
+              <div className="text-xs font-semibold text-slate-400">
+                Step 3: Preview &amp; commit
+              </div>
               <div className="mt-2 space-y-3">
                 {preview ? (
-                  <div className="rounded-lg border bg-slate-950/40 p-3 text-sm" data-testid="box-import-stats">
-                    <div className="flex items-center justify-between"><span>Fetched</span><span className="font-mono">{items.length}</span></div>
-                    <div className="flex items-center justify-between"><span>Mapped events</span><span className="font-mono">{preview.events.length}</span></div>
-                    <div className="flex items-center justify-between"><span>New events</span><span className="font-mono">{preview.newEvents.length}</span></div>
-                    <div className="flex items-center justify-between"><span>Duplicates</span><span className="font-mono">{preview.duplicateExternalRefs.length}</span></div>
-                    <div className="flex items-center justify-between"><span>Issues</span><span className="font-mono">{preview.issues.length}</span></div>
+                  <div
+                    className="rounded-lg border bg-slate-950/40 p-3 text-sm"
+                    data-testid="box-import-stats"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span>Fetched</span>
+                      <span className="font-mono">{items.length}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>Mapped events</span>
+                      <span className="font-mono">{preview.events.length}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>New events</span>
+                      <span className="font-mono">{preview.newEvents.length}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>Duplicates</span>
+                      <span className="font-mono">{preview.duplicateExternalRefs.length}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>Issues</span>
+                      <span className="font-mono">{preview.issues.length}</span>
+                    </div>
                   </div>
                 ) : (
                   <div className="text-sm text-slate-400">Run a fetch to generate a preview.</div>
@@ -495,7 +686,11 @@ export default function ImportsPage() {
 
                 {!canCommit && preview ? (
                   <div className="text-xs text-slate-400">
-                    {preview.issues.length ? 'Resolve issues to enable commit.' : preview.newEvents.length ? 'Ready.' : 'Nothing new to commit.'}
+                    {preview.issues.length
+                      ? 'Resolve issues to enable commit.'
+                      : preview.newEvents.length
+                        ? 'Ready.'
+                        : 'Nothing new to commit.'}
                   </div>
                 ) : null}
               </div>
@@ -504,7 +699,10 @@ export default function ImportsPage() {
 
           {preview ? (
             <div className="mt-5 grid gap-4 md:grid-cols-2">
-              <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4" data-testid="panel-import-preview">
+              <div
+                className="rounded-xl border border-slate-800 bg-slate-900/40 p-4"
+                data-testid="panel-import-preview"
+              >
                 <div className="flex items-center justify-between">
                   <div className="font-semibold">Preview</div>
                   <div className="text-xs text-slate-400">Ledger events (new + duplicates)</div>
@@ -520,12 +718,23 @@ export default function ImportsPage() {
                         >
                           <div className="flex items-center justify-between">
                             <div className="text-sm font-medium">
-                              {e.type} {e.amount} {String(e.assetId).replace(/^asset_/, '').toUpperCase()}
+                              {e.type} {e.amount}{' '}
+                              {String(e.assetId)
+                                .replace(/^asset_/, '')
+                                .toUpperCase()}
                             </div>
-                            {e.externalRef && preview.duplicateExternalRefs.includes(e.externalRef) ? (
-                              <span className="rounded-full bg-slate-200 px-2 py-0.5 text-xs" data-testid={`badge-import-dup-${e.id}`}>dup</span>
+                            {e.externalRef &&
+                            preview.duplicateExternalRefs.includes(e.externalRef) ? (
+                              <span
+                                className="rounded-full bg-slate-200 px-2 py-0.5 text-xs"
+                                data-testid={`badge-import-dup-${e.id}`}
+                              >
+                                dup
+                              </span>
                             ) : (
-                              <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-800">new</span>
+                              <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-800">
+                                new
+                              </span>
                             )}
                           </div>
                           <div className="mt-1 text-xs text-slate-400">
@@ -537,11 +746,16 @@ export default function ImportsPage() {
                   ) : (
                     <div className="text-sm text-slate-400">No mapped events.</div>
                   )}
-                  {preview.events.length > 200 ? <div className="mt-3 text-xs text-slate-400">Showing first 200 events…</div> : null}
+                  {preview.events.length > 200 ? (
+                    <div className="mt-3 text-xs text-slate-400">Showing first 200 events…</div>
+                  ) : null}
                 </div>
               </div>
 
-              <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4" data-testid="panel-import-issues">
+              <div
+                className="rounded-xl border border-slate-800 bg-slate-900/40 p-4"
+                data-testid="panel-import-issues"
+              >
                 <div className="flex items-center justify-between">
                   <div className="font-semibold">Issues</div>
                   <div className="text-xs text-slate-400">Base currency: {baseCurrency}</div>
@@ -554,16 +768,24 @@ export default function ImportsPage() {
                         <div className="text-sm font-semibold">Missing FX rates</div>
                         <div className="mt-2 space-y-2">
                           {Array.from(issueGroups.fx.entries()).map(([cur, arr]) => (
-                            <div key={cur} className="flex items-center gap-2" data-testid={`row-import-issue-fx-${cur}`}>
+                            <div
+                              key={cur}
+                              className="flex items-center gap-2"
+                              data-testid={`row-import-issue-fx-${cur}`}
+                            >
                               <div className="w-20 text-sm font-mono">{cur}</div>
                               <input
                                 className="flex-1 rounded-md border px-2 py-1 text-sm"
                                 placeholder={`1 ${cur} = ? ${baseCurrency}`}
                                 value={fxRatesToBase[cur] ?? ''}
-                                onChange={(e) => setFxRatesToBase((m) => ({ ...m, [cur]: e.target.value }))}
+                                onChange={(e) =>
+                                  setFxRatesToBase((m) => ({ ...m, [cur]: e.target.value }))
+                                }
                                 data-testid={`input-import-fx-${cur}`}
                               />
-                              <div className="text-xs text-slate-400">txs: {arr.flatMap((x) => x.txIds).join(', ')}</div>
+                              <div className="text-xs text-slate-400">
+                                txs: {arr.flatMap((x) => ('txIds' in x ? x.txIds : [])).join(', ')}
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -577,14 +799,25 @@ export default function ImportsPage() {
                           {Array.from(issueGroups.fee.entries()).map(([refKey, arr]) => {
                             const i = arr[0] as any;
                             return (
-                              <div key={refKey} className="flex items-center gap-2" data-testid={`row-import-issue-fee-${refKey}`}>
+                              <div
+                                key={refKey}
+                                className="flex items-center gap-2"
+                                data-testid={`row-import-issue-fee-${refKey}`}
+                              >
                                 <div className="w-28 text-xs font-mono">{refKey}</div>
-                                <div className="w-28 text-xs text-slate-200">{i.feeAmount} {i.feeCurrency}</div>
+                                <div className="w-28 text-xs text-slate-200">
+                                  {i.feeAmount} {i.feeCurrency}
+                                </div>
                                 <input
                                   className="flex-1 rounded-md border px-2 py-1 text-sm"
                                   placeholder={`Fee value in ${baseCurrency}`}
                                   value={feeValueBaseByRefKey[refKey] ?? ''}
-                                  onChange={(e) => setFeeValueBaseByRefKey((m) => ({ ...m, [refKey]: e.target.value }))}
+                                  onChange={(e) =>
+                                    setFeeValueBaseByRefKey((m) => ({
+                                      ...m,
+                                      [refKey]: e.target.value,
+                                    }))
+                                  }
                                   data-testid={`input-import-feevalue-${refKey}`}
                                 />
                               </div>
@@ -599,14 +832,25 @@ export default function ImportsPage() {
                         <div className="text-sm font-semibold">Swap valuation missing</div>
                         <div className="mt-2 space-y-2">
                           {Array.from(issueGroups.swap.entries()).map(([tradeKey, arr]) => (
-                            <div key={tradeKey} className="flex items-center gap-2" data-testid={`row-import-issue-swap-${tradeKey}`}>
+                            <div
+                              key={tradeKey}
+                              className="flex items-center gap-2"
+                              data-testid={`row-import-issue-swap-${tradeKey}`}
+                            >
                               <div className="w-28 text-xs font-mono">{tradeKey}</div>
-                              <div className="text-xs text-slate-400">txIds: {(arr[0] as any).txIds.join(', ')}</div>
+                              <div className="text-xs text-slate-400">
+                                txIds: {(arr[0] as any).txIds.join(', ')}
+                              </div>
                               <input
                                 className="flex-1 rounded-md border px-2 py-1 text-sm"
                                 placeholder={`Valuation in ${baseCurrency}`}
                                 value={tradeValuationBaseByTradeKey[tradeKey] ?? ''}
-                                onChange={(e) => setTradeValuationBaseByTradeKey((m) => ({ ...m, [tradeKey]: e.target.value }))}
+                                onChange={(e) =>
+                                  setTradeValuationBaseByTradeKey((m) => ({
+                                    ...m,
+                                    [tradeKey]: e.target.value,
+                                  }))
+                                }
                                 data-testid={`input-import-swapvalue-${tradeKey}`}
                               />
                             </div>
@@ -620,14 +864,25 @@ export default function ImportsPage() {
                         <div className="text-sm font-semibold">Reward FMV missing</div>
                         <div className="mt-2 space-y-2">
                           {Array.from(issueGroups.reward.entries()).map(([txId, arr]) => (
-                            <div key={txId} className="flex items-center gap-2" data-testid={`row-import-issue-reward-${txId}`}>
+                            <div
+                              key={txId}
+                              className="flex items-center gap-2"
+                              data-testid={`row-import-issue-reward-${txId}`}
+                            >
                               <div className="w-28 text-xs font-mono">{txId}</div>
-                              <div className="w-28 text-xs text-slate-200">{(arr[0] as any).amount} {(arr[0] as any).currency}</div>
+                              <div className="w-28 text-xs text-slate-200">
+                                {(arr[0] as any).amount} {(arr[0] as any).currency}
+                              </div>
                               <input
                                 className="flex-1 rounded-md border px-2 py-1 text-sm"
                                 placeholder={`FMV total in ${baseCurrency}`}
                                 value={rewardFmvTotalBaseByTxId[txId] ?? ''}
-                                onChange={(e) => setRewardFmvTotalBaseByTxId((m) => ({ ...m, [txId]: e.target.value }))}
+                                onChange={(e) =>
+                                  setRewardFmvTotalBaseByTxId((m) => ({
+                                    ...m,
+                                    [txId]: e.target.value,
+                                  }))
+                                }
                                 data-testid={`input-import-rewardfmv-${txId}`}
                               />
                             </div>
@@ -637,11 +892,15 @@ export default function ImportsPage() {
                     ) : null}
 
                     <div className="text-xs text-slate-400">
-                      After entering values, click <span className="font-medium">Rebuild preview</span>.
+                      After entering values, click{' '}
+                      <span className="font-medium">Rebuild preview</span>.
                     </div>
                   </div>
                 ) : (
-                  <div className="mt-3 rounded-lg bg-green-50 p-3 text-sm text-green-800" data-testid="badge-import-noissues">
+                  <div
+                    className="mt-3 rounded-lg bg-green-50 p-3 text-sm text-green-800"
+                    data-testid="badge-import-noissues"
+                  >
                     No blocking issues.
                   </div>
                 )}
@@ -653,22 +912,45 @@ export default function ImportsPage() {
             <div className="mt-5 rounded-xl border bg-green-50 p-4" data-testid="panel-import-done">
               <div className="flex items-center justify-between gap-2 flex-wrap">
                 <div className="font-semibold text-green-900">Import committed</div>
-                <span className="rounded-full bg-green-200 px-2 py-1 text-xs font-medium text-green-900" data-testid="badge-import-step-done">
+                <span
+                  className="rounded-full bg-green-200 px-2 py-1 text-xs font-medium text-green-900"
+                  data-testid="badge-import-step-done"
+                >
                   done
                 </span>
               </div>
               <div className="mt-2 grid gap-1 text-sm text-green-900">
-                <div>Fetched: <span className="font-mono">{commitResult.fetched}</span></div>
-                <div>Mapped events: <span className="font-mono">{commitResult.mapped}</span></div>
-                <div>New events committed: <span className="font-mono">{commitResult.createdLedgerEvents}</span></div>
-                <div>Duplicates skipped: <span className="font-mono">{commitResult.skippedDuplicates}</span></div>
-                <div>Assets created: <span className="font-mono">{commitResult.createdAssets}</span></div>
+                <div>
+                  Fetched: <span className="font-mono">{commitResult.fetched}</span>
+                </div>
+                <div>
+                  Mapped events: <span className="font-mono">{commitResult.mapped}</span>
+                </div>
+                <div>
+                  New events committed:{' '}
+                  <span className="font-mono">{commitResult.createdLedgerEvents}</span>
+                </div>
+                <div>
+                  Duplicates skipped:{' '}
+                  <span className="font-mono">{commitResult.skippedDuplicates}</span>
+                </div>
+                <div>
+                  Assets created: <span className="font-mono">{commitResult.createdAssets}</span>
+                </div>
               </div>
               <div className="mt-3 flex gap-2">
-                <a href="/transactions" className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white" data-testid="link-go-transactions">
+                <a
+                  href="/transactions"
+                  className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white"
+                  data-testid="link-go-transactions"
+                >
                   View transactions
                 </a>
-                <a href="/portfolio" className="rounded-lg border px-3 py-2 text-sm" data-testid="link-go-portfolio">
+                <a
+                  href="/portfolio"
+                  className="rounded-lg border px-3 py-2 text-sm"
+                  data-testid="link-go-portfolio"
+                >
                   View portfolio
                 </a>
               </div>

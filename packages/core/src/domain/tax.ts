@@ -19,7 +19,7 @@ export const TaxIncomeRow = z.object({
    * The FMV in base currency used (only for FMV mode). Optional to allow warning rows.
    */
   fmvTotalBase: DecimalString.optional(),
-  type: z.enum(['REWARD', 'STAKING_REWARD', 'AIRDROP'])
+  type: z.enum(['REWARD', 'STAKING_REWARD', 'AIRDROP']),
 });
 
 export type TaxIncomeRow = z.infer<typeof TaxIncomeRow>;
@@ -27,7 +27,7 @@ export type TaxIncomeRow = z.infer<typeof TaxIncomeRow>;
 export const TaxHoldingRow = z.object({
   assetId: UuidString,
   amount: DecimalString,
-  costBasisBase: DecimalString
+  costBasisBase: DecimalString,
 });
 
 export type TaxHoldingRow = z.infer<typeof TaxHoldingRow>;
@@ -37,7 +37,7 @@ export const TaxYearTotals = z.object({
   costBasisBase: DecimalString,
   feesBase: DecimalString,
   realizedGainBase: DecimalString,
-  incomeBase: DecimalString
+  incomeBase: DecimalString,
 });
 
 export type TaxYearTotals = z.infer<typeof TaxYearTotals>;
@@ -52,7 +52,7 @@ export const TaxYearReport = z.object({
   income: z.array(TaxIncomeRow),
   yearEndHoldings: z.array(TaxHoldingRow),
   totals: TaxYearTotals,
-  warnings: z.array(z.string())
+  warnings: z.array(z.string()),
 });
 
 export type TaxYearReport = z.infer<typeof TaxYearReport>;

@@ -7,7 +7,7 @@ export const Lot = z.object({
   acquiredAtISO: IsoString,
   amountRemaining: DecimalString,
   costBasisBaseRemaining: DecimalString,
-  originEventId: UuidString
+  originEventId: UuidString,
 });
 
 export type Lot = z.infer<typeof Lot>;
@@ -15,7 +15,7 @@ export type Lot = z.infer<typeof Lot>;
 export const DisposalLotMatch = z.object({
   lotId: z.string().min(1),
   amount: DecimalString,
-  costBasisBase: DecimalString
+  costBasisBase: DecimalString,
 });
 
 export const Disposal = z.object({
@@ -28,7 +28,7 @@ export const Disposal = z.object({
   feeBase: DecimalString,
   realizedGainBase: DecimalString,
   lotsMatched: z.array(DisposalLotMatch),
-  taxYear: z.number().int()
+  taxYear: z.number().int(),
 });
 
 export type Disposal = z.infer<typeof Disposal>;
@@ -40,7 +40,7 @@ export const Position = z.object({
   avgCostBase: DecimalString.optional(),
   costBasisBase: DecimalString.optional(),
   unrealizedPnlBase: DecimalString.optional(),
-  unrealizedPnlPct: DecimalString.optional()
+  unrealizedPnlPct: DecimalString.optional(),
 });
 
 export type Position = z.infer<typeof Position>;
@@ -50,7 +50,7 @@ export const TxMarker = z.object({
   type: z.string().min(1),
   timestampISO: IsoString,
   assetId: UuidString,
-  valueBase: DecimalString.optional()
+  valueBase: DecimalString.optional(),
 });
 
 export type TxMarker = z.infer<typeof TxMarker>;
@@ -66,10 +66,10 @@ export const PortfolioSnapshot = z.object({
       amount: DecimalString,
       valueBase: DecimalString,
       costBasisBase: DecimalString,
-      unrealizedPnlBase: DecimalString.optional()
-    })
+      unrealizedPnlBase: DecimalString.optional(),
+    }),
   ),
-  txMarkers: z.array(TxMarker)
+  txMarkers: z.array(TxMarker),
 });
 
 export type PortfolioSnapshot = z.infer<typeof PortfolioSnapshot>;

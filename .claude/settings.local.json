@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm lint:*)",
+      "Bash(wc -l apps/web/src/pages/*.tsx)",
+      "Bash(pnpm test:e2e -- --grep \"smoke|KP-UI-001\")",
+      "Skill(implement-feature)",
+      "Skill(implement-feature:*)"
+    ]
+  }
+}

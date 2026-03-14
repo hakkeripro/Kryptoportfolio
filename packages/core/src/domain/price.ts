@@ -9,7 +9,7 @@ export const PricePoint = z.object({
   provider: z.string().min(1),
   timestampISO: IsoString,
   priceBase: DecimalString,
-  source: PriceSource
+  source: PriceSource,
 });
 
 export type PricePoint = z.infer<typeof PricePoint>;

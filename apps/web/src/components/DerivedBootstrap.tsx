@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useAppStore } from '../store/useAppStore';
+import { useVaultStore } from '../store/useVaultStore';
 import { rebuildDerivedCaches } from '../derived/rebuildDerived';
 import { ensureDefaultSettings } from '../derived/ensureDefaultSettings';
 
@@ -9,10 +9,10 @@ import { ensureDefaultSettings } from '../derived/ensureDefaultSettings';
  * Runs every time the vault transitions from locked -> unlocked.
  */
 export default function DerivedBootstrap() {
-  const { vaultReady, vaultSetup, passphrase } = useAppStore((s) => ({
+  const { vaultReady, vaultSetup, passphrase } = useVaultStore((s) => ({
     vaultReady: s.vaultReady,
     vaultSetup: s.vaultSetup,
-    passphrase: s.passphrase
+    passphrase: s.passphrase,
   }));
 
   const wasUnlocked = useRef(false);

@@ -25,7 +25,7 @@ export class WebDb extends Dexie {
       accounts: '&id, type, name',
       settings: '&id',
       ledgerEvents: '&id, type, timestampISO, assetId, externalRef, replacesEventId, isDeleted',
-      alerts: '&id, type, assetId, isEnabled'
+      alerts: '&id, type, assetId, isEnabled',
     });
 
     // v2: derived caches (non-authoritative)
@@ -37,7 +37,19 @@ export class WebDb extends Dexie {
       ledgerEvents: '&id, type, timestampISO, assetId, externalRef, replacesEventId, isDeleted',
       alerts: '&id, type, assetId, isEnabled',
       pricePoints: '&id, assetId, provider, timestampISO',
-      portfolioSnapshots: '&dayISO'
+      portfolioSnapshots: '&dayISO',
+    });
+
+    // v3: compound index for pricePoints queries (where assetId + sortBy timestampISO)
+    this.version(3).stores({
+      meta: '&key',
+      assets: '&id, symbol, name',
+      accounts: '&id, type, name',
+      settings: '&id',
+      ledgerEvents: '&id, type, timestampISO, assetId, externalRef, replacesEventId, isDeleted',
+      alerts: '&id, type, assetId, isEnabled',
+      pricePoints: '&id, [assetId+timestampISO], assetId, provider, timestampISO',
+      portfolioSnapshots: '&dayISO',
     });
   }
 }

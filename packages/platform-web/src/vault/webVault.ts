@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const VaultKdfParamsSchema = z.object({
   saltBase64: z.string(),
-  iterations: z.number().int().positive()
+  iterations: z.number().int().positive(),
 });
 export type VaultKdfParams = z.infer<typeof VaultKdfParamsSchema>;
 
@@ -10,7 +10,7 @@ export const VaultBlobSchema = z.object({
   version: z.number().int().positive(),
   kdf: VaultKdfParamsSchema,
   nonceBase64: z.string(),
-  ciphertextBase64: z.string()
+  ciphertextBase64: z.string(),
 });
 export type VaultBlob = z.infer<typeof VaultBlobSchema>;
 
@@ -38,18 +38,20 @@ function toArrayBuffer(u8: Uint8Array): ArrayBuffer {
 
 async function deriveKey(passphrase: string, kdf: VaultKdfParams): Promise<CryptoKey> {
   const enc = new TextEncoder();
-  const baseKey = await crypto.subtle.importKey('raw', enc.encode(passphrase), 'PBKDF2', false, ['deriveKey']);
+  const baseKey = await crypto.subtle.importKey('raw', enc.encode(passphrase), 'PBKDF2', false, [
+    'deriveKey',
+  ]);
   return crypto.subtle.deriveKey(
     {
       name: 'PBKDF2',
       salt: toArrayBuffer(unb64(kdf.saltBase64)),
       iterations: kdf.iterations,
-      hash: 'SHA-256'
+      hash: 'SHA-256',
     },
     baseKey,
     { name: 'AES-GCM', length: 256 },
     false,
-    ['encrypt', 'decrypt']
+    ['encrypt', 'decrypt'],
   );
 }
 
@@ -62,13 +64,13 @@ export async function createVaultBlob(passphrase: string, payload: unknown): Pro
   const ct = await crypto.subtle.encrypt(
     { name: 'AES-GCM', iv: toArrayBuffer(nonce) },
     key,
-    toArrayBuffer(pt)
+    toArrayBuffer(pt),
   );
   return {
     version: 1,
     kdf,
     nonceBase64: b64(nonce),
-    ciphertextBase64: b64(ct)
+    ciphertextBase64: b64(ct),
   };
 }
 
@@ -78,7 +80,7 @@ export async function openVaultBlob(passphrase: string, blob: VaultBlob): Promis
   const pt = await crypto.subtle.decrypt(
     { name: 'AES-GCM', iv: toArrayBuffer(unb64(b.nonceBase64)) },
     key,
-    toArrayBuffer(unb64(b.ciphertextBase64))
+    toArrayBuffer(unb64(b.ciphertextBase64)),
   );
   const txt = new TextDecoder().decode(pt);
   return JSON.parse(txt);

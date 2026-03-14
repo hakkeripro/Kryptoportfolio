@@ -16,7 +16,7 @@ import type { Settings } from '../domain/settings.js';
 const CoinbaseMoney = z
   .object({
     amount: z.string(),
-    currency: z.string()
+    currency: z.string(),
   })
   .passthrough();
 
@@ -27,7 +27,7 @@ export const CoinbaseV2TxSchema = z
     created_at: z.string(),
     amount: CoinbaseMoney,
     native_amount: CoinbaseMoney.optional(),
-    details: z.any().optional()
+    details: z.any().optional(),
   })
   .passthrough();
 
@@ -102,7 +102,9 @@ export type CoinbaseV2MapResult = {
 };
 
 function upper(s: string): string {
-  return String(s ?? '').trim().toUpperCase();
+  return String(s ?? '')
+    .trim()
+    .toUpperCase();
 }
 
 function d(s: string | undefined | null): Decimal {
@@ -150,7 +152,7 @@ function convertToBase(
   amount: Decimal,
   currency: string,
   baseCurrency: string,
-  fxRatesToBase: FxRatesToBase | undefined
+  fxRatesToBase: FxRatesToBase | undefined,
 ): Decimal | null {
   const c = upper(currency);
   const base = upper(baseCurrency);
@@ -163,7 +165,7 @@ function convertToBase(
 function pickMoneyToBase(
   money: { amount: string; currency: string } | undefined,
   baseCurrency: string,
-  fxRatesToBase: FxRatesToBase | undefined
+  fxRatesToBase: FxRatesToBase | undefined,
 ): Decimal | null {
   if (!money) return null;
   return convertToBase(d(money.amount), money.currency, baseCurrency, fxRatesToBase);
@@ -190,7 +192,7 @@ function extractBuySellFields(tx: CoinbaseV2Tx):
       kind: 'buy',
       subtotal: b.subtotal,
       fee: b.fee,
-      total: b.total
+      total: b.total,
     };
   }
   if (any.sell && typeof any.sell === 'object') {
@@ -199,7 +201,7 @@ function extractBuySellFields(tx: CoinbaseV2Tx):
       kind: 'sell',
       subtotal: s.subtotal,
       fee: s.fee,
-      total: s.total
+      total: s.total,
     };
   }
   return null;
@@ -208,7 +210,12 @@ function extractBuySellFields(tx: CoinbaseV2Tx):
 function extractFeeMoney(tx: CoinbaseV2Tx): { amount: string; currency: string } | null {
   const any = tx as any;
   // top-level fee
-  if (any.fee && typeof any.fee === 'object' && typeof any.fee.amount === 'string' && typeof any.fee.currency === 'string') {
+  if (
+    any.fee &&
+    typeof any.fee === 'object' &&
+    typeof any.fee.amount === 'string' &&
+    typeof any.fee.currency === 'string'
+  ) {
     return any.fee;
   }
   // buy/sell embedded fee
@@ -218,7 +225,13 @@ function extractFeeMoney(tx: CoinbaseV2Tx): { amount: string; currency: string }
   const net = any.network;
   if (net && typeof net === 'object') {
     const f = net.transaction_fee ?? net.fee;
-    if (f && typeof f === 'object' && typeof f.amount === 'string' && typeof f.currency === 'string') return f;
+    if (
+      f &&
+      typeof f === 'object' &&
+      typeof f.amount === 'string' &&
+      typeof f.currency === 'string'
+    )
+      return f;
   }
   return null;
 }
@@ -232,23 +245,28 @@ function buildNotes(tx: CoinbaseV2Tx): string | undefined {
 }
 
 function tagBase(accountId: string, tx: CoinbaseV2Tx): string[] {
-  return ['import:coinbase', `coinbaseAccount:${accountId}`, `coinbaseType:${String(tx.type ?? '').toLowerCase()}`];
+  return [
+    'import:coinbase',
+    `coinbaseAccount:${accountId}`,
+    `coinbaseType:${String(tx.type ?? '').toLowerCase()}`,
+  ];
 }
 
 export function mapCoinbaseV2TransactionsToLedger(
   items: CoinbaseV2ImportItem[],
-  opts: CoinbaseV2MapOptions
+  opts: CoinbaseV2MapOptions,
 ): CoinbaseV2MapResult {
   const baseCurrency = upper(opts.baseCurrency);
   const fxRatesToBase = opts.fxRatesToBase;
-  const rewardsMode: Settings['rewardsCostBasisMode'] = opts.settings?.rewardsCostBasisMode ?? 'ZERO';
+  const rewardsMode: Settings['rewardsCostBasisMode'] =
+    opts.settings?.rewardsCostBasisMode ?? 'ZERO';
   const issues: ImportIssue[] = [];
   const events: LedgerEvent[] = [];
   const externalRefs: string[] = [];
 
   const parsed: { accountId: string; tx: CoinbaseV2Tx }[] = items.map((it) => ({
     accountId: it.accountId,
-    tx: CoinbaseV2TxSchema.parse(it.tx)
+    tx: CoinbaseV2TxSchema.parse(it.tx),
   }));
 
   // Group trades across accounts into a single SWAP when possible.
@@ -325,11 +343,12 @@ export function mapCoinbaseV2TransactionsToLedger(
     }
 
     // Fee aggregation (Coinbase sometimes reports fee on only one side)
-    const feeMoney = group
-      .map((g) => extractFeeMoney(g.tx))
-      .filter(Boolean)
-      .map((m) => m!)
-      .at(0) ?? null;
+    const feeMoney =
+      group
+        .map((g) => extractFeeMoney(g.tx))
+        .filter(Boolean)
+        .map((m) => m!)
+        .at(0) ?? null;
 
     let feeBase: Decimal | null = null;
     let feeToken: { feeAssetId: string; feeAmount: Decimal; feeValueBase: Decimal } | null = null;
@@ -347,23 +366,28 @@ export function mapCoinbaseV2TransactionsToLedger(
           feeToken = {
             feeAssetId: opts.currencyToAssetId(feeCur),
             feeAmount: feeAmt,
-            feeValueBase: valuationBase.div(amtIn).mul(feeAmt)
+            feeValueBase: valuationBase.div(amtIn).mul(feeAmt),
           };
         } else if (feeCur === curOut && amtOut.gt(0)) {
           feeToken = {
             feeAssetId: opts.currencyToAssetId(feeCur),
             feeAmount: feeAmt,
-            feeValueBase: valuationBase.div(amtOut).mul(feeAmt)
+            feeValueBase: valuationBase.div(amtOut).mul(feeAmt),
           };
         } else {
           if (feeOverride) {
             feeToken = {
               feeAssetId: opts.currencyToAssetId(feeCur),
               feeAmount: feeAmt,
-              feeValueBase: d(feeOverride).abs()
+              feeValueBase: d(feeOverride).abs(),
             };
           } else {
-            issues.push({ type: 'FEE_VALUE_MISSING', refKey: tradeKey, feeCurrency: feeCur, feeAmount: feeAmt.toFixed() });
+            issues.push({
+              type: 'FEE_VALUE_MISSING',
+              refKey: tradeKey,
+              feeCurrency: feeCur,
+              feeAmount: feeAmt.toFixed(),
+            });
             feeMissingValue = true;
           }
         }
@@ -372,10 +396,15 @@ export function mapCoinbaseV2TransactionsToLedger(
           feeToken = {
             feeAssetId: opts.currencyToAssetId(feeCur),
             feeAmount: feeAmt,
-            feeValueBase: d(feeOverride).abs()
+            feeValueBase: d(feeOverride).abs(),
           };
         } else {
-          issues.push({ type: 'FEE_VALUE_MISSING', refKey: tradeKey, feeCurrency: feeCur, feeAmount: feeAmt.toFixed() });
+          issues.push({
+            type: 'FEE_VALUE_MISSING',
+            refKey: tradeKey,
+            feeCurrency: feeCur,
+            feeAmount: feeAmt.toFixed(),
+          });
           feeMissingValue = true;
         }
       }
@@ -412,12 +441,12 @@ export function mapCoinbaseV2TransactionsToLedger(
         ? {
             feeAssetId: feeToken.feeAssetId,
             feeAmount: feeToken.feeAmount.toFixed(),
-            feeValueBase: feeToken.feeValueBase.toFixed()
+            feeValueBase: feeToken.feeValueBase.toFixed(),
           }
         : {}),
       notes: buildNotes(first.tx),
       externalRef: `coinbase:v2:${tradeKey}`,
-      tags: ['import:coinbase', `coinbaseTradeKey:${tradeKey}`, `coinbaseTxIds:${txIds.join(',')}`]
+      tags: ['import:coinbase', `coinbaseTradeKey:${tradeKey}`, `coinbaseTxIds:${txIds.join(',')}`],
     };
 
     // Validate fee invariants eagerly
@@ -450,24 +479,31 @@ export function mapCoinbaseV2TransactionsToLedger(
         feeBase = feeToBase.abs();
       } else {
         // Token-fee valuation: try to infer from transaction price when possible
-        const nativeBase = tx.native_amount ? pickMoneyToBase(tx.native_amount, baseCurrency, fxRatesToBase) : null;
+        const nativeBase = tx.native_amount
+          ? pickMoneyToBase(tx.native_amount, baseCurrency, fxRatesToBase)
+          : null;
         const qtyAbs = d(tx.amount.amount).abs();
-        if (nativeBase && qtyAbs.gt(0) && (feeCur === cur)) {
+        if (nativeBase && qtyAbs.gt(0) && feeCur === cur) {
           const px = nativeBase.abs().div(qtyAbs);
           feeToken = {
             feeAssetId: opts.currencyToAssetId(feeCur!),
             feeAmount: feeAmt,
-            feeValueBase: feeAmt.mul(px)
+            feeValueBase: feeAmt.mul(px),
           };
         } else {
           if (feeOverride) {
             feeToken = {
               feeAssetId: opts.currencyToAssetId(feeCur!),
               feeAmount: feeAmt,
-              feeValueBase: d(feeOverride).abs()
+              feeValueBase: d(feeOverride).abs(),
             };
           } else {
-            issues.push({ type: 'FEE_VALUE_MISSING', refKey: tx.id, feeCurrency: feeCur!, feeAmount: feeAmt.toFixed() });
+            issues.push({
+              type: 'FEE_VALUE_MISSING',
+              refKey: tx.id,
+              feeCurrency: feeCur!,
+              feeAmount: feeAmt.toFixed(),
+            });
           }
         }
       }
@@ -481,26 +517,49 @@ export function mapCoinbaseV2TransactionsToLedger(
 
     // BUY / SELL use subtotal when available to avoid mixing fees into price.
     const bs = extractBuySellFields(tx);
-    const subtotalBase = bs?.subtotal ? pickMoneyToBase(bs.subtotal, baseCurrency, fxRatesToBase) : null;
+    const subtotalBase = bs?.subtotal
+      ? pickMoneyToBase(bs.subtotal, baseCurrency, fxRatesToBase)
+      : null;
     if (bs?.subtotal && !subtotalBase) {
-      issues.push({ type: 'FX_MISSING', currency: upper(bs.subtotal.currency), neededFor: 'subtotal', txIds: [tx.id] });
+      issues.push({
+        type: 'FX_MISSING',
+        currency: upper(bs.subtotal.currency),
+        neededFor: 'subtotal',
+        txIds: [tx.id],
+      });
     }
 
-    const nativeBase = tx.native_amount ? pickMoneyToBase(tx.native_amount, baseCurrency, fxRatesToBase) : null;
+    const nativeBase = tx.native_amount
+      ? pickMoneyToBase(tx.native_amount, baseCurrency, fxRatesToBase)
+      : null;
     if (tx.native_amount && !nativeBase) {
-      issues.push({ type: 'FX_MISSING', currency: upper(tx.native_amount.currency), neededFor: 'native_amount', txIds: [tx.id] });
+      issues.push({
+        type: 'FX_MISSING',
+        currency: upper(tx.native_amount.currency),
+        neededFor: 'native_amount',
+        txIds: [tx.id],
+      });
     }
 
     const qtySigned = d(tx.amount.amount);
     const qty = qtySigned.abs();
 
     if (type === 'buy') {
-      const tradeValue = subtotalBase ? subtotalBase.abs() : nativeBase ? nativeBase.abs().sub(feeBase ?? new Decimal(0)) : null;
+      const tradeValue = subtotalBase
+        ? subtotalBase.abs()
+        : nativeBase
+          ? nativeBase.abs().sub(feeBase ?? new Decimal(0))
+          : null;
       const px = tradeValue && qty.gt(0) ? tradeValue.div(qty) : null;
       if (!px) {
         // without a deterministic base valuation we cannot price cost basis
         if (tx.native_amount) {
-          issues.push({ type: 'FX_MISSING', currency: upper(tx.native_amount.currency), neededFor: 'native_amount', txIds: [tx.id] });
+          issues.push({
+            type: 'FX_MISSING',
+            currency: upper(tx.native_amount.currency),
+            neededFor: 'native_amount',
+            txIds: [tx.id],
+          });
         }
         continue;
       }
@@ -518,11 +577,15 @@ export function mapCoinbaseV2TransactionsToLedger(
         pricePerUnitBase: px.toFixed(),
         ...(feeBase ? { feeBase: feeBase.toFixed() } : {}),
         ...(feeToken
-          ? { feeAssetId: feeToken.feeAssetId, feeAmount: feeToken.feeAmount.toFixed(), feeValueBase: feeToken.feeValueBase.toFixed() }
+          ? {
+              feeAssetId: feeToken.feeAssetId,
+              feeAmount: feeToken.feeAmount.toFixed(),
+              feeValueBase: feeToken.feeValueBase.toFixed(),
+            }
           : {}),
         notes: buildNotes(tx),
         externalRef: ext,
-        tags: tagBase(accountId, tx)
+        tags: tagBase(accountId, tx),
       };
 
       assertFeeInvariants(ev);
@@ -533,11 +596,20 @@ export function mapCoinbaseV2TransactionsToLedger(
     }
 
     if (type === 'sell') {
-      const tradeValue = subtotalBase ? subtotalBase.abs() : nativeBase ? nativeBase.abs().add(feeBase ?? new Decimal(0)) : null;
+      const tradeValue = subtotalBase
+        ? subtotalBase.abs()
+        : nativeBase
+          ? nativeBase.abs().add(feeBase ?? new Decimal(0))
+          : null;
       const px = tradeValue && qty.gt(0) ? tradeValue.div(qty) : null;
       if (!px) {
         if (tx.native_amount) {
-          issues.push({ type: 'FX_MISSING', currency: upper(tx.native_amount.currency), neededFor: 'native_amount', txIds: [tx.id] });
+          issues.push({
+            type: 'FX_MISSING',
+            currency: upper(tx.native_amount.currency),
+            neededFor: 'native_amount',
+            txIds: [tx.id],
+          });
         }
         continue;
       }
@@ -555,11 +627,15 @@ export function mapCoinbaseV2TransactionsToLedger(
         pricePerUnitBase: px.toFixed(),
         ...(feeBase ? { feeBase: feeBase.toFixed() } : {}),
         ...(feeToken
-          ? { feeAssetId: feeToken.feeAssetId, feeAmount: feeToken.feeAmount.toFixed(), feeValueBase: feeToken.feeValueBase.toFixed() }
+          ? {
+              feeAssetId: feeToken.feeAssetId,
+              feeAmount: feeToken.feeAmount.toFixed(),
+              feeValueBase: feeToken.feeValueBase.toFixed(),
+            }
           : {}),
         notes: buildNotes(tx),
         externalRef: ext,
-        tags: tagBase(accountId, tx)
+        tags: tagBase(accountId, tx),
       };
       assertFeeInvariants(ev);
       LedgerEventSchema.parse(ev);
@@ -569,7 +645,12 @@ export function mapCoinbaseV2TransactionsToLedger(
     }
 
     // Rewards
-    if (type.includes('reward') || type.includes('interest') || type.includes('airdrop') || type.includes('staking')) {
+    if (
+      type.includes('reward') ||
+      type.includes('interest') ||
+      type.includes('airdrop') ||
+      type.includes('staking')
+    ) {
       const rewardType: LedgerEvent['type'] = type.includes('staking')
         ? 'STAKING_REWARD'
         : type.includes('airdrop')
@@ -577,9 +658,14 @@ export function mapCoinbaseV2TransactionsToLedger(
           : 'REWARD';
 
       const overrideFmv = opts.overrides?.rewardFmvTotalBaseByTxId?.[tx.id];
-      const fmvTotalBase = (nativeBase?.abs() ?? null) ?? (overrideFmv ? d(overrideFmv).abs() : null);
+      const fmvTotalBase = nativeBase?.abs() ?? (overrideFmv ? d(overrideFmv).abs() : null);
       if (rewardsMode === 'FMV' && !fmvTotalBase) {
-        issues.push({ type: 'REWARD_FMV_MISSING', txId: tx.id, amount: qty.toFixed(), currency: cur });
+        issues.push({
+          type: 'REWARD_FMV_MISSING',
+          txId: tx.id,
+          amount: qty.toFixed(),
+          currency: cur,
+        });
         continue;
       }
       const ev: LedgerEvent = {
@@ -595,7 +681,7 @@ export function mapCoinbaseV2TransactionsToLedger(
         ...(fmvTotalBase ? { fmvTotalBase: fmvTotalBase.toFixed() } : {}),
         notes: buildNotes(tx),
         externalRef: ext,
-        tags: tagBase(accountId, tx)
+        tags: tagBase(accountId, tx),
       };
       LedgerEventSchema.parse(ev);
       events.push(ev);
@@ -616,11 +702,15 @@ export function mapCoinbaseV2TransactionsToLedger(
       amount: qtySigned.toFixed(),
       ...(feeBase ? { feeBase: feeBase.toFixed() } : {}),
       ...(feeToken
-        ? { feeAssetId: feeToken.feeAssetId, feeAmount: feeToken.feeAmount.toFixed(), feeValueBase: feeToken.feeValueBase.toFixed() }
+        ? {
+            feeAssetId: feeToken.feeAssetId,
+            feeAmount: feeToken.feeAmount.toFixed(),
+            feeValueBase: feeToken.feeValueBase.toFixed(),
+          }
         : {}),
       notes: buildNotes(tx),
       externalRef: ext,
-      tags: tagBase(accountId, tx)
+      tags: tagBase(accountId, tx),
     };
     assertFeeInvariants(ev);
     LedgerEventSchema.parse(ev);
@@ -629,7 +719,11 @@ export function mapCoinbaseV2TransactionsToLedger(
   }
 
   // Stable sort by time then externalRef for deterministic output
-  events.sort((a, b) => a.timestampISO.localeCompare(b.timestampISO) || String(a.externalRef ?? '').localeCompare(String(b.externalRef ?? '')));
+  events.sort(
+    (a, b) =>
+      a.timestampISO.localeCompare(b.timestampISO) ||
+      String(a.externalRef ?? '').localeCompare(String(b.externalRef ?? '')),
+  );
 
   return { events, issues, externalRefs };
 }

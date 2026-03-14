@@ -8,7 +8,7 @@ import {
   type FxRatesToBase,
   type ImportIssue,
   type LedgerEvent,
-  type Settings
+  type Settings,
 } from '@kp/core';
 
 export type CoinbaseImportResult = {
@@ -45,7 +45,10 @@ export function buildCoinbaseImportPreview(args: {
   settings: Settings;
   overrides: CoinbaseImportOverrides;
 }): CoinbaseImportPreview {
-  const items: CoinbaseV2ImportItem[] = args.items.map((it) => ({ accountId: it.accountId, tx: it.tx }));
+  const items: CoinbaseV2ImportItem[] = args.items.map((it) => ({
+    accountId: it.accountId,
+    tx: it.tx,
+  }));
   const r = mapCoinbaseV2TransactionsToLedger(items, {
     baseCurrency: args.baseCurrency,
     currencyToAssetId: assetIdForCurrency,
@@ -55,8 +58,8 @@ export function buildCoinbaseImportPreview(args: {
     overrides: {
       feeValueBaseByRefKey: args.overrides.feeValueBaseByRefKey,
       tradeValuationBaseByTradeKey: args.overrides.tradeValuationBaseByTradeKey,
-      rewardFmvTotalBaseByTxId: args.overrides.rewardFmvTotalBaseByTxId
-    }
+      rewardFmvTotalBaseByTxId: args.overrides.rewardFmvTotalBaseByTxId,
+    },
   });
 
   const touchedAssetIds = new Set<string>();
@@ -73,7 +76,7 @@ export function buildCoinbaseImportPreview(args: {
     newEvents: r.events, // filtered during commit when DB is available
     duplicateExternalRefs: [],
     touchedAssetIds: [...touchedAssetIds],
-    rawCount: args.items.length
+    rawCount: args.items.length,
   };
 }
 
@@ -89,7 +92,7 @@ async function ensureCoinbaseAccount(now: string): Promise<boolean> {
     name: 'Coinbase',
     type: 'exchange',
     isActive: true,
-    notes: 'Imported via Coinbase API'
+    notes: 'Imported via Coinbase API',
   } as any);
   return true;
 }
@@ -100,7 +103,7 @@ async function ensureAssets(assetIds: string[], now: string): Promise<number> {
   const toCreate: any[] = [];
 
   for (let i = 0; i < assetIds.length; i++) {
-    const id = assetIds[i];
+    const id = assetIds[i]!;
     if (existing[i]) continue;
     const symbol = id.replace(/^asset_/, '').toUpperCase();
     const known = lookupKnownAsset(symbol);
@@ -114,7 +117,7 @@ async function ensureAssets(assetIds: string[], now: string): Promise<number> {
       type: known?.type ?? inferAssetType(symbol),
       // IMPORTANT: Do not guess provider ids from symbol. The user links coingeckoId manually in Assets.
       providerRef: {},
-      isActive: true
+      isActive: true,
     });
   }
 
@@ -124,7 +127,9 @@ async function ensureAssets(assetIds: string[], now: string): Promise<number> {
   return toCreate.length;
 }
 
-export async function commitCoinbaseImport(preview: CoinbaseImportPreview): Promise<CoinbaseImportResult> {
+export async function commitCoinbaseImport(
+  preview: CoinbaseImportPreview,
+): Promise<CoinbaseImportResult> {
   await ensureWebDbOpen();
   const db = getWebDb();
 
@@ -163,11 +168,13 @@ export async function commitCoinbaseImport(preview: CoinbaseImportPreview): Prom
     createdAssets,
     createdAccount,
     createdLedgerEvents: newEvents.length,
-    skippedDuplicates: dupRefs.length
+    skippedDuplicates: dupRefs.length,
   };
 }
 
-export async function computeCoinbaseDedupe(preview: CoinbaseImportPreview): Promise<CoinbaseImportPreview> {
+export async function computeCoinbaseDedupe(
+  preview: CoinbaseImportPreview,
+): Promise<CoinbaseImportPreview> {
   await ensureWebDbOpen();
   const db = getWebDb();
   const externalRefs = preview.events.map((e) => e.externalRef).filter(Boolean) as string[];
@@ -177,6 +184,8 @@ export async function computeCoinbaseDedupe(preview: CoinbaseImportPreview): Pro
   const existing = await db.ledgerEvents.where('externalRef').anyOf(externalRefs).toArray();
   const existingRefs = new Set(existing.map((e) => String((e as any).externalRef ?? '')));
   const newEvents = preview.events.filter((e) => e.externalRef && !existingRefs.has(e.externalRef));
-  const dupRefs = preview.events.filter((e) => e.externalRef && existingRefs.has(e.externalRef)).map((e) => e.externalRef!) as string[];
+  const dupRefs = preview.events
+    .filter((e) => e.externalRef && existingRefs.has(e.externalRef))
+    .map((e) => e.externalRef!) as string[];
   return { ...preview, newEvents, duplicateExternalRefs: dupRefs };
 }

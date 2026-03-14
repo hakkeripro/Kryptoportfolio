@@ -7,7 +7,7 @@ export const AlertTypeEnum = z.enum([
   'PCT_CHANGE',
   'DRAWDOWN',
   'DRIFT',
-  'TAKE_PROFIT'
+  'TAKE_PROFIT',
 ]);
 export type AlertType = z.infer<typeof AlertTypeEnum>;
 
@@ -28,7 +28,7 @@ export const AlertSchema = z.object({
   snoozedUntilISO: IsoString.optional(),
   isEnabled: z.boolean(),
   lastTriggeredAtISO: IsoString.optional(),
-  source: AlertSourceEnum
+  source: AlertSourceEnum,
 });
 
 export type Alert = z.infer<typeof AlertSchema>;
@@ -38,7 +38,7 @@ export const AlertTriggerLogSchema = z.object({
   alertId: UuidString,
   triggeredAtISO: IsoString,
   source: z.enum(['foreground', 'server']),
-  context: z.record(z.any())
+  context: z.record(z.any()),
 });
 export type AlertTriggerLog = z.infer<typeof AlertTriggerLogSchema>;
 
@@ -52,8 +52,12 @@ export const MirrorStateSchema = z.object({
   assetPrices: z.record(UuidString, DecimalString),
   allocationPct: z.record(UuidString, DecimalString).optional(),
   // Optional history points for pct-change evaluation
-  portfolioHistory: z.array(z.object({ timestampISO: IsoString, valueBase: DecimalString })).optional(),
-  priceHistory: z.record(UuidString, z.array(z.object({ timestampISO: IsoString, priceBase: DecimalString }))).optional(),
-  driftPct: z.record(UuidString, DecimalString).optional()
+  portfolioHistory: z
+    .array(z.object({ timestampISO: IsoString, valueBase: DecimalString }))
+    .optional(),
+  priceHistory: z
+    .record(UuidString, z.array(z.object({ timestampISO: IsoString, priceBase: DecimalString })))
+    .optional(),
+  driftPct: z.record(UuidString, DecimalString).optional(),
 });
 export type MirrorState = z.infer<typeof MirrorStateSchema>;

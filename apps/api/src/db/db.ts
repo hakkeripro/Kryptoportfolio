@@ -68,7 +68,7 @@ const MIGRATIONS: string[] = [
       triggeredAtISO TEXT NOT NULL,
       source TEXT NOT NULL,
       contextJson TEXT NOT NULL
-    );`
+    );`,
 ];
 
 function nowISO() {

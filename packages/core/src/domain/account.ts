@@ -10,7 +10,7 @@ export const Account = z.object({
   chain: z.string().optional(),
   address: z.string().optional(),
   isActive: z.boolean(),
-  notes: z.string().optional()
+  notes: z.string().optional(),
 });
 
 export type Account = z.infer<typeof Account>;

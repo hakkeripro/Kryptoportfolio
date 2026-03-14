@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAppStore } from '../store/useAppStore';
+import { useAuthStore } from '../store/useAuthStore';
+import { useVaultStore } from '../store/useVaultStore';
 
 function errToMsg(e: unknown): string {
   if (e instanceof Error) return e.message;
@@ -12,19 +13,8 @@ export default function OnboardingPage() {
   const location = useLocation();
   const from = (location.state as any)?.from as string | undefined;
 
-  const {
-    apiBase,
-    setApiBase,
-    vaultReady,
-    vaultSetup,
-    passphrase,
-    setupVault,
-    unlockVault,
-    token,
-    email,
-    register,
-    login
-  } = useAppStore();
+  const { apiBase, setApiBase, token, email, register, login } = useAuthStore();
+  const { vaultReady, vaultSetup, passphrase, setupVault, unlockVault } = useVaultStore();
 
   const [vaultPass, setVaultPass] = useState('');
   const [vaultPass2, setVaultPass2] = useState('');
@@ -132,7 +122,8 @@ export default function OnboardingPage() {
         ) : !vaultSetup ? (
           <div className="space-y-3">
             <p className="text-sm text-slate-300">
-              Luo passphrase. Huom: E2E-synkka on zero-knowledge — jos unohdat passphrasen, dataa ei voi palauttaa.
+              Luo passphrase. Huom: E2E-synkka on zero-knowledge — jos unohdat passphrasen, dataa ei
+              voi palauttaa.
             </p>
             <div className="grid gap-2 max-w-md">
               <input
@@ -245,7 +236,7 @@ export default function OnboardingPage() {
               Login
             </button>
           </div>
-          {authError && <div className="text-sm text-rose-300">{authError}</div>}
+          {authError && <div data-testid="auth-error" className="text-sm text-rose-300">{authError}</div>}
         </div>
 
         <div className="pt-2">

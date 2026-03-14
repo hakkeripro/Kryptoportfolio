@@ -1,0 +1,57 @@
+/**
+ * Generate a random passphrase from an EFF-style wordlist subset.
+ * Pure function, no side effects. Uses crypto.getRandomValues for entropy.
+ */
+
+// ~200-word EFF-inspired wordlist (common, easy-to-type English words)
+const WORDLIST = [
+  'abbey', 'acid', 'acorn', 'actor', 'adept', 'admit', 'adopt', 'agave', 'agent', 'agile',
+  'album', 'alert', 'align', 'alive', 'alloy', 'amber', 'ample', 'angel', 'angle', 'antic',
+  'apple', 'arena', 'arrow', 'atlas', 'audio', 'avid', 'azure', 'badge', 'bagel', 'baker',
+  'basin', 'beach', 'beast', 'bench', 'berry', 'birch', 'blade', 'blank', 'blaze', 'blend',
+  'bliss', 'block', 'bloom', 'board', 'bonus', 'booth', 'brace', 'brave', 'brick', 'brief',
+  'brisk', 'brook', 'brush', 'cabin', 'cable', 'camel', 'candy', 'cargo', 'cedar', 'chain',
+  'chalk', 'charm', 'chess', 'chief', 'cider', 'claim', 'clash', 'cliff', 'climb', 'clock',
+  'cloud', 'coach', 'coast', 'cobra', 'comet', 'coral', 'craft', 'crane', 'crash', 'creek',
+  'crisp', 'crown', 'crush', 'cubic', 'curve', 'dance', 'delta', 'depth', 'diary', 'digit',
+  'draft', 'drain', 'dream', 'drift', 'drink', 'drive', 'drum', 'dusk', 'dwarf', 'eagle',
+  'earth', 'easel', 'ebony', 'elite', 'ember', 'entry', 'equal', 'event', 'exile', 'fable',
+  'faith', 'feast', 'fiber', 'field', 'flame', 'fleet', 'flint', 'float', 'flora', 'fluid',
+  'focus', 'forge', 'forum', 'frost', 'fruit', 'fungi', 'gamer', 'gauge', 'giant', 'glade',
+  'gleam', 'globe', 'grace', 'grain', 'grape', 'grasp', 'gravel', 'green', 'grove', 'guard',
+  'guide', 'habit', 'haven', 'hazel', 'heart', 'hedge', 'helix', 'herbs', 'hoist', 'honor',
+  'hover', 'hyper', 'ivory', 'joint', 'judge', 'kayak', 'knack', 'label', 'lance', 'latch',
+  'layer', 'lemon', 'level', 'light', 'lilac', 'linen', 'lobby', 'logic', 'lunar', 'lyric',
+  'magic', 'mango', 'maple', 'march', 'marsh', 'match', 'medal', 'merit', 'mirth', 'model',
+  'moose', 'mound', 'music', 'noble', 'north', 'novel', 'nurse', 'oasis', 'ocean', 'olive',
+  'onset', 'opera', 'orbit', 'organ', 'otter', 'oxide', 'panel', 'pearl', 'phase', 'pilot',
+] as const;
+
+/** Generate a passphrase of `wordCount` random words (5-7, default 6). */
+export function generatePassphrase(wordCount: number = 6): string {
+  if (wordCount < 5 || wordCount > 7) {
+    throw new Error('wordCount must be between 5 and 7');
+  }
+
+  const arr = new Uint32Array(wordCount);
+  crypto.getRandomValues(arr);
+
+  const words: string[] = [];
+  for (let i = 0; i < wordCount; i++) {
+    const idx = arr[i]! % WORDLIST.length;
+    const word = WORDLIST[idx]!;
+    // Avoid duplicates — resample if needed
+    if (words.includes(word)) {
+      // Simple retry: pick next index
+      const retryIdx = (idx + 1) % WORDLIST.length;
+      words.push(WORDLIST[retryIdx]!);
+    } else {
+      words.push(word);
+    }
+  }
+
+  return words.join('-');
+}
+
+/** Wordlist size — useful for entropy calculations. */
+export const PASSPHRASE_WORDLIST_SIZE = WORDLIST.length;

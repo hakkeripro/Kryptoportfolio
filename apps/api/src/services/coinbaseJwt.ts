@@ -27,11 +27,7 @@ export type CoinbaseJwtInput = {
 };
 
 function base64url(input: Buffer): string {
-  return input
-    .toString('base64')
-    .replace(/=/g, '')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_');
+  return input.toString('base64').replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
 }
 
 type KeyFileLike = {
@@ -57,7 +53,11 @@ function maybeExtractFromJson(input: string): { extractedKeyName?: string; extra
   try {
     const obj = JSON.parse(t) as KeyFileLike;
     const extractedKeyName =
-      typeof obj.name === 'string' ? obj.name : typeof obj.keyName === 'string' ? obj.keyName : undefined;
+      typeof obj.name === 'string'
+        ? obj.name
+        : typeof obj.keyName === 'string'
+          ? obj.keyName
+          : undefined;
     const extractedPem =
       typeof obj.privateKey === 'string'
         ? obj.privateKey
@@ -132,8 +132,11 @@ function getKeyObjectFromPem(privateKeyPem: string): crypto.KeyObject {
   try {
     // OpenSSL 3 in some Node builds can be picky about PEM auto-detection.
     // Provide a type hint when possible, and fall back to auto-detect.
-    const typeHint: 'sec1' | 'pkcs8' | undefined =
-      /BEGIN EC PRIVATE KEY/.test(privateKeyPem) ? 'sec1' : /BEGIN PRIVATE KEY/.test(privateKeyPem) ? 'pkcs8' : undefined;
+    const typeHint: 'sec1' | 'pkcs8' | undefined = /BEGIN EC PRIVATE KEY/.test(privateKeyPem)
+      ? 'sec1'
+      : /BEGIN PRIVATE KEY/.test(privateKeyPem)
+        ? 'pkcs8'
+        : undefined;
 
     if (typeHint) {
       try {
@@ -164,10 +167,10 @@ function getKeyObjectFromPem(privateKeyPem: string): crypto.KeyObject {
   return keyObj;
 }
 
-export function normalizeCoinbaseCredentials(input: {
-  keyName?: string;
+export function normalizeCoinbaseCredentials(input: { keyName?: string; privateKeyPem: string }): {
+  keyName: string;
   privateKeyPem: string;
-}): { keyName: string; privateKeyPem: string } {
+} {
   const { extractedKeyName, extractedPem } = maybeExtractFromJson(input.privateKeyPem);
   const keyName = (input.keyName && input.keyName.trim()) || extractedKeyName;
   if (!keyName || typeof keyName !== 'string' || keyName.trim().length === 0) {
@@ -185,7 +188,12 @@ export function normalizeCoinbaseCredentials(input: {
  * Coinbase App (v2) API Key Authentication uses JWT (ES256).
  * Docs: "Coinbase App API Key Authentication".
  */
-export function buildCoinbaseJwt({ keyName, privateKeyPem, method, requestPath }: CoinbaseJwtInput): string {
+export function buildCoinbaseJwt({
+  keyName,
+  privateKeyPem,
+  method,
+  requestPath,
+}: CoinbaseJwtInput): string {
   if (!requestPath.startsWith('/')) throw new Error('coinbase_requestPath_must_start_with_slash');
 
   // Coinbase App API key auth (CDP): iss must be "cdp" and uri must include host.
@@ -200,7 +208,7 @@ export function buildCoinbaseJwt({ keyName, privateKeyPem, method, requestPath }
     // small negative skew helps if clocks drift slightly
     nbf: now,
     exp: now + 120,
-    uri: `${method.toUpperCase()} api.coinbase.com${requestPath}`
+    uri: `${method.toUpperCase()} api.coinbase.com${requestPath}`,
   };
 
   const encodedHeader = base64url(Buffer.from(JSON.stringify(header)));
