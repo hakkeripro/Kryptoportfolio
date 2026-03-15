@@ -70,13 +70,25 @@ export default function PortfolioPage() {
       {/* Filters */}
       <div className="flex gap-3 items-end flex-wrap">
         <div className="w-44">
-          <Select data-testid="filter-account" value={accountFilter} onChange={(e) => setAccountFilter(e.target.value)}>
+          <Select
+            data-testid="filter-account"
+            value={accountFilter}
+            onChange={(e) => setAccountFilter(e.target.value)}
+          >
             <option value="all">{t('portfolio.filter.allAccounts')}</option>
-            {accounts.map((a) => (<option key={a.id} value={a.id}>{a.name}</option>))}
+            {accounts.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.name}
+              </option>
+            ))}
           </Select>
         </div>
         <div className="w-36">
-          <Select data-testid="sort-positions" value={sort} onChange={(e) => setSort(e.target.value as 'value' | 'name')}>
+          <Select
+            data-testid="sort-positions"
+            value={sort}
+            onChange={(e) => setSort(e.target.value as 'value' | 'name')}
+          >
             <option value="value">{t('portfolio.sort.value')}</option>
             <option value="name">{t('portfolio.sort.name')}</option>
           </Select>
@@ -100,21 +112,31 @@ export default function PortfolioPage() {
                     data-testid={`row-position-${p.assetId}`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <TokenIcon symbol={sym} iconUrl={a?.iconUrl} size="md" />
+                      <TokenIcon symbol={sym} size="md" />
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="text-body font-semibold text-content-primary">{sym}</span>
-                          <span className="text-caption text-content-tertiary truncate">{a?.name ?? ''}</span>
+                          <span className="text-body font-semibold text-content-primary">
+                            {sym}
+                          </span>
+                          <span className="text-caption text-content-tertiary truncate">
+                            {a?.name ?? ''}
+                          </span>
                         </div>
                         <div className="text-caption text-content-secondary font-mono">
-                          {fmtQty(p.amount)} · {t('portfolio.row.cost')} {fmtMoney(p.costBasisBase, baseCurrency)}
+                          {fmtQty(p.amount)} · {t('portfolio.row.cost')}{' '}
+                          {fmtMoney(p.costBasisBase, baseCurrency)}
                         </div>
                       </div>
                     </div>
                     <div className="text-right shrink-0">
-                      <div className="text-body font-mono text-content-primary">{fmtMoney(p.valueBase, baseCurrency)}</div>
-                      <div className={`text-caption font-mono ${pnl.isPositive() ? 'text-semantic-success' : pnl.isNegative() ? 'text-semantic-error' : 'text-content-tertiary'}`}>
-                        {pnl.isPositive() ? '+' : ''}{fmtMoney(p.unrealizedPnlBase, baseCurrency)}
+                      <div className="text-body font-mono text-content-primary">
+                        {fmtMoney(p.valueBase, baseCurrency)}
+                      </div>
+                      <div
+                        className={`text-caption font-mono ${pnl.isPositive() ? 'text-semantic-success' : pnl.isNegative() ? 'text-semantic-error' : 'text-content-tertiary'}`}
+                      >
+                        {pnl.isPositive() ? '+' : ''}
+                        {fmtMoney(p.unrealizedPnlBase, baseCurrency)}
                       </div>
                     </div>
                   </li>
