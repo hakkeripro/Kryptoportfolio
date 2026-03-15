@@ -214,7 +214,9 @@ export default function AssetsPage() {
                   <span className="text-content-secondary">({selected.name || '—'})</span>
                 </div>
               ) : (
-                <div className="mt-1 text-sm text-content-secondary">Select an asset from the left.</div>
+                <div className="mt-1 text-sm text-content-secondary">
+                  Select an asset from the left.
+                </div>
               )}
             </div>
             {selected?.providerRef?.coingeckoId ? (
@@ -267,10 +269,7 @@ export default function AssetsPage() {
                 </button>
               </form>
 
-              <div
-                className="rounded-lg border border-border"
-                data-testid="list-coingecko-results"
-              >
+              <div className="rounded-lg border border-border" data-testid="list-coingecko-results">
                 {results.length ? (
                   <div className="max-h-[420px] overflow-auto">
                     {results.map((c) => (
@@ -282,14 +281,18 @@ export default function AssetsPage() {
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
                             <div className="font-medium truncate">{c.name}</div>
-                            <div className="text-xs text-content-secondary uppercase">{c.symbol}</div>
+                            <div className="text-xs text-content-secondary uppercase">
+                              {c.symbol}
+                            </div>
                             {typeof c.market_cap_rank === 'number' ? (
                               <div className="text-[11px] text-content-secondary">
                                 rank #{c.market_cap_rank}
                               </div>
                             ) : null}
                           </div>
-                          <div className="text-xs text-content-secondary font-mono truncate">{c.id}</div>
+                          <div className="text-xs text-content-secondary font-mono truncate">
+                            {c.id}
+                          </div>
                         </div>
                         <button
                           className="rounded-lg bg-surface-raised text-content-primary px-3 py-1.5 text-xs font-medium hover:bg-surface-overlay disabled:opacity-50"
@@ -303,7 +306,9 @@ export default function AssetsPage() {
                     ))}
                   </div>
                 ) : (
-                  <div className="px-3 py-3 text-sm text-content-secondary">Search to see results.</div>
+                  <div className="px-3 py-3 text-sm text-content-secondary">
+                    Search to see results.
+                  </div>
                 )}
               </div>
 
@@ -357,7 +362,9 @@ export default function AssetsPage() {
                 ))}
               </div>
               {mappedCount > 200 ? (
-                <div className="mt-2 text-xs text-content-secondary">Showing first 200 mapped assets.</div>
+                <div className="mt-2 text-xs text-content-secondary">
+                  Showing first 200 mapped assets.
+                </div>
               ) : null}
             </div>
           ) : null}

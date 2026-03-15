@@ -140,7 +140,11 @@ describe('Select', () => {
   });
 
   it('shows error', () => {
-    render(<Select error="Pick one"><option>X</option></Select>);
+    render(
+      <Select error="Pick one">
+        <option>X</option>
+      </Select>,
+    );
     expect(screen.getByText('Pick one')).toBeTruthy();
   });
 });
@@ -161,27 +165,14 @@ describe('Spinner', () => {
 /* ── EmptyState ─────────────────────────────────────── */
 describe('EmptyState', () => {
   it('renders title and description', () => {
-    render(
-      <EmptyState
-        icon={<span>📦</span>}
-        title="No data"
-        description="Add something"
-      />,
-    );
+    render(<EmptyState icon={<span>📦</span>} title="No data" description="Add something" />);
     expect(screen.getByText('No data')).toBeTruthy();
     expect(screen.getByText('Add something')).toBeTruthy();
   });
 
   it('renders action button and fires callback', () => {
     const fn = vi.fn();
-    render(
-      <EmptyState
-        icon={<span>📦</span>}
-        title="Empty"
-        actionLabel="Add"
-        onAction={fn}
-      />,
-    );
+    render(<EmptyState icon={<span>📦</span>} title="Empty" actionLabel="Add" onAction={fn} />);
     fireEvent.click(screen.getByRole('button', { name: 'Add' }));
     expect(fn).toHaveBeenCalledOnce();
   });
@@ -319,7 +310,11 @@ describe('Tabs', () => {
   });
 
   it('has correct aria-selected', () => {
-    render(<Tabs tabs={tabs} activeTab="b">{(a) => <div>{a}</div>}</Tabs>);
+    render(
+      <Tabs tabs={tabs} activeTab="b">
+        {(a) => <div>{a}</div>}
+      </Tabs>,
+    );
     expect(screen.getByRole('tab', { name: 'Tab B' }).getAttribute('aria-selected')).toBe('true');
     expect(screen.getByRole('tab', { name: 'Tab A' }).getAttribute('aria-selected')).toBe('false');
   });
@@ -335,7 +330,9 @@ describe('Tooltip', () => {
       </Tooltip>,
     );
     fireEvent.mouseEnter(screen.getByText('Hover me').parentElement!);
-    act(() => { vi.advanceTimersByTime(350); });
+    act(() => {
+      vi.advanceTimersByTime(350);
+    });
     expect(screen.getByRole('tooltip').textContent).toBe('Help text');
     vi.useRealTimers();
   });
@@ -349,7 +346,9 @@ describe('Tooltip', () => {
     );
     const wrapper = screen.getByText('X').parentElement!;
     fireEvent.mouseEnter(wrapper);
-    act(() => { vi.advanceTimersByTime(350); });
+    act(() => {
+      vi.advanceTimersByTime(350);
+    });
     expect(screen.getByRole('tooltip')).toBeTruthy();
     fireEvent.mouseLeave(wrapper);
     expect(screen.queryByRole('tooltip')).toBeNull();

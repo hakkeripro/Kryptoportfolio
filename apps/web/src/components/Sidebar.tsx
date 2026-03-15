@@ -24,7 +24,12 @@ export default function Sidebar() {
   const navItems = [
     { to: '/home', icon: Home, label: t('nav.home'), testId: 'nav-home' },
     { to: '/portfolio', icon: PieChart, label: t('nav.portfolio'), testId: 'nav-portfolio' },
-    { to: '/transactions', icon: ArrowLeftRight, label: t('nav.transactions'), testId: 'nav-transactions' },
+    {
+      to: '/transactions',
+      icon: ArrowLeftRight,
+      label: t('nav.transactions'),
+      testId: 'nav-transactions',
+    },
     { to: '/taxes', icon: FileText, label: t('nav.taxes'), testId: 'nav-taxes' },
     { to: '/settings', icon: Settings, label: t('nav.settings'), testId: 'nav-settings' },
   ];

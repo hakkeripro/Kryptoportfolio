@@ -34,9 +34,7 @@ export default function WelcomePage() {
         <h1 className="text-heading-1 text-content-primary mb-2 text-3xl md:text-4xl font-bold">
           {t('welcome.title')}
         </h1>
-        <p className="text-lg text-content-secondary max-w-md mx-auto">
-          {t('welcome.tagline')}
-        </p>
+        <p className="text-lg text-content-secondary max-w-md mx-auto">{t('welcome.tagline')}</p>
       </div>
 
       {/* USP Cards */}
@@ -48,7 +46,9 @@ export default function WelcomePage() {
                 <Icon className="h-5 w-5 text-brand" />
               </div>
             </div>
-            <h3 className="text-body font-semibold text-content-primary mb-1">{t(`welcome.usp.${key}.title`)}</h3>
+            <h3 className="text-body font-semibold text-content-primary mb-1">
+              {t(`welcome.usp.${key}.title`)}
+            </h3>
             <p className="text-caption text-content-secondary">{t(`welcome.usp.${key}.desc`)}</p>
           </Card>
         ))}

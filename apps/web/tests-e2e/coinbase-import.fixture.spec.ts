@@ -5,7 +5,10 @@ async function onboardAndRegister(page: any) {
   await signupAndSetupVault(page);
 }
 
-test('coinbase import: fixture → preview → commit → portfolio + transactions update', async ({ page, request }) => {
+test('coinbase import: fixture → preview → commit → portfolio + transactions update', async ({
+  page,
+  request,
+}) => {
   await resetApp(page, request);
   await onboardAndRegister(page);
 
@@ -21,7 +24,9 @@ test('coinbase import: fixture → preview → commit → portfolio + transactio
   const start = Date.now();
   while (Date.now() - start < 15_000) {
     if (await connected.count()) {
-      try { if (await connected.isVisible()) break; } catch {}
+      try {
+        if (await connected.isVisible()) break;
+      } catch {}
     }
     if (await err.count()) {
       try {
@@ -29,7 +34,9 @@ test('coinbase import: fixture → preview → commit → portfolio + transactio
           const msg = (await err.innerText()).trim();
           throw new Error(`Coinbase connect failed: ${msg}`);
         }
-      } catch (e) { throw e; }
+      } catch (e) {
+        throw e;
+      }
     }
     await page.waitForTimeout(200);
   }
@@ -52,11 +59,19 @@ test('coinbase import: fixture → preview → commit → portfolio + transactio
 
   await page.getByTestId('nav-transactions').click();
   await expect(page.getByTestId('list-ledger')).toBeVisible();
-  await expect.poll(async () => await page.locator('[data-testid^="row-ledger-"]').count(), { timeout: 20_000 }).toBeGreaterThan(0);
+  await expect
+    .poll(async () => await page.locator('[data-testid^="row-ledger-"]').count(), {
+      timeout: 20_000,
+    })
+    .toBeGreaterThan(0);
 
   await page.getByTestId('nav-portfolio').click();
   await expect(page.getByTestId('list-positions')).toBeVisible();
-  await expect.poll(async () => await page.locator('[data-testid^="row-position-"]').count(), { timeout: 20_000 }).toBeGreaterThan(0);
+  await expect
+    .poll(async () => await page.locator('[data-testid^="row-position-"]').count(), {
+      timeout: 20_000,
+    })
+    .toBeGreaterThan(0);
 
   await page.getByTestId('nav-home').click();
   await expect(page.getByTestId('metric-total-value')).toBeVisible();

@@ -12,10 +12,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
     return (
       <div className="flex flex-col gap-1.5">
         {label && (
-          <label
-            htmlFor={selectId}
-            className="text-caption text-content-secondary font-medium"
-          >
+          <label htmlFor={selectId} className="text-caption text-content-secondary font-medium">
             {label}
           </label>
         )}
@@ -35,9 +32,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           </select>
           <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-content-tertiary" />
         </div>
-        {error && (
-          <span className="text-caption text-semantic-error">{error}</span>
-        )}
+        {error && <span className="text-caption text-semantic-error">{error}</span>}
       </div>
     );
   },

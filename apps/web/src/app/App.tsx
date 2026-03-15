@@ -62,15 +62,78 @@ export default function App() {
             <Route path="/vault/unlock" element={<UnlockPage />} />
 
             {/* 5 main views */}
-            <Route path="/home" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-            <Route path="/portfolio" element={<ProtectedRoute><PortfolioPage /></ProtectedRoute>} />
-            <Route path="/transactions" element={<ProtectedRoute><TransactionsPage /></ProtectedRoute>} />
-            <Route path="/transactions/import" element={<ProtectedRoute><ImportsPage /></ProtectedRoute>} />
-            <Route path="/taxes" element={<ProtectedRoute><TaxPage /></ProtectedRoute>} />
-            <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
-            <Route path="/settings/alerts" element={<ProtectedRoute><AlertsPage /></ProtectedRoute>} />
-            <Route path="/settings/assets" element={<ProtectedRoute><AssetsPage /></ProtectedRoute>} />
-            <Route path="/settings/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
+            <Route
+              path="/home"
+              element={
+                <ProtectedRoute>
+                  <DashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/portfolio"
+              element={
+                <ProtectedRoute>
+                  <PortfolioPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/transactions"
+              element={
+                <ProtectedRoute>
+                  <TransactionsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/transactions/import"
+              element={
+                <ProtectedRoute>
+                  <ImportsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/taxes"
+              element={
+                <ProtectedRoute>
+                  <TaxPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <SettingsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings/alerts"
+              element={
+                <ProtectedRoute>
+                  <AlertsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings/assets"
+              element={
+                <ProtectedRoute>
+                  <AssetsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings/account"
+              element={
+                <ProtectedRoute>
+                  <AccountPage />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Backward compat redirects */}
             <Route path="/dashboard" element={<Navigate to="/home" replace />} />

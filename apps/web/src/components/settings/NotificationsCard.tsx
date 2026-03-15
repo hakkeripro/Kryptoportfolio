@@ -167,7 +167,10 @@ export default function NotificationsCard({
           </label>
         </div>
 
-        <div className="grid gap-1 text-xs text-content-secondary" data-testid="box-server-alerts-status">
+        <div
+          className="grid gap-1 text-xs text-content-secondary"
+          data-testid="box-server-alerts-status"
+        >
           <div className="flex items-center justify-between">
             <span className="text-content-secondary">Enabled rules</span>
             <span className="font-mono">

@@ -476,7 +476,9 @@ export default function TransactionsPage() {
                 />
               </label>
               <label className="block">
-                <div className="text-xs text-content-secondary">Valuation total ({baseCurrency})</div>
+                <div className="text-xs text-content-secondary">
+                  Valuation total ({baseCurrency})
+                </div>
                 <input
                   className="mt-1 w-full rounded-lg bg-surface-base border border-border px-2 py-2 text-sm font-mono"
                   value={form.valuationBase}

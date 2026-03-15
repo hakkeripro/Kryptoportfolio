@@ -17,7 +17,9 @@ async function runFixtureImport(page: any) {
   const start = Date.now();
   while (Date.now() - start < 15_000) {
     if (await connected.count()) {
-      try { if (await connected.isVisible()) break; } catch {}
+      try {
+        if (await connected.isVisible()) break;
+      } catch {}
     }
     if (await err.count()) {
       try {
@@ -25,7 +27,9 @@ async function runFixtureImport(page: any) {
           const msg = (await err.innerText()).trim();
           throw new Error(`Coinbase connect failed: ${msg}`);
         }
-      } catch (e) { throw e; }
+      } catch (e) {
+        throw e;
+      }
     }
     await page.waitForTimeout(200);
   }
@@ -35,7 +39,10 @@ async function runFixtureImport(page: any) {
   await done.waitFor({ timeout: 20_000 });
 }
 
-test('asset catalog mapping: shows unmapped assets and can link CoinGecko id', async ({ page, request }) => {
+test('asset catalog mapping: shows unmapped assets and can link CoinGecko id', async ({
+  page,
+  request,
+}) => {
   await resetApp(page, request);
   await onboardAndRegister(page);
   await runFixtureImport(page);

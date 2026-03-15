@@ -19,12 +19,7 @@ function hashHue(str: string): number {
   return Math.abs(hash) % 360;
 }
 
-export function TokenIcon({
-  symbol,
-  iconUrl,
-  size = 'md',
-  className = '',
-}: TokenIconProps) {
+export function TokenIcon({ symbol, iconUrl, size = 'md', className = '' }: TokenIconProps) {
   const [imgError, setImgError] = useState(false);
   const px = sizePx[size];
   const letter = symbol.charAt(0).toUpperCase();

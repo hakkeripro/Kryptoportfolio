@@ -12,14 +12,12 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantClasses: Record<ButtonVariant, string> = {
-  primary:
-    'bg-brand text-content-inverse hover:bg-brand-dark focus-visible:ring-brand',
+  primary: 'bg-brand text-content-inverse hover:bg-brand-dark focus-visible:ring-brand',
   secondary:
     'bg-surface-raised text-content-primary border border-border hover:bg-surface-overlay focus-visible:ring-border',
   ghost:
     'text-content-secondary hover:text-content-primary hover:bg-surface-raised focus-visible:ring-border',
-  danger:
-    'bg-semantic-error text-white hover:bg-red-600 focus-visible:ring-semantic-error',
+  danger: 'bg-semantic-error text-white hover:bg-red-600 focus-visible:ring-semantic-error',
 };
 
 const sizeClasses: Record<ButtonSize, string> = {

@@ -10,13 +10,7 @@ interface KpiCardProps {
   icon?: React.ReactNode;
 }
 
-export function KpiCard({
-  label,
-  value,
-  delta,
-  deltaType = 'neutral',
-  icon,
-}: KpiCardProps) {
+export function KpiCard({ label, value, delta, deltaType = 'neutral', icon }: KpiCardProps) {
   const deltaColor =
     deltaType === 'positive'
       ? 'text-semantic-success'
@@ -25,11 +19,7 @@ export function KpiCard({
         : 'text-content-tertiary';
 
   const DeltaIcon =
-    deltaType === 'positive'
-      ? TrendingUp
-      : deltaType === 'negative'
-        ? TrendingDown
-        : null;
+    deltaType === 'positive' ? TrendingUp : deltaType === 'negative' ? TrendingDown : null;
 
   return (
     <Card>

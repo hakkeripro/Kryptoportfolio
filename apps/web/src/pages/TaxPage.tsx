@@ -428,7 +428,9 @@ export default function TaxPage() {
           <h2 className="text-lg font-semibold">{t('tax.disposals.title')}</h2>
           {report ? (
             <div className="text-xs text-content-secondary">
-              {t('tax.disposals.profileLabel')} <span className="font-semibold">{report.taxProfile}</span> • {t('tax.disposals.lotLabel')}{' '}
+              {t('tax.disposals.profileLabel')}{' '}
+              <span className="font-semibold">{report.taxProfile}</span> •{' '}
+              {t('tax.disposals.lotLabel')}{' '}
               <span className="font-semibold">{report.lotMethodUsed}</span>
             </div>
           ) : null}

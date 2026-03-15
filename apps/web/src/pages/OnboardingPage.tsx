@@ -106,12 +106,18 @@ export default function OnboardingPage() {
         <div className="flex items-center gap-2">
           <div className="font-medium">Vault / App lock</div>
           {status === 'locked' && (
-            <span data-testid="badge-locked" className="text-xs rounded bg-surface-raised px-2 py-1">
+            <span
+              data-testid="badge-locked"
+              className="text-xs rounded bg-surface-raised px-2 py-1"
+            >
               Locked
             </span>
           )}
           {status === 'unlocked' && (
-            <span data-testid="badge-unlocked" className="text-xs rounded bg-surface-raised px-2 py-1">
+            <span
+              data-testid="badge-unlocked"
+              className="text-xs rounded bg-surface-raised px-2 py-1"
+            >
               Unlocked
             </span>
           )}
@@ -155,7 +161,9 @@ export default function OnboardingPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            <p className="text-sm text-content-secondary">Syötä passphrase avataksesi sovelluksen.</p>
+            <p className="text-sm text-content-secondary">
+              Syötä passphrase avataksesi sovelluksen.
+            </p>
             <div className="grid gap-2 max-w-md">
               <input
                 data-testid="form-vault-passphrase"

@@ -118,7 +118,9 @@ export default function VaultSetupPage() {
             </div>
 
             <div>
-              <label className="block text-sm text-content-secondary mb-1">Confirm Passphrase</label>
+              <label className="block text-sm text-content-secondary mb-1">
+                Confirm Passphrase
+              </label>
               <input
                 data-testid="form-vault-passphrase-confirm"
                 type="password"

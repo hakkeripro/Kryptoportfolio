@@ -23,12 +23,7 @@ const sizeClasses: Record<BadgeSize, string> = {
   md: 'text-caption px-2 py-0.5',
 };
 
-export function Badge({
-  children,
-  variant = 'default',
-  size = 'md',
-  className = '',
-}: BadgeProps) {
+export function Badge({ children, variant = 'default', size = 'md', className = '' }: BadgeProps) {
   return (
     <span
       className={`inline-flex items-center rounded-badge border font-medium

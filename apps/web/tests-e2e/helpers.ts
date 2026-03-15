@@ -9,8 +9,8 @@ export async function spaNavigate(page: any, path: string) {
     window.history.pushState({}, '', p);
     window.dispatchEvent(new PopStateEvent('popstate'));
   }, path);
-  // Give React Router a tick to process the navigation
-  await page.waitForTimeout(200);
+  // Give React Router time to process the navigation and any redirects
+  await page.waitForTimeout(1000);
 }
 
 export async function waitForToken(page: any) {
@@ -78,7 +78,7 @@ export async function signupAndSetupVault(page: any) {
 
   // Done → go to dashboard
   await page.getByTestId('btn-go-dashboard').click();
-  await expect(page.getByTestId('nav-home')).toBeVisible({ timeout: 10_000 });
+  await expect(page).toHaveURL(/\/home/, { timeout: 10_000 });
 
   return email;
 }
@@ -99,5 +99,5 @@ export async function setupVaultOffline(page: any) {
 
   // Done → dashboard
   await page.getByTestId('btn-go-dashboard').click();
-  await expect(page.getByTestId('nav-home')).toBeVisible({ timeout: 10_000 });
+  await expect(page).toHaveURL(/\/home/, { timeout: 10_000 });
 }

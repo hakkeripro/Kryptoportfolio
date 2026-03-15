@@ -402,7 +402,9 @@ export default function ImportsPage() {
               <CoinbaseLogo />
               <div>
                 <div className="font-semibold">Coinbase</div>
-                <div className="text-xs text-content-secondary">CDP Secret API Key (ECDSA / ES256)</div>
+                <div className="text-xs text-content-secondary">
+                  CDP Secret API Key (ECDSA / ES256)
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -435,7 +437,9 @@ export default function ImportsPage() {
                   />
                 </label>
                 <label className="block">
-                  <div className="text-xs text-content-secondary">Private key (PEM or JSON key file)</div>
+                  <div className="text-xs text-content-secondary">
+                    Private key (PEM or JSON key file)
+                  </div>
                   <textarea
                     className="mt-1 h-28 w-full rounded-lg border px-3 py-2 font-mono text-xs"
                     value={privateKeyPem}
@@ -663,7 +667,9 @@ export default function ImportsPage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="text-sm text-content-secondary">Run a fetch to generate a preview.</div>
+                  <div className="text-sm text-content-secondary">
+                    Run a fetch to generate a preview.
+                  </div>
                 )}
 
                 <button
@@ -705,7 +711,9 @@ export default function ImportsPage() {
               >
                 <div className="flex items-center justify-between">
                   <div className="font-semibold">Preview</div>
-                  <div className="text-xs text-content-secondary">Ledger events (new + duplicates)</div>
+                  <div className="text-xs text-content-secondary">
+                    Ledger events (new + duplicates)
+                  </div>
                 </div>
                 <div className="mt-3 max-h-[420px] overflow-auto" data-testid="list-import-preview">
                   {preview.events.length ? (
@@ -747,7 +755,9 @@ export default function ImportsPage() {
                     <div className="text-sm text-content-secondary">No mapped events.</div>
                   )}
                   {preview.events.length > 200 ? (
-                    <div className="mt-3 text-xs text-content-secondary">Showing first 200 events…</div>
+                    <div className="mt-3 text-xs text-content-secondary">
+                      Showing first 200 events…
+                    </div>
                   ) : null}
                 </div>
               </div>
@@ -758,7 +768,9 @@ export default function ImportsPage() {
               >
                 <div className="flex items-center justify-between">
                   <div className="font-semibold">Issues</div>
-                  <div className="text-xs text-content-secondary">Base currency: {baseCurrency}</div>
+                  <div className="text-xs text-content-secondary">
+                    Base currency: {baseCurrency}
+                  </div>
                 </div>
 
                 {preview.issues.length ? (

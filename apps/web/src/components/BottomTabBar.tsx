@@ -1,12 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import {
-  Home,
-  PieChart,
-  ArrowLeftRight,
-  FileText,
-  Settings,
-} from 'lucide-react';
+import { Home, PieChart, ArrowLeftRight, FileText, Settings } from 'lucide-react';
 
 export default function BottomTabBar() {
   const { t } = useTranslation();
@@ -29,9 +23,7 @@ export default function BottomTabBar() {
             data-testid={testId}
             className={({ isActive }) =>
               `flex flex-col items-center justify-center gap-0.5 flex-1 h-full text-center transition-colors ${
-                isActive
-                  ? 'text-brand'
-                  : 'text-content-tertiary'
+                isActive ? 'text-brand' : 'text-content-tertiary'
               }`
             }
           >

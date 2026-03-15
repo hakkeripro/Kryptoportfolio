@@ -31,10 +31,7 @@ export function Logo({ size = 'md', showWordmark = true, className = '' }: LogoP
         />
         {/* Keyhole */}
         <circle cx="24" cy="20" r="4" fill="var(--color-brand)" />
-        <path
-          d="M22 23h4l1 8h-6l1-8Z"
-          fill="var(--color-brand)"
-        />
+        <path d="M22 23h4l1 8h-6l1-8Z" fill="var(--color-brand)" />
       </svg>
       {showWordmark && (
         <span

@@ -10,13 +10,7 @@ interface DrawerProps {
   className?: string;
 }
 
-export function Drawer({
-  open,
-  onClose,
-  title,
-  children,
-  className = '',
-}: DrawerProps) {
+export function Drawer({ open, onClose, title, children, className = '' }: DrawerProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const [swipeX, setSwipeX] = useState(0);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
@@ -72,15 +66,14 @@ export function Drawer({
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex justify-end">
-      <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div
         ref={panelRef}
         className={`relative z-10 w-full max-w-md h-full bg-surface-overlay border-l border-border
           p-6 shadow-2xl overflow-y-auto animate-slide-in-right ${className}`}
-        style={swipeX > 0 ? { transform: `translateX(${swipeX}px)`, transition: 'none' } : undefined}
+        style={
+          swipeX > 0 ? { transform: `translateX(${swipeX}px)`, transition: 'none' } : undefined
+        }
         role="dialog"
         aria-modal="true"
         aria-label={title}

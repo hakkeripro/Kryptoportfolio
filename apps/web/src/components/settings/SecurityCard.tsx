@@ -53,9 +53,7 @@ export default function SecurityCard({ busy, setBusy }: Props) {
       data-testid="card-security"
     >
       <div className="font-medium">{t('settings.security.title')}</div>
-      <div className="text-sm text-content-secondary">
-        {t('settings.security.description')}
-      </div>
+      <div className="text-sm text-content-secondary">{t('settings.security.description')}</div>
       <div className="flex items-center justify-between gap-3 flex-wrap rounded-lg border border-border bg-surface-base p-3">
         <div>
           <div className="text-sm font-medium">{t('settings.security.passkeyLabel')}</div>

@@ -12,7 +12,9 @@ export default function AdvancedCard() {
     >
       <summary className="cursor-pointer font-medium">Advanced (dev)</summary>
       <div className="mt-3 space-y-2">
-        <div className="text-sm text-content-secondary">API base URL (Vite proxy/localhost only).</div>
+        <div className="text-sm text-content-secondary">
+          API base URL (Vite proxy/localhost only).
+        </div>
         <input
           data-testid="form-settings-api-base"
           value={apiBase}

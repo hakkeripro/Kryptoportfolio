@@ -106,7 +106,9 @@ export default function PortfolioSettingsCard({ settings, loading, error, busy, 
 
       <div className="grid gap-4 md:grid-cols-2">
         <label className="block">
-          <div className="text-xs text-content-secondary">{t('settings.portfolio.baseCurrency')}</div>
+          <div className="text-xs text-content-secondary">
+            {t('settings.portfolio.baseCurrency')}
+          </div>
           <input
             data-testid="form-settings-base-currency"
             className="mt-1 w-full rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
@@ -132,7 +134,9 @@ export default function PortfolioSettingsCard({ settings, loading, error, busy, 
         </label>
 
         <label className="block">
-          <div className="text-xs text-content-secondary">{t('settings.portfolio.rewardsCostBasis')}</div>
+          <div className="text-xs text-content-secondary">
+            {t('settings.portfolio.rewardsCostBasis')}
+          </div>
           <select
             data-testid="form-settings-rewards-mode"
             className="mt-1 w-full rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
@@ -158,7 +162,9 @@ export default function PortfolioSettingsCard({ settings, loading, error, busy, 
         </label>
 
         <label className="block">
-          <div className="text-xs text-content-secondary">{t('settings.portfolio.autoRefresh')}</div>
+          <div className="text-xs text-content-secondary">
+            {t('settings.portfolio.autoRefresh')}
+          </div>
           <select
             data-testid="form-settings-auto-refresh"
             className="mt-1 w-full rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"

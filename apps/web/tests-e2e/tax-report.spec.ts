@@ -18,7 +18,9 @@ async function importFixture(page: any) {
   const start = Date.now();
   while (Date.now() - start < 15_000) {
     if (await connected.count()) {
-      try { if (await connected.isVisible()) break; } catch {}
+      try {
+        if (await connected.isVisible()) break;
+      } catch {}
     }
     if (await err.count()) {
       try {
@@ -26,7 +28,9 @@ async function importFixture(page: any) {
           const msg = (await err.innerText()).trim();
           throw new Error(`Coinbase connect failed: ${msg}`);
         }
-      } catch (e) { throw e; }
+      } catch (e) {
+        throw e;
+      }
     }
     await page.waitForTimeout(200);
   }

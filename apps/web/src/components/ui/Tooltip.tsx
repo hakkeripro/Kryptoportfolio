@@ -6,11 +6,7 @@ interface TooltipProps {
   position?: 'top' | 'bottom';
 }
 
-export function Tooltip({
-  content,
-  children,
-  position = 'top',
-}: TooltipProps) {
+export function Tooltip({ content, children, position = 'top' }: TooltipProps) {
   const [visible, setVisible] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
 

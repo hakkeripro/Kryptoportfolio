@@ -53,7 +53,9 @@ export default function SigninPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm text-content-secondary mb-1">{t('signin.email.label')}</label>
+            <label className="block text-sm text-content-secondary mb-1">
+              {t('signin.email.label')}
+            </label>
             <input
               data-testid="form-email"
               type="email"
@@ -66,7 +68,9 @@ export default function SigninPage() {
           </div>
 
           <div>
-            <label className="block text-sm text-content-secondary mb-1">{t('signin.password.label')}</label>
+            <label className="block text-sm text-content-secondary mb-1">
+              {t('signin.password.label')}
+            </label>
             <input
               data-testid="form-password"
               type="password"

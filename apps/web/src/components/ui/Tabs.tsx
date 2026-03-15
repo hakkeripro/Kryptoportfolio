@@ -40,9 +40,10 @@ export function Tabs({
             onClick={() => handleChange(tab.id)}
             className={`flex items-center gap-2 px-4 py-2.5 text-body font-medium border-b-2
               transition-colors -mb-px
-              ${active === tab.id
-                ? 'border-brand text-content-primary'
-                : 'border-transparent text-content-tertiary hover:text-content-secondary'
+              ${
+                active === tab.id
+                  ? 'border-brand text-content-primary'
+                  : 'border-transparent text-content-tertiary hover:text-content-secondary'
               }`}
           >
             {tab.icon}

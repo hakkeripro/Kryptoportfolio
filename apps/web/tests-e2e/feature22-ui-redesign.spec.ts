@@ -7,11 +7,15 @@ test.describe('Feature 22: UI/UX Redesign', () => {
     await page.goto('/welcome');
     await expect(page.getByTestId('page-welcome')).toBeVisible();
 
-    // Logo
-    await expect(page.locator('svg[aria-label="VaultFolio"]')).toBeVisible();
+    // Logo (scoped to welcome page to avoid sidebar duplicate)
+    await expect(
+      page.getByTestId('page-welcome').locator('svg[aria-label="VaultFolio"]'),
+    ).toBeVisible();
 
     // Tagline
-    await expect(page.getByText('The only crypto tracker that never sees your data.')).toBeVisible();
+    await expect(
+      page.getByText('The only crypto tracker that never sees your data.'),
+    ).toBeVisible();
 
     // 3 USP cards
     await expect(page.getByText('Zero-Knowledge Encryption')).toBeVisible();
@@ -71,19 +75,19 @@ test.describe('Feature 22: UI/UX Redesign', () => {
     await signupAndSetupVault(page);
 
     await spaNavigate(page, '/dashboard');
-    await expect(page).toHaveURL(/\/home/);
+    await expect(page).toHaveURL(/\/home/, { timeout: 5_000 });
 
     await spaNavigate(page, '/imports');
-    await expect(page).toHaveURL(/\/transactions\/import/);
+    await expect(page).toHaveURL(/\/transactions\/import/, { timeout: 5_000 });
 
     await spaNavigate(page, '/alerts');
-    await expect(page).toHaveURL(/\/settings\/alerts/);
+    await expect(page).toHaveURL(/\/settings\/alerts/, { timeout: 5_000 });
 
     await spaNavigate(page, '/assets');
-    await expect(page).toHaveURL(/\/settings\/assets/);
+    await expect(page).toHaveURL(/\/settings\/assets/, { timeout: 5_000 });
 
     await spaNavigate(page, '/account');
-    await expect(page).toHaveURL(/\/settings\/account/);
+    await expect(page).toHaveURL(/\/settings\/account/, { timeout: 5_000 });
   });
 
   /* ── Language switch ─────────────────────────────── */

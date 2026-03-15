@@ -499,7 +499,9 @@ export default function AlertsPage() {
                       <div className="text-sm font-medium truncate">
                         {formatAlert(a, assetsById, baseCurrency)}
                       </div>
-                      <div className="text-xs text-content-tertiary">Cooldown: {a.cooldownMin ?? 0}m</div>
+                      <div className="text-xs text-content-tertiary">
+                        Cooldown: {a.cooldownMin ?? 0}m
+                      </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <label

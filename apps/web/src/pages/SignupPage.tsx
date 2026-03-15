@@ -50,7 +50,9 @@ export default function SignupPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm text-content-secondary mb-1">{t('signup.email.label')}</label>
+            <label className="block text-sm text-content-secondary mb-1">
+              {t('signup.email.label')}
+            </label>
             <input
               data-testid="form-email"
               type="email"
@@ -63,7 +65,9 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label className="block text-sm text-content-secondary mb-1">{t('signup.password.label')}</label>
+            <label className="block text-sm text-content-secondary mb-1">
+              {t('signup.password.label')}
+            </label>
             <input
               data-testid="form-password"
               type="password"
@@ -79,7 +83,9 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label className="block text-sm text-content-secondary mb-1">{t('signup.confirmPassword.label')}</label>
+            <label className="block text-sm text-content-secondary mb-1">
+              {t('signup.confirmPassword.label')}
+            </label>
             <input
               data-testid="form-password-confirm"
               type="password"
@@ -89,7 +95,9 @@ export default function SignupPage() {
               onChange={(e) => setConfirm(e.target.value)}
               className="w-full rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
             />
-            {pwMismatch && <p className="text-xs text-rose-400 mt-1">{t('signup.error.passwordMismatch')}</p>}
+            {pwMismatch && (
+              <p className="text-xs text-rose-400 mt-1">{t('signup.error.passwordMismatch')}</p>
+            )}
           </div>
 
           <button
