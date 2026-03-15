@@ -134,7 +134,7 @@ export default function DashboardPage() {
         <div>
           <h1 className="text-heading-1 text-content-primary">{t('dashboard.title')}</h1>
           <p className="text-caption text-content-tertiary mt-0.5">
-            {t('dashboard.subtitle', { defaultValue: 'Portfolio overview & performance' })}
+            {t('dashboard.subtitle')}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -171,7 +171,7 @@ export default function DashboardPage() {
             icon={<Plus className="h-3.5 w-3.5" />}
             onClick={() => nav('/transactions/import')}
           >
-            {t('dashboard.btn.addTransaction', { defaultValue: 'Add Transaction' })}
+            {t('dashboard.btn.addTransaction')}
           </Button>
         </div>
       </div>
@@ -200,13 +200,13 @@ export default function DashboardPage() {
           },
           {
             testId: 'metric-asset-count',
-            label: t('dashboard.kpi.totalAssets', { defaultValue: 'Total Assets' }),
+            label: t('dashboard.kpi.totalAssets'),
             value: String(positionCount),
             icon: <Layers className="h-4 w-4" />,
           },
           {
             testId: 'metric-best-performer',
-            label: t('dashboard.kpi.bestPerformer', { defaultValue: 'Best Performer' }),
+            label: t('dashboard.kpi.bestPerformer'),
             value: bestPerformer?.symbol ?? '—',
             delta: bestPerformer
               ? `${bestPerformer.pct.isPositive() ? '+' : ''}${bestPerformer.pct.toDecimalPlaces(1).toFixed()}%`
@@ -252,12 +252,12 @@ export default function DashboardPage() {
       {/* Holdings table */}
       <Card data-testid="card-portfolio-top">
         <div className="flex items-center justify-between mb-3">
-          <CardTitle>{t('dashboard.topPositions.title', { defaultValue: 'Holdings' })}</CardTitle>
+          <CardTitle>{t('dashboard.topPositions.title')}</CardTitle>
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-content-tertiary" />
             <input
               type="text"
-              placeholder={t('dashboard.search', { defaultValue: 'Search assets...' })}
+              placeholder={t('dashboard.search')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-8 pr-3 py-1.5 rounded-button bg-surface-base border border-border-subtle

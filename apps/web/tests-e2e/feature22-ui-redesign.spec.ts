@@ -17,10 +17,10 @@ test.describe('Feature 22: UI/UX Redesign', () => {
       page.getByText('The only crypto tracker that never sees your data.'),
     ).toBeVisible();
 
-    // 3 USP cards
-    await expect(page.getByText('Zero-Knowledge Encryption')).toBeVisible();
-    await expect(page.getByText('Multi-Exchange Import')).toBeVisible();
-    await expect(page.getByText('Tax Reports')).toBeVisible();
+    // 3 USP cards (scoped to welcome page to avoid sidebar duplicate)
+    await expect(page.getByTestId('page-welcome').getByText('Zero-Knowledge Encryption')).toBeVisible();
+    await expect(page.getByTestId('page-welcome').getByText('Multi-Exchange Import')).toBeVisible();
+    await expect(page.getByTestId('page-welcome').getByText('Tax Reports')).toBeVisible();
 
     // CTA buttons
     await expect(page.getByTestId('btn-signup')).toBeVisible();
@@ -41,21 +41,19 @@ test.describe('Feature 22: UI/UX Redesign', () => {
   });
 
   /* ── Navigation (desktop: sidebar) ───────────────── */
-  test('sidebar navigation: 5 main views accessible', async ({ page, request }) => {
+  test('sidebar navigation: main views accessible', async ({ page, request }) => {
     await resetApp(page, request);
     await signupAndSetupVault(page);
 
-    // Should be on /home with sidebar visible
+    // Should be on /home with sidebar visible (grouped nav)
     await expect(page.getByTestId('nav-home')).toBeVisible();
-    await expect(page.getByTestId('nav-portfolio')).toBeVisible();
     await expect(page.getByTestId('nav-transactions')).toBeVisible();
     await expect(page.getByTestId('nav-taxes')).toBeVisible();
+    await expect(page.getByTestId('nav-alerts')).toBeVisible();
+    await expect(page.getByTestId('nav-import')).toBeVisible();
     await expect(page.getByTestId('nav-settings')).toBeVisible();
 
     // Navigate to each view
-    await page.getByTestId('nav-portfolio').click();
-    await expect(page).toHaveURL(/\/portfolio/);
-
     await page.getByTestId('nav-transactions').click();
     await expect(page).toHaveURL(/\/transactions/);
 
@@ -100,18 +98,18 @@ test.describe('Feature 22: UI/UX Redesign', () => {
     await spaNavigate(page, '/settings');
     await expect(page.getByTestId('page-settings')).toBeVisible();
 
-    // Default language is EN — sidebar should show "Home"
-    await expect(page.getByTestId('nav-home')).toContainText('Home');
+    // Default language is EN — sidebar should show "Dashboard"
+    await expect(page.getByTestId('nav-home')).toContainText('Dashboard');
 
     // Switch to FI
     await page.getByTestId('btn-lang-fi').click();
     // Sidebar should now show Finnish labels
-    await expect(page.getByTestId('nav-home')).toContainText('Koti');
+    await expect(page.getByTestId('nav-home')).toContainText('Etusivu');
     await expect(page.getByTestId('nav-settings')).toContainText('Asetukset');
 
     // Switch back to EN
     await page.getByTestId('btn-lang-en').click();
-    await expect(page.getByTestId('nav-home')).toContainText('Home');
+    await expect(page.getByTestId('nav-home')).toContainText('Dashboard');
   });
 
   /* ── Mobile viewport: bottom tab bar ─────────────── */

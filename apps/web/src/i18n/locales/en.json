@@ -17,14 +17,22 @@
 
   "nav": {
     "home": "Home",
+    "dashboard": "Dashboard",
     "portfolio": "Portfolio",
     "transactions": "Transactions",
     "txns": "Txns",
     "taxes": "Taxes",
+    "taxReports": "Tax Reports",
+    "alerts": "Alerts",
+    "import": "Import",
     "settings": "Settings",
     "sync": "Sync",
     "lockVault": "Lock vault",
-    "locked": "Locked"
+    "locked": "Locked",
+    "section": {
+      "portfolio": "PORTFOLIO",
+      "tools": "TOOLS"
+    }
   },
 
   "welcome": {
@@ -161,13 +169,15 @@
   },
 
   "dashboard": {
-    "title": "Home",
+    "title": "Dashboard",
+    "subtitle": "Portfolio overview & performance",
     "autoRefresh": { "label": "Auto" },
-    "btn": { "refresh": "Refresh" },
     "kpi": {
       "totalValue": "Total Value",
       "realizedPnl": "Realized P&L",
-      "unrealizedPnl": "Unrealized P&L"
+      "unrealizedPnl": "Unrealized P&L",
+      "totalAssets": "Total Assets",
+      "bestPerformer": "Best Performer"
     },
     "chart": {
       "allocation": "Allocation",
@@ -187,7 +197,9 @@
         "desc": "Import transactions to see your holdings."
       }
     },
-    "topPositions": { "title": "Top Positions" },
+    "topPositions": { "title": "Holdings" },
+    "search": "Search assets...",
+    "btn": { "refresh": "Refresh", "addTransaction": "Add Transaction" },
     "lastUpdate": "Last update:"
   },
 

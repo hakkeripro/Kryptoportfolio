@@ -65,7 +65,7 @@ test('coinbase import: fixture → preview → commit → portfolio + transactio
     })
     .toBeGreaterThan(0);
 
-  await page.getByTestId('nav-portfolio').click();
+  await page.goto('/portfolio');
   await expect(page.getByTestId('list-positions')).toBeVisible();
   await expect
     .poll(async () => await page.locator('[data-testid^="row-position-"]').count(), {

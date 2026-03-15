@@ -17,14 +17,22 @@
 
   "nav": {
     "home": "Koti",
+    "dashboard": "Etusivu",
     "portfolio": "Salkku",
     "transactions": "Tapahtumat",
     "txns": "Tap.",
     "taxes": "Verot",
+    "taxReports": "Veroraportit",
+    "alerts": "Hälytykset",
+    "import": "Tuonti",
     "settings": "Asetukset",
     "sync": "Synkronoi",
     "lockVault": "Lukitse holvi",
-    "locked": "Lukittu"
+    "locked": "Lukittu",
+    "section": {
+      "portfolio": "SALKKU",
+      "tools": "TYÖKALUT"
+    }
   },
 
   "welcome": {
@@ -161,13 +169,15 @@
   },
 
   "dashboard": {
-    "title": "Koti",
+    "title": "Etusivu",
+    "subtitle": "Salkkukatsaus ja suorituskyky",
     "autoRefresh": { "label": "Auto" },
-    "btn": { "refresh": "Päivitä" },
     "kpi": {
       "totalValue": "Kokonaisarvo",
       "realizedPnl": "Realisoitunut tulos",
-      "unrealizedPnl": "Realisoimaton tulos"
+      "unrealizedPnl": "Realisoimaton tulos",
+      "totalAssets": "Omaisuuserät",
+      "bestPerformer": "Paras tuotto"
     },
     "chart": {
       "allocation": "Allokaatio",
@@ -187,7 +197,9 @@
         "desc": "Tuo tapahtumia nähdäksesi omistuksesi."
       }
     },
-    "topPositions": { "title": "Suurimmat positiot" },
+    "topPositions": { "title": "Omistukset" },
+    "search": "Hae omaisuuseriä...",
+    "btn": { "refresh": "Päivitä", "addTransaction": "Lisää tapahtuma" },
     "lastUpdate": "Viimeisin päivitys:"
   },
 

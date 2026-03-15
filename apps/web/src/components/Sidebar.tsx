@@ -2,9 +2,10 @@ import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Home,
-  PieChart,
   ArrowLeftRight,
   FileText,
+  Bell,
+  Upload,
   Settings,
   Lock,
   Unlock,
@@ -15,23 +16,55 @@ import { useVaultStore } from '../store/useVaultStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { useSyncStore } from '../store/useSyncStore';
 
+interface NavSection {
+  label: string;
+  items: { to: string; icon: typeof Home; label: string; testId: string }[];
+}
+
+function NavItem({ to, icon: Icon, label, testId }: NavSection['items'][number]) {
+  return (
+    <NavLink
+      to={to}
+      data-testid={testId}
+      className={({ isActive }) =>
+        `relative flex items-center gap-3 px-3 py-2 rounded-button text-body font-medium
+        transition-all duration-150 ease-expo ${
+          isActive
+            ? 'bg-brand/10 text-brand shadow-sm shadow-brand/5 before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-5 before:w-0.5 before:rounded-full before:bg-brand'
+            : 'text-content-secondary hover:text-content-primary hover:bg-surface-overlay/60'
+        }`
+      }
+    >
+      <Icon className="h-[18px] w-[18px]" />
+      {label}
+    </NavLink>
+  );
+}
+
 export default function Sidebar() {
   const { t } = useTranslation();
   const { passphrase, lockVault } = useVaultStore();
   const token = useAuthStore((s) => s.token);
+  const email = useAuthStore((s) => s.email);
   const syncNow = useSyncStore((s) => s.syncNow);
 
-  const navItems = [
-    { to: '/home', icon: Home, label: t('nav.home'), testId: 'nav-home' },
-    { to: '/portfolio', icon: PieChart, label: t('nav.portfolio'), testId: 'nav-portfolio' },
+  const sections: NavSection[] = [
     {
-      to: '/transactions',
-      icon: ArrowLeftRight,
-      label: t('nav.transactions'),
-      testId: 'nav-transactions',
+      label: t('nav.section.portfolio', { defaultValue: 'PORTFOLIO' }),
+      items: [
+        { to: '/home', icon: Home, label: t('nav.dashboard', { defaultValue: 'Dashboard' }), testId: 'nav-home' },
+        { to: '/transactions', icon: ArrowLeftRight, label: t('nav.transactions'), testId: 'nav-transactions' },
+        { to: '/taxes', icon: FileText, label: t('nav.taxReports', { defaultValue: 'Tax Reports' }), testId: 'nav-taxes' },
+      ],
     },
-    { to: '/taxes', icon: FileText, label: t('nav.taxes'), testId: 'nav-taxes' },
-    { to: '/settings', icon: Settings, label: t('nav.settings'), testId: 'nav-settings' },
+    {
+      label: t('nav.section.tools', { defaultValue: 'TOOLS' }),
+      items: [
+        { to: '/settings/alerts', icon: Bell, label: t('nav.alerts', { defaultValue: 'Alerts' }), testId: 'nav-alerts' },
+        { to: '/transactions/import', icon: Upload, label: t('nav.import', { defaultValue: 'Import' }), testId: 'nav-import' },
+        { to: '/settings', icon: Settings, label: t('nav.settings'), testId: 'nav-settings' },
+      ],
+    },
   ];
 
   return (
@@ -42,28 +75,22 @@ export default function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-1">
-        {navItems.map(({ to, icon: Icon, label, testId }) => (
-          <NavLink
-            key={to}
-            to={to}
-            data-testid={testId}
-            className={({ isActive }) =>
-              `relative flex items-center gap-3 px-3 py-2.5 rounded-button text-body font-medium
-              transition-all duration-150 ease-expo ${
-                isActive
-                  ? 'bg-brand/8 text-brand shadow-sm shadow-brand/5 before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-5 before:w-0.5 before:rounded-full before:bg-brand'
-                  : 'text-content-secondary hover:text-content-primary hover:bg-surface-overlay/60'
-              }`
-            }
-          >
-            <Icon className="h-5 w-5" />
-            {label}
-          </NavLink>
+      <nav className="flex-1 px-3 py-4 space-y-5 overflow-y-auto">
+        {sections.map((section) => (
+          <div key={section.label}>
+            <div className="px-3 mb-2 text-[0.625rem] font-semibold uppercase tracking-widest text-content-tertiary">
+              {section.label}
+            </div>
+            <div className="space-y-0.5">
+              {section.items.map((item) => (
+                <NavItem key={item.to} {...item} />
+              ))}
+            </div>
+          </div>
         ))}
       </nav>
 
-      {/* Footer actions */}
+      {/* Footer */}
       <div className="px-3 py-4 border-t border-border/50 space-y-2">
         {token && (
           <button
@@ -96,6 +123,11 @@ export default function Sidebar() {
             <Unlock className="h-4 w-4" />
             {t('nav.locked')}
           </span>
+        )}
+        {email && (
+          <div className="px-3 pt-1 text-[0.625rem] text-content-tertiary truncate">
+            {email}
+          </div>
         )}
       </div>
     </aside>
