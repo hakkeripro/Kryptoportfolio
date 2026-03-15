@@ -397,6 +397,31 @@ Ks. [ISSUE_LOG.md](../ISSUE_LOG.md) tarkemmat kuvaukset.
 ---
 ---
 
+## SEURAAVA VAIHE: UI/UX Remontti
+
+### Feature 22: UI/UX Redesign + Design System ✅
+**Status:** ✅ VALMIS (2026-03-15)
+**Prioriteetti:** Kriittinen — tehdaan ENNEN Feature 13 (Imports) ja Feature 14 (Billing)
+**Edellyttaa:** Feature 12 valmis, PRODUCT_VISION.md
+
+**Tavoite:** Tuote naytetaan ja tuntuu luotettavalta, ammattimaiselta ja helppokayttoiselta.
+
+**Toteutettu:**
+- [x] Design system: CSS-tokenit, Tailwind config, 14 UI-komponenttia (Button, Card, Input, Select, Badge, Spinner, Modal, Drawer, Tabs, Tooltip, EmptyState, TokenIcon, KpiCard, Logo)
+- [x] Token-ikonit (CoinGecko iconUrl + letter avatar fallback)
+- [x] Navigaatio: Sidebar (desktop) + BottomTabBar (mobiili), 5 päänäkymää, backward-compat redirectit
+- [x] Welcome-sivu: VaultFolio branding, USP-kortit, CTA-painikkeet
+- [x] Dashboard redesign: KPI-kortit, allokaatiodonitsi, arvokaavio, top positions
+- [x] Kaikki sivut migrated design system -tokeneihin
+- [x] Mobile-first: 44px touch targets, swipe-to-close drawer, safe area, standalone PWA
+- [x] Branding: Logo (SVG), favicon, PWA manifest, "Obsidian" dark theme
+- [x] i18n: react-i18next, EN+FI (~320 käännösavainta), kielivalitsin
+
+**Huom:** i18n-avaimet on kytketty pääsivuille. Muutamilla sekundäärisivuilla (Imports, Alerts, Assets, Account, Transactions) on vain otsikot käännetty — yksityiskohtaiset käännökset voidaan lisätä jatkokehityksessä.
+
+---
+---
+
 ## EI TOTEUTETTU (backlogissa)
 
 ### Feature 15: Dashboard Alert Popup ❌
@@ -416,10 +441,8 @@ Ks. [ISSUE_LOG.md](../ISSUE_LOG.md) tarkemmat kuvaukset.
 
 ---
 
-### Feature 18: Branding + Token Icons ❌
-**Kuvaus:** Asset catalogiin `iconUrl` (cache), fallback letter avatar. Logo + `--brand-gradient`. PWA app icon.
-
-**Ratkaisee:** KP-UI-004, KP-BRAND-001
+### ~~Feature 18: Branding + Token Icons~~ → yhdistetty Feature 22:een
+**Kuvaus:** Sisaltyy nyt Feature 22: UI/UX Redesign -kokonaisuuteen.
 
 ---
 
@@ -484,29 +507,26 @@ Ks. [ISSUE_LOG.md](../ISSUE_LOG.md) tarkemmat kuvaukset.
 
 | Kategoria | Maara |
 |-----------|-------|
-| Vaihe 0 (tekninen velka) | 8 tehtavaa (T-001..T-008) |
-| P0-bugit | 4 |
-| Toteutetut featuret | 11 (01-11) |
-| Suunnitteilla (ADR) | 3 (12-14) |
-| Ei toteutetut | 6 (15-20) |
-| Meta (AI workflow) | 1 (21) ✅ |
+| Vaihe 0 (tekninen velka) | 8/8 ✅ |
+| P0-bugit | 4/4 ✅ |
+| Toteutetut featuret | 11 (01-11) + 21 |
+| Toteutuksessa | 1 (12) |
+| Suunnitteilla | 3 (13, 14, 22) |
+| Backlog | 5 (15-17, 19-20) |
 | Avoimet P1-bugit | 5 |
 | Avoimet P2/P3-bugit | 4 |
 
 ### Toteutusjarjestys
 
 ```
-VAIHE 0: Tekninen velka
-  T-001 (CI) → T-008 (siivous) → T-002 (API hajotus) → T-003 (store hajotus)
-  → T-004 (duplikaatio) → T-005 (testit) → T-007 (indeksit) → T-006 (komponentit)
+VAIHE 0: Tekninen velka ✅ VALMIS
+VAIHE 1: P0-bugit ✅ VALMIS
+Feature 21: AI-kehitysymparisto ✅ VALMIS
+Feature 12: Auth/Vault UX 🚧 (E2E-testit kesken)
 
-VAIHE 1: P0-bugit
-  KP-UI-001 → KP-UI-002 → KP-ALERT-001 → KP-IMPORT-001
-
-Feature 21: AI-kehitysymparisto (rinnakkain vaiheen 1 kanssa)
-
-Feature 12: Auth/Vault UX
-Feature 13: Imports Registry
-Feature 14: Billing
-Feature 15-20: backlogista prioriteettien mukaan
+→ PRODUCT_VISION.md (tuotteen suunta + kohderyhmä)
+→ Feature 22: UI/UX Redesign + Design System
+→ Feature 13: Imports Registry
+→ Feature 14: Billing
+→ Feature 15-20: backlogista prioriteettien mukaan
 ```

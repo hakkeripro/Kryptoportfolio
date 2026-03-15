@@ -25,14 +25,50 @@ Paivitetty: 2026-03-13
 - CI: puuttuu typecheck, lint, coverage, audit, preview deploy
 
 ### Seuraava tyovaihe
-**→ Feature 12: Auth/Vault UX Redesign** — 🚧 TOTEUTUKSESSA
-Core + UI + API valmis. E2E-testit paivitetty. Erilliset E2E-testit kesken.
+**→ Feature 13: Imports Plugin Registry + Wizard** — seuraava
+Feature 22 (UI/UX Redesign) valmis. Feature 12 (Auth/Vault UX) valmis.
 
-Seuraavaksi: Feature 12 E2E-testit → Feature 13 (Imports) → Feature 14 (Billing)
+Seuraavaksi: Feature 13 (Imports) → Feature 14 (Billing)
 
 ---
 
 ## Muutosloki
+
+### 2026-03-15 — Feature 22: UI/UX Redesign + Design System (koko feature)
+**Phase A: Design System Foundation**
+- `apps/web/src/styles/tokens.css` — CSS custom properties (Obsidian dark theme)
+- `apps/web/tailwind.config.cjs` — custom theme (colors, fonts, spacing, radii)
+- `apps/web/src/components/ui/` — 14 UI-komponenttia (Button, Card, Input, Select, Badge, Spinner, Modal, Drawer, Tabs, Tooltip, EmptyState, TokenIcon, KpiCard, Logo)
+- `@fontsource/inter` (400/500/600/700) + `lucide-react` icons
+
+**Phase B: Navigation + Shell**
+- `apps/web/src/components/Sidebar.tsx` — desktop sidebar (5 nav items + logo + lock/sync)
+- `apps/web/src/components/BottomTabBar.tsx` — mobile bottom tab bar
+- `apps/web/src/components/AppShell.tsx` — layout wrapper
+- `apps/web/src/app/App.tsx` — route restructure (17→5 views + sub-routes + redirects)
+- E2E helpers: `spaNavigate()` for SPA navigation
+
+**Phase C: Branding + Welcome**
+- `apps/web/src/pages/WelcomePage.tsx` — redesigned with USP cards + CTA
+- `apps/web/public/favicon.svg` — shield/keyhole brand icon
+- PWA manifest updates (VaultFolio, theme_color)
+
+**Phase D: Page Redesigns**
+- DashboardPage + PortfolioPage fully rewritten with UI components
+- Design tokens applied to ALL 15+ pages and 5 settings cards
+- `useDashboardRefresh.ts` hook extracted
+
+**Phase E: i18n**
+- `apps/web/src/i18n/` — react-i18next config + EN/FI locales (~320 keys)
+- Language selector in Settings
+- Translations applied to nav, Dashboard, Portfolio, Welcome, Signup, Signin, Tax, Settings
+
+**Phase F: Mobile Polish**
+- Swipe-to-close Drawer, 44px touch targets, safe area CSS, PWA standalone meta tags
+
+**Testitulos:** Build OK, Unit tests ✅
+
+---
 
 ### 2026-03-14 — Feature 12: Auth/Vault UX Redesign (core + UI)
 **Luotu:**
