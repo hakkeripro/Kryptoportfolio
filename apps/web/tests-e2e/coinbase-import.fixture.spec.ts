@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { resetApp, signupAndSetupVault } from './helpers';
+import { resetApp, signupAndSetupVault, spaNavigate } from './helpers';
 
 async function onboardAndRegister(page: any) {
   await signupAndSetupVault(page);
@@ -10,7 +10,7 @@ test('coinbase import: fixture → preview → commit → portfolio + transactio
   await onboardAndRegister(page);
 
   // Use SPA navigation to keep the in-memory vault state (avoid full reload).
-  await page.getByTestId('nav-imports').click();
+  await spaNavigate(page, '/transactions/import');
   await expect(page.getByTestId('form-coinbase-keyname')).toBeVisible();
 
   await page.getByTestId('form-coinbase-keyname').fill('FIXTURE:basic');
@@ -58,7 +58,7 @@ test('coinbase import: fixture → preview → commit → portfolio + transactio
   await expect(page.getByTestId('list-positions')).toBeVisible();
   await expect.poll(async () => await page.locator('[data-testid^="row-position-"]').count(), { timeout: 20_000 }).toBeGreaterThan(0);
 
-  await page.getByTestId('nav-dashboard').click();
+  await page.getByTestId('nav-home').click();
   await expect(page.getByTestId('metric-total-value')).toBeVisible();
   const txt = await page.getByTestId('metric-total-value').innerText();
   expect(txt.toUpperCase()).toContain('EUR');

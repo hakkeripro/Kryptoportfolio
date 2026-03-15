@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { resetApp, signupAndSetupVault } from './helpers';
+import { resetApp, signupAndSetupVault, spaNavigate } from './helpers';
 
 async function onboardAndRegister(page: any) {
   await signupAndSetupVault(page);
@@ -7,7 +7,7 @@ async function onboardAndRegister(page: any) {
 
 async function importFixture(page: any) {
   // Use SPA navigation to keep the in-memory vault state (avoid full reload).
-  await page.getByTestId('nav-imports').click();
+  await spaNavigate(page, '/transactions/import');
   await expect(page.getByTestId('form-coinbase-keyname')).toBeVisible();
 
   await page.getByTestId('form-coinbase-keyname').fill('FIXTURE:basic');
@@ -42,7 +42,7 @@ test('tax report: generate for 2025 and export CSV', async ({ page, request }) =
   await onboardAndRegister(page);
   await importFixture(page);
 
-  await page.getByTestId('nav-tax').click();
+  await spaNavigate(page, '/taxes');
   await expect(page.getByTestId('form-tax-year')).toBeVisible();
 
   await page.getByTestId('form-tax-year').selectOption('2025');

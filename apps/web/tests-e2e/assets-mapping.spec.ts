@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { resetApp, signupAndSetupVault } from './helpers';
+import { resetApp, signupAndSetupVault, spaNavigate } from './helpers';
 
 async function onboardAndRegister(page: any) {
   await signupAndSetupVault(page);
@@ -7,7 +7,7 @@ async function onboardAndRegister(page: any) {
 
 async function runFixtureImport(page: any) {
   // Use SPA navigation to keep the in-memory vault state (avoid full reload).
-  await page.getByTestId('nav-imports').click();
+  await spaNavigate(page, '/transactions/import');
   await expect(page.getByTestId('form-coinbase-keyname')).toBeVisible();
   await page.getByTestId('form-coinbase-keyname').fill('FIXTURE:basic');
   await page.getByTestId('form-coinbase-privatekey').fill('FIXTURE:basic');
@@ -40,7 +40,7 @@ test('asset catalog mapping: shows unmapped assets and can link CoinGecko id', a
   await onboardAndRegister(page);
   await runFixtureImport(page);
 
-  await page.getByTestId('nav-assets').click();
+  await spaNavigate(page, '/settings/assets');
   await expect(page.getByTestId('list-unmapped-assets')).toBeVisible();
   const first = page.locator('[data-testid^="row-unmapped-"]').first();
   await expect(first).toBeVisible();

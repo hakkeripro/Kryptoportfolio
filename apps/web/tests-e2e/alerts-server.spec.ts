@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { resetApp, signupAndSetupVault } from './helpers';
+import { resetApp, signupAndSetupVault, spaNavigate } from './helpers';
 
 async function onboardAndRegister(page: any) {
   await signupAndSetupVault(page);
@@ -7,7 +7,7 @@ async function onboardAndRegister(page: any) {
 
 async function runFixtureImport(page: any) {
   // Use SPA navigation to keep the in-memory vault state (avoid full reload).
-  await page.getByTestId('nav-imports').click();
+  await spaNavigate(page, '/transactions/import');
   await expect(page.getByTestId('form-coinbase-keyname')).toBeVisible();
   await page.getByTestId('form-coinbase-keyname').fill('FIXTURE:basic');
   await page.getByTestId('form-coinbase-privatekey').fill('FIXTURE:basic');
@@ -50,7 +50,7 @@ test.fixme('server alerts: create alert → enable server → log shows triggers
   await onboardAndRegister(page);
   await runFixtureImport(page);
 
-  await page.getByTestId('nav-alerts').click();
+  await spaNavigate(page, '/settings/alerts');
   await expect(page.getByTestId('panel-alerts')).toBeVisible();
 
   await page.getByTestId('form-alert-type').selectOption('PORTFOLIO_VALUE');
@@ -88,7 +88,7 @@ test('server alerts: empty local list does not clear server rules when cancelled
   await onboardAndRegister(page);
   await runFixtureImport(page);
 
-  await page.getByTestId('nav-alerts').click();
+  await spaNavigate(page, '/settings/alerts');
   await expect(page.getByTestId('panel-alerts')).toBeVisible();
 
   // Create a single alert and sync to the server.

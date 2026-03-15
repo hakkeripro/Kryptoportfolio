@@ -1,5 +1,18 @@
 import { expect } from '@playwright/test';
 
+/**
+ * SPA-navigate without full page reload (preserves in-memory vault state).
+ * Uses the BrowserRouter's pushState + popstate to trigger React Router navigation.
+ */
+export async function spaNavigate(page: any, path: string) {
+  await page.evaluate((p: string) => {
+    window.history.pushState({}, '', p);
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  }, path);
+  // Give React Router a tick to process the navigation
+  await page.waitForTimeout(200);
+}
+
 export async function waitForToken(page: any) {
   await page.waitForFunction(
     () => {
@@ -65,7 +78,7 @@ export async function signupAndSetupVault(page: any) {
 
   // Done → go to dashboard
   await page.getByTestId('btn-go-dashboard').click();
-  await expect(page.getByTestId('nav-dashboard')).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByTestId('nav-home')).toBeVisible({ timeout: 10_000 });
 
   return email;
 }
@@ -86,5 +99,5 @@ export async function setupVaultOffline(page: any) {
 
   // Done → dashboard
   await page.getByTestId('btn-go-dashboard').click();
-  await expect(page.getByTestId('nav-dashboard')).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByTestId('nav-home')).toBeVisible({ timeout: 10_000 });
 }

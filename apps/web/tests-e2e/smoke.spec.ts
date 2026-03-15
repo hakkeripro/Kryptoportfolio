@@ -13,7 +13,7 @@ test('KP-UI-001: vault passphrase persists across page reload', async ({ page, r
 
   // Reload — passphrase should be restored from sessionStorage (KP-UI-001 fix)
   await page.reload();
-  await expect(page.getByTestId('nav-dashboard')).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByTestId('nav-home')).toBeVisible({ timeout: 10_000 });
   // Should NOT be redirected to unlock page
   await expect(page).not.toHaveURL(/\/unlock/);
   await expect(page.getByTestId('metric-total-value')).toBeVisible();
