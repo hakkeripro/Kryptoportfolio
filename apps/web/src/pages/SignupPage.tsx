@@ -48,7 +48,7 @@ export default function SignupPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm text-slate-400 mb-1">Email</label>
+            <label className="block text-sm text-content-secondary mb-1">Email</label>
             <input
               data-testid="form-email"
               type="email"
@@ -56,12 +56,12 @@ export default function SignupPage() {
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-sm"
+              className="w-full rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
             />
           </div>
 
           <div>
-            <label className="block text-sm text-slate-400 mb-1">Password</label>
+            <label className="block text-sm text-content-secondary mb-1">Password</label>
             <input
               data-testid="form-password"
               type="password"
@@ -69,7 +69,7 @@ export default function SignupPage() {
               autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-sm"
+              className="w-full rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
             />
             {pwTooShort && (
               <p className="text-xs text-rose-400 mt-1">Password must be at least 8 characters</p>
@@ -77,7 +77,7 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label className="block text-sm text-slate-400 mb-1">Confirm password</label>
+            <label className="block text-sm text-content-secondary mb-1">Confirm password</label>
             <input
               data-testid="form-password-confirm"
               type="password"
@@ -85,7 +85,7 @@ export default function SignupPage() {
               autoComplete="new-password"
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
-              className="w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-sm"
+              className="w-full rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
             />
             {pwMismatch && <p className="text-xs text-rose-400 mt-1">Passwords do not match</p>}
           </div>
@@ -94,19 +94,19 @@ export default function SignupPage() {
             data-testid="btn-signup"
             type="submit"
             disabled={!canSubmit}
-            className="w-full rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 px-4 py-2 text-sm font-medium"
+            className="w-full rounded-lg bg-brand hover:bg-brand-dark disabled:opacity-60 px-4 py-2 text-sm font-medium"
           >
             {busy ? 'Creating account…' : 'Create account'}
           </button>
 
           {error && (
-            <div data-testid="signup-error" className="text-sm text-rose-300">
+            <div data-testid="signup-error" className="text-sm text-semantic-error">
               {error}
             </div>
           )}
         </form>
 
-        <p className="text-center text-sm text-slate-500">
+        <p className="text-center text-sm text-content-tertiary">
           Already have an account?{' '}
           <Link to="/auth/signin" className="text-indigo-400 hover:underline">
             Sign in

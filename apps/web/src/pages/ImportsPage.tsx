@@ -375,7 +375,7 @@ export default function ImportsPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-xl font-semibold">Imports</h1>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-content-secondary">
             Connect exchanges and import transactions into the append-only ledger.
           </p>
         </div>
@@ -392,7 +392,7 @@ export default function ImportsPage() {
 
       <div className="grid gap-4" data-testid="list-import-sources">
         <div
-          className="rounded-2xl border border-slate-800 bg-slate-900/40 p-5 shadow-sm"
+          className="rounded-2xl border border-border bg-surface-raised p-5 shadow-sm"
           data-testid="card-import-coinbase"
         >
           <div className="flex items-center justify-between gap-3">
@@ -400,13 +400,13 @@ export default function ImportsPage() {
               <CoinbaseLogo />
               <div>
                 <div className="font-semibold">Coinbase</div>
-                <div className="text-xs text-slate-400">CDP Secret API Key (ECDSA / ES256)</div>
+                <div className="text-xs text-content-secondary">CDP Secret API Key (ECDSA / ES256)</div>
               </div>
             </div>
             <div className="flex items-center gap-2">
               {connected ? (
                 <button
-                  className="rounded-lg border px-3 py-2 text-sm hover:bg-slate-700"
+                  className="rounded-lg border px-3 py-2 text-sm hover:bg-surface-overlay"
                   onClick={() => void disconnect()}
                   disabled={!!loading}
                   data-testid="btn-coinbase-disconnect"
@@ -419,10 +419,10 @@ export default function ImportsPage() {
 
           <div className="mt-4 grid gap-4 md:grid-cols-3">
             <div className="md:col-span-1">
-              <div className="text-xs font-semibold text-slate-400">Step 1: Connect</div>
+              <div className="text-xs font-semibold text-content-secondary">Step 1: Connect</div>
               <div className="mt-2 space-y-2">
                 <label className="block">
-                  <div className="text-xs text-slate-400">Key name</div>
+                  <div className="text-xs text-content-secondary">Key name</div>
                   <input
                     className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
                     value={keyName}
@@ -433,7 +433,7 @@ export default function ImportsPage() {
                   />
                 </label>
                 <label className="block">
-                  <div className="text-xs text-slate-400">Private key (PEM or JSON key file)</div>
+                  <div className="text-xs text-content-secondary">Private key (PEM or JSON key file)</div>
                   <textarea
                     className="mt-1 h-28 w-full rounded-lg border px-3 py-2 font-mono text-xs"
                     value={privateKeyPem}
@@ -446,7 +446,7 @@ export default function ImportsPage() {
 
                 {!connected ? (
                   <button
-                    className="w-full rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
+                    className="w-full rounded-lg bg-surface-raised px-3 py-2 text-sm font-medium text-white hover:bg-surface-overlay disabled:opacity-50"
                     onClick={() => void connect()}
                     disabled={
                       !!loading || !passphrase || !token || !keyName.trim() || !privateKeyPem.trim()
@@ -467,7 +467,7 @@ export default function ImportsPage() {
             </div>
 
             <div className="md:col-span-1">
-              <div className="text-xs font-semibold text-slate-400">Step 2: Fetch</div>
+              <div className="text-xs font-semibold text-content-secondary">Step 2: Fetch</div>
               <div className="mt-2 space-y-3">
                 <div className="flex items-center justify-between">
                   <label
@@ -499,7 +499,7 @@ export default function ImportsPage() {
                 </div>
 
                 <button
-                  className="w-full rounded-lg border px-3 py-2 text-sm hover:bg-slate-700 disabled:opacity-50"
+                  className="w-full rounded-lg border px-3 py-2 text-sm hover:bg-surface-overlay disabled:opacity-50"
                   onClick={() => void runFetch('newest')}
                   disabled={!!loading || !connected}
                   data-testid="btn-import-run"
@@ -507,7 +507,7 @@ export default function ImportsPage() {
                   Fetch newest
                 </button>
                 <button
-                  className="w-full rounded-lg border px-3 py-2 text-sm hover:bg-slate-700 disabled:opacity-50"
+                  className="w-full rounded-lg border px-3 py-2 text-sm hover:bg-surface-overlay disabled:opacity-50"
                   onClick={() => void runFetch('all')}
                   disabled={!!loading || !connected}
                   data-testid="btn-import-run-all"
@@ -516,13 +516,13 @@ export default function ImportsPage() {
                 </button>
 
                 <div
-                  className="rounded-lg border bg-slate-950/40 p-3 text-xs"
+                  className="rounded-lg border bg-surface-base p-3 text-xs"
                   data-testid="box-coinbase-autosync-status"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-400">Auto-sync status</span>
+                    <span className="text-content-secondary">Auto-sync status</span>
                     <span
-                      className="rounded-md bg-slate-950 px-2 py-0.5 font-mono"
+                      className="rounded-md bg-surface-base px-2 py-0.5 font-mono"
                       data-testid="badge-coinbase-autosync-inflight"
                     >
                       {cbStatus.data?.inFlight ? 'running…' : 'idle'}
@@ -530,7 +530,7 @@ export default function ImportsPage() {
                   </div>
                   <div className="mt-2 grid gap-1">
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-400">Last run</span>
+                      <span className="text-content-secondary">Last run</span>
                       <span className="font-mono">
                         {cbStatus.data?.lastRunISO
                           ? new Date(cbStatus.data.lastRunISO).toLocaleString()
@@ -538,7 +538,7 @@ export default function ImportsPage() {
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-400">Last commit</span>
+                      <span className="text-content-secondary">Last commit</span>
                       <span className="font-mono">
                         {cbStatus.data?.lastCommitISO
                           ? new Date(cbStatus.data.lastCommitISO).toLocaleString()
@@ -546,7 +546,7 @@ export default function ImportsPage() {
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-400">Next run</span>
+                      <span className="text-content-secondary">Next run</span>
                       <span className="font-mono">
                         {cbStatus.data?.nextRunISO
                           ? new Date(cbStatus.data.nextRunISO).toLocaleString()
@@ -554,7 +554,7 @@ export default function ImportsPage() {
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-400">Fetched last time</span>
+                      <span className="text-content-secondary">Fetched last time</span>
                       <span className="font-mono">
                         {typeof cbStatus.data?.lastFetchedCount === 'number'
                           ? cbStatus.data.lastFetchedCount
@@ -564,7 +564,7 @@ export default function ImportsPage() {
                   </div>
                   <div className="mt-2 flex items-center justify-between">
                     <button
-                      className="rounded-md border border-slate-700 bg-slate-950 px-2 py-1 text-[11px] hover:bg-slate-700 disabled:opacity-50"
+                      className="rounded-md border border-border bg-surface-base px-2 py-1 text-[11px] hover:bg-surface-overlay disabled:opacity-50"
                       onClick={() =>
                         window.dispatchEvent(new Event('kp_coinbase_autosync_run_now'))
                       }
@@ -574,7 +574,7 @@ export default function ImportsPage() {
                       Run now
                     </button>
                     <span
-                      className="text-[11px] text-slate-400"
+                      className="text-[11px] text-content-secondary"
                       data-testid="text-coinbase-autosync-duration"
                     >
                       {typeof cbStatus.data?.lastDurationMs === 'number'
@@ -600,10 +600,10 @@ export default function ImportsPage() {
                   ) : null}
                 </div>
 
-                <div className="text-xs text-slate-400">
+                <div className="text-xs text-content-secondary">
                   Last seen cursors:
                   <div
-                    className="mt-1 rounded-lg bg-slate-950/40 p-2 font-mono text-[11px]"
+                    className="mt-1 rounded-lg bg-surface-base p-2 font-mono text-[11px]"
                     data-testid="box-cb-cursors"
                   >
                     {Object.keys(lastSeenByAccount).length
@@ -613,13 +613,13 @@ export default function ImportsPage() {
                 </div>
 
                 <details
-                  className="rounded-lg border bg-slate-950/40 p-3 text-xs"
+                  className="rounded-lg border bg-surface-base p-3 text-xs"
                   data-testid="details-coinbase-cursor-telemetry"
                 >
-                  <summary className="cursor-pointer select-none text-slate-200">
+                  <summary className="cursor-pointer select-none text-content-primary">
                     Cursor telemetry (last autosync)
                   </summary>
-                  <div className="mt-2 rounded-lg bg-slate-950 p-2 font-mono text-[11px]">
+                  <div className="mt-2 rounded-lg bg-surface-base p-2 font-mono text-[11px]">
                     {cbStatus.data?.lastCursorByAccount &&
                     Object.keys(cbStatus.data.lastCursorByAccount).length
                       ? JSON.stringify(cbStatus.data.lastCursorByAccount, null, 2)
@@ -630,13 +630,13 @@ export default function ImportsPage() {
             </div>
 
             <div className="md:col-span-1">
-              <div className="text-xs font-semibold text-slate-400">
+              <div className="text-xs font-semibold text-content-secondary">
                 Step 3: Preview &amp; commit
               </div>
               <div className="mt-2 space-y-3">
                 {preview ? (
                   <div
-                    className="rounded-lg border bg-slate-950/40 p-3 text-sm"
+                    className="rounded-lg border bg-surface-base p-3 text-sm"
                     data-testid="box-import-stats"
                   >
                     <div className="flex items-center justify-between">
@@ -661,11 +661,11 @@ export default function ImportsPage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="text-sm text-slate-400">Run a fetch to generate a preview.</div>
+                  <div className="text-sm text-content-secondary">Run a fetch to generate a preview.</div>
                 )}
 
                 <button
-                  className="w-full rounded-lg border px-3 py-2 text-sm hover:bg-slate-700 disabled:opacity-50"
+                  className="w-full rounded-lg border px-3 py-2 text-sm hover:bg-surface-overlay disabled:opacity-50"
                   onClick={() => void rebuildPreview()}
                   disabled={!!loading || !preview}
                   data-testid="btn-import-rebuild-preview"
@@ -674,7 +674,7 @@ export default function ImportsPage() {
                 </button>
 
                 <button
-                  className="w-full rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
+                  className="w-full rounded-lg bg-surface-raised px-3 py-2 text-sm font-medium text-white hover:bg-surface-overlay disabled:opacity-50"
                   onClick={() => void doCommit(preview!, accounts, items)}
                   disabled={!!loading || !connected || !canCommit}
                   data-testid="btn-import-commit"
@@ -683,7 +683,7 @@ export default function ImportsPage() {
                 </button>
 
                 {!canCommit && preview ? (
-                  <div className="text-xs text-slate-400">
+                  <div className="text-xs text-content-secondary">
                     {preview.issues.length
                       ? 'Resolve issues to enable commit.'
                       : preview.newEvents.length
@@ -698,12 +698,12 @@ export default function ImportsPage() {
           {preview ? (
             <div className="mt-5 grid gap-4 md:grid-cols-2">
               <div
-                className="rounded-xl border border-slate-800 bg-slate-900/40 p-4"
+                className="rounded-xl border border-border bg-surface-raised p-4"
                 data-testid="panel-import-preview"
               >
                 <div className="flex items-center justify-between">
                   <div className="font-semibold">Preview</div>
-                  <div className="text-xs text-slate-400">Ledger events (new + duplicates)</div>
+                  <div className="text-xs text-content-secondary">Ledger events (new + duplicates)</div>
                 </div>
                 <div className="mt-3 max-h-[420px] overflow-auto" data-testid="list-import-preview">
                   {preview.events.length ? (
@@ -711,7 +711,7 @@ export default function ImportsPage() {
                       {preview.events.slice(0, 200).map((e) => (
                         <li
                           key={e.id}
-                          className="rounded-lg border bg-slate-950/40 p-2"
+                          className="rounded-lg border bg-surface-base p-2"
                           data-testid={`row-import-preview-${e.id}`}
                         >
                           <div className="flex items-center justify-between">
@@ -735,28 +735,28 @@ export default function ImportsPage() {
                               </span>
                             )}
                           </div>
-                          <div className="mt-1 text-xs text-slate-400">
+                          <div className="mt-1 text-xs text-content-secondary">
                             {new Date(e.timestampISO).toLocaleString()} • {e.externalRef}
                           </div>
                         </li>
                       ))}
                     </ul>
                   ) : (
-                    <div className="text-sm text-slate-400">No mapped events.</div>
+                    <div className="text-sm text-content-secondary">No mapped events.</div>
                   )}
                   {preview.events.length > 200 ? (
-                    <div className="mt-3 text-xs text-slate-400">Showing first 200 events…</div>
+                    <div className="mt-3 text-xs text-content-secondary">Showing first 200 events…</div>
                   ) : null}
                 </div>
               </div>
 
               <div
-                className="rounded-xl border border-slate-800 bg-slate-900/40 p-4"
+                className="rounded-xl border border-border bg-surface-raised p-4"
                 data-testid="panel-import-issues"
               >
                 <div className="flex items-center justify-between">
                   <div className="font-semibold">Issues</div>
-                  <div className="text-xs text-slate-400">Base currency: {baseCurrency}</div>
+                  <div className="text-xs text-content-secondary">Base currency: {baseCurrency}</div>
                 </div>
 
                 {preview.issues.length ? (
@@ -781,7 +781,7 @@ export default function ImportsPage() {
                                 }
                                 data-testid={`input-import-fx-${cur}`}
                               />
-                              <div className="text-xs text-slate-400">
+                              <div className="text-xs text-content-secondary">
                                 txs: {arr.flatMap((x) => ('txIds' in x ? x.txIds : [])).join(', ')}
                               </div>
                             </div>
@@ -803,7 +803,7 @@ export default function ImportsPage() {
                                 data-testid={`row-import-issue-fee-${refKey}`}
                               >
                                 <div className="w-28 text-xs font-mono">{refKey}</div>
-                                <div className="w-28 text-xs text-slate-200">
+                                <div className="w-28 text-xs text-content-primary">
                                   {i.feeAmount} {i.feeCurrency}
                                 </div>
                                 <input
@@ -836,7 +836,7 @@ export default function ImportsPage() {
                               data-testid={`row-import-issue-swap-${tradeKey}`}
                             >
                               <div className="w-28 text-xs font-mono">{tradeKey}</div>
-                              <div className="text-xs text-slate-400">
+                              <div className="text-xs text-content-secondary">
                                 txIds: {(arr[0] as any).txIds.join(', ')}
                               </div>
                               <input
@@ -868,7 +868,7 @@ export default function ImportsPage() {
                               data-testid={`row-import-issue-reward-${txId}`}
                             >
                               <div className="w-28 text-xs font-mono">{txId}</div>
-                              <div className="w-28 text-xs text-slate-200">
+                              <div className="w-28 text-xs text-content-primary">
                                 {(arr[0] as any).amount} {(arr[0] as any).currency}
                               </div>
                               <input
@@ -889,7 +889,7 @@ export default function ImportsPage() {
                       </div>
                     ) : null}
 
-                    <div className="text-xs text-slate-400">
+                    <div className="text-xs text-content-secondary">
                       After entering values, click{' '}
                       <span className="font-medium">Rebuild preview</span>.
                     </div>
@@ -939,7 +939,7 @@ export default function ImportsPage() {
               <div className="mt-3 flex gap-2">
                 <a
                   href="/transactions"
-                  className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white"
+                  className="rounded-lg bg-surface-raised px-3 py-2 text-sm font-medium text-white"
                   data-testid="link-go-transactions"
                 >
                   View transactions

@@ -63,16 +63,16 @@ export default function UnlockPage() {
     <div className="space-y-6" data-testid="page-unlock">
       <h1 className="text-xl font-semibold">Unlock Vault</h1>
 
-      <div className="text-sm text-slate-300">
+      <div className="text-sm text-content-secondary">
         Same <span className="font-semibold">Vault Passphrase</span> works on all devices. A{' '}
         <span className="font-semibold">Passkey</span> is device-specific; enable it per device for
         quick unlock.
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4 space-y-3">
+        <div className="rounded-xl border border-border bg-surface-raised p-4 space-y-3">
           <div className="font-medium">Use Passkey</div>
-          <div className="text-sm text-slate-300">
+          <div className="text-sm text-content-secondary">
             {isPasskeySupported()
               ? hasPasskey
                 ? 'Unlock without typing your passphrase on this device.'
@@ -83,17 +83,17 @@ export default function UnlockPage() {
             data-testid="btn-unlock-passkey"
             disabled={busy || !passkeyOk}
             onClick={() => void unlockWithPasskey()}
-            className="rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 px-3 py-2 text-sm font-medium"
+            className="rounded-lg bg-brand hover:bg-brand-dark disabled:opacity-60 px-3 py-2 text-sm font-medium"
           >
             {busy ? 'Unlocking…' : 'Unlock with Passkey'}
           </button>
-          <div className="text-xs text-slate-400">
+          <div className="text-xs text-content-secondary">
             Tip: enable a passkey in <span className="font-medium">Account → Passkeys</span> after
             unlocking.
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4 space-y-3">
+        <div className="rounded-xl border border-border bg-surface-raised p-4 space-y-3">
           <div className="font-medium">Use Vault Passphrase</div>
           <input
             data-testid="form-unlock-passphrase"
@@ -101,7 +101,7 @@ export default function UnlockPage() {
             placeholder="Vault passphrase"
             value={passphrase}
             onChange={(e) => setPassphrase(e.target.value)}
-            className="rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-sm w-full"
+            className="rounded-lg bg-surface-base border border-border px-3 py-2 text-sm w-full"
           />
           <button
             data-testid="btn-unlock-passphrase"

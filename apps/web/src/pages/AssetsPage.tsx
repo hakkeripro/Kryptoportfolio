@@ -138,13 +138,13 @@ export default function AssetsPage() {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-xl font-semibold">Assets</h1>
-          <div className="text-sm text-slate-500">
+          <div className="text-sm text-content-tertiary">
             Map assets to CoinGecko IDs (no symbol guessing). Unmapped assets block live pricing and
             some imports.
           </div>
         </div>
         <button
-          className="rounded-lg border px-3 py-2 text-sm hover:bg-slate-700 disabled:opacity-50"
+          className="rounded-lg border px-3 py-2 text-sm hover:bg-surface-overlay disabled:opacity-50"
           onClick={() => void refreshPricesAndRebuild()}
           disabled={linking || searchLoading}
           data-testid="btn-refresh-live-prices"
@@ -155,7 +155,7 @@ export default function AssetsPage() {
 
       {msg ? (
         <div
-          className="rounded-lg border bg-slate-950/40 p-3 text-sm"
+          className="rounded-lg border bg-surface-base p-3 text-sm"
           data-testid="toast-assets-msg"
         >
           {msg}
@@ -163,20 +163,20 @@ export default function AssetsPage() {
       ) : null}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
+        <div className="rounded-xl border border-border bg-surface-raised p-4">
           <div className="flex items-center justify-between">
             <div className="text-sm font-medium">Unmapped assets</div>
-            <div className="text-xs text-slate-400" data-testid="badge-asset-counts">
+            <div className="text-xs text-content-secondary" data-testid="badge-asset-counts">
               {unmappedCount} unmapped / {mappedCount} mapped
             </div>
           </div>
 
           <div className="mt-3">
             {assetsQ.loading ? (
-              <div className="text-sm text-slate-400">Loading…</div>
+              <div className="text-sm text-content-secondary">Loading…</div>
             ) : unmappedCount ? (
               <div
-                className="max-h-[520px] overflow-auto rounded-lg border border-slate-800"
+                className="max-h-[520px] overflow-auto rounded-lg border border-border"
                 data-testid="list-unmapped-assets"
               >
                 {unmapped.map((a) => (
@@ -184,40 +184,40 @@ export default function AssetsPage() {
                     key={a.id}
                     onClick={() => setSelectedId(a.id)}
                     data-testid={`row-unmapped-${a.id}`}
-                    className={`w-full text-left px-3 py-2 text-sm border-b border-slate-800 hover:bg-slate-700/50 ${
-                      selectedId === a.id ? 'bg-slate-800/70' : ''
+                    className={`w-full text-left px-3 py-2 text-sm border-b border-border hover:bg-surface-overlay/50 ${
+                      selectedId === a.id ? 'bg-surface-raised/70' : ''
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="font-medium">{a.symbol || a.name}</div>
-                      <div className="text-xs text-slate-400">{kindLabel(a)}</div>
+                      <div className="text-xs text-content-secondary">{kindLabel(a)}</div>
                     </div>
-                    {a.name ? <div className="text-xs text-slate-400">{a.name}</div> : null}
+                    {a.name ? <div className="text-xs text-content-secondary">{a.name}</div> : null}
                   </button>
                 ))}
               </div>
             ) : (
-              <div className="text-sm text-slate-400">All assets are mapped. ✅</div>
+              <div className="text-sm text-content-secondary">All assets are mapped. ✅</div>
             )}
           </div>
         </div>
 
-        <div className="md:col-span-2 rounded-xl border border-slate-800 bg-slate-900/40 p-4">
+        <div className="md:col-span-2 rounded-xl border border-border bg-surface-raised p-4">
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div>
               <div className="text-sm font-medium">Mapping</div>
               {selected ? (
-                <div className="mt-1 text-sm text-slate-200" data-testid="selected-asset">
+                <div className="mt-1 text-sm text-content-primary" data-testid="selected-asset">
                   <span className="font-semibold">{selected.symbol || selected.name}</span>{' '}
-                  <span className="text-slate-400">({selected.name || '—'})</span>
+                  <span className="text-content-secondary">({selected.name || '—'})</span>
                 </div>
               ) : (
-                <div className="mt-1 text-sm text-slate-400">Select an asset from the left.</div>
+                <div className="mt-1 text-sm text-content-secondary">Select an asset from the left.</div>
               )}
             </div>
             {selected?.providerRef?.coingeckoId ? (
               <button
-                className="rounded-lg border px-3 py-2 text-sm hover:bg-slate-700 disabled:opacity-50"
+                className="rounded-lg border px-3 py-2 text-sm hover:bg-surface-overlay disabled:opacity-50"
                 onClick={() => void unlinkSelected()}
                 disabled={linking}
                 data-testid="btn-unlink-coingecko"
@@ -230,11 +230,11 @@ export default function AssetsPage() {
           {selected ? (
             <div className="mt-4 space-y-3">
               <div
-                className="rounded-lg border border-slate-800 bg-slate-950/40 p-3 text-sm"
+                className="rounded-lg border border-border bg-surface-base p-3 text-sm"
                 data-testid="box-current-mapping"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-400">Current coingeckoId</span>
+                  <span className="text-content-secondary">Current coingeckoId</span>
                   <span className="font-mono" data-testid="txt-current-coingeckoId">
                     {selected.providerRef?.coingeckoId || '—'}
                   </span>
@@ -249,14 +249,14 @@ export default function AssetsPage() {
                 className="flex gap-2 flex-wrap"
               >
                 <input
-                  className="flex-1 min-w-[220px] rounded-lg border border-slate-800 bg-slate-950/40 px-3 py-2 text-sm"
+                  className="flex-1 min-w-[220px] rounded-lg border border-border bg-surface-base px-3 py-2 text-sm"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Search CoinGecko (e.g. bitcoin, ethereum)"
                   data-testid="form-coingecko-search"
                 />
                 <button
-                  className="rounded-lg bg-slate-800 text-slate-100 px-3 py-2 text-sm font-medium hover:bg-slate-700 disabled:opacity-50"
+                  className="rounded-lg bg-surface-raised text-content-primary px-3 py-2 text-sm font-medium hover:bg-surface-overlay disabled:opacity-50"
                   type="submit"
                   disabled={searchLoading || !query.trim()}
                   data-testid="btn-coingecko-search"
@@ -266,7 +266,7 @@ export default function AssetsPage() {
               </form>
 
               <div
-                className="rounded-lg border border-slate-800"
+                className="rounded-lg border border-border"
                 data-testid="list-coingecko-results"
               >
                 {results.length ? (
@@ -274,23 +274,23 @@ export default function AssetsPage() {
                     {results.map((c) => (
                       <div
                         key={c.id}
-                        className="flex items-center justify-between gap-2 border-b border-slate-800 px-3 py-2 text-sm"
+                        className="flex items-center justify-between gap-2 border-b border-border px-3 py-2 text-sm"
                         data-testid={`row-coingecko-${c.id}`}
                       >
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
                             <div className="font-medium truncate">{c.name}</div>
-                            <div className="text-xs text-slate-400 uppercase">{c.symbol}</div>
+                            <div className="text-xs text-content-secondary uppercase">{c.symbol}</div>
                             {typeof c.market_cap_rank === 'number' ? (
-                              <div className="text-[11px] text-slate-400">
+                              <div className="text-[11px] text-content-secondary">
                                 rank #{c.market_cap_rank}
                               </div>
                             ) : null}
                           </div>
-                          <div className="text-xs text-slate-400 font-mono truncate">{c.id}</div>
+                          <div className="text-xs text-content-secondary font-mono truncate">{c.id}</div>
                         </div>
                         <button
-                          className="rounded-lg bg-slate-800 text-slate-100 px-3 py-1.5 text-xs font-medium hover:bg-slate-700 disabled:opacity-50"
+                          className="rounded-lg bg-surface-raised text-content-primary px-3 py-1.5 text-xs font-medium hover:bg-surface-overlay disabled:opacity-50"
                           onClick={() => void linkAsset(c)}
                           disabled={linking}
                           data-testid={`btn-link-coingecko-${c.id}`}
@@ -301,15 +301,15 @@ export default function AssetsPage() {
                     ))}
                   </div>
                 ) : (
-                  <div className="px-3 py-3 text-sm text-slate-400">Search to see results.</div>
+                  <div className="px-3 py-3 text-sm text-content-secondary">Search to see results.</div>
                 )}
               </div>
 
               <div
-                className="rounded-lg border border-slate-800 bg-slate-950/40 p-3 text-xs text-slate-300"
+                className="rounded-lg border border-border bg-surface-base p-3 text-xs text-content-secondary"
                 data-testid="box-asset-mapping-help"
               >
-                <div className="font-semibold text-slate-200">Why this matters</div>
+                <div className="font-semibold text-content-primary">Why this matters</div>
                 <ul className="mt-2 list-disc pl-5 space-y-1">
                   <li>
                     Live prices use CoinGecko IDs. Without mapping, portfolio value may be 0 for
@@ -326,26 +326,26 @@ export default function AssetsPage() {
             <div className="mt-6">
               <div className="text-sm font-medium">Mapped assets</div>
               <div
-                className="mt-2 max-h-[240px] overflow-auto rounded-lg border border-slate-800"
+                className="mt-2 max-h-[240px] overflow-auto rounded-lg border border-border"
                 data-testid="list-mapped-assets"
               >
                 {mapped.slice(0, 200).map((a) => (
                   <div
                     key={a.id}
-                    className="flex items-center justify-between gap-2 border-b border-slate-800 px-3 py-2 text-sm"
+                    className="flex items-center justify-between gap-2 border-b border-border px-3 py-2 text-sm"
                     data-testid={`row-mapped-${a.id}`}
                   >
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <div className="font-medium">{a.symbol || a.name}</div>
-                        <div className="text-xs text-slate-400">{kindLabel(a)}</div>
+                        <div className="text-xs text-content-secondary">{kindLabel(a)}</div>
                       </div>
-                      <div className="text-xs text-slate-400 font-mono truncate">
+                      <div className="text-xs text-content-secondary font-mono truncate">
                         {a.providerRef?.coingeckoId}
                       </div>
                     </div>
                     <button
-                      className="rounded-lg border border-slate-800 px-3 py-1.5 text-xs hover:bg-slate-700/50"
+                      className="rounded-lg border border-border px-3 py-1.5 text-xs hover:bg-surface-overlay/50"
                       onClick={() => setSelectedId(a.id)}
                       data-testid={`btn-edit-mapped-${a.id}`}
                     >
@@ -355,12 +355,12 @@ export default function AssetsPage() {
                 ))}
               </div>
               {mappedCount > 200 ? (
-                <div className="mt-2 text-xs text-slate-400">Showing first 200 mapped assets.</div>
+                <div className="mt-2 text-xs text-content-secondary">Showing first 200 mapped assets.</div>
               ) : null}
             </div>
           ) : null}
 
-          <div className="mt-3 text-xs text-slate-400" data-testid="box-assets-stats">
+          <div className="mt-3 text-xs text-content-secondary" data-testid="box-assets-stats">
             Total assets: {assetsQ.data.length}. Total unmapped: {unmappedCount}.{' '}
             {unmappedCount ? (
               <span>Estimated impact: {unmappedCount} asset(s) missing live prices.</span>

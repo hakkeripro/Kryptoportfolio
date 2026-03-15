@@ -87,13 +87,13 @@ export default function PortfolioSettingsCard({ settings, loading, error, busy, 
 
   return (
     <div
-      className="rounded-xl border border-slate-800 bg-slate-900/40 p-4 space-y-4"
+      className="rounded-xl border border-border bg-surface-raised p-4 space-y-4"
       data-testid="card-portfolio-settings"
     >
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
           <div className="font-medium">Portfolio settings</div>
-          <div className="text-sm text-slate-300">
+          <div className="text-sm text-content-secondary">
             These settings affect imports, lotting and tax calculations. Changing them rebuilds
             derived caches.
           </div>
@@ -102,20 +102,20 @@ export default function PortfolioSettingsCard({ settings, loading, error, busy, 
           data-testid="btn-settings-save-portfolio"
           disabled={busy || loading || !hasDirty}
           onClick={() => void save()}
-          className="rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-60 px-3 py-2 text-sm"
+          className="rounded-lg bg-surface-raised hover:bg-surface-overlay disabled:opacity-60 px-3 py-2 text-sm"
         >
           Save
         </button>
       </div>
 
-      {error ? <div className="text-sm text-rose-300">{String(error)}</div> : null}
+      {error ? <div className="text-sm text-semantic-error">{String(error)}</div> : null}
 
       <div className="grid gap-4 md:grid-cols-2">
         <label className="block">
-          <div className="text-xs text-slate-300">Base currency</div>
+          <div className="text-xs text-content-secondary">Base currency</div>
           <input
             data-testid="form-settings-base-currency"
-            className="mt-1 w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
             value={baseCurrency}
             onChange={(e) => setBaseCurrency(e.target.value.toUpperCase())}
             placeholder="EUR"
@@ -123,10 +123,10 @@ export default function PortfolioSettingsCard({ settings, loading, error, busy, 
         </label>
 
         <label className="block">
-          <div className="text-xs text-slate-300">Lot method default</div>
+          <div className="text-xs text-content-secondary">Lot method default</div>
           <select
             data-testid="form-settings-lot-method-default"
-            className="mt-1 w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
             value={lotMethodDefault}
             onChange={(e) => setLotMethodDefault(e.target.value as LotMethod)}
           >
@@ -138,10 +138,10 @@ export default function PortfolioSettingsCard({ settings, loading, error, busy, 
         </label>
 
         <label className="block">
-          <div className="text-xs text-slate-300">Rewards cost basis</div>
+          <div className="text-xs text-content-secondary">Rewards cost basis</div>
           <select
             data-testid="form-settings-rewards-mode"
-            className="mt-1 w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
             value={rewardsCostBasisMode}
             onChange={(e) => setRewardsCostBasisMode(e.target.value as RewardsCostBasisMode)}
           >
@@ -151,10 +151,10 @@ export default function PortfolioSettingsCard({ settings, loading, error, busy, 
         </label>
 
         <label className="block">
-          <div className="text-xs text-slate-300">Tax profile</div>
+          <div className="text-xs text-content-secondary">Tax profile</div>
           <select
             data-testid="form-settings-tax-profile"
-            className="mt-1 w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
             value={taxProfile}
             onChange={(e) => setTaxProfile(e.target.value)}
           >
@@ -164,10 +164,10 @@ export default function PortfolioSettingsCard({ settings, loading, error, busy, 
         </label>
 
         <label className="block">
-          <div className="text-xs text-slate-300">Price auto-refresh</div>
+          <div className="text-xs text-content-secondary">Price auto-refresh</div>
           <select
             data-testid="form-settings-auto-refresh"
-            className="mt-1 w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
             value={String(autoRefreshIntervalSec)}
             onChange={(e) => setAutoRefreshIntervalSec(Number(e.target.value))}
           >
@@ -181,7 +181,7 @@ export default function PortfolioSettingsCard({ settings, loading, error, busy, 
       </div>
 
       {saveMsg ? (
-        <div data-testid="metric-settings-save-status" className="text-sm text-slate-200">
+        <div data-testid="metric-settings-save-status" className="text-sm text-content-primary">
           {saveMsg}
         </div>
       ) : null}

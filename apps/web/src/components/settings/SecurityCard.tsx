@@ -47,17 +47,17 @@ export default function SecurityCard({ busy, setBusy }: Props) {
 
   return (
     <div
-      className="rounded-xl border border-slate-800 bg-slate-900/40 p-4 space-y-3"
+      className="rounded-xl border border-border bg-surface-raised p-4 space-y-3"
       data-testid="card-security"
     >
       <div className="font-medium">Security</div>
-      <div className="text-sm text-slate-300">
+      <div className="text-sm text-content-secondary">
         Enable a Passkey on this device to unlock without typing your Vault passphrase.
       </div>
-      <div className="flex items-center justify-between gap-3 flex-wrap rounded-lg border border-slate-800 bg-slate-950/30 p-3">
+      <div className="flex items-center justify-between gap-3 flex-wrap rounded-lg border border-border bg-surface-base p-3">
         <div>
           <div className="text-sm font-medium">Passkey unlock (this device)</div>
-          <div className="text-xs text-slate-400">
+          <div className="text-xs text-content-secondary">
             {isPasskeySupported()
               ? hasPasskey
                 ? 'Enabled'
@@ -69,7 +69,7 @@ export default function SecurityCard({ busy, setBusy }: Props) {
           <button
             disabled={busy || !isPasskeySupported() || hasPasskey}
             onClick={() => void enablePasskey()}
-            className="rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-60 px-3 py-2 text-sm"
+            className="rounded-lg bg-surface-raised hover:bg-surface-overlay disabled:opacity-60 px-3 py-2 text-sm"
             data-testid="btn-passkey-enable"
           >
             Enable
@@ -77,14 +77,14 @@ export default function SecurityCard({ busy, setBusy }: Props) {
           <button
             disabled={busy || !hasPasskey}
             onClick={() => void disablePasskey()}
-            className="rounded-lg border border-slate-800 hover:bg-slate-800 disabled:opacity-60 px-3 py-2 text-sm"
+            className="rounded-lg border border-border hover:bg-surface-overlay disabled:opacity-60 px-3 py-2 text-sm"
             data-testid="btn-passkey-disable"
           >
             Remove
           </button>
         </div>
       </div>
-      {passkeyMsg ? <div className="text-sm text-slate-200">{passkeyMsg}</div> : null}
+      {passkeyMsg ? <div className="text-sm text-content-primary">{passkeyMsg}</div> : null}
     </div>
   );
 }

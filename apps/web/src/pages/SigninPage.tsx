@@ -52,7 +52,7 @@ export default function SigninPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm text-slate-400 mb-1">Email</label>
+            <label className="block text-sm text-content-secondary mb-1">Email</label>
             <input
               data-testid="form-email"
               type="email"
@@ -60,12 +60,12 @@ export default function SigninPage() {
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-sm"
+              className="w-full rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
             />
           </div>
 
           <div>
-            <label className="block text-sm text-slate-400 mb-1">Password</label>
+            <label className="block text-sm text-content-secondary mb-1">Password</label>
             <input
               data-testid="form-password"
               type="password"
@@ -73,7 +73,7 @@ export default function SigninPage() {
               autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-sm"
+              className="w-full rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
             />
           </div>
 
@@ -81,19 +81,19 @@ export default function SigninPage() {
             data-testid="btn-signin"
             type="submit"
             disabled={!canSubmit}
-            className="w-full rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 px-4 py-2 text-sm font-medium"
+            className="w-full rounded-lg bg-brand hover:bg-brand-dark disabled:opacity-60 px-4 py-2 text-sm font-medium"
           >
             {busy ? 'Signing in…' : 'Sign in'}
           </button>
 
           {error && (
-            <div data-testid="signin-error" className="text-sm text-rose-300">
+            <div data-testid="signin-error" className="text-sm text-semantic-error">
               {error}
             </div>
           )}
         </form>
 
-        <p className="text-center text-sm text-slate-500">
+        <p className="text-center text-sm text-content-tertiary">
           Don&apos;t have an account?{' '}
           <Link to="/auth/signup" className="text-indigo-400 hover:underline">
             Create account

@@ -31,9 +31,9 @@ export default function SettingsPage() {
     <div className="space-y-6" data-testid="page-settings">
       <h1 className="text-xl font-semibold">Settings</h1>
 
-      <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4 space-y-2">
+      <div className="rounded-xl border border-border bg-surface-raised p-4 space-y-2">
         <div className="font-medium">Account</div>
-        <div className="text-sm text-slate-300">
+        <div className="text-sm text-content-secondary">
           {token ? `Logged in as ${email}` : 'Not logged in'}
         </div>
       </div>

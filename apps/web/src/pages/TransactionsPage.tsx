@@ -7,6 +7,7 @@ import { rebuildDerivedCaches } from '../derived/rebuildDerived';
 import { ensureDefaultSettings } from '../derived/ensureDefaultSettings';
 import { useDbQuery } from '../hooks/useDbQuery';
 import { VirtualList } from '../components/VirtualList';
+import PageHeader from '../components/PageHeader';
 
 function d(s: string | undefined | null): Decimal {
   if (!s) return new Decimal(0);
@@ -291,16 +292,11 @@ export default function TransactionsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-end justify-between flex-wrap gap-3">
-        <h1 className="text-xl font-semibold">Transactions</h1>
-        <div className="text-xs text-slate-400">
-          Ledger is append-only. Edit = replacement. Delete = tombstone (append-only).
-        </div>
-      </div>
+      <PageHeader title="Transactions" />
 
       {msg ? (
         <div
-          className={`rounded-xl border p-3 text-sm ${msg.includes('error') || msg.includes('Invalid') ? 'border-red-800 bg-red-900/30 text-red-200' : 'border-slate-800 bg-slate-900/40 text-slate-200'}`}
+          className={`rounded-xl border p-3 text-sm ${msg.includes('error') || msg.includes('Invalid') ? 'border-red-800 bg-red-900/30 text-red-200' : 'border-border bg-surface-raised text-content-primary'}`}
           data-testid="alert-tx-message"
         >
           {msg}
@@ -308,7 +304,7 @@ export default function TransactionsPage() {
       ) : null}
 
       <div
-        className="rounded-xl border border-slate-800 bg-slate-900/40 p-4"
+        className="rounded-xl border border-border bg-surface-raised p-4"
         data-testid="panel-event-form"
       >
         <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -317,7 +313,7 @@ export default function TransactionsPage() {
           </div>
           {form.mode === 'edit' ? (
             <button
-              className="rounded-lg border border-slate-700 px-3 py-2 text-sm hover:bg-slate-800"
+              className="rounded-lg border border-border px-3 py-2 text-sm hover:bg-surface-raised"
               onClick={resetForm}
               disabled={saving}
               data-testid="btn-cancel-edit"
@@ -329,10 +325,10 @@ export default function TransactionsPage() {
 
         <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3">
           <label className="block">
-            <div className="text-xs text-slate-400">Type</div>
+            <div className="text-xs text-content-secondary">Type</div>
             <select
               data-testid="form-event-type"
-              className="mt-1 w-full rounded-lg bg-slate-950 border border-slate-800 px-2 py-2 text-sm"
+              className="mt-1 w-full rounded-lg bg-surface-base border border-border px-2 py-2 text-sm"
               value={form.type}
               onChange={(e) => setForm((f) => ({ ...f, type: e.target.value as any }))}
               disabled={saving}
@@ -346,10 +342,10 @@ export default function TransactionsPage() {
           </label>
 
           <label className="block">
-            <div className="text-xs text-slate-400">Asset</div>
+            <div className="text-xs text-content-secondary">Asset</div>
             <select
               data-testid="form-event-asset"
-              className="mt-1 w-full rounded-lg bg-slate-950 border border-slate-800 px-2 py-2 text-sm"
+              className="mt-1 w-full rounded-lg bg-surface-base border border-border px-2 py-2 text-sm"
               value={form.assetId}
               onChange={(e) => setForm((f) => ({ ...f, assetId: e.target.value }))}
               disabled={saving}
@@ -363,9 +359,9 @@ export default function TransactionsPage() {
           </label>
 
           <label className="block">
-            <div className="text-xs text-slate-400">Timestamp (UTC ISO)</div>
+            <div className="text-xs text-content-secondary">Timestamp (UTC ISO)</div>
             <input
-              className="mt-1 w-full rounded-lg bg-slate-950 border border-slate-800 px-2 py-2 text-sm"
+              className="mt-1 w-full rounded-lg bg-surface-base border border-border px-2 py-2 text-sm"
               value={form.timestampISO}
               onChange={(e) => setForm((f) => ({ ...f, timestampISO: e.target.value }))}
               disabled={saving}
@@ -373,10 +369,10 @@ export default function TransactionsPage() {
           </label>
 
           <label className="block">
-            <div className="text-xs text-slate-400">Amount</div>
+            <div className="text-xs text-content-secondary">Amount</div>
             <input
               data-testid="form-event-amount"
-              className="mt-1 w-full rounded-lg bg-slate-950 border border-slate-800 px-2 py-2 text-sm font-mono"
+              className="mt-1 w-full rounded-lg bg-surface-base border border-border px-2 py-2 text-sm font-mono"
               value={form.amount}
               onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))}
               disabled={saving}
@@ -384,10 +380,10 @@ export default function TransactionsPage() {
           </label>
 
           <label className="block">
-            <div className="text-xs text-slate-400">Price per unit ({baseCurrency})</div>
+            <div className="text-xs text-content-secondary">Price per unit ({baseCurrency})</div>
             <input
               data-testid="form-event-price"
-              className="mt-1 w-full rounded-lg bg-slate-950 border border-slate-800 px-2 py-2 text-sm font-mono"
+              className="mt-1 w-full rounded-lg bg-surface-base border border-border px-2 py-2 text-sm font-mono"
               value={form.pricePerUnitBase}
               onChange={(e) => setForm((f) => ({ ...f, pricePerUnitBase: e.target.value }))}
               disabled={saving || (form.type !== 'BUY' && form.type !== 'SELL')}
@@ -395,10 +391,10 @@ export default function TransactionsPage() {
           </label>
 
           <label className="block">
-            <div className="text-xs text-slate-400">Fee ({baseCurrency})</div>
+            <div className="text-xs text-content-secondary">Fee ({baseCurrency})</div>
             <input
               data-testid="form-event-fee"
-              className="mt-1 w-full rounded-lg bg-slate-950 border border-slate-800 px-2 py-2 text-sm font-mono"
+              className="mt-1 w-full rounded-lg bg-surface-base border border-border px-2 py-2 text-sm font-mono"
               value={form.feeBase}
               onChange={(e) => setForm((f) => ({ ...f, feeBase: e.target.value }))}
               disabled={saving}
@@ -407,10 +403,10 @@ export default function TransactionsPage() {
           </label>
 
           <label className="block">
-            <div className="text-xs text-slate-400">Fee asset (optional token fee)</div>
+            <div className="text-xs text-content-secondary">Fee asset (optional token fee)</div>
             <select
               data-testid="form-event-fee-asset"
-              className="mt-1 w-full rounded-lg bg-slate-950 border border-slate-800 px-2 py-2 text-sm"
+              className="mt-1 w-full rounded-lg bg-surface-base border border-border px-2 py-2 text-sm"
               value={form.feeAssetId}
               onChange={(e) => setForm((f) => ({ ...f, feeAssetId: e.target.value }))}
               disabled={saving}
@@ -429,20 +425,20 @@ export default function TransactionsPage() {
           {form.feeAssetId !== dbState.data.baseCurrencyAssetId ? (
             <>
               <label className="block">
-                <div className="text-xs text-slate-400">Fee amount (token)</div>
+                <div className="text-xs text-content-secondary">Fee amount (token)</div>
                 <input
                   data-testid="form-event-fee-amount"
-                  className="mt-1 w-full rounded-lg bg-slate-950 border border-slate-800 px-2 py-2 text-sm font-mono"
+                  className="mt-1 w-full rounded-lg bg-surface-base border border-border px-2 py-2 text-sm font-mono"
                   value={form.feeAmount}
                   onChange={(e) => setForm((f) => ({ ...f, feeAmount: e.target.value }))}
                   disabled={saving}
                 />
               </label>
               <label className="block">
-                <div className="text-xs text-slate-400">Fee value ({baseCurrency})</div>
+                <div className="text-xs text-content-secondary">Fee value ({baseCurrency})</div>
                 <input
                   data-testid="form-event-fee-value"
-                  className="mt-1 w-full rounded-lg bg-slate-950 border border-slate-800 px-2 py-2 text-sm font-mono"
+                  className="mt-1 w-full rounded-lg bg-surface-base border border-border px-2 py-2 text-sm font-mono"
                   value={form.feeValueBase}
                   onChange={(e) => setForm((f) => ({ ...f, feeValueBase: e.target.value }))}
                   disabled={saving}
@@ -454,9 +450,9 @@ export default function TransactionsPage() {
           {form.type === 'SWAP' ? (
             <>
               <label className="block">
-                <div className="text-xs text-slate-400">Asset out</div>
+                <div className="text-xs text-content-secondary">Asset out</div>
                 <select
-                  className="mt-1 w-full rounded-lg bg-slate-950 border border-slate-800 px-2 py-2 text-sm"
+                  className="mt-1 w-full rounded-lg bg-surface-base border border-border px-2 py-2 text-sm"
                   value={form.assetOutId}
                   onChange={(e) => setForm((f) => ({ ...f, assetOutId: e.target.value }))}
                   disabled={saving}
@@ -469,18 +465,18 @@ export default function TransactionsPage() {
                 </select>
               </label>
               <label className="block">
-                <div className="text-xs text-slate-400">Amount out</div>
+                <div className="text-xs text-content-secondary">Amount out</div>
                 <input
-                  className="mt-1 w-full rounded-lg bg-slate-950 border border-slate-800 px-2 py-2 text-sm font-mono"
+                  className="mt-1 w-full rounded-lg bg-surface-base border border-border px-2 py-2 text-sm font-mono"
                   value={form.amountOut}
                   onChange={(e) => setForm((f) => ({ ...f, amountOut: e.target.value }))}
                   disabled={saving}
                 />
               </label>
               <label className="block">
-                <div className="text-xs text-slate-400">Valuation total ({baseCurrency})</div>
+                <div className="text-xs text-content-secondary">Valuation total ({baseCurrency})</div>
                 <input
-                  className="mt-1 w-full rounded-lg bg-slate-950 border border-slate-800 px-2 py-2 text-sm font-mono"
+                  className="mt-1 w-full rounded-lg bg-surface-base border border-border px-2 py-2 text-sm font-mono"
                   value={form.valuationBase}
                   onChange={(e) => setForm((f) => ({ ...f, valuationBase: e.target.value }))}
                   disabled={saving}
@@ -490,9 +486,9 @@ export default function TransactionsPage() {
           ) : null}
 
           <label className="block md:col-span-2">
-            <div className="text-xs text-slate-400">External ref (optional)</div>
+            <div className="text-xs text-content-secondary">External ref (optional)</div>
             <input
-              className="mt-1 w-full rounded-lg bg-slate-950 border border-slate-800 px-2 py-2 text-sm"
+              className="mt-1 w-full rounded-lg bg-surface-base border border-border px-2 py-2 text-sm"
               value={form.externalRef}
               onChange={(e) => setForm((f) => ({ ...f, externalRef: e.target.value }))}
               disabled={saving}
@@ -500,9 +496,9 @@ export default function TransactionsPage() {
           </label>
 
           <label className="block md:col-span-3">
-            <div className="text-xs text-slate-400">Notes</div>
+            <div className="text-xs text-content-secondary">Notes</div>
             <input
-              className="mt-1 w-full rounded-lg bg-slate-950 border border-slate-800 px-2 py-2 text-sm"
+              className="mt-1 w-full rounded-lg bg-surface-base border border-border px-2 py-2 text-sm"
               value={form.notes}
               onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
               disabled={saving}
@@ -513,14 +509,14 @@ export default function TransactionsPage() {
         <div className="mt-3 flex gap-2">
           <button
             data-testid="btn-submit-event"
-            className="rounded-lg bg-slate-800 hover:bg-slate-700 px-3 py-2 text-sm disabled:opacity-50"
+            className="rounded-lg bg-surface-raised hover:bg-surface-overlay px-3 py-2 text-sm disabled:opacity-50"
             onClick={() => void submit()}
             disabled={saving}
           >
             {saving ? 'Saving…' : form.mode === 'edit' ? 'Save replacement' : 'Add event'}
           </button>
           <button
-            className="rounded-lg border border-slate-700 px-3 py-2 text-sm hover:bg-slate-800"
+            className="rounded-lg border border-border px-3 py-2 text-sm hover:bg-surface-raised"
             onClick={resetForm}
             disabled={saving}
           >
@@ -530,12 +526,12 @@ export default function TransactionsPage() {
       </div>
 
       <div
-        className="rounded-xl border border-slate-800 bg-slate-900/40 p-4"
+        className="rounded-xl border border-border bg-surface-raised p-4"
         data-testid="panel-ledger"
       >
         <div className="flex items-center justify-between">
           <div className="font-medium">Ledger events</div>
-          <div className="text-xs text-slate-400">{eventsView.length} events</div>
+          <div className="text-xs text-content-secondary">{eventsView.length} events</div>
         </div>
         <div className="mt-3" data-testid="list-ledger">
           {eventsView.length ? (
@@ -543,13 +539,13 @@ export default function TransactionsPage() {
               items={eventsView as any[]}
               itemHeight={116}
               height={620}
-              className="overflow-auto rounded-lg border border-slate-800"
+              className="overflow-auto rounded-lg border border-border"
               getKey={(e: any) => String(e.id)}
               renderItem={(e: any) => {
                 const replacedBy = dbState.data.replacedBy.get(String(e.id));
                 return (
                   <div
-                    className="h-full bg-slate-950/40 px-3 py-3 flex items-start justify-between gap-3 border-b border-slate-800"
+                    className="h-full bg-surface-base/40 px-3 py-3 flex items-start justify-between gap-3 border-b border-border"
                     data-testid={`row-ledger-${e.id}`}
                   >
                     <div className="min-w-0 overflow-hidden">
@@ -559,7 +555,7 @@ export default function TransactionsPage() {
                           {fmt(e.amount)} {e.assetSym}
                         </span>
                         {e.type === 'SWAP' ? (
-                          <span className="text-xs text-slate-400 font-mono truncate">
+                          <span className="text-xs text-content-secondary font-mono truncate">
                             → {fmt((e as any).amountOut)}{' '}
                             {assetsById.get((e as any).assetOutId)?.symbol ?? (e as any).assetOutId}
                           </span>
@@ -574,14 +570,14 @@ export default function TransactionsPage() {
                         ) : null}
                         {replacedBy ? (
                           <span
-                            className="text-xs rounded bg-slate-800 px-2 py-0.5"
+                            className="text-xs rounded bg-surface-raised px-2 py-0.5"
                             data-testid="badge-ledger-replaced"
                           >
                             replaced
                           </span>
                         ) : null}
                       </div>
-                      <div className="mt-1 text-xs text-slate-400 truncate">
+                      <div className="mt-1 text-xs text-content-secondary truncate">
                         {new Date(e.timestampISO).toLocaleString()} • {e.accountName}
                         {e.externalRef ? (
                           <span className="ml-2 font-mono">
@@ -590,7 +586,7 @@ export default function TransactionsPage() {
                         ) : null}
                       </div>
                       {e.feeBase || (e as any).feeAssetId ? (
-                        <div className="mt-1 text-xs text-slate-400 truncate">
+                        <div className="mt-1 text-xs text-content-secondary truncate">
                           feeBase: {fmt((e as any).feeBase)} {baseCurrency}
                           {(e as any).feeAssetId ? (
                             <>
@@ -604,7 +600,7 @@ export default function TransactionsPage() {
                         </div>
                       ) : null}
                       {replacedBy ? (
-                        <div className="mt-1 text-xs text-slate-400 truncate">
+                        <div className="mt-1 text-xs text-content-secondary truncate">
                           Replaced by: {replacedBy}
                         </div>
                       ) : null}
@@ -612,7 +608,7 @@ export default function TransactionsPage() {
                     <div className="flex gap-2">
                       <button
                         data-testid={`btn-details-event-${e.id}`}
-                        className="rounded-lg border border-slate-700 px-3 py-2 text-sm hover:bg-slate-800"
+                        className="rounded-lg border border-border px-3 py-2 text-sm hover:bg-surface-raised"
                         onClick={() => setDetailsId(String(e.id))}
                         disabled={saving}
                       >
@@ -620,7 +616,7 @@ export default function TransactionsPage() {
                       </button>
                       <button
                         data-testid={`btn-edit-event-${e.id}`}
-                        className="rounded-lg border border-slate-700 px-3 py-2 text-sm hover:bg-slate-800"
+                        className="rounded-lg border border-border px-3 py-2 text-sm hover:bg-surface-raised"
                         onClick={() => openEdit(e)}
                         disabled={saving}
                       >
@@ -632,7 +628,7 @@ export default function TransactionsPage() {
               }}
             />
           ) : (
-            <div className="text-sm text-slate-400">
+            <div className="text-sm text-content-secondary">
               No events yet. Import from an exchange or add manually above.
             </div>
           )}
@@ -649,18 +645,18 @@ export default function TransactionsPage() {
             if (e.target === e.currentTarget) setDetailsId(null);
           }}
         >
-          <div className="w-full max-w-2xl rounded-2xl border border-slate-700 bg-slate-950 p-4 shadow-2xl">
+          <div className="w-full max-w-2xl rounded-2xl border border-border bg-surface-base p-4 shadow-2xl">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <div className="text-lg font-semibold truncate">
                   {selectedEvent.type} • {selectedEvent.assetSym}
                 </div>
-                <div className="mt-1 text-xs text-slate-400 font-mono truncate">
+                <div className="mt-1 text-xs text-content-secondary font-mono truncate">
                   {selectedEvent.id}
                 </div>
               </div>
               <button
-                className="rounded-lg border border-slate-700 px-3 py-2 text-sm hover:bg-slate-800"
+                className="rounded-lg border border-border px-3 py-2 text-sm hover:bg-surface-raised"
                 onClick={() => setDetailsId(null)}
                 data-testid="btn-close-ledger-drawer"
               >
@@ -670,24 +666,24 @@ export default function TransactionsPage() {
 
             <div className="mt-3 grid gap-2 text-sm">
               <div className="flex items-center justify-between">
-                <span className="text-slate-400">Time</span>
+                <span className="text-content-secondary">Time</span>
                 <span className="font-mono">
                   {new Date(selectedEvent.timestampISO).toLocaleString()}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-400">Account</span>
+                <span className="text-content-secondary">Account</span>
                 <span className="font-mono">{selectedEvent.accountName}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-400">Amount</span>
+                <span className="text-content-secondary">Amount</span>
                 <span className="font-mono">
                   {fmt(selectedEvent.amount)} {selectedEvent.assetSym}
                 </span>
               </div>
               {(selectedEvent as any).assetOutId ? (
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-400">Swap out</span>
+                  <span className="text-content-secondary">Swap out</span>
                   <span className="font-mono">
                     {fmt((selectedEvent as any).amountOut)}{' '}
                     {assetsById.get((selectedEvent as any).assetOutId)?.symbol ??
@@ -697,7 +693,7 @@ export default function TransactionsPage() {
               ) : null}
               {(selectedEvent as any).feeBase || (selectedEvent as any).feeAssetId ? (
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-400">Fee</span>
+                  <span className="text-content-secondary">Fee</span>
                   <span className="font-mono">
                     {fmt((selectedEvent as any).feeBase)} {baseCurrency}
                     {(selectedEvent as any).feeAssetId
@@ -708,13 +704,13 @@ export default function TransactionsPage() {
               ) : null}
               {selectedEvent.externalRef ? (
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-400">External ref</span>
+                  <span className="text-content-secondary">External ref</span>
                   <span className="font-mono">{String(selectedEvent.externalRef)}</span>
                 </div>
               ) : null}
               {selectedEvent.notes ? (
                 <div
-                  className="rounded-lg border border-slate-800 bg-slate-900/40 p-2 text-xs"
+                  className="rounded-lg border border-border bg-surface-raised p-2 text-xs"
                   data-testid="box-ledger-notes"
                 >
                   {String(selectedEvent.notes)}
@@ -724,7 +720,7 @@ export default function TransactionsPage() {
 
             <div className="mt-4 flex gap-2">
               <button
-                className="rounded-lg bg-slate-800 hover:bg-slate-700 px-3 py-2 text-sm disabled:opacity-50"
+                className="rounded-lg bg-surface-raised hover:bg-surface-overlay px-3 py-2 text-sm disabled:opacity-50"
                 onClick={() => {
                   openEdit(selectedEvent);
                   setDetailsId(null);
@@ -745,13 +741,13 @@ export default function TransactionsPage() {
             </div>
 
             <details
-              className="mt-4 rounded-xl border border-slate-800 bg-slate-900/40 p-3"
+              className="mt-4 rounded-xl border border-border bg-surface-raised p-3"
               data-testid="details-ledger-raw"
             >
-              <summary className="cursor-pointer select-none text-sm text-slate-200">
+              <summary className="cursor-pointer select-none text-sm text-content-primary">
                 Raw event JSON
               </summary>
-              <pre className="mt-2 max-h-[260px] overflow-auto text-xs text-slate-200">
+              <pre className="mt-2 max-h-[260px] overflow-auto text-xs text-content-primary">
                 {JSON.stringify(selectedEvent, null, 2)}
               </pre>
             </details>

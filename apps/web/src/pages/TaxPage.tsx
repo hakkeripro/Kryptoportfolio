@@ -5,6 +5,7 @@ import { generateTaxYearReport } from '@kp/core';
 import { ensureWebDbOpen } from '@kp/platform-web';
 import { useDbQuery } from '../hooks/useDbQuery';
 import { ensureDefaultSettings } from '../derived/ensureDefaultSettings';
+import PageHeader from '../components/PageHeader';
 
 function d(s: string | undefined | null): Decimal {
   if (!s) return new Decimal(0);
@@ -302,18 +303,15 @@ export default function TaxPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3 flex-wrap">
-        <h1 className="text-xl font-semibold">Tax</h1>
-        <div className="text-xs text-slate-300">Not tax advice. Calculation tool only.</div>
-      </div>
+      <PageHeader title="Taxes" />
 
-      <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
+      <div className="rounded-xl border border-border bg-surface-raised p-4">
         <div className="flex items-end gap-3 flex-wrap">
           <label className="text-sm">
-            <div className="text-xs text-slate-300 mb-1">Tax year</div>
+            <div className="text-xs text-content-secondary mb-1">Tax year</div>
             <select
               data-testid="form-tax-year"
-              className="rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-sm"
+              className="rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
               value={year}
               onChange={(e) => setYear(Number(e.target.value))}
             >
@@ -326,10 +324,10 @@ export default function TaxPage() {
           </label>
 
           <label className="text-sm">
-            <div className="text-xs text-slate-300 mb-1">Tax profile</div>
+            <div className="text-xs text-content-secondary mb-1">Tax profile</div>
             <select
               data-testid="form-tax-profile"
-              className="rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-sm"
+              className="rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
               value={taxProfileOverride}
               onChange={(e) => setTaxProfileOverride(e.target.value as any)}
             >
@@ -339,10 +337,10 @@ export default function TaxPage() {
           </label>
 
           <label className="text-sm">
-            <div className="text-xs text-slate-300 mb-1">Lot method</div>
+            <div className="text-xs text-content-secondary mb-1">Lot method</div>
             <select
               data-testid="form-tax-lot-method"
-              className="rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-sm"
+              className="rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
               value={taxProfileOverride === 'FINLAND' ? 'FIFO' : lotMethodOverride}
               disabled={taxProfileOverride === 'FINLAND'}
               onChange={(e) => setLotMethodOverride(e.target.value as any)}
@@ -357,7 +355,7 @@ export default function TaxPage() {
           <button
             data-testid="btn-tax-generate"
             onClick={() => void generate()}
-            className="rounded-lg bg-emerald-600 hover:bg-emerald-500 px-3 py-2 text-sm font-medium"
+            className="rounded-lg bg-brand hover:bg-brand-dark px-3 py-2 text-sm font-medium"
           >
             Generate
           </button>
@@ -366,7 +364,7 @@ export default function TaxPage() {
             data-testid="btn-tax-export-csv"
             onClick={exportCsv}
             disabled={!report}
-            className="rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-50 px-3 py-2 text-sm"
+            className="rounded-lg bg-surface-raised hover:bg-surface-overlay disabled:opacity-50 px-3 py-2 text-sm"
           >
             Export CSV
           </button>
@@ -375,47 +373,47 @@ export default function TaxPage() {
             data-testid="btn-tax-export-pdf"
             onClick={exportPdf}
             disabled={!report}
-            className="rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-50 px-3 py-2 text-sm"
+            className="rounded-lg bg-surface-raised hover:bg-surface-overlay disabled:opacity-50 px-3 py-2 text-sm"
           >
             Export PDF
           </button>
 
-          <div className="ml-auto text-xs text-slate-300">
+          <div className="ml-auto text-xs text-content-secondary">
             Base currency: <span className="font-semibold">{baseCurrency}</span>
           </div>
         </div>
 
-        {msg ? <div className="mt-3 text-sm text-rose-300">{msg}</div> : null}
+        {msg ? <div className="mt-3 text-sm text-semantic-error">{msg}</div> : null}
       </div>
 
       {report ? (
         <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
-          <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
-            <div className="text-xs text-slate-300">Realized gain</div>
+          <div className="rounded-xl border border-border bg-surface-raised p-4">
+            <div className="text-xs text-content-secondary">Realized gain</div>
             <div className="text-lg font-semibold">
               {fmtMoney(report.totals.realizedGainBase, report.baseCurrency)}
             </div>
           </div>
-          <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
-            <div className="text-xs text-slate-300">Proceeds</div>
+          <div className="rounded-xl border border-border bg-surface-raised p-4">
+            <div className="text-xs text-content-secondary">Proceeds</div>
             <div className="text-lg font-semibold">
               {fmtMoney(report.totals.proceedsBase, report.baseCurrency)}
             </div>
           </div>
-          <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
-            <div className="text-xs text-slate-300">Cost basis</div>
+          <div className="rounded-xl border border-border bg-surface-raised p-4">
+            <div className="text-xs text-content-secondary">Cost basis</div>
             <div className="text-lg font-semibold">
               {fmtMoney(report.totals.costBasisBase, report.baseCurrency)}
             </div>
           </div>
-          <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
-            <div className="text-xs text-slate-300">Fees</div>
+          <div className="rounded-xl border border-border bg-surface-raised p-4">
+            <div className="text-xs text-content-secondary">Fees</div>
             <div className="text-lg font-semibold">
               {fmtMoney(report.totals.feesBase, report.baseCurrency)}
             </div>
           </div>
-          <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
-            <div className="text-xs text-slate-300">Income</div>
+          <div className="rounded-xl border border-border bg-surface-raised p-4">
+            <div className="text-xs text-content-secondary">Income</div>
             <div className="text-lg font-semibold">
               {fmtMoney(report.totals.incomeBase, report.baseCurrency)}
             </div>
@@ -423,11 +421,11 @@ export default function TaxPage() {
         </div>
       ) : null}
 
-      <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
+      <div className="rounded-xl border border-border bg-surface-raised p-4">
         <div className="flex items-center gap-2">
           <h2 className="text-lg font-semibold">Realized disposals</h2>
           {report ? (
-            <div className="text-xs text-slate-300">
+            <div className="text-xs text-content-secondary">
               Profile: <span className="font-semibold">{report.taxProfile}</span> • Lot:{' '}
               <span className="font-semibold">{report.lotMethodUsed}</span>
             </div>
@@ -436,8 +434,8 @@ export default function TaxPage() {
 
         <div data-testid="list-tax-disposals" className="mt-3 overflow-auto">
           <table className="min-w-full text-sm">
-            <thead className="text-slate-300">
-              <tr className="border-b border-slate-800">
+            <thead className="text-content-secondary">
+              <tr className="border-b border-border">
                 <th className="text-left py-2 pr-3">Date (UTC)</th>
                 <th className="text-left py-2 pr-3">Asset</th>
                 <th className="text-right py-2 pl-3">Amount</th>
@@ -455,7 +453,7 @@ export default function TaxPage() {
                   <tr
                     key={r.eventId}
                     data-testid={`row-tax-disposal-${r.eventId}`}
-                    className="border-b border-slate-900 hover:bg-slate-950/40"
+                    className="border-b border-border-subtle hover:bg-surface-base/40"
                   >
                     <td className="py-2 pr-3 whitespace-nowrap">{r.disposedAtISO}</td>
                     <td className="py-2 pr-3">{sym}</td>
@@ -470,7 +468,7 @@ export default function TaxPage() {
                       {fmtMoney(r.feeBase, report?.baseCurrency ?? 'EUR')}
                     </td>
                     <td
-                      className={`py-2 pl-3 text-right ${gain.gte(0) ? 'text-emerald-300' : 'text-rose-300'}`}
+                      className={`py-2 pl-3 text-right ${gain.gte(0) ? 'text-semantic-success' : 'text-semantic-error'}`}
                     >
                       {fmtMoney(r.realizedGainBase, report?.baseCurrency ?? 'EUR')}
                     </td>
@@ -479,14 +477,14 @@ export default function TaxPage() {
               })}
               {!report ? (
                 <tr>
-                  <td colSpan={7} className="py-3 text-slate-300">
+                  <td colSpan={7} className="py-3 text-content-secondary">
                     Generate a report to see disposals for the selected year.
                   </td>
                 </tr>
               ) : null}
               {report && report.disposals.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-3 text-slate-300">
+                  <td colSpan={7} className="py-3 text-content-secondary">
                     No taxable disposals found for {report.year}.
                   </td>
                 </tr>
@@ -498,12 +496,12 @@ export default function TaxPage() {
 
       {report ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
+          <div className="rounded-xl border border-border bg-surface-raised p-4">
             <h2 className="text-lg font-semibold">Income (rewards/airdrops)</h2>
             <div className="mt-3 overflow-auto">
               <table className="min-w-full text-sm">
-                <thead className="text-slate-300">
-                  <tr className="border-b border-slate-800">
+                <thead className="text-content-secondary">
+                  <tr className="border-b border-border">
                     <th className="text-left py-2 pr-3">Date</th>
                     <th className="text-left py-2 pr-3">Type</th>
                     <th className="text-left py-2 pr-3">Asset</th>
@@ -517,7 +515,7 @@ export default function TaxPage() {
                     return (
                       <tr
                         key={r.eventId}
-                        className="border-b border-slate-900 hover:bg-slate-950/40"
+                        className="border-b border-border-subtle hover:bg-surface-base/40"
                       >
                         <td className="py-2 pr-3 whitespace-nowrap">{r.timestampISO}</td>
                         <td className="py-2 pr-3">{r.type}</td>
@@ -531,7 +529,7 @@ export default function TaxPage() {
                   })}
                   {report.income.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="py-3 text-slate-300">
+                      <td colSpan={5} className="py-3 text-content-secondary">
                         No reward/airdrop income events in {report.year}.
                       </td>
                     </tr>
@@ -541,12 +539,12 @@ export default function TaxPage() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
+          <div className="rounded-xl border border-border bg-surface-raised p-4">
             <h2 className="text-lg font-semibold">Year-end holdings</h2>
             <div className="mt-3 overflow-auto">
               <table className="min-w-full text-sm">
-                <thead className="text-slate-300">
-                  <tr className="border-b border-slate-800">
+                <thead className="text-content-secondary">
+                  <tr className="border-b border-border">
                     <th className="text-left py-2 pr-3">Asset</th>
                     <th className="text-right py-2 pl-3">Amount</th>
                     <th className="text-right py-2 pl-3">Cost basis</th>
@@ -558,7 +556,7 @@ export default function TaxPage() {
                     return (
                       <tr
                         key={h.assetId}
-                        className="border-b border-slate-900 hover:bg-slate-950/40"
+                        className="border-b border-border-subtle hover:bg-surface-base/40"
                       >
                         <td className="py-2 pr-3">{sym}</td>
                         <td className="py-2 pl-3 text-right">{h.amount}</td>
@@ -570,7 +568,7 @@ export default function TaxPage() {
                   })}
                   {report.yearEndHoldings.length === 0 ? (
                     <tr>
-                      <td colSpan={3} className="py-3 text-slate-300">
+                      <td colSpan={3} className="py-3 text-content-secondary">
                         No holdings at the end of {report.year}.
                       </td>
                     </tr>
@@ -583,7 +581,7 @@ export default function TaxPage() {
       ) : null}
 
       {report?.warnings?.length ? (
-        <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
+        <div className="rounded-xl border border-border bg-surface-raised p-4">
           <h2 className="text-lg font-semibold">Warnings</h2>
           <ul className="mt-2 list-disc pl-5 text-sm text-amber-200">
             {report.warnings.map((w) => (

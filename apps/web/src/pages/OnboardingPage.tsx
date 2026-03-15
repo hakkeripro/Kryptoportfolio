@@ -102,26 +102,26 @@ export default function OnboardingPage() {
     <div className="space-y-6">
       <h1 className="text-xl font-semibold">Onboarding</h1>
 
-      <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4 space-y-3">
+      <div className="rounded-xl border border-border bg-surface-raised p-4 space-y-3">
         <div className="flex items-center gap-2">
           <div className="font-medium">Vault / App lock</div>
           {status === 'locked' && (
-            <span data-testid="badge-locked" className="text-xs rounded bg-slate-800 px-2 py-1">
+            <span data-testid="badge-locked" className="text-xs rounded bg-surface-raised px-2 py-1">
               Locked
             </span>
           )}
           {status === 'unlocked' && (
-            <span data-testid="badge-unlocked" className="text-xs rounded bg-slate-800 px-2 py-1">
+            <span data-testid="badge-unlocked" className="text-xs rounded bg-surface-raised px-2 py-1">
               Unlocked
             </span>
           )}
         </div>
 
         {status === 'loading' ? (
-          <div className="text-sm text-slate-300">Loading…</div>
+          <div className="text-sm text-content-secondary">Loading…</div>
         ) : !vaultSetup ? (
           <div className="space-y-3">
-            <p className="text-sm text-slate-300">
+            <p className="text-sm text-content-secondary">
               Luo passphrase. Huom: E2E-synkka on zero-knowledge — jos unohdat passphrasen, dataa ei
               voi palauttaa.
             </p>
@@ -130,7 +130,7 @@ export default function OnboardingPage() {
                 data-testid="form-vault-passphrase"
                 type="password"
                 placeholder="Passphrase"
-                className="rounded-lg bg-slate-950 border border-slate-800 px-3 py-2"
+                className="rounded-lg bg-surface-base border border-border px-3 py-2"
                 value={vaultPass}
                 onChange={(e) => setVaultPass(e.target.value)}
               />
@@ -138,7 +138,7 @@ export default function OnboardingPage() {
                 data-testid="form-vault-passphrase-confirm"
                 type="password"
                 placeholder="Confirm passphrase"
-                className="rounded-lg bg-slate-950 border border-slate-800 px-3 py-2"
+                className="rounded-lg bg-surface-base border border-border px-3 py-2"
                 value={vaultPass2}
                 onChange={(e) => setVaultPass2(e.target.value)}
               />
@@ -146,22 +146,22 @@ export default function OnboardingPage() {
                 data-testid="btn-create-vault"
                 disabled={vaultBusy}
                 onClick={handleSetup}
-                className="rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 px-3 py-2 text-sm font-medium"
+                className="rounded-lg bg-brand hover:bg-brand-dark disabled:opacity-60 px-3 py-2 text-sm font-medium"
               >
                 Create vault
               </button>
-              {vaultError && <div className="text-sm text-rose-300">{vaultError}</div>}
+              {vaultError && <div className="text-sm text-semantic-error">{vaultError}</div>}
             </div>
           </div>
         ) : (
           <div className="space-y-3">
-            <p className="text-sm text-slate-300">Syötä passphrase avataksesi sovelluksen.</p>
+            <p className="text-sm text-content-secondary">Syötä passphrase avataksesi sovelluksen.</p>
             <div className="grid gap-2 max-w-md">
               <input
                 data-testid="form-vault-passphrase"
                 type="password"
                 placeholder="Passphrase"
-                className="rounded-lg bg-slate-950 border border-slate-800 px-3 py-2"
+                className="rounded-lg bg-surface-base border border-border px-3 py-2"
                 value={vaultPass}
                 onChange={(e) => setVaultPass(e.target.value)}
               />
@@ -173,32 +173,32 @@ export default function OnboardingPage() {
               >
                 Unlock
               </button>
-              {vaultError && <div className="text-sm text-rose-300">{vaultError}</div>}
+              {vaultError && <div className="text-sm text-semantic-error">{vaultError}</div>}
             </div>
           </div>
         )}
       </div>
 
-      <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4 space-y-3">
+      <div className="rounded-xl border border-border bg-surface-raised p-4 space-y-3">
         <div className="font-medium">API</div>
         <div className="grid gap-2 max-w-md">
           <input
             data-testid="form-api-base"
             value={apiBase}
             onChange={(e) => setApiBase(e.target.value)}
-            className="rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-sm"
+            className="rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
             placeholder="http://localhost:8788"
           />
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4 space-y-3">
+      <div className="rounded-xl border border-border bg-surface-raised p-4 space-y-3">
         <div className="flex items-center gap-3">
           <div className="font-medium">Login + Sync</div>
           {token ? (
-            <span className="text-xs rounded bg-slate-800 px-2 py-1">Logged in: {email}</span>
+            <span className="text-xs rounded bg-surface-raised px-2 py-1">Logged in: {email}</span>
           ) : (
-            <span className="text-xs rounded bg-slate-800 px-2 py-1">Not logged in</span>
+            <span className="text-xs rounded bg-surface-raised px-2 py-1">Not logged in</span>
           )}
         </div>
 
@@ -207,7 +207,7 @@ export default function OnboardingPage() {
             data-testid="form-auth-email"
             value={authEmail}
             onChange={(e) => setAuthEmail(e.target.value)}
-            className="rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-sm"
+            className="rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
             placeholder="Email"
           />
           <input
@@ -215,7 +215,7 @@ export default function OnboardingPage() {
             type="password"
             value={authPass}
             onChange={(e) => setAuthPass(e.target.value)}
-            className="rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-sm"
+            className="rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
             placeholder="Password"
           />
           <div className="flex gap-2">
@@ -237,7 +237,7 @@ export default function OnboardingPage() {
             </button>
           </div>
           {authError && (
-            <div data-testid="auth-error" className="text-sm text-rose-300">
+            <div data-testid="auth-error" className="text-sm text-semantic-error">
               {authError}
             </div>
           )}
@@ -247,7 +247,7 @@ export default function OnboardingPage() {
           <button
             data-testid="btn-finish-onboarding"
             onClick={() => nav(from ?? '/dashboard')}
-            className="rounded-lg bg-slate-800 hover:bg-slate-700 px-3 py-2 text-sm"
+            className="rounded-lg bg-surface-raised hover:bg-surface-overlay px-3 py-2 text-sm"
           >
             Continue
           </button>

@@ -25,7 +25,7 @@ export default function SyncCard({ busy, setBusy }: Props) {
 
   return (
     <div
-      className="rounded-xl border border-slate-800 bg-slate-900/40 p-4 space-y-3"
+      className="rounded-xl border border-border bg-surface-raised p-4 space-y-3"
       data-testid="card-sync"
     >
       <div className="font-medium">Sync</div>
@@ -33,12 +33,12 @@ export default function SyncCard({ busy, setBusy }: Props) {
         data-testid="btn-sync-now"
         disabled={busy}
         onClick={() => void doSync()}
-        className="rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-60 px-3 py-2 text-sm"
+        className="rounded-lg bg-surface-raised hover:bg-surface-overlay disabled:opacity-60 px-3 py-2 text-sm"
       >
         Sync now
       </button>
       {syncMsg ? (
-        <div data-testid="metric-sync-status" className="text-sm text-slate-200">
+        <div data-testid="metric-sync-status" className="text-sm text-content-primary">
           {syncMsg}
         </div>
       ) : null}

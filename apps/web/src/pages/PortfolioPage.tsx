@@ -1,7 +1,10 @@
 import { useMemo, useState } from 'react';
 import Decimal from 'decimal.js';
+import { PieChart } from 'lucide-react';
 import { usePortfolioData } from '../hooks/usePortfolioData';
 import TokenDetailDrawer from '../components/TokenDetailDrawer';
+import PageHeader from '../components/PageHeader';
+import { Card, Select, EmptyState, TokenIcon } from '../components/ui';
 
 function d(s: string | undefined | null): Decimal {
   if (!s) return new Decimal(0);
@@ -37,7 +40,6 @@ export default function PortfolioPage() {
   const positions = useMemo(() => {
     const latest = dbState.data.latest;
     if (!latest?.positions?.length) return [];
-
     const out = [...latest.positions];
     if (sort === 'name') {
       out.sort((a, b) =>
@@ -60,66 +62,57 @@ export default function PortfolioPage() {
   }, [dbState.data.latest, selectedAssetId]);
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-end justify-between flex-wrap gap-3">
-        <h1 className="text-xl font-semibold">Portfolio</h1>
-        <div className="text-xs text-slate-400">
-          Holdings are derived from the append-only ledger.
+    <div className="space-y-section">
+      <PageHeader title="Portfolio" />
+
+      {/* Filters */}
+      <div className="flex gap-3 items-end flex-wrap">
+        <div className="w-44">
+          <Select data-testid="filter-account" value={accountFilter} onChange={(e) => setAccountFilter(e.target.value)}>
+            <option value="all">All accounts</option>
+            {accounts.map((a) => (<option key={a.id} value={a.id}>{a.name}</option>))}
+          </Select>
+        </div>
+        <div className="w-36">
+          <Select data-testid="sort-positions" value={sort} onChange={(e) => setSort(e.target.value as 'value' | 'name')}>
+            <option value="value">Sort: Value</option>
+            <option value="name">Sort: Name</option>
+          </Select>
         </div>
       </div>
 
-      <div className="flex gap-2 items-center flex-wrap">
-        <select
-          data-testid="filter-account"
-          className="rounded-lg bg-slate-950 border border-slate-800 px-2 py-2 text-sm"
-          value={accountFilter}
-          onChange={(e) => setAccountFilter(e.target.value)}
-        >
-          <option value="all">All accounts</option>
-          {accounts.map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.name}
-            </option>
-          ))}
-        </select>
-        <select
-          data-testid="sort-positions"
-          className="rounded-lg bg-slate-950 border border-slate-800 px-2 py-2 text-sm"
-          value={sort}
-          onChange={(e) => setSort(e.target.value as 'value' | 'name')}
-        >
-          <option value="value">Sort: Value</option>
-          <option value="name">Sort: Name</option>
-        </select>
-      </div>
-
-      <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
+      {/* Holdings */}
+      <Card>
         <div data-testid="list-positions">
           {positions.length ? (
-            <ul className="divide-y divide-slate-800">
+            <ul className="divide-y divide-border">
               {positions.map((p) => {
                 const a = assetsById.get(p.assetId);
                 const sym = a?.symbol ?? p.assetId;
+                const pnl = d(p.unrealizedPnlBase);
                 return (
                   <li
                     key={p.assetId}
-                    className="py-3 flex items-center justify-between gap-3 hover:bg-slate-900/30 rounded-lg px-2 -mx-2 cursor-pointer"
+                    className="py-3 flex items-center justify-between gap-3 hover:bg-surface-overlay/50 rounded-button px-2 -mx-2 cursor-pointer transition-colors"
                     onClick={() => setSelectedAssetId(p.assetId)}
                     data-testid={`row-position-${p.assetId}`}
                   >
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <div className="text-sm font-semibold">{sym}</div>
-                        <div className="text-xs text-slate-400 truncate">{a?.name ?? ''}</div>
-                      </div>
-                      <div className="text-xs text-slate-400 font-mono">
-                        {fmtQty(p.amount)} • cost {fmtMoney(p.costBasisBase, baseCurrency)}
+                    <div className="flex items-center gap-3 min-w-0">
+                      <TokenIcon symbol={sym} iconUrl={a?.iconUrl} size="md" />
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-body font-semibold text-content-primary">{sym}</span>
+                          <span className="text-caption text-content-tertiary truncate">{a?.name ?? ''}</span>
+                        </div>
+                        <div className="text-caption text-content-secondary font-mono">
+                          {fmtQty(p.amount)} · cost {fmtMoney(p.costBasisBase, baseCurrency)}
+                        </div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="text-sm font-mono">{fmtMoney(p.valueBase, baseCurrency)}</div>
-                      <div className="text-xs font-mono text-slate-400">
-                        unrealized {fmtMoney(p.unrealizedPnlBase, baseCurrency)}
+                    <div className="text-right shrink-0">
+                      <div className="text-body font-mono text-content-primary">{fmtMoney(p.valueBase, baseCurrency)}</div>
+                      <div className={`text-caption font-mono ${pnl.isPositive() ? 'text-semantic-success' : pnl.isNegative() ? 'text-semantic-error' : 'text-content-tertiary'}`}>
+                        {pnl.isPositive() ? '+' : ''}{fmtMoney(p.unrealizedPnlBase, baseCurrency)}
                       </div>
                     </div>
                   </li>
@@ -127,14 +120,18 @@ export default function PortfolioPage() {
               })}
             </ul>
           ) : (
-            <div className="text-slate-300">
-              No positions yet. Import exchange history to populate holdings.
-            </div>
+            <EmptyState
+              icon={<PieChart className="h-10 w-10" />}
+              title="No holdings yet"
+              description="Import transactions to see your portfolio."
+              actionLabel="Import"
+              onAction={() => window.location.assign('/transactions/import')}
+            />
           )}
         </div>
-      </div>
+      </Card>
 
-      {selectedAssetId ? (
+      {selectedAssetId && (
         <TokenDetailDrawer
           assetId={selectedAssetId}
           assetsById={assetsById}
@@ -144,7 +141,7 @@ export default function PortfolioPage() {
           settings={dbState.data.settings}
           onClose={() => setSelectedAssetId(null)}
         />
-      ) : null}
+      )}
     </div>
   );
 }

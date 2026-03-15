@@ -139,19 +139,19 @@ export default function NotificationsCard({
 
   return (
     <div
-      className="rounded-xl border border-slate-800 bg-slate-900/40 p-4 space-y-3"
+      className="rounded-xl border border-border bg-surface-raised p-4 space-y-3"
       data-testid="card-notifications"
     >
       <div className="font-medium">Notifications</div>
 
       <div
-        className="rounded-lg border border-slate-800 bg-slate-950/30 p-3 space-y-2"
+        className="rounded-lg border border-border bg-surface-base p-3 space-y-2"
         data-testid="card-server-alerts"
       >
         <div className="flex items-center justify-between">
           <div>
             <div className="text-sm font-medium">Server alerts</div>
-            <div className="text-xs text-slate-400">
+            <div className="text-xs text-content-secondary">
               Push notifications even when the app is closed.
             </div>
           </div>
@@ -167,15 +167,15 @@ export default function NotificationsCard({
           </label>
         </div>
 
-        <div className="grid gap-1 text-xs text-slate-300" data-testid="box-server-alerts-status">
+        <div className="grid gap-1 text-xs text-content-secondary" data-testid="box-server-alerts-status">
           <div className="flex items-center justify-between">
-            <span className="text-slate-400">Enabled rules</span>
+            <span className="text-content-secondary">Enabled rules</span>
             <span className="font-mono">
               {serverStatus ? `${serverStatus.enabled}/${serverStatus.total}` : '—'}
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-slate-400">Mirror updated</span>
+            <span className="text-content-secondary">Mirror updated</span>
             <span className="font-mono">
               {serverStatus?.mirrorUpdatedAtISO
                 ? new Date(serverStatus.mirrorUpdatedAtISO).toLocaleString()
@@ -188,7 +188,7 @@ export default function NotificationsCard({
           <button
             disabled={busy}
             onClick={() => void refreshServerStatus()}
-            className="rounded-lg border border-slate-800 hover:bg-slate-800 disabled:opacity-60 px-3 py-2 text-sm"
+            className="rounded-lg border border-border hover:bg-surface-overlay disabled:opacity-60 px-3 py-2 text-sm"
             data-testid="btn-refresh-server-alerts-status"
           >
             Refresh status
@@ -204,17 +204,17 @@ export default function NotificationsCard({
         </div>
 
         {serverMsg ? (
-          <div className="text-sm text-slate-200" data-testid="txt-server-alerts-message">
+          <div className="text-sm text-content-primary" data-testid="txt-server-alerts-message">
             {serverMsg}
           </div>
         ) : null}
       </div>
 
-      <div className="rounded-lg border border-slate-800 bg-slate-950/30 p-3 space-y-2">
+      <div className="rounded-lg border border-border bg-surface-base p-3 space-y-2">
         <div className="flex items-center justify-between">
           <div>
             <div className="text-sm font-medium">Device push</div>
-            <div className="text-xs text-slate-400">
+            <div className="text-xs text-content-secondary">
               Per-device permission (browser). Managed in Alerts page.
             </div>
           </div>
@@ -229,7 +229,7 @@ export default function NotificationsCard({
             {devicePushEnabledLocal ? 'On' : 'Off'}
           </label>
         </div>
-        <div className="text-xs text-slate-400">
+        <div className="text-xs text-content-secondary">
           Go to <span className="font-medium">Alerts</span> to enable push notifications for this
           device.
         </div>
