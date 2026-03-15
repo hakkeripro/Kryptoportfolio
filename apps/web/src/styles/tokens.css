@@ -1,0 +1,43 @@
+/* VaultFolio Design Tokens — "Obsidian" dark theme */
+
+:root {
+  /* Brand */
+  --color-brand: #10b981;
+  --color-brand-light: #34d399;
+  --color-brand-dark: #059669;
+
+  /* Surfaces */
+  --color-surface-base: #0a0f1a;
+  --color-surface-raised: rgba(15, 23, 42, 0.6);
+  --color-surface-overlay: rgba(15, 23, 42, 0.95);
+
+  /* Borders */
+  --color-border: #1e293b;
+  --color-border-subtle: rgba(30, 41, 59, 0.5);
+
+  /* Content */
+  --color-content-primary: #f1f5f9;
+  --color-content-secondary: #94a3b8;
+  --color-content-tertiary: #64748b;
+  --color-content-inverse: #0a0f1a;
+
+  /* Semantic */
+  --color-semantic-success: #10b981;
+  --color-semantic-warning: #f59e0b;
+  --color-semantic-error: #ef4444;
+  --color-semantic-info: #3b82f6;
+}
+
+/* Animations */
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.2s ease-out;
+}

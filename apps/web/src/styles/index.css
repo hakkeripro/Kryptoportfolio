@@ -1,3 +1,5 @@
+@import './tokens.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,26 +9,32 @@
 }
 
 body {
-  @apply bg-slate-950 text-slate-100;
+  background-color: var(--color-surface-base);
+  color: var(--color-content-primary);
+  font-family: Inter, system-ui, sans-serif;
 }
 
 a {
-  @apply text-slate-200 hover:text-white;
+  color: var(--color-content-secondary);
 }
-
+a:hover {
+  color: var(--color-content-primary);
+}
 
 @layer base {
   input, textarea, select {
-    @apply border border-slate-800 bg-slate-950/40 text-slate-100;
+    border: 1px solid var(--color-border);
+    background-color: rgba(10, 15, 26, 0.4);
+    color: var(--color-content-primary);
+    border-radius: 0.5rem;
   }
 
   input::placeholder, textarea::placeholder {
-    @apply text-slate-500;
+    color: var(--color-content-tertiary);
   }
 
-  /* On dark theme, ensure native <select> options are readable (Windows/Chrome can render white-on-white otherwise). */
   select option {
-    background-color: #020617; /* slate-950 */
-    color: #f1f5f9; /* slate-100 */
+    background-color: var(--color-surface-base);
+    color: var(--color-content-primary);
   }
 }
