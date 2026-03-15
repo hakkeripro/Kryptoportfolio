@@ -177,7 +177,7 @@ export default function OnboardingPage() {
                 data-testid="btn-unlock"
                 disabled={vaultBusy}
                 onClick={handleUnlock}
-                className="rounded-lg bg-slate-700 hover:bg-slate-600 disabled:opacity-60 px-3 py-2 text-sm font-medium"
+                className="rounded-lg bg-surface-raised hover:bg-surface-overlay disabled:opacity-60 px-3 py-2 text-sm font-medium"
               >
                 Unlock
               </button>
@@ -231,7 +231,7 @@ export default function OnboardingPage() {
               data-testid="btn-register"
               disabled={authBusy}
               onClick={handleRegister}
-              className="rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 px-3 py-2 text-sm font-medium"
+              className="rounded-lg bg-brand hover:bg-brand-dark disabled:opacity-60 px-3 py-2 text-sm font-medium"
             >
               Register
             </button>
@@ -239,7 +239,7 @@ export default function OnboardingPage() {
               data-testid="btn-login"
               disabled={authBusy}
               onClick={handleLogin}
-              className="rounded-lg bg-slate-700 hover:bg-slate-600 disabled:opacity-60 px-3 py-2 text-sm font-medium"
+              className="rounded-lg bg-surface-raised hover:bg-surface-overlay disabled:opacity-60 px-3 py-2 text-sm font-medium"
             >
               Login
             </button>

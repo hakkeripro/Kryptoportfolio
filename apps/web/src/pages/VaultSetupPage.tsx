@@ -85,7 +85,7 @@ export default function VaultSetupPage() {
                 n === stepNumber
                   ? 'bg-brand text-white'
                   : n < stepNumber
-                    ? 'bg-emerald-900 text-semantic-success'
+                    ? 'bg-brand-dark/20 text-semantic-success'
                     : 'bg-surface-raised text-content-tertiary'
               }`}
             >
@@ -213,7 +213,7 @@ export default function VaultSetupPage() {
               )}
               <div className="flex justify-between">
                 <span className="text-content-secondary">Vault</span>
-                <span className="text-emerald-400">Encrypted</span>
+                <span className="text-semantic-success">Encrypted</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-content-secondary">Passkey</span>

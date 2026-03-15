@@ -40,7 +40,7 @@ export default class ErrorBoundary extends React.Component<Props, State> {
             </div>
             <button
               data-testid="btn-reload"
-              className="rounded-lg bg-slate-800 hover:bg-slate-700 px-3 py-2 text-sm"
+              className="rounded-lg bg-surface-raised hover:bg-surface-overlay px-3 py-2 text-sm"
               onClick={() => window.location.reload()}
             >
               Reload
@@ -52,7 +52,7 @@ export default class ErrorBoundary extends React.Component<Props, State> {
             {String(this.state.error.stack ?? '')}
           </pre>
 
-          <div className="mt-4 text-sm text-slate-200">
+          <div className="mt-4 text-sm text-content-secondary">
             If this keeps happening, go to{' '}
             <a className="underline" href="/onboarding">
               Onboarding

@@ -107,7 +107,7 @@ export default function UnlockPage() {
             data-testid="btn-unlock-passphrase"
             disabled={busy || passphrase.length < 1}
             onClick={() => void unlockWithPassphrase()}
-            className="rounded-lg bg-slate-700 hover:bg-slate-600 disabled:opacity-60 px-3 py-2 text-sm font-medium"
+            className="rounded-lg bg-surface-raised hover:bg-surface-overlay disabled:opacity-60 px-3 py-2 text-sm font-medium"
           >
             {busy ? 'Unlocking…' : 'Unlock'}
           </button>

@@ -9,7 +9,7 @@ const NavItem = ({ to, testId, label }: { to: string; testId: string; label: str
     to={to}
     data-testid={testId}
     className={({ isActive }) =>
-      `px-3 py-2 rounded-lg text-sm ${isActive ? 'bg-slate-800' : 'hover:bg-slate-900'}`
+      `px-3 py-2 rounded-lg text-sm ${isActive ? 'bg-surface-raised' : 'hover:bg-surface-base'}`
     }
   >
     {label}
@@ -22,7 +22,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   const syncNow = useSyncStore((s) => s.syncNow);
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-10 bg-slate-950/90 backdrop-blur border-b border-slate-800">
+      <header className="sticky top-0 z-10 bg-surface-base/90 backdrop-blur border-b border-border">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-2 flex-wrap">
           <div className="font-semibold">Kryptoportfolio v3</div>
           <div className="flex gap-2 ml-auto flex-wrap items-center">
@@ -30,12 +30,12 @@ export default function Shell({ children }: { children: React.ReactNode }) {
               <button
                 data-testid="btn-lock"
                 onClick={() => lockVault()}
-                className="text-xs rounded-lg bg-slate-800 hover:bg-slate-700 px-2 py-1"
+                className="text-xs rounded-lg bg-surface-raised hover:bg-surface-overlay px-2 py-1"
               >
                 Lock
               </button>
             ) : (
-              <span data-testid="badge-locked" className="text-xs rounded bg-slate-800 px-2 py-1">
+              <span data-testid="badge-locked" className="text-xs rounded bg-surface-raised px-2 py-1">
                 Locked
               </span>
             )}
@@ -43,7 +43,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
               <button
                 data-testid="btn-sync-now"
                 onClick={() => void syncNow()}
-                className="text-xs rounded-lg bg-slate-800 hover:bg-slate-700 px-2 py-1"
+                className="text-xs rounded-lg bg-surface-raised hover:bg-surface-overlay px-2 py-1"
               >
                 Sync
               </button>

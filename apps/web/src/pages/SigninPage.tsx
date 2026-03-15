@@ -100,7 +100,7 @@ export default function SigninPage() {
 
         <p className="text-center text-sm text-content-tertiary">
           {t('signin.signupPrompt')}{' '}
-          <Link to="/auth/signup" className="text-indigo-400 hover:underline">
+          <Link to="/auth/signup" className="text-brand hover:underline">
             {t('signin.signupLink')}
           </Link>
         </p>

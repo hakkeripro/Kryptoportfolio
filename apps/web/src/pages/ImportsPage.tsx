@@ -734,7 +734,7 @@ export default function ImportsPage() {
                             {e.externalRef &&
                             preview.duplicateExternalRefs.includes(e.externalRef) ? (
                               <span
-                                className="rounded-full bg-slate-200 px-2 py-0.5 text-xs"
+                                className="rounded-full bg-surface-raised text-content-secondary px-2 py-0.5 text-xs"
                                 data-testid={`badge-import-dup-${e.id}`}
                               >
                                 dup

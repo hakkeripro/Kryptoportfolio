@@ -23,13 +23,13 @@ export default function PassphraseGenerator({
   }, [phrase]);
 
   return (
-    <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-3 space-y-2">
+    <div className="rounded-lg border border-border bg-surface-raised p-3 space-y-2">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-slate-300">Generate a passphrase</span>
+        <span className="text-sm font-medium text-content-secondary">Generate a passphrase</span>
         <button
           type="button"
           onClick={generate}
-          className="text-xs rounded bg-indigo-600 hover:bg-indigo-500 px-2 py-1 font-medium"
+          className="text-xs rounded bg-brand hover:bg-brand-dark px-2 py-1 font-medium"
         >
           Generate
         </button>
@@ -38,7 +38,7 @@ export default function PassphraseGenerator({
         <>
           <div
             data-testid="generated-passphrase"
-            className="font-mono text-sm bg-slate-950 rounded px-3 py-2 select-all break-all"
+            className="font-mono text-sm bg-surface-base rounded px-3 py-2 select-all break-all"
           >
             {phrase}
           </div>
@@ -46,14 +46,14 @@ export default function PassphraseGenerator({
             <button
               type="button"
               onClick={copy}
-              className="text-xs rounded bg-slate-700 hover:bg-slate-600 px-2 py-1"
+              className="text-xs rounded bg-surface-raised hover:bg-border px-2 py-1"
             >
               {copied ? 'Copied!' : 'Copy'}
             </button>
             <button
               type="button"
               onClick={() => onAccept(phrase)}
-              className="text-xs rounded bg-emerald-600 hover:bg-emerald-500 px-2 py-1"
+              className="text-xs rounded bg-brand hover:bg-brand-dark px-2 py-1"
             >
               Use this passphrase
             </button>

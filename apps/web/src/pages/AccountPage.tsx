@@ -136,12 +136,12 @@ function ChangePasswordSection() {
         data-testid="btn-change-password"
         type="submit"
         disabled={!canSubmit}
-        className="rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 px-3 py-2 text-sm font-medium"
+        className="rounded-lg bg-brand hover:bg-brand-dark disabled:opacity-60 px-3 py-2 text-sm font-medium"
       >
         {busy ? 'Changing…' : 'Change password'}
       </button>
       {error && <div className="text-sm text-semantic-error">{error}</div>}
-      {success && <div className="text-sm text-emerald-400">Password changed.</div>}
+      {success && <div className="text-sm text-semantic-success">Password changed.</div>}
     </form>
   );
 }
@@ -208,12 +208,12 @@ function ChangePassphraseSection() {
         data-testid="btn-change-passphrase"
         type="submit"
         disabled={!canSubmit}
-        className="rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 px-3 py-2 text-sm font-medium"
+        className="rounded-lg bg-brand hover:bg-brand-dark disabled:opacity-60 px-3 py-2 text-sm font-medium"
       >
         {busy ? 'Changing…' : 'Change passphrase'}
       </button>
       {error && <div className="text-sm text-semantic-error">{error}</div>}
-      {success && <div className="text-sm text-emerald-400">Vault passphrase changed.</div>}
+      {success && <div className="text-sm text-semantic-success">Vault passphrase changed.</div>}
     </form>
   );
 }

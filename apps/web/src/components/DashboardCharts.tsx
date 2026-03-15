@@ -30,7 +30,7 @@ const TOOLTIP_STYLE = {
 };
 
 const PALETTE = [
-  '#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#a78bfa',
+  '#ff8400', '#3b82f6', '#f59e0b', '#ef4444', '#a78bfa',
   '#fb7185', '#22d3ee', '#c084fc', '#4ade80', '#f97316',
 ];
 
@@ -104,7 +104,7 @@ export function ValueChart({ data }: { data: { day: string; value: number }[] })
                 stroke="var(--color-brand)"
                 strokeWidth={2}
                 fill="url(#areaGradient)"
-                style={{ filter: 'drop-shadow(0 0 6px rgba(16, 185, 129, 0.3))' }}
+                style={{ filter: 'drop-shadow(0 0 6px rgba(255, 132, 0, 0.3))' }}
                 animationDuration={1000}
               />
             </AreaChart>

@@ -14,9 +14,9 @@ export default function PasskeyCard({ mode, onEnable, onSkip, onUnlock, busy }: 
 
   if (mode === 'setup') {
     return (
-      <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4 space-y-3">
+      <div className="rounded-xl border border-border bg-surface-raised p-4 space-y-3">
         <div className="font-medium">Enable Passkey</div>
-        <p className="text-sm text-slate-300">
+        <p className="text-sm text-content-secondary">
           {supported
             ? 'A passkey lets you unlock without typing your passphrase on this device.'
             : 'Your device does not support passkeys.'}
@@ -26,7 +26,7 @@ export default function PasskeyCard({ mode, onEnable, onSkip, onUnlock, busy }: 
             data-testid="btn-enable-passkey"
             disabled={busy}
             onClick={onEnable}
-            className="rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 px-4 py-2 text-sm font-medium"
+            className="rounded-lg bg-brand hover:bg-brand-dark disabled:opacity-60 px-4 py-2 text-sm font-medium"
           >
             {busy ? 'Enabling…' : 'Enable Passkey (recommended)'}
           </button>
@@ -34,7 +34,7 @@ export default function PasskeyCard({ mode, onEnable, onSkip, onUnlock, busy }: 
         <button
           data-testid="btn-skip-passkey"
           onClick={onSkip}
-          className="block text-sm text-slate-400 hover:text-slate-300 underline"
+          className="block text-sm text-content-tertiary hover:text-content-secondary underline"
         >
           Skip for now
         </button>
@@ -44,9 +44,9 @@ export default function PasskeyCard({ mode, onEnable, onSkip, onUnlock, busy }: 
 
   if (mode === 'unlock') {
     return (
-      <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4 space-y-3">
+      <div className="rounded-xl border border-border bg-surface-raised p-4 space-y-3">
         <div className="font-medium">Unlock with Passkey</div>
-        <p className="text-sm text-slate-300">
+        <p className="text-sm text-content-secondary">
           {supported && hasPasskey
             ? 'Unlock without typing your passphrase on this device.'
             : !supported
@@ -57,7 +57,7 @@ export default function PasskeyCard({ mode, onEnable, onSkip, onUnlock, busy }: 
           data-testid="btn-unlock-passkey"
           disabled={busy || !supported || !hasPasskey}
           onClick={onUnlock}
-          className="rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 px-4 py-2 text-sm font-medium"
+          className="rounded-lg bg-brand hover:bg-brand-dark disabled:opacity-60 px-4 py-2 text-sm font-medium"
         >
           {busy ? 'Unlocking…' : 'Unlock with Passkey'}
         </button>

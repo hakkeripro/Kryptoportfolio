@@ -12,7 +12,7 @@ interface BadgeProps {
 
 const variantClasses: Record<BadgeVariant, string> = {
   default: 'bg-surface-raised text-content-secondary border-border',
-  success: 'bg-emerald-500/10 text-semantic-success border-emerald-500/20',
+  success: 'bg-semantic-success/10 text-semantic-success border-semantic-success/20',
   warning: 'bg-amber-500/10 text-semantic-warning border-amber-500/20',
   error: 'bg-red-500/10 text-semantic-error border-red-500/20',
   info: 'bg-blue-500/10 text-semantic-info border-blue-500/20',
