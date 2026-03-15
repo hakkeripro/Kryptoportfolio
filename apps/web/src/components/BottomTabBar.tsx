@@ -14,7 +14,8 @@ export default function BottomTabBar() {
   ];
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-10 bg-surface-raised border-t border-border safe-area-bottom">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-10 bg-surface-raised/80 backdrop-blur-md border-t border-border/50 safe-area-bottom
+      before:absolute before:top-0 before:left-0 before:right-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-border before:to-transparent">
       <div className="flex items-center justify-around h-14">
         {tabs.map(({ to, icon: Icon, label, testId }) => (
           <NavLink
@@ -22,8 +23,11 @@ export default function BottomTabBar() {
             to={to}
             data-testid={testId}
             className={({ isActive }) =>
-              `flex flex-col items-center justify-center gap-0.5 flex-1 h-full text-center transition-colors ${
-                isActive ? 'text-brand' : 'text-content-tertiary'
+              `relative flex flex-col items-center justify-center gap-0.5 flex-1 h-full text-center
+              transition-all duration-150 ease-expo ${
+                isActive
+                  ? 'text-brand scale-105 after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:rounded-full after:bg-brand'
+                  : 'text-content-tertiary'
               }`
             }
           >

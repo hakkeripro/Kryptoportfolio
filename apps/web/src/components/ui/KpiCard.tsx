@@ -23,17 +23,21 @@ export function KpiCard({ label, value, delta, deltaType = 'neutral', icon }: Kp
 
   return (
     <Card>
-      <div className="flex items-start justify-between">
-        <span className="text-caption text-content-secondary">{label}</span>
-        {icon && <span className="text-content-tertiary">{icon}</span>}
-      </div>
-      <div className="mt-1 text-heading-2 text-content-primary">{value}</div>
-      {delta && (
-        <div className={`flex items-center gap-1 mt-1 text-caption ${deltaColor}`}>
-          {DeltaIcon && <DeltaIcon className="h-3 w-3" />}
-          <span>{delta}</span>
+      <div className="relative overflow-hidden">
+        {/* Gradient accent line */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand/40 to-transparent" />
+        <div className="flex items-start justify-between pt-1">
+          <span className="text-caption text-content-secondary">{label}</span>
+          {icon && <span className="text-content-tertiary">{icon}</span>}
         </div>
-      )}
+        <div className="mt-1 text-heading-2 text-content-primary font-mono">{value}</div>
+        {delta && (
+          <div className={`flex items-center gap-1 mt-1 text-caption ${deltaColor}`}>
+            {DeltaIcon && <DeltaIcon className="h-3 w-3" />}
+            <span>{delta}</span>
+          </div>
+        )}
+      </div>
     </Card>
   );
 }

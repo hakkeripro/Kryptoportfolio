@@ -1,4 +1,4 @@
-/* VaultFolio Design Tokens — "Obsidian" dark theme */
+/* VaultFolio Design Tokens — "Obsidian Premium" dark theme */
 
 :root {
   /* Brand */
@@ -26,35 +26,141 @@
   --color-semantic-warning: #f59e0b;
   --color-semantic-error: #ef4444;
   --color-semantic-info: #3b82f6;
+
+  /* Shadows — emerald-tinted for depth */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(16, 185, 129, 0.03);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(16, 185, 129, 0.05);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.35), 0 4px 12px rgba(16, 185, 129, 0.06);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.4), 0 8px 20px rgba(16, 185, 129, 0.08);
+
+  /* Glows */
+  --glow-brand: 0 0 20px rgba(16, 185, 129, 0.15), 0 0 40px rgba(16, 185, 129, 0.05);
+  --glow-brand-strong: 0 0 30px rgba(16, 185, 129, 0.25), 0 0 60px rgba(16, 185, 129, 0.1);
+  --glow-success: 0 0 20px rgba(16, 185, 129, 0.2);
+  --glow-error: 0 0 20px rgba(239, 68, 68, 0.2);
+  --glow-warning: 0 0 20px rgba(245, 158, 11, 0.2);
+
+  /* Animation tokens */
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --duration-slower: 500ms;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Gradients */
+  --gradient-card-bg: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(10, 15, 26, 0.6));
+  --gradient-card-border: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(30, 41, 59, 0.5), rgba(16, 185, 129, 0.05));
+  --gradient-brand-subtle: linear-gradient(135deg, rgba(16, 185, 129, 0.05), transparent);
 }
 
-/* Animations */
+/* ============ Keyframes ============ */
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
 @keyframes slide-in-right {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to { background-position: 200% 0; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.1); }
+  50% { box-shadow: 0 0 30px rgba(16, 185, 129, 0.25), 0 0 60px rgba(16, 185, 129, 0.1); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ============ Animation utilities ============ */
+
+.animate-fade-in {
+  animation: fade-in var(--duration-slow) var(--ease-out-expo) both;
+}
+
+.animate-slide-up {
+  animation: slide-up var(--duration-slow) var(--ease-out-expo) both;
+}
+
+.animate-scale-in {
+  animation: scale-in var(--duration-normal) var(--ease-spring) both;
 }
 
 .animate-slide-in-right {
-  animation: slide-in-right 0.2s ease-out;
+  animation: slide-in-right var(--duration-normal) var(--ease-out-expo);
 }
 
-/* PWA safe area for bottom tab bar */
+.animate-shimmer {
+  animation: shimmer 2s linear infinite;
+  background-size: 200% 100%;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-gradient-shift {
+  animation: gradient-shift 8s ease-in-out infinite;
+  background-size: 200% 200%;
+}
+
+/* ============ Noise overlay ============ */
+
+.noise-overlay::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.018;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+/* ============ PWA safe areas ============ */
+
 .safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-/* PWA standalone: safe areas for notch / status bar */
 @supports (padding-top: env(safe-area-inset-top)) {
   .safe-area-top {
     padding-top: env(safe-area-inset-top, 0px);
   }
 }
 
-/* Mobile touch targets — ensure minimum 44x44px for interactive elements */
+/* ============ Mobile touch targets ============ */
+
 @media (pointer: coarse) {
   button,
   [role="button"],
@@ -66,7 +172,6 @@
     min-width: 44px;
   }
 
-  /* Inputs already have proper height via padding */
   input[type="text"],
   input[type="email"],
   input[type="password"],
@@ -76,12 +181,23 @@
   }
 }
 
-/* Prevent text selection on interactive elements for mobile */
 @media (pointer: coarse) {
   nav a,
   button {
     -webkit-user-select: none;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* ============ Reduced motion ============ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

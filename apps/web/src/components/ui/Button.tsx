@@ -12,12 +12,14 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantClasses: Record<ButtonVariant, string> = {
-  primary: 'bg-brand text-content-inverse hover:bg-brand-dark focus-visible:ring-brand',
+  primary:
+    'bg-brand text-content-inverse hover:bg-brand-dark hover:brightness-110 shadow-md hover:shadow-lg hover:shadow-brand/20 focus-visible:ring-brand',
   secondary:
-    'bg-surface-raised text-content-primary border border-border hover:bg-surface-overlay focus-visible:ring-border',
+    'bg-surface-raised text-content-primary border border-border hover:border-brand/30 hover:bg-surface-overlay hover:shadow-sm focus-visible:ring-border',
   ghost:
-    'text-content-secondary hover:text-content-primary hover:bg-surface-raised focus-visible:ring-border',
-  danger: 'bg-semantic-error text-white hover:bg-red-600 focus-visible:ring-semantic-error',
+    'text-content-secondary hover:text-content-primary hover:bg-surface-raised/80 focus-visible:ring-border',
+  danger:
+    'bg-semantic-error text-white hover:bg-red-600 shadow-md hover:shadow-glow-error focus-visible:ring-semantic-error',
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
@@ -40,7 +42,8 @@ export function Button({
     <button
       disabled={disabled || loading}
       className={`inline-flex items-center justify-center font-medium rounded-button
-        transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+        transition-all duration-150 ease-expo active:scale-[0.97]
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
         focus-visible:ring-offset-surface-base disabled:opacity-50 disabled:pointer-events-none
         ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
       {...props}

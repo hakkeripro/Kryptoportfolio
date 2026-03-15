@@ -22,7 +22,10 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             id={selectId}
             className={`w-full appearance-none rounded-input border bg-surface-base/40
               px-3 py-2 pr-10 text-body text-content-primary
-              focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand
+              transition-all duration-200 ease-expo
+              focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand
+              focus:shadow-[var(--glow-brand)]
+              hover:border-content-tertiary/30
               disabled:opacity-50 disabled:cursor-not-allowed
               ${error ? 'border-semantic-error' : 'border-border'}
               ${className}`}
@@ -32,7 +35,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           </select>
           <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-content-tertiary" />
         </div>
-        {error && <span className="text-caption text-semantic-error">{error}</span>}
+        {error && <span className="text-caption text-semantic-error animate-fade-in">{error}</span>}
       </div>
     );
   },

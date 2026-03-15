@@ -1,22 +1,12 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import Decimal from 'decimal.js';
-import {
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  Cell,
-  Line,
-  LineChart,
-  XAxis,
-  YAxis,
-} from 'recharts';
-import { BarChart3, RefreshCw, TrendingUp } from 'lucide-react';
+import { BarChart3, RefreshCw } from 'lucide-react';
 import { useDashboardData } from '../hooks/useDashboardData';
 import { useDashboardRefresh } from '../hooks/useDashboardRefresh';
 import { useAuthStore } from '../store/useAuthStore';
 import PageHeader from '../components/PageHeader';
+import { AllocationChart, ValueChart } from '../components/DashboardCharts';
 import { KpiCard, Card, CardTitle, EmptyState, TokenIcon, Button } from '../components/ui';
 
 function d(s: string | undefined | null): Decimal {
@@ -30,25 +20,6 @@ function d(s: string | undefined | null): Decimal {
 
 function fmtMoney(val: string | undefined | null, currency: string): string {
   return `${d(val).toDecimalPlaces(2).toFixed()} ${currency}`;
-}
-
-const PALETTE = [
-  '#10b981',
-  '#3b82f6',
-  '#f59e0b',
-  '#ef4444',
-  '#a78bfa',
-  '#fb7185',
-  '#22d3ee',
-  '#c084fc',
-  '#4ade80',
-  '#f97316',
-];
-
-function colorForKey(key: string): string {
-  let h = 0;
-  for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) >>> 0;
-  return PALETTE[h % PALETTE.length]!;
 }
 
 export default function DashboardPage() {
@@ -143,124 +114,46 @@ export default function DashboardPage() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div data-testid="metric-total-value">
-          <KpiCard
-            label={t('dashboard.kpi.totalValue')}
-            value={fmtMoney(metrics.totalValueBase, baseCurrency)}
-            icon={<BarChart3 className="h-4 w-4" />}
-          />
-        </div>
-        <div data-testid="metric-realized">
-          <KpiCard
-            label={t('dashboard.kpi.realizedPnl')}
-            value={fmtMoney(metrics.realizedPnlBaseToDate, baseCurrency)}
-            delta={
-              realizedDelta.isZero()
-                ? undefined
-                : `${realizedDelta.isPositive() ? '+' : ''}${realizedDelta.toDecimalPlaces(2).toFixed()}`
-            }
-            deltaType={
-              realizedDelta.isPositive()
-                ? 'positive'
-                : realizedDelta.isNegative()
-                  ? 'negative'
-                  : 'neutral'
-            }
-          />
-        </div>
-        <div data-testid="metric-unrealized">
-          <KpiCard
-            label={t('dashboard.kpi.unrealizedPnl')}
-            value={fmtMoney(metrics.unrealizedPnlBase, baseCurrency)}
-            delta={
-              unrealizedDelta.isZero()
-                ? undefined
-                : `${unrealizedDelta.isPositive() ? '+' : ''}${unrealizedDelta.toDecimalPlaces(2).toFixed()}`
-            }
-            deltaType={
-              unrealizedDelta.isPositive()
-                ? 'positive'
-                : unrealizedDelta.isNegative()
-                  ? 'negative'
-                  : 'neutral'
-            }
-          />
-        </div>
+        {[
+          {
+            testId: 'metric-total-value',
+            label: t('dashboard.kpi.totalValue'),
+            value: fmtMoney(metrics.totalValueBase, baseCurrency),
+            icon: <BarChart3 className="h-4 w-4" />,
+          },
+          {
+            testId: 'metric-realized',
+            label: t('dashboard.kpi.realizedPnl'),
+            value: fmtMoney(metrics.realizedPnlBaseToDate, baseCurrency),
+            delta: realizedDelta.isZero()
+              ? undefined
+              : `${realizedDelta.isPositive() ? '+' : ''}${realizedDelta.toDecimalPlaces(2).toFixed()}`,
+            deltaType: realizedDelta.isPositive() ? 'positive' as const : realizedDelta.isNegative() ? 'negative' as const : 'neutral' as const,
+          },
+          {
+            testId: 'metric-unrealized',
+            label: t('dashboard.kpi.unrealizedPnl'),
+            value: fmtMoney(metrics.unrealizedPnlBase, baseCurrency),
+            delta: unrealizedDelta.isZero()
+              ? undefined
+              : `${unrealizedDelta.isPositive() ? '+' : ''}${unrealizedDelta.toDecimalPlaces(2).toFixed()}`,
+            deltaType: unrealizedDelta.isPositive() ? 'positive' as const : unrealizedDelta.isNegative() ? 'negative' as const : 'neutral' as const,
+          },
+        ].map((kpi, i) => (
+          <div key={kpi.testId} data-testid={kpi.testId} className="animate-slide-up" style={{ animationDelay: `${i * 80}ms` }}>
+            <KpiCard {...kpi} />
+          </div>
+        ))}
       </div>
 
       {/* Charts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card data-testid="chart-allocation">
-          <CardTitle>{t('dashboard.chart.allocation')}</CardTitle>
-          {allocation.length ? (
-            <div className="h-64 mt-3">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'var(--color-surface-overlay)',
-                      border: '1px solid var(--color-border)',
-                      borderRadius: '0.5rem',
-                      color: 'var(--color-content-primary)',
-                    }}
-                  />
-                  <Pie
-                    data={allocation}
-                    dataKey="value"
-                    nameKey="name"
-                    innerRadius={50}
-                    outerRadius={90}
-                  >
-                    {allocation.map((x) => (
-                      <Cell key={x.assetId} fill={colorForKey(x.assetId)} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          ) : (
-            <EmptyState
-              icon={<BarChart3 className="h-10 w-10" />}
-              title={t('dashboard.empty.allocation.title')}
-              description={t('dashboard.empty.allocation.desc')}
-            />
-          )}
-        </Card>
-
-        <Card data-testid="chart-portfolio-value">
-          <CardTitle>{t('dashboard.chart.portfolioValue')}</CardTitle>
-          {valueSeries.length ? (
-            <div className="h-64 mt-3">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={valueSeries}>
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'var(--color-surface-overlay)',
-                      border: '1px solid var(--color-border)',
-                      borderRadius: '0.5rem',
-                      color: 'var(--color-content-primary)',
-                    }}
-                  />
-                  <XAxis dataKey="day" hide />
-                  <YAxis hide domain={['auto', 'auto']} />
-                  <Line
-                    type="monotone"
-                    dataKey="value"
-                    dot={false}
-                    stroke="var(--color-brand)"
-                    strokeWidth={2}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          ) : (
-            <EmptyState
-              icon={<TrendingUp className="h-10 w-10" />}
-              title={t('dashboard.empty.snapshots.title')}
-              description={t('dashboard.empty.snapshots.desc')}
-            />
-          )}
-        </Card>
+        <div className="animate-slide-up" style={{ animationDelay: '240ms' }}>
+          <AllocationChart data={allocation} />
+        </div>
+        <div className="animate-slide-up" style={{ animationDelay: '320ms' }}>
+          <ValueChart data={valueSeries} />
+        </div>
       </div>
 
       {/* Top positions */}
@@ -268,9 +161,15 @@ export default function DashboardPage() {
         <CardTitle>{t('dashboard.topPositions.title')}</CardTitle>
         <div data-testid="list-top-positions" className="mt-3">
           {topPositions.length ? (
-            <ul className="divide-y divide-border">
-              {topPositions.map((p) => (
-                <li key={p.assetId} className="py-3 flex items-center justify-between">
+            <ul className="divide-y divide-border/50">
+              {topPositions.map((p, i) => (
+                <li
+                  key={p.assetId}
+                  className="group py-3 flex items-center justify-between rounded-button
+                    hover:bg-surface-overlay/30 px-2 -mx-2 transition-all duration-150 ease-expo
+                    animate-slide-up"
+                  style={{ animationDelay: `${i * 50 + 400}ms` }}
+                >
                   <div className="flex items-center gap-3">
                     <TokenIcon symbol={p.symbol} size="sm" />
                     <span className="text-body text-content-primary font-medium">{p.symbol}</span>
@@ -293,7 +192,7 @@ export default function DashboardPage() {
 
       {/* Status footer */}
       {status.lastRebuildISO && (
-        <p className="text-caption text-content-tertiary text-right">
+        <p className="text-caption text-content-tertiary text-right animate-fade-in">
           {t('dashboard.lastUpdate')} {new Date(status.lastRebuildISO).toLocaleString()}
           {dbState.error && <span className="text-semantic-error ml-2">{dbState.error}</span>}
         </p>

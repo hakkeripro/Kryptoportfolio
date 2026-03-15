@@ -27,15 +27,18 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             id={inputId}
             className={`w-full rounded-input border bg-surface-base/40 px-3 py-2 text-body
               text-content-primary placeholder:text-content-tertiary
-              focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand
+              transition-all duration-200 ease-expo
+              focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand
+              focus:shadow-[var(--glow-brand)]
+              hover:border-content-tertiary/30
               disabled:opacity-50 disabled:cursor-not-allowed
               ${icon ? 'pl-10' : ''}
-              ${error ? 'border-semantic-error' : 'border-border'}
+              ${error ? 'border-semantic-error focus:ring-semantic-error/40 focus:shadow-[var(--glow-error)]' : 'border-border'}
               ${className}`}
             {...props}
           />
         </div>
-        {error && <span className="text-caption text-semantic-error">{error}</span>}
+        {error && <span className="text-caption text-semantic-error animate-fade-in">{error}</span>}
       </div>
     );
   },

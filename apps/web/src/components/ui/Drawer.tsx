@@ -66,11 +66,11 @@ export function Drawer({ open, onClose, title, children, className = '' }: Drawe
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex justify-end">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={onClose} />
       <div
         ref={panelRef}
         className={`relative z-10 w-full max-w-md h-full bg-surface-overlay border-l border-border
-          p-6 shadow-2xl overflow-y-auto animate-slide-in-right ${className}`}
+          p-6 shadow-xl overflow-y-auto animate-slide-in-right ${className}`}
         style={
           swipeX > 0 ? { transform: `translateX(${swipeX}px)`, transition: 'none' } : undefined
         }

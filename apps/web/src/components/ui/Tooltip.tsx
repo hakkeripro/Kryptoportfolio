@@ -39,7 +39,7 @@ export function Tooltip({ content, children, position = 'top' }: TooltipProps) {
           role="tooltip"
           className={`absolute z-50 whitespace-nowrap rounded-button bg-surface-overlay
             border border-border px-2 py-1 text-caption text-content-primary
-            shadow-lg pointer-events-none ${posClass}`}
+            shadow-lg pointer-events-none animate-scale-in ${posClass}`}
         >
           {content}
         </span>

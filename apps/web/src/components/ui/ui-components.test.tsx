@@ -61,7 +61,7 @@ describe('Button', () => {
 describe('Card', () => {
   it('renders children with surface-raised', () => {
     const { container } = render(<Card>Content</Card>);
-    expect(container.firstElementChild!.className).toContain('bg-surface-raised');
+    expect(container.firstElementChild!.className).toContain('bg-gradient-card');
     expect(screen.getByText('Content')).toBeTruthy();
   });
 

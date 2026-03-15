@@ -34,14 +34,15 @@ export function TokenIcon({ symbol, iconUrl, size = 'md', className = '' }: Toke
         height={px}
         loading="lazy"
         onError={() => setImgError(true)}
-        className={`rounded-full ${className}`}
+        className={`rounded-full transition-all duration-150 group-hover:ring-2 group-hover:ring-brand/20 ${className}`}
       />
     );
   }
 
   return (
     <span
-      className={`inline-flex items-center justify-center rounded-full text-white font-semibold ${className}`}
+      className={`inline-flex items-center justify-center rounded-full text-white font-semibold
+        transition-all duration-150 group-hover:ring-2 group-hover:ring-brand/20 ${className}`}
       style={{
         width: px,
         height: px,

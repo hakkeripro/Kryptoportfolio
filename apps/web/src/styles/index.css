@@ -38,3 +38,32 @@ a:hover {
     color: var(--color-content-primary);
   }
 }
+
+/* Custom scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+*:hover {
+  scrollbar-color: var(--color-brand-dark) transparent;
+}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-brand-dark);
+}
+
+/* Selection */
+::selection {
+  background-color: rgba(16, 185, 129, 0.3);
+  color: var(--color-content-primary);
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}

@@ -99,15 +99,17 @@ export default function PortfolioPage() {
       <Card>
         <div data-testid="list-positions">
           {positions.length ? (
-            <ul className="divide-y divide-border">
-              {positions.map((p) => {
+            <ul className="divide-y divide-border/50">
+              {positions.map((p, i) => {
                 const a = assetsById.get(p.assetId);
                 const sym = a?.symbol ?? p.assetId;
                 const pnl = d(p.unrealizedPnlBase);
                 return (
                   <li
                     key={p.assetId}
-                    className="py-3 flex items-center justify-between gap-3 hover:bg-surface-overlay/50 rounded-button px-2 -mx-2 cursor-pointer transition-colors"
+                    className="group py-3 flex items-center justify-between gap-3 hover:bg-surface-overlay/30 hover:shadow-sm
+                      rounded-button px-2 -mx-2 cursor-pointer transition-all duration-150 ease-expo animate-slide-up"
+                    style={{ animationDelay: `${i * 40}ms` }}
                     onClick={() => setSelectedAssetId(p.assetId)}
                     data-testid={`row-position-${p.assetId}`}
                   >
