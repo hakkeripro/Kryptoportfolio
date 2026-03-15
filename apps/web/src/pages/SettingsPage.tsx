@@ -50,12 +50,14 @@ export default function SettingsPage() {
         <div className="font-medium">{t('settings.language.title')}</div>
         <div className="flex gap-2">
           <button
+            data-testid="btn-lang-en"
             className={`px-3 py-1.5 rounded-button text-caption font-medium transition-colors ${i18n.language === 'en' ? 'bg-brand text-content-inverse' : 'bg-surface-overlay text-content-secondary hover:text-content-primary'}`}
             onClick={() => changeLang('en')}
           >
             {t('settings.language.en')}
           </button>
           <button
+            data-testid="btn-lang-fi"
             className={`px-3 py-1.5 rounded-button text-caption font-medium transition-colors ${i18n.language === 'fi' ? 'bg-brand text-content-inverse' : 'bg-surface-overlay text-content-secondary hover:text-content-primary'}`}
             onClick={() => changeLang('fi')}
           >

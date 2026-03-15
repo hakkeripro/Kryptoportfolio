@@ -417,6 +417,10 @@ Ks. [ISSUE_LOG.md](../ISSUE_LOG.md) tarkemmat kuvaukset.
 - [x] Branding: Logo (SVG), favicon, PWA manifest, "Obsidian" dark theme
 - [x] i18n: react-i18next, EN+FI (~320 käännösavainta), kielivalitsin
 
+**Testit:**
+- Unit: 50 testiä (44 UI-komponenttia + 6 i18n locale-validointia)
+- E2E: 7 testiä (welcome page, navigation, redirectit, language switch, mobile viewport)
+
 **Huom:** i18n-avaimet on kytketty pääsivuille. Muutamilla sekundäärisivuilla (Imports, Alerts, Assets, Account, Transactions) on vain otsikot käännetty — yksityiskohtaiset käännökset voidaan lisätä jatkokehityksessä.
 
 ---
@@ -509,9 +513,9 @@ Ks. [ISSUE_LOG.md](../ISSUE_LOG.md) tarkemmat kuvaukset.
 |-----------|-------|
 | Vaihe 0 (tekninen velka) | 8/8 ✅ |
 | P0-bugit | 4/4 ✅ |
-| Toteutetut featuret | 11 (01-11) + 21 |
+| Toteutetut featuret | 12 (01-11, 22) + 21 |
 | Toteutuksessa | 1 (12) |
-| Suunnitteilla | 3 (13, 14, 22) |
+| Suunnitteilla | 2 (13, 14) |
 | Backlog | 5 (15-17, 19-20) |
 | Avoimet P1-bugit | 5 |
 | Avoimet P2/P3-bugit | 4 |

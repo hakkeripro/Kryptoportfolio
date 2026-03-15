@@ -12,10 +12,7 @@ Paivitetty: 2026-03-13
 - CI: GitHub Actions (unit + e2e) — puutteellinen (ei lint/typecheck/coverage)
 
 ### Avoimet P0-bugit
-- ~~**KP-UI-001:** Vault passphrase ei pysy sessionissa (onboarding)~~ → ✅ korjattu (T-003 store-hajotus + e2e-testi)
-- **KP-UI-002:** Price auto-refresh settings key mismatch (`settings` vs `settings_1`)
-- **KP-ALERT-001:** Server alerts enable/replace voi tyhjentaa saannot
-- **KP-IMPORT-001:** Coinbase JSON key -flow ristiriidassa UI-validoinnin kanssa
+Ei avoimia P0-bugeja. Kaikki korjattu 2026-03-14.
 
 ### Kriittinen tekninen velka (tunnistettu 2026-03-12)
 - ~~`functions/api/[[path]].ts` = 1082-rivinen monolith~~ → ✅ T-002 hajotus valmis
@@ -66,7 +63,13 @@ Seuraavaksi: Feature 13 (Imports) → Feature 14 (Billing)
 **Phase F: Mobile Polish**
 - Swipe-to-close Drawer, 44px touch targets, safe area CSS, PWA standalone meta tags
 
-**Testitulos:** Build OK, Unit tests ✅
+**Testit lisätty (2026-03-15):**
+- `apps/web/src/components/ui/ui-components.test.tsx` — 44 unit-testiä (14 UI-komponenttia)
+- `apps/web/src/i18n/i18n.test.ts` — 6 testiä (EN/FI locale key parity)
+- `apps/web/tests-e2e/feature22-ui-redesign.spec.ts` — 7 E2E-testiä (welcome, navigation, redirects, mobile, language switch)
+- `apps/web/src/pages/SettingsPage.tsx` — language selector test IDs lisätty
+
+**Testitulos:** Build OK, Unit tests 155/155 ✅
 
 ---
 
