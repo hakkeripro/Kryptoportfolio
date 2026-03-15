@@ -11,3 +11,4 @@ export { Tooltip } from './Tooltip';
 export { EmptyState } from './EmptyState';
 export { TokenIcon } from './TokenIcon';
 export { KpiCard } from './KpiCard';
+export { Logo } from './Logo';

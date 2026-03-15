@@ -15,19 +15,20 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg'],
       manifest: {
-        name: 'Kryptoportfolio v3',
-        short_name: 'Kryptoportfolio',
-        theme_color: '#0f172a',
-        background_color: '#0b1220',
+        name: 'VaultFolio',
+        short_name: 'VaultFolio',
+        description: 'Privacy-first crypto portfolio tracker',
+        theme_color: '#0a0f1a',
+        background_color: '#0a0f1a',
         display: 'standalone',
         start_url: '/',
         icons: [
           {
             src: 'favicon.svg',
             sizes: '512x512',
-            type: 'image/svg+xml'
-          }
-        ]
+            type: 'image/svg+xml',
+          },
+        ],
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],

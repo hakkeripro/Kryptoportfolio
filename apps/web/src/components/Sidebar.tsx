@@ -8,8 +8,8 @@ import {
   Lock,
   Unlock,
   RefreshCw,
-  Shield,
 } from 'lucide-react';
+import { Logo } from './ui';
 import { useVaultStore } from '../store/useVaultStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { useSyncStore } from '../store/useSyncStore';
@@ -30,9 +30,8 @@ export default function Sidebar() {
   return (
     <aside className="hidden md:flex flex-col w-60 h-screen fixed left-0 top-0 bg-surface-raised border-r border-border">
       {/* Brand */}
-      <div className="flex items-center gap-2 px-5 py-4 border-b border-border">
-        <Shield className="h-6 w-6 text-brand" />
-        <span className="text-heading-4 text-content-primary font-semibold">VaultFolio</span>
+      <div className="px-5 py-4 border-b border-border">
+        <Logo size="sm" />
       </div>
 
       {/* Navigation */}
