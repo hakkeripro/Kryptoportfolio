@@ -1,29 +1,19 @@
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Shield, ArrowLeftRight, FileText } from 'lucide-react';
 import { Logo } from '../components/ui/Logo';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 
-const usps = [
-  {
-    icon: Shield,
-    title: 'Zero-Knowledge Encryption',
-    desc: 'Your data is encrypted before it leaves your device. We can never see it.',
-  },
-  {
-    icon: ArrowLeftRight,
-    title: 'Multi-Exchange Import',
-    desc: 'Connect Coinbase and more exchanges with one click.',
-  },
-  {
-    icon: FileText,
-    title: 'Tax Reports',
-    desc: 'Generate capital gains reports ready for tax filing.',
-  },
+const uspKeys = [
+  { icon: Shield, key: 'encryption' },
+  { icon: ArrowLeftRight, key: 'import' },
+  { icon: FileText, key: 'tax' },
 ] as const;
 
 export default function WelcomePage() {
   const nav = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <div
@@ -42,24 +32,24 @@ export default function WelcomePage() {
           <Logo size="lg" showWordmark={false} />
         </div>
         <h1 className="text-heading-1 text-content-primary mb-2 text-3xl md:text-4xl font-bold">
-          VaultFolio
+          {t('welcome.title')}
         </h1>
         <p className="text-lg text-content-secondary max-w-md mx-auto">
-          The only crypto tracker that never sees your data.
+          {t('welcome.tagline')}
         </p>
       </div>
 
       {/* USP Cards */}
       <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl w-full mb-10">
-        {usps.map(({ icon: Icon, title, desc }) => (
-          <Card key={title} className="text-center p-6">
+        {uspKeys.map(({ icon: Icon, key }) => (
+          <Card key={key} className="text-center p-6">
             <div className="flex justify-center mb-3">
               <div className="w-10 h-10 rounded-full bg-brand/10 flex items-center justify-center">
                 <Icon className="h-5 w-5 text-brand" />
               </div>
             </div>
-            <h3 className="text-body font-semibold text-content-primary mb-1">{title}</h3>
-            <p className="text-caption text-content-secondary">{desc}</p>
+            <h3 className="text-body font-semibold text-content-primary mb-1">{t(`welcome.usp.${key}.title`)}</h3>
+            <p className="text-caption text-content-secondary">{t(`welcome.usp.${key}.desc`)}</p>
           </Card>
         ))}
       </div>
@@ -72,7 +62,7 @@ export default function WelcomePage() {
           size="lg"
           className="w-full"
         >
-          Get Started Free
+          {t('welcome.cta.signup')}
         </Button>
         <Button
           data-testid="btn-signin"
@@ -81,20 +71,20 @@ export default function WelcomePage() {
           size="lg"
           className="w-full"
         >
-          Sign In
+          {t('welcome.cta.signin')}
         </Button>
         <button
           data-testid="btn-offline"
           onClick={() => nav('/vault/setup?offline=1')}
           className="w-full text-caption text-content-tertiary hover:text-content-secondary py-2 transition-colors"
         >
-          Use without account
+          {t('welcome.cta.offline')}
         </button>
       </div>
 
       {/* Footer */}
       <div className="relative z-10 mt-12 text-caption text-content-tertiary text-center">
-        Your data never leaves your device unencrypted.
+        {t('welcome.footer')}
       </div>
     </div>
   );

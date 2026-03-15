@@ -1,0 +1,653 @@
+{
+  "common": {
+    "save": "Tallenna",
+    "cancel": "Peruuta",
+    "close": "Sulje",
+    "delete": "Poista",
+    "edit": "Muokkaa",
+    "loading": "Ladataan…",
+    "reset": "Nollaa",
+    "details": "Tiedot",
+    "enabled": "Käytössä",
+    "disabled": "Pois käytöstä",
+    "cost": "hankintahinta",
+    "import": "Tuo",
+    "refresh": "Päivitä"
+  },
+
+  "nav": {
+    "home": "Koti",
+    "portfolio": "Salkku",
+    "transactions": "Tapahtumat",
+    "txns": "Tap.",
+    "taxes": "Verot",
+    "settings": "Asetukset",
+    "sync": "Synkronoi",
+    "lockVault": "Lukitse holvi",
+    "locked": "Lukittu"
+  },
+
+  "welcome": {
+    "title": "VaultFolio",
+    "tagline": "Ainoa kryptoseurantasovellus, joka ei koskaan näe tietojasi.",
+    "usp": {
+      "encryption": {
+        "title": "Nollatietosalaus",
+        "desc": "Tietosi salataan ennen kuin ne poistuvat laitteeltasi. Emme voi koskaan nähdä niitä."
+      },
+      "import": {
+        "title": "Monipörssituonti",
+        "desc": "Yhdistä Coinbase ja muut pörssit yhdellä napsautuksella."
+      },
+      "tax": {
+        "title": "Veroraportit",
+        "desc": "Luo myyntivoittoraportit verotusta varten."
+      }
+    },
+    "cta": {
+      "signup": "Aloita ilmaiseksi",
+      "signin": "Kirjaudu",
+      "offline": "Käytä ilman tiliä"
+    },
+    "footer": "Tietosi eivät koskaan poistu laitteeltasi salaamattomina."
+  },
+
+  "signup": {
+    "title": "Luo tili",
+    "email": { "label": "Sähköposti" },
+    "password": { "label": "Salasana" },
+    "confirmPassword": { "label": "Vahvista salasana" },
+    "error": {
+      "passwordTooShort": "Salasanan on oltava vähintään 8 merkkiä",
+      "passwordMismatch": "Salasanat eivät täsmää",
+      "emailTaken": "Tällä sähköpostilla on jo tili.",
+      "serverUnreachable": "Palvelimeen ei saada yhteyttä. Yritä uudelleen."
+    },
+    "btn": {
+      "creating": "Luodaan tiliä…",
+      "submit": "Luo tili"
+    },
+    "signinPrompt": "Onko sinulla jo tili?",
+    "signinLink": "Kirjaudu"
+  },
+
+  "signin": {
+    "title": "Kirjaudu",
+    "email": { "label": "Sähköposti" },
+    "password": { "label": "Salasana" },
+    "btn": {
+      "loading": "Kirjaudutaan…",
+      "submit": "Kirjaudu"
+    },
+    "error": {
+      "invalidCredentials": "Virheellinen sähköposti tai salasana.",
+      "serverUnreachable": "Palvelimeen ei saada yhteyttä. Yritä uudelleen."
+    },
+    "signupPrompt": "Eikö sinulla ole tiliä?",
+    "signupLink": "Luo tili"
+  },
+
+  "vaultSetup": {
+    "step1": {
+      "title": "Aseta holvi",
+      "description": "Holvin tunnuslause salaa kaiken tiedon. Tallenna se turvalliseen paikkaan — sitä ei voi palauttaa."
+    },
+    "passphraseLabel": "Holvin tunnuslause",
+    "passphrasePlaceholder": "Syötä tunnuslause (vähintään 6 merkkiä)",
+    "confirmLabel": "Vahvista tunnuslause",
+    "confirmPlaceholder": "Vahvista tunnuslause",
+    "error": { "mismatch": "Tunnuslauseet eivät täsmää" },
+    "savedCheckbox": "Tallensin tunnuslauseeni turvalliseen paikkaan",
+    "btn": {
+      "creating": "Luodaan holvia…",
+      "continue": "Jatka",
+      "enablingPasskey": "Otetaan käyttöön…",
+      "enablePasskey": "Ota pääsyavain käyttöön (suositeltu)",
+      "skipPasskey": "Ohita toistaiseksi",
+      "goDashboard": "Siirry etusivulle"
+    },
+    "step2": {
+      "title": "Ota pääsyavain käyttöön",
+      "description": "Pääsyavain mahdollistaa holvin avaamisen ilman tunnuslausetta tällä laitteella. Se on laitekohtainen."
+    },
+    "passkeyNotSupported": "Laitteesi ei tue pääsyavaimia. Voit lisätä sellaisen myöhemmin Tili-asetuksista.",
+    "step3": { "title": "Kaikki valmista!" },
+    "summary": {
+      "account": "Tili",
+      "mode": "Tila",
+      "offlineMode": "Offline (ei synkronointia)",
+      "vault": "Holvi",
+      "encrypted": "Salattu",
+      "passkey": "Pääsyavain",
+      "passkeyEnabled": "Käytössä",
+      "passkeyNotSet": "Ei asetettu"
+    }
+  },
+
+  "passphraseGenerator": {
+    "title": "Luo tunnuslause",
+    "btn": {
+      "generate": "Luo",
+      "copied": "Kopioitu!",
+      "copy": "Kopioi",
+      "use": "Käytä tätä tunnuslausetta"
+    }
+  },
+
+  "unlock": {
+    "title": "Avaa holvi",
+    "description": "Sama holvin tunnuslause toimii kaikilla laitteilla. Pääsyavain on laitekohtainen; ota se käyttöön jokaisella laitteella nopeaa avausta varten.",
+    "passkey": {
+      "title": "Käytä pääsyavainta",
+      "descHasPasskey": "Avaa holvi ilman tunnuslauseen kirjoittamista tällä laitteella.",
+      "descNoPasskey": "Pääsyavainta ei ole määritetty tälle laitteelle.",
+      "descNotSupported": "Pääsyavaimia ei tueta tässä selaimessa.",
+      "tip": "Vinkki: ota pääsyavain käyttöön kohdassa Tili → Pääsyavaimet holvin avaamisen jälkeen."
+    },
+    "passphrase": {
+      "title": "Käytä holvin tunnuslausetta",
+      "placeholder": "Holvin tunnuslause"
+    },
+    "btn": {
+      "unlocking": "Avataan…",
+      "unlockPasskey": "Avaa pääsyavaimella",
+      "unlock": "Avaa"
+    },
+    "error": {
+      "wrongPassphrase": "Väärä tunnuslause. Yritä uudelleen.",
+      "passkeyCancelled": "Pääsyavaimen todentaminen peruutettiin.",
+      "passkeyNotSupported": "Pääsyavaimia ei tueta tällä laitteella."
+    }
+  },
+
+  "dashboard": {
+    "title": "Koti",
+    "autoRefresh": { "label": "Auto" },
+    "btn": { "refresh": "Päivitä" },
+    "kpi": {
+      "totalValue": "Kokonaisarvo",
+      "realizedPnl": "Realisoitunut tulos",
+      "unrealizedPnl": "Realisoimaton tulos"
+    },
+    "chart": {
+      "allocation": "Allokaatio",
+      "portfolioValue": "Salkun arvo"
+    },
+    "empty": {
+      "allocation": {
+        "title": "Ei allokaatiotietoja",
+        "desc": "Tuo tapahtumia nähdäksesi salkun allokaation."
+      },
+      "snapshots": {
+        "title": "Ei tilannekuvia vielä",
+        "desc": "Salkun arvokaavio ilmestyy hintapäivitysten jälkeen."
+      },
+      "positions": {
+        "title": "Ei positioita vielä",
+        "desc": "Tuo tapahtumia nähdäksesi omistuksesi."
+      }
+    },
+    "topPositions": { "title": "Suurimmat positiot" },
+    "lastUpdate": "Viimeisin päivitys:"
+  },
+
+  "portfolio": {
+    "title": "Salkku",
+    "filter": { "allAccounts": "Kaikki tilit" },
+    "sort": { "value": "Järjestys: Arvo", "name": "Järjestys: Nimi" },
+    "row": { "cost": "hankintahinta" },
+    "empty": {
+      "title": "Ei omistuksia vielä",
+      "desc": "Tuo tapahtumia nähdäksesi salkkusi.",
+      "action": "Tuo"
+    }
+  },
+
+  "tokenDetail": {
+    "btn": { "close": "Sulje" },
+    "amount": "Määrä",
+    "value": "Arvo",
+    "unrealized": "Realisoimaton",
+    "priceChart": {
+      "title": "Hinta ({{currency}})",
+      "empty": "Ei hintapisteitä vielä. Tuonnit lisäävät determinisitiset hintapisteet kirjanpidosta; myöhemmät versiot noutavat ulkoisia hintoja."
+    },
+    "badge": { "missingPrice": "hintatiedot puuttuvat" },
+    "events": { "title": "Tapahtumat", "empty": "Tälle omaisuuserälle ei löytynyt tapahtumia." },
+    "lots": {
+      "title": "Erät",
+      "cost": "hankintahinta",
+      "empty": "Ei eriä (positio on tyhjä tai ei vielä johdettu)."
+    }
+  },
+
+  "transactions": {
+    "title": "Tapahtumat",
+    "form": {
+      "addTitle": "Lisää manuaalinen tapahtuma",
+      "editTitle": "Muokkaa (korvaus) {{id}}",
+      "type": "Tyyppi",
+      "asset": "Omaisuuserä",
+      "timestamp": "Aikaleima (UTC ISO)",
+      "amount": "Määrä",
+      "pricePerUnit": "Yksikköhinta ({{currency}})",
+      "fee": "Palkkio ({{currency}})",
+      "feeAsset": "Palkkion omaisuuserä (valinnainen token-palkkio)",
+      "feeAssetBase": "{{currency}} (perusvaluutta)",
+      "feeAmount": "Palkkion määrä (token)",
+      "feeValue": "Palkkion arvo ({{currency}})",
+      "assetOut": "Omaisuuserä ulos",
+      "amountOut": "Määrä ulos",
+      "valuationTotal": "Arvostus yhteensä ({{currency}})",
+      "externalRef": "Ulkoinen viite (valinnainen)",
+      "notes": "Muistiinpanot"
+    },
+    "btn": {
+      "cancel": "Peruuta",
+      "saving": "Tallennetaan…",
+      "saveReplacement": "Tallenna korvaus",
+      "addEvent": "Lisää tapahtuma",
+      "reset": "Nollaa",
+      "details": "Tiedot",
+      "edit": "Muokkaa",
+      "closeDrawer": "Sulje",
+      "drawerEdit": "Muokkaa (korvaus)",
+      "drawerDelete": "Poista"
+    },
+    "ledger": {
+      "title": "Kirjanpitotapahtumat",
+      "count": "{{n}} tapahtumaa",
+      "empty": "Ei tapahtumia vielä. Tuo pörssistä tai lisää manuaalisesti yllä."
+    },
+    "badge": { "deleted": "poistettu", "replaced": "korvattu" },
+    "row": {
+      "feeBase": "peruspalkkio:",
+      "tokenFee": "token-palkkio:",
+      "feeValue": "arvo",
+      "replacedBy": "Korvattu:"
+    },
+    "detail": {
+      "time": "Aika",
+      "account": "Tili",
+      "amount": "Määrä",
+      "swapOut": "Vaihto ulos",
+      "fee": "Palkkio",
+      "externalRef": "Ulkoinen viite",
+      "rawJson": "Raaka JSON"
+    },
+    "msg": {
+      "savedReplacement": "Korvaustapahtuma tallennettu (append-only).",
+      "addedEvent": "Tapahtuma lisätty.",
+      "deleted": "Poistettu (tombstone lisätty)."
+    }
+  },
+
+  "tax": {
+    "title": "Verot",
+    "form": {
+      "year": "Verovuosi",
+      "profile": "Veroprofiili",
+      "lotMethod": "Erämetodi"
+    },
+    "profile": {
+      "generic": "YLEINEN",
+      "finland": "SUOMI (FIFO)"
+    },
+    "btn": {
+      "generate": "Luo raportti",
+      "exportCsv": "Vie CSV",
+      "exportPdf": "Vie PDF"
+    },
+    "baseCurrency": "Perusvaluutta:",
+    "kpi": {
+      "realizedGain": "Realisoitunut voitto",
+      "proceeds": "Myyntitulot",
+      "costBasis": "Hankintameno",
+      "fees": "Palkkiot",
+      "income": "Tulot"
+    },
+    "disposals": {
+      "title": "Realisoidut myynnit",
+      "profileLabel": "Profiili:",
+      "lotLabel": "Erä:",
+      "generatePrompt": "Luo raportti nähdäksesi valitun vuoden myynnit.",
+      "empty": "Verotettavia myyntejä ei löytynyt vuodelle {{year}}."
+    },
+    "table": {
+      "date": "Päivämäärä (UTC)",
+      "asset": "Omaisuuserä",
+      "amount": "Määrä",
+      "proceeds": "Myyntitulot",
+      "costBasis": "Hankintameno",
+      "fees": "Palkkiot",
+      "gainLoss": "Voitto/Tappio"
+    },
+    "income": {
+      "title": "Tulot (palkkiot/airdropsit)",
+      "table": { "date": "Päivämäärä", "type": "Tyyppi", "income": "Tulo" },
+      "empty": "Ei palkkio-/airdrop-tuloja vuonna {{year}}."
+    },
+    "holdings": {
+      "title": "Vuoden lopun omistukset",
+      "empty": "Ei omistuksia vuoden {{year}} lopussa."
+    },
+    "warnings": { "title": "Varoitukset" }
+  },
+
+  "alerts": {
+    "title": "Hälytykset",
+    "serverRequiresLogin": "Palvelinhälytykset vaativat kirjautumisen + synkronoinnin",
+    "local": { "title": "Paikalliset hälytyssäännöt", "base": "Perus:" },
+    "form": {
+      "type": "Tyyppi",
+      "direction": "Suunta",
+      "asset": "Omaisuuserä",
+      "assetPlaceholder": "Valitse…",
+      "threshold": "Kynnysarvo",
+      "thresholdPercent": "Prosentti",
+      "thresholdBase": "Perusvaluutta",
+      "cooldown": "Jäähdytysaika (min)"
+    },
+    "type": {
+      "portfolioValue": "Salkun arvo",
+      "price": "Omaisuuserän hinta",
+      "drawdown": "Pudotus",
+      "pctChange": "%-muutos"
+    },
+    "direction": { "above": "Yli", "below": "Ali" },
+    "btn": { "addAlert": "Lisää hälytys", "delete": "Poista" },
+    "existing": { "label": "Olemassa olevat" },
+    "row": { "cooldown": "Jäähdytys: {{n}} min", "enabled": "Käytössä" },
+    "empty": "Ei hälytyksiä vielä.",
+    "server": {
+      "title": "Palvelinhälytykset (opt-in)",
+      "description": "Ota käyttöön push-ilmoitukset myös kun sovellus on suljettuna.",
+      "loginRequired": "Kirjautuminen vaaditaan palvelinhälytysten käyttöön.",
+      "enabledRules": "Käytössä olevat säännöt",
+      "mirrorUpdated": "Peilitila päivitetty",
+      "btn": {
+        "refresh": "Päivitä",
+        "syncing": "Synkronoidaan…",
+        "syncRules": "Synkronoi säännöt palvelimelle",
+        "updating": "Päivitetään…",
+        "updateState": "Päivitä peilitila",
+        "enabling": "Otetaan käyttöön…",
+        "enableDelivery": "Ota toimitus käyttöön (säilytä säännöt)",
+        "enablingPush": "Otetaan push käyttöön…",
+        "enablePush": "Ota push-ilmoitukset käyttöön (tämä laite)",
+        "sending": "Lähetetään…",
+        "testPush": "Lähetä testi-ilmoitus"
+      }
+    },
+    "triggerLog": {
+      "title": "Laukaisuloki",
+      "btn": { "refresh": "Päivitä" },
+      "empty": "Ei laukaisuja vielä."
+    },
+    "error": {
+      "loginRequiredSync": "Kirjautuminen vaaditaan palvelinhälytysten synkronointiin.",
+      "loginRequired": "Kirjautuminen vaaditaan."
+    },
+    "msg": {
+      "pushEnabled": "Push käytössä tällä laitteella.",
+      "pushTestFailed": "Push-testi epäonnistui."
+    }
+  },
+
+  "imports": {
+    "title": "Tuonnit",
+    "description": "Yhdistä pörssejä ja tuo tapahtumia append-only-kirjanpitoon.",
+    "coinbase": {
+      "title": "Coinbase",
+      "subtitle": "CDP Secret API Key (ECDSA / ES256)"
+    },
+    "btn": {
+      "disconnect": "Katkaise yhteys",
+      "connect": "Yhdistä",
+      "fetchNewest": "Hae uusimmat",
+      "fetchAll": "Hae koko historia",
+      "runNow": "Aja nyt",
+      "rebuildPreview": "Rakenna esikatselu uudelleen",
+      "commit": "Vahvista"
+    },
+    "step1": { "title": "Vaihe 1: Yhdistä" },
+    "form": {
+      "keyName": "Avaimen nimi",
+      "keyNamePlaceholder": "organizations/.../apiKeys/...",
+      "privateKey": "Yksityinen avain (PEM tai JSON-avaintiedosto)",
+      "privateKeyPlaceholder": "Liitä PEM tai JSON-avaintiedoston sisältö"
+    },
+    "badge": {
+      "connected": "Yhdistetty",
+      "dup": "duplikaatti",
+      "new": "uusi"
+    },
+    "step2": { "title": "Vaihe 2: Hae" },
+    "toggle": {
+      "autoCommit": "Automaattinen vahvistus haun jälkeen",
+      "autoSync": "Automaattinen synkronointi sovelluksen ollessa auki"
+    },
+    "autosync": {
+      "status": "Automaattisen synkronoinnin tila",
+      "running": "käynnissä…",
+      "idle": "odottaa",
+      "lastRun": "Viimeisin ajo",
+      "lastCommit": "Viimeisin vahvistus",
+      "nextRun": "Seuraava ajo",
+      "fetchedLastTime": "Haettu viimeksi",
+      "backoff": "Viive: {{n}} peräkkäistä epäonnistumista",
+      "cursors": "Viimeisimmät kursorit:",
+      "cursorTelemetry": "Kursoritelemetria (viimeisin automaattinen synkronointi)"
+    },
+    "step3": { "title": "Vaihe 3: Esikatselu ja vahvistus" },
+    "preview": {
+      "fetched": "Haettu",
+      "mappedEvents": "Kartoitetut tapahtumat",
+      "newEvents": "Uudet tapahtumat",
+      "duplicates": "Duplikaatit",
+      "issues": "Ongelmat",
+      "empty": "Hae luodaksesi esikatselun.",
+      "resolveIssues": "Ratkaise ongelmat vahvistuksen mahdollistamiseksi.",
+      "ready": "Valmis.",
+      "nothingNew": "Ei uutta vahvistettavaa.",
+      "noMappedEvents": "Ei kartoitettuja tapahtumia.",
+      "truncated": "Näytetään ensimmäiset 200 tapahtumaa…"
+    },
+    "panel": {
+      "preview": "Esikatselu",
+      "previewSubtitle": "Kirjanpitotapahtumat (uudet + duplikaatit)",
+      "issues": "Ongelmat",
+      "issuesSubtitle": "Perusvaluutta:"
+    },
+    "issues": {
+      "fxMissing": "Puuttuvat valuuttakurssit",
+      "feeMissing": "Palkkion arvo puuttuu",
+      "swapMissing": "Vaihdon arvostus puuttuu",
+      "rewardMissing": "Palkkion FMV puuttuu",
+      "rebuildHint": "Syötettyäsi arvot, napsauta Rakenna esikatselu uudelleen.",
+      "noIssues": "Ei estäviä ongelmia."
+    },
+    "done": {
+      "title": "Tuonti vahvistettu",
+      "badge": "valmis",
+      "fetched": "Haettu:",
+      "mappedEvents": "Kartoitetut tapahtumat:",
+      "newEvents": "Uudet vahvistetut tapahtumat:",
+      "duplicates": "Ohitetut duplikaatit:",
+      "assetsCreated": "Luodut omaisuuserät:",
+      "viewTransactions": "Näytä tapahtumat",
+      "viewPortfolio": "Näytä salkku"
+    },
+    "error": {
+      "vaultLocked": "Holvi on lukittu. Avaa holvi yhdistääksesi Coinbasen.",
+      "notAuthenticated": "Ei tunnistautunut. Rekisteröidy tai kirjaudu ensin.",
+      "resolveIssues": "Tuonti vaatii syötteitä ennen vahvistusta. Ratkaise alla olevat ongelmat."
+    }
+  },
+
+  "assets": {
+    "title": "Omaisuuserät",
+    "description": "Kartoita omaisuuserät CoinGecko-tunnisteisiin. Kartoittamattomat estävät reaaliaikaiset hinnat ja jotkin tuonnit.",
+    "btn": {
+      "refreshPrices": "Päivitä hinnat + rakenna uudelleen",
+      "unlink": "Poista linkitys",
+      "searching": "Haetaan…",
+      "search": "Hae",
+      "link": "Linkitä",
+      "edit": "Muokkaa"
+    },
+    "panel": {
+      "unmapped": "Kartoittamattomat omaisuuserät",
+      "mapping": "Kartoitus",
+      "mapped": "Kartoitetut omaisuuserät"
+    },
+    "badge": { "counts": "{{unmapped}} kartoittamatta / {{mapped}} kartoitettu" },
+    "allMapped": "Kaikki omaisuuserät on kartoitettu.",
+    "mapping": {
+      "selectPrompt": "Valitse omaisuuserä vasemmalta.",
+      "currentId": "Nykyinen coingeckoId"
+    },
+    "search": {
+      "placeholder": "Hae CoinGeckosta (esim. bitcoin, ethereum)",
+      "empty": "Hae nähdäksesi tulokset."
+    },
+    "result": { "rank": "sija #" },
+    "help": {
+      "title": "Miksi tällä on väliä",
+      "point1": "Reaaliaikaiset hinnat käyttävät CoinGecko-tunnisteita. Ilman kartoitusta salkun arvo voi olla 0.",
+      "point2": "Palkkioiden arvostus ja palkkioiden FMV-tila voivat vaatia deterministiset hinnat.",
+      "point3": "Ei symbolin arvailua: kartoitus on eksplisiittinen ja tarkastuskelpoinen."
+    },
+    "mapped": { "truncated": "Näytetään ensimmäiset 200 kartoitettua omaisuuserää." },
+    "stats": {
+      "total": "Omaisuuserät yhteensä: {{total}}. Kartoittamatta: {{unmapped}}.",
+      "impact": "Arvioitu vaikutus: {{count}} omaisuuserältä puuttuvat reaaliaikaiset hinnat.",
+      "allSet": "Kaikki kunnossa."
+    },
+    "kind": { "fiat": "Fiat", "crypto": "Krypto" }
+  },
+
+  "account": {
+    "title": "Tili",
+    "passkeys": {
+      "title": "Pääsyavaimet",
+      "notSupported": "Laitteesi ei tue pääsyavaimia.",
+      "none": "Pääsyavaimia ei ole määritetty tälle laitteelle.",
+      "item": "Pääsyavain · {{date}}",
+      "btn": {
+        "remove": "Poista",
+        "adding": "Lisätään…",
+        "add": "Lisää pääsyavain"
+      }
+    },
+    "security": { "title": "Turvallisuus" },
+    "password": {
+      "title": "Vaihda salasana",
+      "currentPlaceholder": "Nykyinen salasana",
+      "newPlaceholder": "Uusi salasana (vähintään 8 merkkiä)",
+      "btn": { "changing": "Vaihdetaan…", "submit": "Vaihda salasana" },
+      "error": { "wrong": "Väärä nykyinen salasana." },
+      "success": "Salasana vaihdettu."
+    },
+    "passphrase": {
+      "title": "Vaihda holvin tunnuslause",
+      "currentPlaceholder": "Nykyinen tunnuslause",
+      "newPlaceholder": "Uusi tunnuslause (vähintään 6 merkkiä)",
+      "confirmPlaceholder": "Vahvista uusi tunnuslause",
+      "error": {
+        "mismatch": "Tunnuslauseet eivät täsmää",
+        "wrong": "Väärä nykyinen tunnuslause tai salauksen purku epäonnistui."
+      },
+      "btn": { "changing": "Vaihdetaan…", "submit": "Vaihda tunnuslause" },
+      "success": "Holvin tunnuslause vaihdettu."
+    },
+    "data": {
+      "title": "Tiedot",
+      "exportComingSoon": "Vie salattu varmuuskopio (tulossa pian)"
+    }
+  },
+
+  "settings": {
+    "title": "Asetukset",
+    "account": {
+      "title": "Tili",
+      "loggedIn": "Kirjautunut: {{email}}",
+      "notLoggedIn": "Ei kirjautunut"
+    },
+    "btn": { "save": "Tallenna" },
+    "portfolio": {
+      "title": "Salkun asetukset",
+      "description": "Nämä asetukset vaikuttavat tuonteihin, erien laskentaan ja verolaskelmiin. Muutokset rakentavat johdetut välimuistit uudelleen.",
+      "baseCurrency": "Perusvaluutta",
+      "lotMethod": "Oletuserämetodi",
+      "rewardsCostBasis": "Palkkioiden hankintahinta",
+      "rewardsZero": "NOLLA (oletus)",
+      "rewardsFmv": "FMV (vaatii hinnan/käyttäjän syötteen)",
+      "taxProfile": "Veroprofiili",
+      "autoRefresh": "Hintapäivitys",
+      "savedMsg": "Tallennettu + johdetut välimuistit rakennettu uudelleen"
+    },
+    "autoRefresh": {
+      "off": "Pois",
+      "1min": "Joka 1 min",
+      "5min": "Joka 5 min",
+      "15min": "Joka 15 min"
+    },
+    "security": {
+      "title": "Turvallisuus",
+      "description": "Ota pääsyavain käyttöön tällä laitteella avataksesi holvin ilman tunnuslausetta.",
+      "passkeyLabel": "Pääsyavainlukitus (tämä laite)",
+      "passkeyEnabled": "Käytössä",
+      "passkeyNotEnabled": "Ei käytössä",
+      "passkeyNotSupported": "Ei tuettu tässä selaimessa",
+      "btn": { "enable": "Ota käyttöön", "remove": "Poista" },
+      "error": { "vaultLocked": "Avaa holvi ensin." },
+      "msg": {
+        "enabled": "Pääsyavain otettu käyttöön tälle laitteelle.",
+        "removed": "Pääsyavain poistettu tältä laitteelta."
+      }
+    },
+    "notifications": {
+      "title": "Ilmoitukset",
+      "serverAlerts": {
+        "title": "Palvelinhälytykset",
+        "desc": "Push-ilmoitukset myös kun sovellus on suljettuna.",
+        "enabled": "Käytössä",
+        "disabled": "Pois käytöstä"
+      },
+      "enabledRules": "Käytössä olevat säännöt",
+      "mirrorUpdated": "Peilitila päivitetty",
+      "btn": {
+        "refreshStatus": "Päivitä tila",
+        "clearRules": "Tyhjennä palvelinsäännöt"
+      },
+      "confirmClearRules": "Tämä poistaa KAIKKI palvelinpuolen hälytyssäännöt tililtäsi. Jatketaanko?",
+      "msg": {
+        "alertsEnabled": "Palvelinhälytykset käytössä.",
+        "alertsDisabled": "Palvelinhälytykset pois käytöstä.",
+        "rulesCleared": "Palvelinsäännöt tyhjennetty."
+      },
+      "error": { "loginRequired": "Kirjautuminen vaaditaan palvelinhälytysten hallintaan." },
+      "devicePush": {
+        "title": "Laitteen push",
+        "desc": "Laitekohtainen lupa (selain). Hallitaan Hälytykset-sivulla.",
+        "on": "Päällä",
+        "off": "Pois",
+        "hint": "Siirry Hälytyksiin ottaaksesi push-ilmoitukset käyttöön tälle laitteelle."
+      }
+    },
+    "sync": {
+      "title": "Synkronointi",
+      "btn": { "syncNow": "Synkronoi nyt" }
+    },
+    "advanced": {
+      "title": "Edistyneet (dev)",
+      "description": "API-perusosoite (vain Vite proxy/localhost)."
+    },
+    "language": {
+      "title": "Kieli",
+      "en": "English",
+      "fi": "Suomi"
+    }
+  }
+}

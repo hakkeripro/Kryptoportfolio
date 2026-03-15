@@ -1,0 +1,653 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading…",
+    "reset": "Reset",
+    "details": "Details",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "cost": "cost",
+    "import": "Import",
+    "refresh": "Refresh"
+  },
+
+  "nav": {
+    "home": "Home",
+    "portfolio": "Portfolio",
+    "transactions": "Transactions",
+    "txns": "Txns",
+    "taxes": "Taxes",
+    "settings": "Settings",
+    "sync": "Sync",
+    "lockVault": "Lock vault",
+    "locked": "Locked"
+  },
+
+  "welcome": {
+    "title": "VaultFolio",
+    "tagline": "The only crypto tracker that never sees your data.",
+    "usp": {
+      "encryption": {
+        "title": "Zero-Knowledge Encryption",
+        "desc": "Your data is encrypted before it leaves your device. We can never see it."
+      },
+      "import": {
+        "title": "Multi-Exchange Import",
+        "desc": "Connect Coinbase and more exchanges with one click."
+      },
+      "tax": {
+        "title": "Tax Reports",
+        "desc": "Generate capital gains reports ready for tax filing."
+      }
+    },
+    "cta": {
+      "signup": "Get Started Free",
+      "signin": "Sign In",
+      "offline": "Use without account"
+    },
+    "footer": "Your data never leaves your device unencrypted."
+  },
+
+  "signup": {
+    "title": "Create account",
+    "email": { "label": "Email" },
+    "password": { "label": "Password" },
+    "confirmPassword": { "label": "Confirm password" },
+    "error": {
+      "passwordTooShort": "Password must be at least 8 characters",
+      "passwordMismatch": "Passwords do not match",
+      "emailTaken": "An account with this email already exists.",
+      "serverUnreachable": "Could not reach the server. Please try again."
+    },
+    "btn": {
+      "creating": "Creating account…",
+      "submit": "Create account"
+    },
+    "signinPrompt": "Already have an account?",
+    "signinLink": "Sign in"
+  },
+
+  "signin": {
+    "title": "Sign in",
+    "email": { "label": "Email" },
+    "password": { "label": "Password" },
+    "btn": {
+      "loading": "Signing in…",
+      "submit": "Sign in"
+    },
+    "error": {
+      "invalidCredentials": "Invalid email or password.",
+      "serverUnreachable": "Could not reach the server. Please try again."
+    },
+    "signupPrompt": "Don't have an account?",
+    "signupLink": "Create account"
+  },
+
+  "vaultSetup": {
+    "step1": {
+      "title": "Set up your Vault",
+      "description": "Your Vault Passphrase encrypts all data. Save it somewhere safe — it cannot be recovered."
+    },
+    "passphraseLabel": "Vault Passphrase",
+    "passphrasePlaceholder": "Enter passphrase (min 6 characters)",
+    "confirmLabel": "Confirm Passphrase",
+    "confirmPlaceholder": "Confirm passphrase",
+    "error": { "mismatch": "Passphrases do not match" },
+    "savedCheckbox": "I saved my passphrase somewhere safe",
+    "btn": {
+      "creating": "Creating vault…",
+      "continue": "Continue",
+      "enablingPasskey": "Enabling…",
+      "enablePasskey": "Enable Passkey (recommended)",
+      "skipPasskey": "Skip for now",
+      "goDashboard": "Go to Dashboard"
+    },
+    "step2": {
+      "title": "Enable Passkey",
+      "description": "A passkey lets you unlock without typing your passphrase on this device. It is device-specific."
+    },
+    "passkeyNotSupported": "Your device does not support passkeys. You can always add one later from Account settings.",
+    "step3": { "title": "You're all set!" },
+    "summary": {
+      "account": "Account",
+      "mode": "Mode",
+      "offlineMode": "Offline (no sync)",
+      "vault": "Vault",
+      "encrypted": "Encrypted",
+      "passkey": "Passkey",
+      "passkeyEnabled": "Enabled",
+      "passkeyNotSet": "Not set"
+    }
+  },
+
+  "passphraseGenerator": {
+    "title": "Generate a passphrase",
+    "btn": {
+      "generate": "Generate",
+      "copied": "Copied!",
+      "copy": "Copy",
+      "use": "Use this passphrase"
+    }
+  },
+
+  "unlock": {
+    "title": "Unlock Vault",
+    "description": "Same Vault Passphrase works on all devices. A Passkey is device-specific; enable it per device for quick unlock.",
+    "passkey": {
+      "title": "Use Passkey",
+      "descHasPasskey": "Unlock without typing your passphrase on this device.",
+      "descNoPasskey": "No passkey configured on this device yet.",
+      "descNotSupported": "Passkeys are not supported in this browser.",
+      "tip": "Tip: enable a passkey in Account → Passkeys after unlocking."
+    },
+    "passphrase": {
+      "title": "Use Vault Passphrase",
+      "placeholder": "Vault passphrase"
+    },
+    "btn": {
+      "unlocking": "Unlocking…",
+      "unlockPasskey": "Unlock with Passkey",
+      "unlock": "Unlock"
+    },
+    "error": {
+      "wrongPassphrase": "Wrong passphrase. Try again.",
+      "passkeyCancelled": "Passkey authentication was cancelled.",
+      "passkeyNotSupported": "Passkeys are not supported on this device."
+    }
+  },
+
+  "dashboard": {
+    "title": "Home",
+    "autoRefresh": { "label": "Auto" },
+    "btn": { "refresh": "Refresh" },
+    "kpi": {
+      "totalValue": "Total Value",
+      "realizedPnl": "Realized P&L",
+      "unrealizedPnl": "Unrealized P&L"
+    },
+    "chart": {
+      "allocation": "Allocation",
+      "portfolioValue": "Portfolio Value"
+    },
+    "empty": {
+      "allocation": {
+        "title": "No allocation data",
+        "desc": "Import transactions to see your portfolio allocation."
+      },
+      "snapshots": {
+        "title": "No snapshots yet",
+        "desc": "Portfolio value chart will appear after price updates."
+      },
+      "positions": {
+        "title": "No positions yet",
+        "desc": "Import transactions to see your holdings."
+      }
+    },
+    "topPositions": { "title": "Top Positions" },
+    "lastUpdate": "Last update:"
+  },
+
+  "portfolio": {
+    "title": "Portfolio",
+    "filter": { "allAccounts": "All accounts" },
+    "sort": { "value": "Sort: Value", "name": "Sort: Name" },
+    "row": { "cost": "cost" },
+    "empty": {
+      "title": "No holdings yet",
+      "desc": "Import transactions to see your portfolio.",
+      "action": "Import"
+    }
+  },
+
+  "tokenDetail": {
+    "btn": { "close": "Close" },
+    "amount": "Amount",
+    "value": "Value",
+    "unrealized": "Unrealized",
+    "priceChart": {
+      "title": "Price ({{currency}})",
+      "empty": "No price points yet. Imports add deterministic price points from ledger; later versions will fetch external prices."
+    },
+    "badge": { "missingPrice": "missing price data" },
+    "events": { "title": "Events", "empty": "No events found for this asset." },
+    "lots": {
+      "title": "Lots",
+      "cost": "cost",
+      "empty": "No lots (position is empty or not yet derived)."
+    }
+  },
+
+  "transactions": {
+    "title": "Transactions",
+    "form": {
+      "addTitle": "Add manual event",
+      "editTitle": "Edit (replacement) {{id}}",
+      "type": "Type",
+      "asset": "Asset",
+      "timestamp": "Timestamp (UTC ISO)",
+      "amount": "Amount",
+      "pricePerUnit": "Price per unit ({{currency}})",
+      "fee": "Fee ({{currency}})",
+      "feeAsset": "Fee asset (optional token fee)",
+      "feeAssetBase": "{{currency}} (base)",
+      "feeAmount": "Fee amount (token)",
+      "feeValue": "Fee value ({{currency}})",
+      "assetOut": "Asset out",
+      "amountOut": "Amount out",
+      "valuationTotal": "Valuation total ({{currency}})",
+      "externalRef": "External ref (optional)",
+      "notes": "Notes"
+    },
+    "btn": {
+      "cancel": "Cancel",
+      "saving": "Saving…",
+      "saveReplacement": "Save replacement",
+      "addEvent": "Add event",
+      "reset": "Reset",
+      "details": "Details",
+      "edit": "Edit",
+      "closeDrawer": "Close",
+      "drawerEdit": "Edit (replacement)",
+      "drawerDelete": "Delete"
+    },
+    "ledger": {
+      "title": "Ledger events",
+      "count": "{{n}} events",
+      "empty": "No events yet. Import from an exchange or add manually above."
+    },
+    "badge": { "deleted": "deleted", "replaced": "replaced" },
+    "row": {
+      "feeBase": "feeBase:",
+      "tokenFee": "token fee:",
+      "feeValue": "value",
+      "replacedBy": "Replaced by:"
+    },
+    "detail": {
+      "time": "Time",
+      "account": "Account",
+      "amount": "Amount",
+      "swapOut": "Swap out",
+      "fee": "Fee",
+      "externalRef": "External ref",
+      "rawJson": "Raw event JSON"
+    },
+    "msg": {
+      "savedReplacement": "Saved replacement event (append-only).",
+      "addedEvent": "Added event.",
+      "deleted": "Deleted (tombstone appended)."
+    }
+  },
+
+  "tax": {
+    "title": "Taxes",
+    "form": {
+      "year": "Tax year",
+      "profile": "Tax profile",
+      "lotMethod": "Lot method"
+    },
+    "profile": {
+      "generic": "GENERIC",
+      "finland": "FINLAND (FIFO)"
+    },
+    "btn": {
+      "generate": "Generate",
+      "exportCsv": "Export CSV",
+      "exportPdf": "Export PDF"
+    },
+    "baseCurrency": "Base currency:",
+    "kpi": {
+      "realizedGain": "Realized gain",
+      "proceeds": "Proceeds",
+      "costBasis": "Cost basis",
+      "fees": "Fees",
+      "income": "Income"
+    },
+    "disposals": {
+      "title": "Realized disposals",
+      "profileLabel": "Profile:",
+      "lotLabel": "Lot:",
+      "generatePrompt": "Generate a report to see disposals for the selected year.",
+      "empty": "No taxable disposals found for {{year}}."
+    },
+    "table": {
+      "date": "Date (UTC)",
+      "asset": "Asset",
+      "amount": "Amount",
+      "proceeds": "Proceeds",
+      "costBasis": "Cost basis",
+      "fees": "Fees",
+      "gainLoss": "Gain/Loss"
+    },
+    "income": {
+      "title": "Income (rewards/airdrops)",
+      "table": { "date": "Date", "type": "Type", "income": "Income" },
+      "empty": "No reward/airdrop income events in {{year}}."
+    },
+    "holdings": {
+      "title": "Year-end holdings",
+      "empty": "No holdings at the end of {{year}}."
+    },
+    "warnings": { "title": "Warnings" }
+  },
+
+  "alerts": {
+    "title": "Alerts",
+    "serverRequiresLogin": "Server alerts require login + sync",
+    "local": { "title": "Local alert rules", "base": "Base:" },
+    "form": {
+      "type": "Type",
+      "direction": "Direction",
+      "asset": "Asset",
+      "assetPlaceholder": "Select…",
+      "threshold": "Threshold",
+      "thresholdPercent": "Percent",
+      "thresholdBase": "Base currency",
+      "cooldown": "Cooldown (min)"
+    },
+    "type": {
+      "portfolioValue": "Portfolio value",
+      "price": "Asset price",
+      "drawdown": "Drawdown",
+      "pctChange": "Pct-change"
+    },
+    "direction": { "above": "Above", "below": "Below" },
+    "btn": { "addAlert": "Add alert", "delete": "Delete" },
+    "existing": { "label": "Existing" },
+    "row": { "cooldown": "Cooldown: {{n}}m", "enabled": "Enabled" },
+    "empty": "No alerts yet.",
+    "server": {
+      "title": "Server alerts (opt-in)",
+      "description": "Enable to get push notifications even when the app is closed.",
+      "loginRequired": "Login required to enable server alerts.",
+      "enabledRules": "Enabled rules",
+      "mirrorUpdated": "Mirror updated",
+      "btn": {
+        "refresh": "Refresh",
+        "syncing": "Syncing…",
+        "syncRules": "Sync rules to server",
+        "updating": "Updating…",
+        "updateState": "Update mirror state",
+        "enabling": "Enabling…",
+        "enableDelivery": "Enable delivery (keep existing rules)",
+        "enablingPush": "Enabling push…",
+        "enablePush": "Enable push notifications (this device)",
+        "sending": "Sending…",
+        "testPush": "Send test notification"
+      }
+    },
+    "triggerLog": {
+      "title": "Trigger log",
+      "btn": { "refresh": "Refresh" },
+      "empty": "No triggers yet."
+    },
+    "error": {
+      "loginRequiredSync": "Login required to sync server alerts.",
+      "loginRequired": "Login required."
+    },
+    "msg": {
+      "pushEnabled": "Push enabled for this device.",
+      "pushTestFailed": "Push test failed."
+    }
+  },
+
+  "imports": {
+    "title": "Imports",
+    "description": "Connect exchanges and import transactions into the append-only ledger.",
+    "coinbase": {
+      "title": "Coinbase",
+      "subtitle": "CDP Secret API Key (ECDSA / ES256)"
+    },
+    "btn": {
+      "disconnect": "Disconnect",
+      "connect": "Connect",
+      "fetchNewest": "Fetch newest",
+      "fetchAll": "Fetch all history",
+      "runNow": "Run now",
+      "rebuildPreview": "Rebuild preview",
+      "commit": "Commit"
+    },
+    "step1": { "title": "Step 1: Connect" },
+    "form": {
+      "keyName": "Key name",
+      "keyNamePlaceholder": "organizations/.../apiKeys/...",
+      "privateKey": "Private key (PEM or JSON key file)",
+      "privateKeyPlaceholder": "Paste PEM or JSON key file contents"
+    },
+    "badge": {
+      "connected": "Connected",
+      "dup": "dup",
+      "new": "new"
+    },
+    "step2": { "title": "Step 2: Fetch" },
+    "toggle": {
+      "autoCommit": "Auto-commit after fetch",
+      "autoSync": "Auto-sync while app is open"
+    },
+    "autosync": {
+      "status": "Auto-sync status",
+      "running": "running…",
+      "idle": "idle",
+      "lastRun": "Last run",
+      "lastCommit": "Last commit",
+      "nextRun": "Next run",
+      "fetchedLastTime": "Fetched last time",
+      "backoff": "Backoff: {{n}} consecutive failure(s)",
+      "cursors": "Last seen cursors:",
+      "cursorTelemetry": "Cursor telemetry (last autosync)"
+    },
+    "step3": { "title": "Step 3: Preview & commit" },
+    "preview": {
+      "fetched": "Fetched",
+      "mappedEvents": "Mapped events",
+      "newEvents": "New events",
+      "duplicates": "Duplicates",
+      "issues": "Issues",
+      "empty": "Run a fetch to generate a preview.",
+      "resolveIssues": "Resolve issues to enable commit.",
+      "ready": "Ready.",
+      "nothingNew": "Nothing new to commit.",
+      "noMappedEvents": "No mapped events.",
+      "truncated": "Showing first 200 events…"
+    },
+    "panel": {
+      "preview": "Preview",
+      "previewSubtitle": "Ledger events (new + duplicates)",
+      "issues": "Issues",
+      "issuesSubtitle": "Base currency:"
+    },
+    "issues": {
+      "fxMissing": "Missing FX rates",
+      "feeMissing": "Fee value missing",
+      "swapMissing": "Swap valuation missing",
+      "rewardMissing": "Reward FMV missing",
+      "rebuildHint": "After entering values, click Rebuild preview.",
+      "noIssues": "No blocking issues."
+    },
+    "done": {
+      "title": "Import committed",
+      "badge": "done",
+      "fetched": "Fetched:",
+      "mappedEvents": "Mapped events:",
+      "newEvents": "New events committed:",
+      "duplicates": "Duplicates skipped:",
+      "assetsCreated": "Assets created:",
+      "viewTransactions": "View transactions",
+      "viewPortfolio": "View portfolio"
+    },
+    "error": {
+      "vaultLocked": "Vault is locked. Unlock vault to connect Coinbase.",
+      "notAuthenticated": "Not authenticated. Please register/login first.",
+      "resolveIssues": "Import needs input before it can be committed. Please resolve the issues below."
+    }
+  },
+
+  "assets": {
+    "title": "Assets",
+    "description": "Map assets to CoinGecko IDs (no symbol guessing). Unmapped assets block live pricing and some imports.",
+    "btn": {
+      "refreshPrices": "Refresh live prices + rebuild",
+      "unlink": "Unlink",
+      "searching": "Searching…",
+      "search": "Search",
+      "link": "Link",
+      "edit": "Edit"
+    },
+    "panel": {
+      "unmapped": "Unmapped assets",
+      "mapping": "Mapping",
+      "mapped": "Mapped assets"
+    },
+    "badge": { "counts": "{{unmapped}} unmapped / {{mapped}} mapped" },
+    "allMapped": "All assets are mapped.",
+    "mapping": {
+      "selectPrompt": "Select an asset from the left.",
+      "currentId": "Current coingeckoId"
+    },
+    "search": {
+      "placeholder": "Search CoinGecko (e.g. bitcoin, ethereum)",
+      "empty": "Search to see results."
+    },
+    "result": { "rank": "rank #" },
+    "help": {
+      "title": "Why this matters",
+      "point1": "Live prices use CoinGecko IDs. Without mapping, portfolio value may be 0 for that asset.",
+      "point2": "Fee valuation and reward FMV mode can require deterministic pricing.",
+      "point3": "No symbol guessing: the mapping is explicit and audit-friendly."
+    },
+    "mapped": { "truncated": "Showing first 200 mapped assets." },
+    "stats": {
+      "total": "Total assets: {{total}}. Total unmapped: {{unmapped}}.",
+      "impact": "Estimated impact: {{count}} asset(s) missing live prices.",
+      "allSet": "All set."
+    },
+    "kind": { "fiat": "Fiat", "crypto": "Crypto" }
+  },
+
+  "account": {
+    "title": "Account",
+    "passkeys": {
+      "title": "Passkeys",
+      "notSupported": "Your device does not support passkeys.",
+      "none": "No passkeys configured on this device.",
+      "item": "Passkey · {{date}}",
+      "btn": {
+        "remove": "Remove",
+        "adding": "Adding…",
+        "add": "Add Passkey"
+      }
+    },
+    "security": { "title": "Security" },
+    "password": {
+      "title": "Change password",
+      "currentPlaceholder": "Current password",
+      "newPlaceholder": "New password (min 8 characters)",
+      "btn": { "changing": "Changing…", "submit": "Change password" },
+      "error": { "wrong": "Wrong current password." },
+      "success": "Password changed."
+    },
+    "passphrase": {
+      "title": "Change vault passphrase",
+      "currentPlaceholder": "Current passphrase",
+      "newPlaceholder": "New passphrase (min 6 characters)",
+      "confirmPlaceholder": "Confirm new passphrase",
+      "error": {
+        "mismatch": "Passphrases do not match",
+        "wrong": "Wrong current passphrase or decryption failed."
+      },
+      "btn": { "changing": "Changing…", "submit": "Change passphrase" },
+      "success": "Vault passphrase changed."
+    },
+    "data": {
+      "title": "Data",
+      "exportComingSoon": "Export encrypted backup (coming soon)"
+    }
+  },
+
+  "settings": {
+    "title": "Settings",
+    "account": {
+      "title": "Account",
+      "loggedIn": "Logged in as {{email}}",
+      "notLoggedIn": "Not logged in"
+    },
+    "btn": { "save": "Save" },
+    "portfolio": {
+      "title": "Portfolio settings",
+      "description": "These settings affect imports, lotting and tax calculations. Changing them rebuilds derived caches.",
+      "baseCurrency": "Base currency",
+      "lotMethod": "Lot method default",
+      "rewardsCostBasis": "Rewards cost basis",
+      "rewardsZero": "ZERO (default)",
+      "rewardsFmv": "FMV (requires price/user input)",
+      "taxProfile": "Tax profile",
+      "autoRefresh": "Price auto-refresh",
+      "savedMsg": "Saved + rebuilt derived caches"
+    },
+    "autoRefresh": {
+      "off": "Off",
+      "1min": "Every 1 min",
+      "5min": "Every 5 min",
+      "15min": "Every 15 min"
+    },
+    "security": {
+      "title": "Security",
+      "description": "Enable a Passkey on this device to unlock without typing your Vault passphrase.",
+      "passkeyLabel": "Passkey unlock (this device)",
+      "passkeyEnabled": "Enabled",
+      "passkeyNotEnabled": "Not enabled",
+      "passkeyNotSupported": "Not supported in this browser",
+      "btn": { "enable": "Enable", "remove": "Remove" },
+      "error": { "vaultLocked": "Unlock the vault first." },
+      "msg": {
+        "enabled": "Passkey enabled for this device.",
+        "removed": "Passkey removed from this device."
+      }
+    },
+    "notifications": {
+      "title": "Notifications",
+      "serverAlerts": {
+        "title": "Server alerts",
+        "desc": "Push notifications even when the app is closed.",
+        "enabled": "Enabled",
+        "disabled": "Disabled"
+      },
+      "enabledRules": "Enabled rules",
+      "mirrorUpdated": "Mirror updated",
+      "btn": {
+        "refreshStatus": "Refresh status",
+        "clearRules": "Clear server rules"
+      },
+      "confirmClearRules": "This will delete ALL server-side alert rules for your account. Continue?",
+      "msg": {
+        "alertsEnabled": "Server alerts enabled.",
+        "alertsDisabled": "Server alerts disabled.",
+        "rulesCleared": "Server rules cleared."
+      },
+      "error": { "loginRequired": "Login required to manage server alerts." },
+      "devicePush": {
+        "title": "Device push",
+        "desc": "Per-device permission (browser). Managed in Alerts page.",
+        "on": "On",
+        "off": "Off",
+        "hint": "Go to Alerts to enable push notifications for this device."
+      }
+    },
+    "sync": {
+      "title": "Sync",
+      "btn": { "syncNow": "Sync now" }
+    },
+    "advanced": {
+      "title": "Advanced (dev)",
+      "description": "API base URL (Vite proxy/localhost only)."
+    },
+    "language": {
+      "title": "Language",
+      "en": "English",
+      "fi": "Suomi"
+    }
+  }
+}

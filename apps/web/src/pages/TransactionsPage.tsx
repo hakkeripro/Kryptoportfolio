@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Decimal from 'decimal.js';
 import { ensureWebDbOpen, getWebDb } from '@kp/platform-web';
 import type { LedgerEvent } from '@kp/core';
@@ -86,6 +87,7 @@ function buildReplacementId(oldId: string): string {
 }
 
 export default function TransactionsPage() {
+  const { t } = useTranslation();
   const [detailsId, setDetailsId] = useState<string | null>(null);
   const dbState = useDbQuery(
     async (db) => {
@@ -292,7 +294,7 @@ export default function TransactionsPage() {
 
   return (
     <div className="space-y-4">
-      <PageHeader title="Transactions" />
+      <PageHeader title={t('transactions.title')} />
 
       {msg ? (
         <div

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useVaultStore } from '../store/useVaultStore';
 import { useAuthStore } from '../store/useAuthStore';
 import {
@@ -45,6 +46,7 @@ function CoinbaseLogo() {
 type Step = 'connect' | 'fetch' | 'preview' | 'done';
 
 export default function ImportsPage() {
+  const { t } = useTranslation();
   const passphrase = useVaultStore((s) => s.passphrase);
   const token = useAuthStore((s) => s.token);
   const apiBase = useAuthStore((s) => s.apiBase);
@@ -374,7 +376,7 @@ export default function ImportsPage() {
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold">Imports</h1>
+          <h1 className="text-xl font-semibold">{t('imports.title')}</h1>
           <p className="text-sm text-content-secondary">
             Connect exchanges and import transactions into the append-only ledger.
           </p>

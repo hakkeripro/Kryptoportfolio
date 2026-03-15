@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import Decimal from 'decimal.js';
 import {
   Pie,
@@ -43,6 +44,7 @@ function colorForKey(key: string): string {
 }
 
 export default function DashboardPage() {
+  const { t } = useTranslation();
   const apiBase = useAuthStore((s) => s.apiBase);
   const dbState = useDashboardData();
   const baseCurrency = (dbState.data.settings?.baseCurrency ?? 'EUR').toUpperCase();
@@ -103,15 +105,15 @@ export default function DashboardPage() {
   return (
     <div className="space-y-section">
       <PageHeader
-        title="Home"
+        title={t('dashboard.title')}
         actions={
           <div className="flex items-center gap-2">
             <label className="flex items-center gap-2 text-caption text-content-secondary cursor-pointer" data-testid="toggle-auto-refresh">
               <input type="checkbox" checked={autoRefreshEnabled} onChange={(e) => void toggleAutoRefresh(e.target.checked)} className="accent-brand" />
-              Auto
+              {t('dashboard.autoRefresh.label')}
             </label>
             <Button variant="secondary" size="sm" loading={refreshing} icon={<RefreshCw className="h-3.5 w-3.5" />} data-testid="btn-refresh-prices" onClick={() => void refreshNow()}>
-              Refresh
+              {t('dashboard.btn.refresh')}
             </Button>
           </div>
         }
@@ -120,20 +122,20 @@ export default function DashboardPage() {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div data-testid="metric-total-value">
-          <KpiCard label="Total Value" value={fmtMoney(metrics.totalValueBase, baseCurrency)} icon={<BarChart3 className="h-4 w-4" />} />
+          <KpiCard label={t('dashboard.kpi.totalValue')} value={fmtMoney(metrics.totalValueBase, baseCurrency)} icon={<BarChart3 className="h-4 w-4" />} />
         </div>
         <div data-testid="metric-realized">
-          <KpiCard label="Realized P&L" value={fmtMoney(metrics.realizedPnlBaseToDate, baseCurrency)} delta={realizedDelta.isZero() ? undefined : `${realizedDelta.isPositive() ? '+' : ''}${realizedDelta.toDecimalPlaces(2).toFixed()}`} deltaType={realizedDelta.isPositive() ? 'positive' : realizedDelta.isNegative() ? 'negative' : 'neutral'} />
+          <KpiCard label={t('dashboard.kpi.realizedPnl')} value={fmtMoney(metrics.realizedPnlBaseToDate, baseCurrency)} delta={realizedDelta.isZero() ? undefined : `${realizedDelta.isPositive() ? '+' : ''}${realizedDelta.toDecimalPlaces(2).toFixed()}`} deltaType={realizedDelta.isPositive() ? 'positive' : realizedDelta.isNegative() ? 'negative' : 'neutral'} />
         </div>
         <div data-testid="metric-unrealized">
-          <KpiCard label="Unrealized P&L" value={fmtMoney(metrics.unrealizedPnlBase, baseCurrency)} delta={unrealizedDelta.isZero() ? undefined : `${unrealizedDelta.isPositive() ? '+' : ''}${unrealizedDelta.toDecimalPlaces(2).toFixed()}`} deltaType={unrealizedDelta.isPositive() ? 'positive' : unrealizedDelta.isNegative() ? 'negative' : 'neutral'} />
+          <KpiCard label={t('dashboard.kpi.unrealizedPnl')} value={fmtMoney(metrics.unrealizedPnlBase, baseCurrency)} delta={unrealizedDelta.isZero() ? undefined : `${unrealizedDelta.isPositive() ? '+' : ''}${unrealizedDelta.toDecimalPlaces(2).toFixed()}`} deltaType={unrealizedDelta.isPositive() ? 'positive' : unrealizedDelta.isNegative() ? 'negative' : 'neutral'} />
         </div>
       </div>
 
       {/* Charts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card data-testid="chart-allocation">
-          <CardTitle>Allocation</CardTitle>
+          <CardTitle>{t('dashboard.chart.allocation')}</CardTitle>
           {allocation.length ? (
             <div className="h-64 mt-3">
               <ResponsiveContainer width="100%" height="100%">
@@ -146,12 +148,12 @@ export default function DashboardPage() {
               </ResponsiveContainer>
             </div>
           ) : (
-            <EmptyState icon={<BarChart3 className="h-10 w-10" />} title="No allocation data" description="Import transactions to see your portfolio allocation." />
+            <EmptyState icon={<BarChart3 className="h-10 w-10" />} title={t('dashboard.empty.allocation.title')} description={t('dashboard.empty.allocation.desc')} />
           )}
         </Card>
 
         <Card data-testid="chart-portfolio-value">
-          <CardTitle>Portfolio Value</CardTitle>
+          <CardTitle>{t('dashboard.chart.portfolioValue')}</CardTitle>
           {valueSeries.length ? (
             <div className="h-64 mt-3">
               <ResponsiveContainer width="100%" height="100%">
@@ -164,14 +166,14 @@ export default function DashboardPage() {
               </ResponsiveContainer>
             </div>
           ) : (
-            <EmptyState icon={<TrendingUp className="h-10 w-10" />} title="No snapshots yet" description="Portfolio value chart will appear after price updates." />
+            <EmptyState icon={<TrendingUp className="h-10 w-10" />} title={t('dashboard.empty.snapshots.title')} description={t('dashboard.empty.snapshots.desc')} />
           )}
         </Card>
       </div>
 
       {/* Top positions */}
       <Card data-testid="card-portfolio-top">
-        <CardTitle>Top Positions</CardTitle>
+        <CardTitle>{t('dashboard.topPositions.title')}</CardTitle>
         <div data-testid="list-top-positions" className="mt-3">
           {topPositions.length ? (
             <ul className="divide-y divide-border">
@@ -186,7 +188,7 @@ export default function DashboardPage() {
               ))}
             </ul>
           ) : (
-            <EmptyState icon={<BarChart3 className="h-10 w-10" />} title="No positions yet" description="Import transactions to see your holdings." />
+            <EmptyState icon={<BarChart3 className="h-10 w-10" />} title={t('dashboard.empty.positions.title')} description={t('dashboard.empty.positions.desc')} />
           )}
         </div>
       </Card>
@@ -194,7 +196,7 @@ export default function DashboardPage() {
       {/* Status footer */}
       {status.lastRebuildISO && (
         <p className="text-caption text-content-tertiary text-right">
-          Last update: {new Date(status.lastRebuildISO).toLocaleString()}
+          {t('dashboard.lastUpdate')} {new Date(status.lastRebuildISO).toLocaleString()}
           {dbState.error && <span className="text-semantic-error ml-2">{dbState.error}</span>}
         </p>
       )}

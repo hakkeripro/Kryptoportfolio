@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ensureWebDbOpen, getWebDb } from '@kp/platform-web';
 import type { Asset } from '@kp/core';
 import { useAuthStore } from '../store/useAuthStore';
@@ -14,6 +15,7 @@ function kindLabel(a: Asset): string {
 }
 
 export default function AssetsPage() {
+  const { t } = useTranslation();
   const apiBase = useAuthStore((s) => s.apiBase);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [query, setQuery] = useState('');
@@ -137,7 +139,7 @@ export default function AssetsPage() {
     <div className="space-y-4" data-testid="page-assets">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-xl font-semibold">Assets</h1>
+          <h1 className="text-xl font-semibold">{t('assets.title')}</h1>
           <div className="text-sm text-content-tertiary">
             Map assets to CoinGecko IDs (no symbol guessing). Unmapped assets block live pricing and
             some imports.

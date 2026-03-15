@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Decimal from 'decimal.js';
 import { PieChart } from 'lucide-react';
 import { usePortfolioData } from '../hooks/usePortfolioData';
@@ -25,6 +26,7 @@ function fmtQty(val: string | undefined | null): string {
 }
 
 export default function PortfolioPage() {
+  const { t } = useTranslation();
   const dbState = usePortfolioData();
   const baseCurrency = dbState.data.baseCurrency;
 
@@ -63,20 +65,20 @@ export default function PortfolioPage() {
 
   return (
     <div className="space-y-section">
-      <PageHeader title="Portfolio" />
+      <PageHeader title={t('portfolio.title')} />
 
       {/* Filters */}
       <div className="flex gap-3 items-end flex-wrap">
         <div className="w-44">
           <Select data-testid="filter-account" value={accountFilter} onChange={(e) => setAccountFilter(e.target.value)}>
-            <option value="all">All accounts</option>
+            <option value="all">{t('portfolio.filter.allAccounts')}</option>
             {accounts.map((a) => (<option key={a.id} value={a.id}>{a.name}</option>))}
           </Select>
         </div>
         <div className="w-36">
           <Select data-testid="sort-positions" value={sort} onChange={(e) => setSort(e.target.value as 'value' | 'name')}>
-            <option value="value">Sort: Value</option>
-            <option value="name">Sort: Name</option>
+            <option value="value">{t('portfolio.sort.value')}</option>
+            <option value="name">{t('portfolio.sort.name')}</option>
           </Select>
         </div>
       </div>
@@ -105,7 +107,7 @@ export default function PortfolioPage() {
                           <span className="text-caption text-content-tertiary truncate">{a?.name ?? ''}</span>
                         </div>
                         <div className="text-caption text-content-secondary font-mono">
-                          {fmtQty(p.amount)} · cost {fmtMoney(p.costBasisBase, baseCurrency)}
+                          {fmtQty(p.amount)} · {t('portfolio.row.cost')} {fmtMoney(p.costBasisBase, baseCurrency)}
                         </div>
                       </div>
                     </div>
@@ -122,9 +124,9 @@ export default function PortfolioPage() {
           ) : (
             <EmptyState
               icon={<PieChart className="h-10 w-10" />}
-              title="No holdings yet"
-              description="Import transactions to see your portfolio."
-              actionLabel="Import"
+              title={t('portfolio.empty.title')}
+              description={t('portfolio.empty.desc')}
+              actionLabel={t('portfolio.empty.action')}
               onAction={() => window.location.assign('/transactions/import')}
             />
           )}

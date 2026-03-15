@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/useAuthStore';
 import { useVaultStore } from '../store/useVaultStore';
 import {
@@ -218,11 +219,12 @@ function ChangePassphraseSection() {
 }
 
 export default function AccountPage() {
+  const { t } = useTranslation();
   const email = useAuthStore((s) => s.email);
 
   return (
     <div data-testid="page-account" className="space-y-6">
-      <h1 className="text-xl font-semibold">Account</h1>
+      <h1 className="text-xl font-semibold">{t('account.title')}</h1>
       {email && <p className="text-sm text-content-secondary">{email}</p>}
 
       <PasskeysSection />

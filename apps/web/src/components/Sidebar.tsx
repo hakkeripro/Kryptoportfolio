@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Home,
   PieChart,
@@ -14,18 +15,19 @@ import { useVaultStore } from '../store/useVaultStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { useSyncStore } from '../store/useSyncStore';
 
-const navItems = [
-  { to: '/home', icon: Home, label: 'Home', testId: 'nav-home' },
-  { to: '/portfolio', icon: PieChart, label: 'Portfolio', testId: 'nav-portfolio' },
-  { to: '/transactions', icon: ArrowLeftRight, label: 'Transactions', testId: 'nav-transactions' },
-  { to: '/taxes', icon: FileText, label: 'Taxes', testId: 'nav-taxes' },
-  { to: '/settings', icon: Settings, label: 'Settings', testId: 'nav-settings' },
-] as const;
-
 export default function Sidebar() {
+  const { t } = useTranslation();
   const { passphrase, lockVault } = useVaultStore();
   const token = useAuthStore((s) => s.token);
   const syncNow = useSyncStore((s) => s.syncNow);
+
+  const navItems = [
+    { to: '/home', icon: Home, label: t('nav.home'), testId: 'nav-home' },
+    { to: '/portfolio', icon: PieChart, label: t('nav.portfolio'), testId: 'nav-portfolio' },
+    { to: '/transactions', icon: ArrowLeftRight, label: t('nav.transactions'), testId: 'nav-transactions' },
+    { to: '/taxes', icon: FileText, label: t('nav.taxes'), testId: 'nav-taxes' },
+    { to: '/settings', icon: Settings, label: t('nav.settings'), testId: 'nav-settings' },
+  ];
 
   return (
     <aside className="hidden md:flex flex-col w-60 h-screen fixed left-0 top-0 bg-surface-raised border-r border-border">
@@ -65,7 +67,7 @@ export default function Sidebar() {
               text-content-secondary hover:text-content-primary hover:bg-surface-overlay transition-colors"
           >
             <RefreshCw className="h-4 w-4" />
-            Sync
+            {t('nav.sync')}
           </button>
         )}
         {passphrase ? (
@@ -76,7 +78,7 @@ export default function Sidebar() {
               text-content-secondary hover:text-content-primary hover:bg-surface-overlay transition-colors"
           >
             <Lock className="h-4 w-4" />
-            Lock vault
+            {t('nav.lockVault')}
           </button>
         ) : (
           <span
@@ -84,7 +86,7 @@ export default function Sidebar() {
             className="flex items-center gap-2 px-3 py-2 text-caption text-content-tertiary"
           >
             <Unlock className="h-4 w-4" />
-            Locked
+            {t('nav.locked')}
           </span>
         )}
       </div>

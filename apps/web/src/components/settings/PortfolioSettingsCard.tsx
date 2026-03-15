@@ -1,14 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Settings } from '@kp/core';
 import { ensureWebDbOpen, getWebDb } from '@kp/platform-web';
 import { rebuildDerivedCaches } from '../../derived/rebuildDerived';
-
-const AUTO_REFRESH_OPTIONS = [
-  { value: 0, label: 'Off' },
-  { value: 60, label: 'Every 1 min' },
-  { value: 300, label: 'Every 5 min' },
-  { value: 900, label: 'Every 15 min' },
-];
 
 type LotMethod = Settings['lotMethodDefault'];
 type RewardsCostBasisMode = Settings['rewardsCostBasisMode'];
@@ -22,6 +16,7 @@ interface Props {
 }
 
 export default function PortfolioSettingsCard({ settings, loading, error, busy, setBusy }: Props) {
+  const { t } = useTranslation();
   const [saveMsg, setSaveMsg] = useState('');
   const [baseCurrency, setBaseCurrency] = useState('EUR');
   const [lotMethodDefault, setLotMethodDefault] = useState<LotMethod>('FIFO');
@@ -77,7 +72,7 @@ export default function PortfolioSettingsCard({ settings, loading, error, busy, 
       } as Settings;
       await db.settings.put(next);
       await rebuildDerivedCaches({ daysBack: 365 });
-      setSaveMsg('Saved + rebuilt derived caches');
+      setSaveMsg(t('settings.portfolio.savedMsg'));
     } catch (e) {
       setSaveMsg(e instanceof Error ? e.message : String(e));
     } finally {
@@ -92,10 +87,9 @@ export default function PortfolioSettingsCard({ settings, loading, error, busy, 
     >
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <div className="font-medium">Portfolio settings</div>
+          <div className="font-medium">{t('settings.portfolio.title')}</div>
           <div className="text-sm text-content-secondary">
-            These settings affect imports, lotting and tax calculations. Changing them rebuilds
-            derived caches.
+            {t('settings.portfolio.description')}
           </div>
         </div>
         <button
@@ -104,7 +98,7 @@ export default function PortfolioSettingsCard({ settings, loading, error, busy, 
           onClick={() => void save()}
           className="rounded-lg bg-surface-raised hover:bg-surface-overlay disabled:opacity-60 px-3 py-2 text-sm"
         >
-          Save
+          {t('settings.btn.save')}
         </button>
       </div>
 
@@ -112,7 +106,7 @@ export default function PortfolioSettingsCard({ settings, loading, error, busy, 
 
       <div className="grid gap-4 md:grid-cols-2">
         <label className="block">
-          <div className="text-xs text-content-secondary">Base currency</div>
+          <div className="text-xs text-content-secondary">{t('settings.portfolio.baseCurrency')}</div>
           <input
             data-testid="form-settings-base-currency"
             className="mt-1 w-full rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
@@ -123,7 +117,7 @@ export default function PortfolioSettingsCard({ settings, loading, error, busy, 
         </label>
 
         <label className="block">
-          <div className="text-xs text-content-secondary">Lot method default</div>
+          <div className="text-xs text-content-secondary">{t('settings.portfolio.lotMethod')}</div>
           <select
             data-testid="form-settings-lot-method-default"
             className="mt-1 w-full rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
@@ -138,20 +132,20 @@ export default function PortfolioSettingsCard({ settings, loading, error, busy, 
         </label>
 
         <label className="block">
-          <div className="text-xs text-content-secondary">Rewards cost basis</div>
+          <div className="text-xs text-content-secondary">{t('settings.portfolio.rewardsCostBasis')}</div>
           <select
             data-testid="form-settings-rewards-mode"
             className="mt-1 w-full rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
             value={rewardsCostBasisMode}
             onChange={(e) => setRewardsCostBasisMode(e.target.value as RewardsCostBasisMode)}
           >
-            <option value="ZERO">ZERO (default)</option>
-            <option value="FMV">FMV (requires price/user input)</option>
+            <option value="ZERO">{t('settings.portfolio.rewardsZero')}</option>
+            <option value="FMV">{t('settings.portfolio.rewardsFmv')}</option>
           </select>
         </label>
 
         <label className="block">
-          <div className="text-xs text-content-secondary">Tax profile</div>
+          <div className="text-xs text-content-secondary">{t('settings.portfolio.taxProfile')}</div>
           <select
             data-testid="form-settings-tax-profile"
             className="mt-1 w-full rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
@@ -164,18 +158,17 @@ export default function PortfolioSettingsCard({ settings, loading, error, busy, 
         </label>
 
         <label className="block">
-          <div className="text-xs text-content-secondary">Price auto-refresh</div>
+          <div className="text-xs text-content-secondary">{t('settings.portfolio.autoRefresh')}</div>
           <select
             data-testid="form-settings-auto-refresh"
             className="mt-1 w-full rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
             value={String(autoRefreshIntervalSec)}
             onChange={(e) => setAutoRefreshIntervalSec(Number(e.target.value))}
           >
-            {AUTO_REFRESH_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
+            <option value="0">{t('settings.autoRefresh.off')}</option>
+            <option value="60">{t('settings.autoRefresh.1min')}</option>
+            <option value="300">{t('settings.autoRefresh.5min')}</option>
+            <option value="900">{t('settings.autoRefresh.15min')}</option>
           </select>
         </label>
       </div>

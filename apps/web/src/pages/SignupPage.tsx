@@ -1,17 +1,19 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/useAuthStore';
-
-function errToMsg(e: unknown): string {
-  const msg = e instanceof Error ? e.message : String(e);
-  if (msg.includes('email_taken')) return 'An account with this email already exists.';
-  if (msg.includes('fetch')) return 'Could not reach the server. Please try again.';
-  return msg;
-}
 
 export default function SignupPage() {
   const nav = useNavigate();
+  const { t } = useTranslation();
   const register = useAuthStore((s) => s.register);
+
+  function errToMsg(e: unknown): string {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (msg.includes('email_taken')) return t('signup.error.emailTaken');
+    if (msg.includes('fetch')) return t('signup.error.serverUnreachable');
+    return msg;
+  }
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -44,11 +46,11 @@ export default function SignupPage() {
       className="min-h-screen flex flex-col items-center justify-center px-4"
     >
       <div className="w-full max-w-sm space-y-6">
-        <h1 className="text-2xl font-bold text-center">Create account</h1>
+        <h1 className="text-2xl font-bold text-center">{t('signup.title')}</h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm text-content-secondary mb-1">Email</label>
+            <label className="block text-sm text-content-secondary mb-1">{t('signup.email.label')}</label>
             <input
               data-testid="form-email"
               type="email"
@@ -61,7 +63,7 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label className="block text-sm text-content-secondary mb-1">Password</label>
+            <label className="block text-sm text-content-secondary mb-1">{t('signup.password.label')}</label>
             <input
               data-testid="form-password"
               type="password"
@@ -72,12 +74,12 @@ export default function SignupPage() {
               className="w-full rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
             />
             {pwTooShort && (
-              <p className="text-xs text-rose-400 mt-1">Password must be at least 8 characters</p>
+              <p className="text-xs text-rose-400 mt-1">{t('signup.error.passwordTooShort')}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm text-content-secondary mb-1">Confirm password</label>
+            <label className="block text-sm text-content-secondary mb-1">{t('signup.confirmPassword.label')}</label>
             <input
               data-testid="form-password-confirm"
               type="password"
@@ -87,7 +89,7 @@ export default function SignupPage() {
               onChange={(e) => setConfirm(e.target.value)}
               className="w-full rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
             />
-            {pwMismatch && <p className="text-xs text-rose-400 mt-1">Passwords do not match</p>}
+            {pwMismatch && <p className="text-xs text-rose-400 mt-1">{t('signup.error.passwordMismatch')}</p>}
           </div>
 
           <button
@@ -96,7 +98,7 @@ export default function SignupPage() {
             disabled={!canSubmit}
             className="w-full rounded-lg bg-brand hover:bg-brand-dark disabled:opacity-60 px-4 py-2 text-sm font-medium"
           >
-            {busy ? 'Creating account…' : 'Create account'}
+            {busy ? t('signup.btn.creating') : t('signup.btn.submit')}
           </button>
 
           {error && (
@@ -107,9 +109,9 @@ export default function SignupPage() {
         </form>
 
         <p className="text-center text-sm text-content-tertiary">
-          Already have an account?{' '}
+          {t('signup.signinPrompt')}{' '}
           <Link to="/auth/signin" className="text-indigo-400 hover:underline">
-            Sign in
+            {t('signup.signinLink')}
           </Link>
         </p>
       </div>

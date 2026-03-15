@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Home,
   PieChart,
@@ -7,15 +8,17 @@ import {
   Settings,
 } from 'lucide-react';
 
-const tabs = [
-  { to: '/home', icon: Home, label: 'Home', testId: 'tab-home' },
-  { to: '/portfolio', icon: PieChart, label: 'Portfolio', testId: 'tab-portfolio' },
-  { to: '/transactions', icon: ArrowLeftRight, label: 'Txns', testId: 'tab-transactions' },
-  { to: '/taxes', icon: FileText, label: 'Taxes', testId: 'tab-taxes' },
-  { to: '/settings', icon: Settings, label: 'Settings', testId: 'tab-settings' },
-] as const;
-
 export default function BottomTabBar() {
+  const { t } = useTranslation();
+
+  const tabs = [
+    { to: '/home', icon: Home, label: t('nav.home'), testId: 'tab-home' },
+    { to: '/portfolio', icon: PieChart, label: t('nav.portfolio'), testId: 'tab-portfolio' },
+    { to: '/transactions', icon: ArrowLeftRight, label: t('nav.txns'), testId: 'tab-transactions' },
+    { to: '/taxes', icon: FileText, label: t('nav.taxes'), testId: 'tab-taxes' },
+    { to: '/settings', icon: Settings, label: t('nav.settings'), testId: 'tab-settings' },
+  ];
+
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-10 bg-surface-raised border-t border-border safe-area-bottom">
       <div className="flex items-center justify-around h-14">

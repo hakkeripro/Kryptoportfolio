@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import Decimal from 'decimal.js';
 import { ensureWebDbOpen, getWebDb } from '@kp/platform-web';
@@ -93,6 +94,7 @@ function urlBase64ToUint8Array(base64String: string) {
 }
 
 export default function AlertsPage() {
+  const { t } = useTranslation();
   const apiBase = useAuthStore((s) => s.apiBase);
   const token = useAuthStore((s) => s.token);
 
@@ -383,7 +385,7 @@ export default function AlertsPage() {
   return (
     <div className="space-y-6" data-testid="panel-alerts">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Alerts</h1>
+        <h1 className="text-xl font-semibold">{t('alerts.title')}</h1>
         <div className="text-xs text-content-tertiary">Server alerts require login + sync</div>
       </div>
 

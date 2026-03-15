@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Decimal from 'decimal.js';
 import type { Asset, LedgerEvent, Settings, TaxYearReport } from '@kp/core';
 import { generateTaxYearReport } from '@kp/core';
@@ -208,6 +209,7 @@ function buildSummaryHtml(report: TaxYearReport, assetsById: Map<string, Asset>)
 }
 
 export default function TaxPage() {
+  const { t } = useTranslation();
   const dbState = useDbQuery(
     async (db) => {
       await ensureWebDbOpen();
@@ -303,12 +305,12 @@ export default function TaxPage() {
 
   return (
     <div className="space-y-4">
-      <PageHeader title="Taxes" />
+      <PageHeader title={t('tax.title')} />
 
       <div className="rounded-xl border border-border bg-surface-raised p-4">
         <div className="flex items-end gap-3 flex-wrap">
           <label className="text-sm">
-            <div className="text-xs text-content-secondary mb-1">Tax year</div>
+            <div className="text-xs text-content-secondary mb-1">{t('tax.form.year')}</div>
             <select
               data-testid="form-tax-year"
               className="rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
@@ -324,20 +326,20 @@ export default function TaxPage() {
           </label>
 
           <label className="text-sm">
-            <div className="text-xs text-content-secondary mb-1">Tax profile</div>
+            <div className="text-xs text-content-secondary mb-1">{t('tax.form.profile')}</div>
             <select
               data-testid="form-tax-profile"
               className="rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
               value={taxProfileOverride}
               onChange={(e) => setTaxProfileOverride(e.target.value as any)}
             >
-              <option value="GENERIC">GENERIC</option>
-              <option value="FINLAND">FINLAND (FIFO)</option>
+              <option value="GENERIC">{t('tax.profile.generic')}</option>
+              <option value="FINLAND">{t('tax.profile.finland')}</option>
             </select>
           </label>
 
           <label className="text-sm">
-            <div className="text-xs text-content-secondary mb-1">Lot method</div>
+            <div className="text-xs text-content-secondary mb-1">{t('tax.form.lotMethod')}</div>
             <select
               data-testid="form-tax-lot-method"
               className="rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
@@ -357,7 +359,7 @@ export default function TaxPage() {
             onClick={() => void generate()}
             className="rounded-lg bg-brand hover:bg-brand-dark px-3 py-2 text-sm font-medium"
           >
-            Generate
+            {t('tax.btn.generate')}
           </button>
 
           <button
@@ -366,7 +368,7 @@ export default function TaxPage() {
             disabled={!report}
             className="rounded-lg bg-surface-raised hover:bg-surface-overlay disabled:opacity-50 px-3 py-2 text-sm"
           >
-            Export CSV
+            {t('tax.btn.exportCsv')}
           </button>
 
           <button
@@ -375,11 +377,11 @@ export default function TaxPage() {
             disabled={!report}
             className="rounded-lg bg-surface-raised hover:bg-surface-overlay disabled:opacity-50 px-3 py-2 text-sm"
           >
-            Export PDF
+            {t('tax.btn.exportPdf')}
           </button>
 
           <div className="ml-auto text-xs text-content-secondary">
-            Base currency: <span className="font-semibold">{baseCurrency}</span>
+            {t('tax.baseCurrency')} <span className="font-semibold">{baseCurrency}</span>
           </div>
         </div>
 
@@ -389,31 +391,31 @@ export default function TaxPage() {
       {report ? (
         <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
           <div className="rounded-xl border border-border bg-surface-raised p-4">
-            <div className="text-xs text-content-secondary">Realized gain</div>
+            <div className="text-xs text-content-secondary">{t('tax.kpi.realizedGain')}</div>
             <div className="text-lg font-semibold">
               {fmtMoney(report.totals.realizedGainBase, report.baseCurrency)}
             </div>
           </div>
           <div className="rounded-xl border border-border bg-surface-raised p-4">
-            <div className="text-xs text-content-secondary">Proceeds</div>
+            <div className="text-xs text-content-secondary">{t('tax.kpi.proceeds')}</div>
             <div className="text-lg font-semibold">
               {fmtMoney(report.totals.proceedsBase, report.baseCurrency)}
             </div>
           </div>
           <div className="rounded-xl border border-border bg-surface-raised p-4">
-            <div className="text-xs text-content-secondary">Cost basis</div>
+            <div className="text-xs text-content-secondary">{t('tax.kpi.costBasis')}</div>
             <div className="text-lg font-semibold">
               {fmtMoney(report.totals.costBasisBase, report.baseCurrency)}
             </div>
           </div>
           <div className="rounded-xl border border-border bg-surface-raised p-4">
-            <div className="text-xs text-content-secondary">Fees</div>
+            <div className="text-xs text-content-secondary">{t('tax.kpi.fees')}</div>
             <div className="text-lg font-semibold">
               {fmtMoney(report.totals.feesBase, report.baseCurrency)}
             </div>
           </div>
           <div className="rounded-xl border border-border bg-surface-raised p-4">
-            <div className="text-xs text-content-secondary">Income</div>
+            <div className="text-xs text-content-secondary">{t('tax.kpi.income')}</div>
             <div className="text-lg font-semibold">
               {fmtMoney(report.totals.incomeBase, report.baseCurrency)}
             </div>
@@ -423,10 +425,10 @@ export default function TaxPage() {
 
       <div className="rounded-xl border border-border bg-surface-raised p-4">
         <div className="flex items-center gap-2">
-          <h2 className="text-lg font-semibold">Realized disposals</h2>
+          <h2 className="text-lg font-semibold">{t('tax.disposals.title')}</h2>
           {report ? (
             <div className="text-xs text-content-secondary">
-              Profile: <span className="font-semibold">{report.taxProfile}</span> • Lot:{' '}
+              {t('tax.disposals.profileLabel')} <span className="font-semibold">{report.taxProfile}</span> • {t('tax.disposals.lotLabel')}{' '}
               <span className="font-semibold">{report.lotMethodUsed}</span>
             </div>
           ) : null}
@@ -436,13 +438,13 @@ export default function TaxPage() {
           <table className="min-w-full text-sm">
             <thead className="text-content-secondary">
               <tr className="border-b border-border">
-                <th className="text-left py-2 pr-3">Date (UTC)</th>
-                <th className="text-left py-2 pr-3">Asset</th>
-                <th className="text-right py-2 pl-3">Amount</th>
-                <th className="text-right py-2 pl-3">Proceeds</th>
-                <th className="text-right py-2 pl-3">Cost basis</th>
-                <th className="text-right py-2 pl-3">Fees</th>
-                <th className="text-right py-2 pl-3">Gain/Loss</th>
+                <th className="text-left py-2 pr-3">{t('tax.table.date')}</th>
+                <th className="text-left py-2 pr-3">{t('tax.table.asset')}</th>
+                <th className="text-right py-2 pl-3">{t('tax.table.amount')}</th>
+                <th className="text-right py-2 pl-3">{t('tax.table.proceeds')}</th>
+                <th className="text-right py-2 pl-3">{t('tax.table.costBasis')}</th>
+                <th className="text-right py-2 pl-3">{t('tax.table.fees')}</th>
+                <th className="text-right py-2 pl-3">{t('tax.table.gainLoss')}</th>
               </tr>
             </thead>
             <tbody>
@@ -478,14 +480,14 @@ export default function TaxPage() {
               {!report ? (
                 <tr>
                   <td colSpan={7} className="py-3 text-content-secondary">
-                    Generate a report to see disposals for the selected year.
+                    {t('tax.disposals.generatePrompt')}
                   </td>
                 </tr>
               ) : null}
               {report && report.disposals.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="py-3 text-content-secondary">
-                    No taxable disposals found for {report.year}.
+                    {t('tax.disposals.empty', { year: report.year })}
                   </td>
                 </tr>
               ) : null}
@@ -497,16 +499,16 @@ export default function TaxPage() {
       {report ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div className="rounded-xl border border-border bg-surface-raised p-4">
-            <h2 className="text-lg font-semibold">Income (rewards/airdrops)</h2>
+            <h2 className="text-lg font-semibold">{t('tax.income.title')}</h2>
             <div className="mt-3 overflow-auto">
               <table className="min-w-full text-sm">
                 <thead className="text-content-secondary">
                   <tr className="border-b border-border">
-                    <th className="text-left py-2 pr-3">Date</th>
-                    <th className="text-left py-2 pr-3">Type</th>
-                    <th className="text-left py-2 pr-3">Asset</th>
-                    <th className="text-right py-2 pl-3">Amount</th>
-                    <th className="text-right py-2 pl-3">Income</th>
+                    <th className="text-left py-2 pr-3">{t('tax.income.table.date')}</th>
+                    <th className="text-left py-2 pr-3">{t('tax.income.table.type')}</th>
+                    <th className="text-left py-2 pr-3">{t('tax.table.asset')}</th>
+                    <th className="text-right py-2 pl-3">{t('tax.table.amount')}</th>
+                    <th className="text-right py-2 pl-3">{t('tax.income.table.income')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -530,7 +532,7 @@ export default function TaxPage() {
                   {report.income.length === 0 ? (
                     <tr>
                       <td colSpan={5} className="py-3 text-content-secondary">
-                        No reward/airdrop income events in {report.year}.
+                        {t('tax.income.empty', { year: report.year })}
                       </td>
                     </tr>
                   ) : null}
@@ -540,14 +542,14 @@ export default function TaxPage() {
           </div>
 
           <div className="rounded-xl border border-border bg-surface-raised p-4">
-            <h2 className="text-lg font-semibold">Year-end holdings</h2>
+            <h2 className="text-lg font-semibold">{t('tax.holdings.title')}</h2>
             <div className="mt-3 overflow-auto">
               <table className="min-w-full text-sm">
                 <thead className="text-content-secondary">
                   <tr className="border-b border-border">
-                    <th className="text-left py-2 pr-3">Asset</th>
-                    <th className="text-right py-2 pl-3">Amount</th>
-                    <th className="text-right py-2 pl-3">Cost basis</th>
+                    <th className="text-left py-2 pr-3">{t('tax.table.asset')}</th>
+                    <th className="text-right py-2 pl-3">{t('tax.table.amount')}</th>
+                    <th className="text-right py-2 pl-3">{t('tax.kpi.costBasis')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -569,7 +571,7 @@ export default function TaxPage() {
                   {report.yearEndHoldings.length === 0 ? (
                     <tr>
                       <td colSpan={3} className="py-3 text-content-secondary">
-                        No holdings at the end of {report.year}.
+                        {t('tax.holdings.empty', { year: report.year })}
                       </td>
                     </tr>
                   ) : null}
@@ -582,7 +584,7 @@ export default function TaxPage() {
 
       {report?.warnings?.length ? (
         <div className="rounded-xl border border-border bg-surface-raised p-4">
-          <h2 className="text-lg font-semibold">Warnings</h2>
+          <h2 className="text-lg font-semibold">{t('tax.warnings.title')}</h2>
           <ul className="mt-2 list-disc pl-5 text-sm text-amber-200">
             {report.warnings.map((w) => (
               <li key={w}>{w}</li>

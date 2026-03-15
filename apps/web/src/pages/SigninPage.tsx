@@ -1,19 +1,21 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/useAuthStore';
 import { useVaultStore } from '../store/useVaultStore';
 
-function errToMsg(e: unknown): string {
-  const msg = e instanceof Error ? e.message : String(e);
-  if (msg.includes('invalid_credentials')) return 'Invalid email or password.';
-  if (msg.includes('fetch')) return 'Could not reach the server. Please try again.';
-  return msg;
-}
-
 export default function SigninPage() {
+  const { t } = useTranslation();
   const nav = useNavigate();
   const login = useAuthStore((s) => s.login);
   const vaultSetup = useVaultStore((s) => s.vaultSetup);
+
+  function errToMsg(e: unknown): string {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (msg.includes('invalid_credentials')) return t('signin.error.invalidCredentials');
+    if (msg.includes('fetch')) return t('signin.error.serverUnreachable');
+    return msg;
+  }
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -29,7 +31,6 @@ export default function SigninPage() {
     setBusy(true);
     try {
       await login(email, password);
-      // If vault already set up → unlock, else → setup
       if (vaultSetup) {
         nav('/vault/unlock', { replace: true });
       } else {
@@ -48,11 +49,11 @@ export default function SigninPage() {
       className="min-h-screen flex flex-col items-center justify-center px-4"
     >
       <div className="w-full max-w-sm space-y-6">
-        <h1 className="text-2xl font-bold text-center">Sign in</h1>
+        <h1 className="text-2xl font-bold text-center">{t('signin.title')}</h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm text-content-secondary mb-1">Email</label>
+            <label className="block text-sm text-content-secondary mb-1">{t('signin.email.label')}</label>
             <input
               data-testid="form-email"
               type="email"
@@ -65,7 +66,7 @@ export default function SigninPage() {
           </div>
 
           <div>
-            <label className="block text-sm text-content-secondary mb-1">Password</label>
+            <label className="block text-sm text-content-secondary mb-1">{t('signin.password.label')}</label>
             <input
               data-testid="form-password"
               type="password"
@@ -83,7 +84,7 @@ export default function SigninPage() {
             disabled={!canSubmit}
             className="w-full rounded-lg bg-brand hover:bg-brand-dark disabled:opacity-60 px-4 py-2 text-sm font-medium"
           >
-            {busy ? 'Signing in…' : 'Sign in'}
+            {busy ? t('signin.btn.loading') : t('signin.btn.submit')}
           </button>
 
           {error && (
@@ -94,9 +95,9 @@ export default function SigninPage() {
         </form>
 
         <p className="text-center text-sm text-content-tertiary">
-          Don&apos;t have an account?{' '}
+          {t('signin.signupPrompt')}{' '}
           <Link to="/auth/signup" className="text-indigo-400 hover:underline">
-            Create account
+            {t('signin.signupLink')}
           </Link>
         </p>
       </div>
