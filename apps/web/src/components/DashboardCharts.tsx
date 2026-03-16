@@ -39,8 +39,14 @@ export interface AllocationItem {
 }
 
 const BAR_COLORS = [
-  '#ff8400', '#3b82f6', '#a78bfa', '#f59e0b',
-  '#ef4444', '#22d3ee', '#fb7185', '#4ade80',
+  '#ff8400',
+  '#3b82f6',
+  '#a78bfa',
+  '#f59e0b',
+  '#ef4444',
+  '#22d3ee',
+  '#fb7185',
+  '#4ade80',
 ];
 
 export function colorForAsset(key: string, index: number): string {
@@ -91,9 +97,10 @@ export function ValueChart({ data }: { data: { day: string; value: number }[] })
               key={r}
               onClick={() => setRange(r)}
               className={`px-2.5 py-1 rounded-full text-[0.625rem] font-medium transition-all duration-150
-                ${range === r
-                  ? 'bg-brand text-white'
-                  : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-overlay/60'
+                ${
+                  range === r
+                    ? 'bg-brand text-white'
+                    : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-overlay/60'
                 }`}
             >
               {r}

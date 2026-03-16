@@ -21,9 +21,7 @@ export function KpiCard({ label, value, delta, deltaType = 'neutral' }: KpiCardP
     <Card>
       <span className="text-xs font-medium text-content-secondary">{label}</span>
       <div className="mt-2 text-2xl font-semibold font-heading text-content-primary">{value}</div>
-      {delta && (
-        <div className={`mt-2 text-xs ${deltaColor}`}>{delta}</div>
-      )}
+      {delta && <div className={`mt-2 text-xs ${deltaColor}`}>{delta}</div>}
     </Card>
   );
 }

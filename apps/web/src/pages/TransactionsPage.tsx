@@ -35,7 +35,13 @@ function fmtMoney(val: string | undefined | null, currency: string): string {
 }
 
 const EVENT_TYPES: LedgerEvent['type'][] = [
-  'BUY', 'SELL', 'SWAP', 'TRANSFER', 'REWARD', 'STAKING_REWARD', 'AIRDROP',
+  'BUY',
+  'SELL',
+  'SWAP',
+  'TRANSFER',
+  'REWARD',
+  'STAKING_REWARD',
+  'AIRDROP',
 ];
 
 type FormState = {
@@ -87,14 +93,20 @@ function buildReplacementId(oldId: string): string {
 
 function typeBadgeColor(type: string): string {
   switch (type) {
-    case 'BUY': return 'bg-semantic-success/10 text-semantic-success';
-    case 'SELL': return 'bg-semantic-error/10 text-semantic-error';
-    case 'SWAP': return 'bg-brand/10 text-brand';
-    case 'TRANSFER': return 'bg-blue-500/10 text-blue-400';
+    case 'BUY':
+      return 'bg-semantic-success/10 text-semantic-success';
+    case 'SELL':
+      return 'bg-semantic-error/10 text-semantic-error';
+    case 'SWAP':
+      return 'bg-brand/10 text-brand';
+    case 'TRANSFER':
+      return 'bg-blue-500/10 text-blue-400';
     case 'REWARD':
     case 'STAKING_REWARD':
-    case 'AIRDROP': return 'bg-purple-500/10 text-purple-400';
-    default: return 'bg-surface-overlay text-content-secondary';
+    case 'AIRDROP':
+      return 'bg-purple-500/10 text-purple-400';
+    default:
+      return 'bg-surface-overlay text-content-secondary';
   }
 }
 
@@ -193,11 +205,17 @@ export default function TransactionsPage() {
       const db = getWebDb();
       const now = new Date().toISOString();
       const base: any = {
-        id: form.mode === 'edit' && form.targetId
-          ? buildReplacementId(form.targetId) : `ev_manual_${Date.now()}`,
-        schemaVersion: 1, createdAtISO: now, updatedAtISO: now,
+        id:
+          form.mode === 'edit' && form.targetId
+            ? buildReplacementId(form.targetId)
+            : `ev_manual_${Date.now()}`,
+        schemaVersion: 1,
+        createdAtISO: now,
+        updatedAtISO: now,
         timestampISO: new Date(form.timestampISO).toISOString(),
-        type: form.type, accountId: 'acct_manual', assetId: form.assetId,
+        type: form.type,
+        accountId: 'acct_manual',
+        assetId: form.assetId,
         amount: form.amount.trim() || '0',
         ...(form.notes.trim() ? { notes: form.notes.trim() } : {}),
         ...(form.externalRef.trim() ? { externalRef: form.externalRef.trim() } : {}),
@@ -212,7 +230,11 @@ export default function TransactionsPage() {
         if (form.valuationBase.trim()) base.valuationBase = form.valuationBase.trim();
       }
       if (form.feeBase.trim()) base.feeBase = form.feeBase.trim();
-      if (form.feeAssetId && form.feeAssetId !== dbState.data.baseCurrencyAssetId && form.feeAmount.trim()) {
+      if (
+        form.feeAssetId &&
+        form.feeAssetId !== dbState.data.baseCurrencyAssetId &&
+        form.feeAmount.trim()
+      ) {
         base.feeAssetId = form.feeAssetId;
         base.feeAmount = form.feeAmount.trim();
         if (form.feeValueBase.trim()) base.feeValueBase = form.feeValueBase.trim();
@@ -226,7 +248,11 @@ export default function TransactionsPage() {
         }
       });
       await rebuildDerivedCaches({ daysBack: 365 });
-      setMsg(form.mode === 'edit' ? t('transactions.msg.savedReplacement') : t('transactions.msg.addedEvent'));
+      setMsg(
+        form.mode === 'edit'
+          ? t('transactions.msg.savedReplacement')
+          : t('transactions.msg.addedEvent'),
+      );
       resetForm();
     } catch (e) {
       setMsg(e instanceof Error ? e.message : String(e));
@@ -243,9 +269,14 @@ export default function TransactionsPage() {
       const db = getWebDb();
       const now = new Date().toISOString();
       const tomb: any = {
-        ...e, id: buildReplacementId(String(e.id)) + '_del',
-        schemaVersion: 1, createdAtISO: now, updatedAtISO: now, timestampISO: now,
-        isDeleted: true, replacesEventId: String(e.id),
+        ...e,
+        id: buildReplacementId(String(e.id)) + '_del',
+        schemaVersion: 1,
+        createdAtISO: now,
+        updatedAtISO: now,
+        timestampISO: now,
+        isDeleted: true,
+        replacesEventId: String(e.id),
         notes: e.notes ? `${String(e.notes)} (deleted)` : 'deleted',
       };
       const parsed = LedgerEventSchema.parse(tomb);
@@ -273,10 +304,11 @@ export default function TransactionsPage() {
     if (typeFilter !== 'ALL') list = list.filter((e: any) => e.type === typeFilter);
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      list = list.filter((e: any) =>
-        e.assetSym.toLowerCase().includes(q) ||
-        e.type.toLowerCase().includes(q) ||
-        (e.notes ?? '').toLowerCase().includes(q),
+      list = list.filter(
+        (e: any) =>
+          e.assetSym.toLowerCase().includes(q) ||
+          e.type.toLowerCase().includes(q) ||
+          (e.notes ?? '').toLowerCase().includes(q),
       );
     }
     return list;
@@ -287,7 +319,8 @@ export default function TransactionsPage() {
     return eventsView.find((e: any) => String(e.id) === String(detailsId)) ?? null;
   }, [detailsId, eventsView]);
 
-  const inputCls = 'w-full rounded-input bg-surface-base border border-border px-3 py-2 text-body focus:outline-none focus:border-brand/50 transition-colors';
+  const inputCls =
+    'w-full rounded-input bg-surface-base border border-border px-3 py-2 text-body focus:outline-none focus:border-brand/50 transition-colors';
   const labelCls = 'block text-caption text-content-secondary mb-1';
 
   return (
@@ -295,9 +328,12 @@ export default function TransactionsPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-heading-1 font-heading text-content-primary">{t('transactions.title')}</h1>
+          <h1 className="text-heading-1 font-heading text-content-primary">
+            {t('transactions.title')}
+          </h1>
           <p className="text-caption text-content-tertiary mt-0.5">
-            {eventsView.length} {t('transactions.ledger.count', { n: eventsView.length }).replace(/^\d+ /, '')}
+            {eventsView.length}{' '}
+            {t('transactions.ledger.count', { n: eventsView.length }).replace(/^\d+ /, '')}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -342,7 +378,9 @@ export default function TransactionsPage() {
         >
           <option value="ALL">All Types</option>
           {EVENT_TYPES.map((t) => (
-            <option key={t} value={t}>{t}</option>
+            <option key={t} value={t}>
+              {t}
+            </option>
           ))}
         </select>
       </div>
@@ -384,76 +422,150 @@ export default function TransactionsPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <label className="block">
               <div className={labelCls}>{t('transactions.form.type')}</div>
-              <select data-testid="form-event-type" className={inputCls} value={form.type}
-                onChange={(e) => setForm((f) => ({ ...f, type: e.target.value as any }))} disabled={saving}>
-                {EVENT_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+              <select
+                data-testid="form-event-type"
+                className={inputCls}
+                value={form.type}
+                onChange={(e) => setForm((f) => ({ ...f, type: e.target.value as any }))}
+                disabled={saving}
+              >
+                {EVENT_TYPES.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
               </select>
             </label>
             <label className="block">
               <div className={labelCls}>{t('transactions.form.asset')}</div>
-              <select data-testid="form-event-asset" className={inputCls} value={form.assetId}
-                onChange={(e) => setForm((f) => ({ ...f, assetId: e.target.value }))} disabled={saving}>
-                {dbState.data.assets.map((a: any) => <option key={a.id} value={a.id}>{a.symbol}</option>)}
+              <select
+                data-testid="form-event-asset"
+                className={inputCls}
+                value={form.assetId}
+                onChange={(e) => setForm((f) => ({ ...f, assetId: e.target.value }))}
+                disabled={saving}
+              >
+                {dbState.data.assets.map((a: any) => (
+                  <option key={a.id} value={a.id}>
+                    {a.symbol}
+                  </option>
+                ))}
               </select>
             </label>
             <label className="block">
               <div className={labelCls}>{t('transactions.form.timestamp')}</div>
-              <input className={inputCls} value={form.timestampISO}
-                onChange={(e) => setForm((f) => ({ ...f, timestampISO: e.target.value }))} disabled={saving} />
+              <input
+                className={inputCls}
+                value={form.timestampISO}
+                onChange={(e) => setForm((f) => ({ ...f, timestampISO: e.target.value }))}
+                disabled={saving}
+              />
             </label>
             <label className="block">
               <div className={labelCls}>{t('transactions.form.amount')}</div>
-              <input data-testid="form-event-amount" className={`${inputCls} font-mono`} value={form.amount}
-                onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))} disabled={saving} />
+              <input
+                data-testid="form-event-amount"
+                className={`${inputCls} font-mono`}
+                value={form.amount}
+                onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))}
+                disabled={saving}
+              />
             </label>
             <label className="block">
-              <div className={labelCls}>{t('transactions.form.pricePerUnit', { currency: baseCurrency })}</div>
-              <input data-testid="form-event-price" className={`${inputCls} font-mono`} value={form.pricePerUnitBase}
+              <div className={labelCls}>
+                {t('transactions.form.pricePerUnit', { currency: baseCurrency })}
+              </div>
+              <input
+                data-testid="form-event-price"
+                className={`${inputCls} font-mono`}
+                value={form.pricePerUnitBase}
                 onChange={(e) => setForm((f) => ({ ...f, pricePerUnitBase: e.target.value }))}
-                disabled={saving || (form.type !== 'BUY' && form.type !== 'SELL')} />
+                disabled={saving || (form.type !== 'BUY' && form.type !== 'SELL')}
+              />
             </label>
             <label className="block">
-              <div className={labelCls}>{t('transactions.form.fee', { currency: baseCurrency })}</div>
-              <input data-testid="form-event-fee" className={`${inputCls} font-mono`} value={form.feeBase}
-                onChange={(e) => setForm((f) => ({ ...f, feeBase: e.target.value }))} disabled={saving} />
+              <div className={labelCls}>
+                {t('transactions.form.fee', { currency: baseCurrency })}
+              </div>
+              <input
+                data-testid="form-event-fee"
+                className={`${inputCls} font-mono`}
+                value={form.feeBase}
+                onChange={(e) => setForm((f) => ({ ...f, feeBase: e.target.value }))}
+                disabled={saving}
+              />
             </label>
             {form.type === 'SWAP' && (
               <>
                 <label className="block">
                   <div className={labelCls}>{t('transactions.form.assetOut')}</div>
-                  <select className={inputCls} value={form.assetOutId}
-                    onChange={(e) => setForm((f) => ({ ...f, assetOutId: e.target.value }))} disabled={saving}>
-                    {dbState.data.assets.map((a: any) => <option key={a.id} value={a.id}>{a.symbol}</option>)}
+                  <select
+                    className={inputCls}
+                    value={form.assetOutId}
+                    onChange={(e) => setForm((f) => ({ ...f, assetOutId: e.target.value }))}
+                    disabled={saving}
+                  >
+                    {dbState.data.assets.map((a: any) => (
+                      <option key={a.id} value={a.id}>
+                        {a.symbol}
+                      </option>
+                    ))}
                   </select>
                 </label>
                 <label className="block">
                   <div className={labelCls}>{t('transactions.form.amountOut')}</div>
-                  <input className={`${inputCls} font-mono`} value={form.amountOut}
-                    onChange={(e) => setForm((f) => ({ ...f, amountOut: e.target.value }))} disabled={saving} />
+                  <input
+                    className={`${inputCls} font-mono`}
+                    value={form.amountOut}
+                    onChange={(e) => setForm((f) => ({ ...f, amountOut: e.target.value }))}
+                    disabled={saving}
+                  />
                 </label>
                 <label className="block">
-                  <div className={labelCls}>{t('transactions.form.valuationTotal', { currency: baseCurrency })}</div>
-                  <input className={`${inputCls} font-mono`} value={form.valuationBase}
-                    onChange={(e) => setForm((f) => ({ ...f, valuationBase: e.target.value }))} disabled={saving} />
+                  <div className={labelCls}>
+                    {t('transactions.form.valuationTotal', { currency: baseCurrency })}
+                  </div>
+                  <input
+                    className={`${inputCls} font-mono`}
+                    value={form.valuationBase}
+                    onChange={(e) => setForm((f) => ({ ...f, valuationBase: e.target.value }))}
+                    disabled={saving}
+                  />
                 </label>
               </>
             )}
             <label className="block md:col-span-2">
               <div className={labelCls}>{t('transactions.form.externalRef')}</div>
-              <input className={inputCls} value={form.externalRef}
-                onChange={(e) => setForm((f) => ({ ...f, externalRef: e.target.value }))} disabled={saving} />
+              <input
+                className={inputCls}
+                value={form.externalRef}
+                onChange={(e) => setForm((f) => ({ ...f, externalRef: e.target.value }))}
+                disabled={saving}
+              />
             </label>
             <label className="block md:col-span-3">
               <div className={labelCls}>{t('transactions.form.notes')}</div>
-              <input className={inputCls} value={form.notes}
-                onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} disabled={saving} />
+              <input
+                className={inputCls}
+                value={form.notes}
+                onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
+                disabled={saving}
+              />
             </label>
           </div>
 
           <div className="mt-3 flex gap-2">
-            <Button variant="primary" size="sm" data-testid="btn-submit-event"
-              onClick={() => void submit()} disabled={saving} loading={saving}>
-              {form.mode === 'edit' ? t('transactions.btn.saveReplacement') : t('transactions.btn.addEvent')}
+            <Button
+              variant="primary"
+              size="sm"
+              data-testid="btn-submit-event"
+              onClick={() => void submit()}
+              disabled={saving}
+              loading={saving}
+            >
+              {form.mode === 'edit'
+                ? t('transactions.btn.saveReplacement')
+                : t('transactions.btn.addEvent')}
             </Button>
             <Button variant="secondary" size="sm" onClick={resetForm} disabled={saving}>
               {t('common.reset')}
@@ -465,14 +577,19 @@ export default function TransactionsPage() {
       {/* Transactions table */}
       <Card data-testid="panel-ledger">
         <div className="flex items-center justify-between mb-3">
-          <div className="text-body font-medium text-content-primary">{t('transactions.ledger.title')}</div>
+          <div className="text-body font-medium text-content-primary">
+            {t('transactions.ledger.title')}
+          </div>
           <div className="text-caption text-content-tertiary">{filteredEvents.length} events</div>
         </div>
 
         {/* Table header */}
         <div className="grid grid-cols-[1.5fr_0.7fr_1.2fr_1fr_1fr_1fr] gap-2 px-3 pb-2 border-b border-border-subtle">
           {['Date', 'Type', 'Asset', 'Amount', 'Price', 'Total'].map((h) => (
-            <span key={h} className="text-[0.625rem] text-content-tertiary font-medium uppercase tracking-wider">
+            <span
+              key={h}
+              className="text-[0.625rem] text-content-tertiary font-medium uppercase tracking-wider"
+            >
               {h}
             </span>
           ))}
@@ -488,9 +605,10 @@ export default function TransactionsPage() {
               getKey={(e: any) => String(e.id)}
               renderItem={(e: any) => {
                 const replacedBy = dbState.data.replacedBy.get(String(e.id));
-                const total = (e.type === 'BUY' || e.type === 'SELL')
-                  ? d(e.amount).mul(d(e.pricePerUnitBase))
-                  : d(e.valuationBase ?? '0');
+                const total =
+                  e.type === 'BUY' || e.type === 'SELL'
+                    ? d(e.amount).mul(d(e.pricePerUnitBase))
+                    : d(e.valuationBase ?? '0');
                 return (
                   <div
                     className="grid grid-cols-[1.5fr_0.7fr_1.2fr_1fr_1fr_1fr] gap-2 items-center py-2.5 px-3
@@ -502,15 +620,33 @@ export default function TransactionsPage() {
                       {new Date(e.timestampISO).toLocaleDateString()}
                     </div>
                     <div>
-                      <span className={`inline-block rounded-full px-2 py-0.5 text-[0.625rem] font-medium ${typeBadgeColor(e.type)}`}>
+                      <span
+                        className={`inline-block rounded-full px-2 py-0.5 text-[0.625rem] font-medium ${typeBadgeColor(e.type)}`}
+                      >
                         {e.type}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <TokenIcon symbol={e.assetSym} size="sm" />
-                      <span className="text-body text-content-primary font-medium truncate">{e.assetSym}</span>
-                      {e.isDeleted && <span className="text-[0.5rem] rounded bg-semantic-error/10 text-semantic-error px-1" data-testid="badge-ledger-deleted">{t('transactions.badge.deleted')}</span>}
-                      {replacedBy && <span className="text-[0.5rem] rounded bg-surface-overlay text-content-tertiary px-1" data-testid="badge-ledger-replaced">{t('transactions.badge.replaced')}</span>}
+                      <span className="text-body text-content-primary font-medium truncate">
+                        {e.assetSym}
+                      </span>
+                      {e.isDeleted && (
+                        <span
+                          className="text-[0.5rem] rounded bg-semantic-error/10 text-semantic-error px-1"
+                          data-testid="badge-ledger-deleted"
+                        >
+                          {t('transactions.badge.deleted')}
+                        </span>
+                      )}
+                      {replacedBy && (
+                        <span
+                          className="text-[0.5rem] rounded bg-surface-overlay text-content-tertiary px-1"
+                          data-testid="badge-ledger-replaced"
+                        >
+                          {t('transactions.badge.replaced')}
+                        </span>
+                      )}
                     </div>
                     <div className="text-caption font-mono text-content-secondary text-right truncate">
                       {d(e.amount).toDecimalPlaces(6).toFixed()}
@@ -540,7 +676,9 @@ export default function TransactionsPage() {
           role="dialog"
           aria-modal="true"
           data-testid="drawer-ledger-event"
-          onMouseDown={(e) => { if (e.target === e.currentTarget) setDetailsId(null); }}
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) setDetailsId(null);
+          }}
         >
           <div className="w-full max-w-2xl rounded-xl border border-border bg-surface-base p-5 shadow-2xl">
             <div className="flex items-start justify-between gap-3">
@@ -563,9 +701,15 @@ export default function TransactionsPage() {
 
             <div className="mt-4 grid gap-2 text-body">
               {[
-                [t('transactions.detail.time'), new Date(selectedEvent.timestampISO).toLocaleString()],
+                [
+                  t('transactions.detail.time'),
+                  new Date(selectedEvent.timestampISO).toLocaleString(),
+                ],
                 [t('transactions.detail.account'), selectedEvent.accountName],
-                [t('transactions.detail.amount'), `${fmt(selectedEvent.amount)} ${selectedEvent.assetSym}`],
+                [
+                  t('transactions.detail.amount'),
+                  `${fmt(selectedEvent.amount)} ${selectedEvent.assetSym}`,
+                ],
               ].map(([label, value]) => (
                 <div key={label} className="flex items-center justify-between">
                   <span className="text-content-secondary">{label}</span>
@@ -577,7 +721,8 @@ export default function TransactionsPage() {
                   <span className="text-content-secondary">{t('transactions.detail.swapOut')}</span>
                   <span className="font-mono text-content-primary">
                     {fmt((selectedEvent as any).amountOut)}{' '}
-                    {assetsById.get((selectedEvent as any).assetOutId)?.symbol ?? (selectedEvent as any).assetOutId}
+                    {assetsById.get((selectedEvent as any).assetOutId)?.symbol ??
+                      (selectedEvent as any).assetOutId}
                   </span>
                 </div>
               )}
@@ -594,20 +739,35 @@ export default function TransactionsPage() {
               )}
               {selectedEvent.externalRef && (
                 <div className="flex items-center justify-between">
-                  <span className="text-content-secondary">{t('transactions.detail.externalRef')}</span>
-                  <span className="font-mono text-content-primary truncate max-w-[300px]">{String(selectedEvent.externalRef)}</span>
+                  <span className="text-content-secondary">
+                    {t('transactions.detail.externalRef')}
+                  </span>
+                  <span className="font-mono text-content-primary truncate max-w-[300px]">
+                    {String(selectedEvent.externalRef)}
+                  </span>
                 </div>
               )}
               {selectedEvent.notes && (
-                <div className="rounded-button border border-border bg-surface-raised p-2 text-caption text-content-secondary" data-testid="box-ledger-notes">
+                <div
+                  className="rounded-button border border-border bg-surface-raised p-2 text-caption text-content-secondary"
+                  data-testid="box-ledger-notes"
+                >
                   {String(selectedEvent.notes)}
                 </div>
               )}
             </div>
 
             <div className="mt-4 flex gap-2">
-              <Button variant="secondary" size="sm" data-testid="btn-drawer-edit"
-                onClick={() => { openEdit(selectedEvent); setDetailsId(null); }} disabled={saving}>
+              <Button
+                variant="secondary"
+                size="sm"
+                data-testid="btn-drawer-edit"
+                onClick={() => {
+                  openEdit(selectedEvent);
+                  setDetailsId(null);
+                }}
+                disabled={saving}
+              >
                 {t('transactions.btn.drawerEdit')}
               </Button>
               <button
@@ -620,7 +780,10 @@ export default function TransactionsPage() {
               </button>
             </div>
 
-            <details className="mt-4 rounded-xl border border-border bg-surface-raised p-3" data-testid="details-ledger-raw">
+            <details
+              className="mt-4 rounded-xl border border-border bg-surface-raised p-3"
+              data-testid="details-ledger-raw"
+            >
               <summary className="cursor-pointer select-none text-caption text-content-secondary">
                 {t('transactions.detail.rawJson')}
               </summary>

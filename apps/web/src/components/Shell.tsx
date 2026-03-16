@@ -35,7 +35,10 @@ export default function Shell({ children }: { children: React.ReactNode }) {
                 Lock
               </button>
             ) : (
-              <span data-testid="badge-locked" className="text-xs rounded bg-surface-raised px-2 py-1">
+              <span
+                data-testid="badge-locked"
+                className="text-xs rounded bg-surface-raised px-2 py-1"
+              >
                 Locked
               </span>
             )}

@@ -132,10 +132,10 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-heading-1 font-heading text-content-primary">{t('dashboard.title')}</h1>
-          <p className="text-caption text-content-tertiary mt-0.5">
-            {t('dashboard.subtitle')}
-          </p>
+          <h1 className="text-heading-1 font-heading text-content-primary">
+            {t('dashboard.title')}
+          </h1>
+          <p className="text-caption text-content-tertiary mt-0.5">{t('dashboard.subtitle')}</p>
         </div>
         <div className="flex items-center gap-2">
           {status.lastRebuildISO && (
@@ -293,9 +293,7 @@ export default function DashboardPage() {
                 {filteredPositions.map((p, i) => {
                   const pnl = d(p.unrealizedPnlBase);
                   const costBasis = d(p.costBasisBase);
-                  const pnlPct = costBasis.isZero()
-                    ? null
-                    : pnl.div(costBasis).mul(100);
+                  const pnlPct = costBasis.isZero() ? null : pnl.div(costBasis).mul(100);
                   const pricePerUnit = d(p.amount).isZero()
                     ? new Decimal(0)
                     : d(p.valueBase).div(d(p.amount));

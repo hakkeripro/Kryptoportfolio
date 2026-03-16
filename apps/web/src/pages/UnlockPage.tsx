@@ -11,7 +11,8 @@ import {
 
 function errToMsg(e: unknown, t: (k: string) => string): string {
   const msg = e instanceof Error ? e.message : String(e);
-  if (msg.includes('Decryption') || msg.includes('decrypt')) return t('unlock.error.wrongPassphrase');
+  if (msg.includes('Decryption') || msg.includes('decrypt'))
+    return t('unlock.error.wrongPassphrase');
   if (msg.includes('passkey_cancelled')) return t('unlock.error.passkeyCancelled');
   if (msg.includes('hmac_secret_not_supported') || msg.includes('prf_not_supported'))
     return t('unlock.error.passkeyNotSupported');

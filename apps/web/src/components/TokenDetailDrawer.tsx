@@ -181,7 +181,9 @@ export default function TokenDetailDrawer({
                   ))}
                 </ul>
               ) : (
-                <div className="text-sm text-content-secondary">No events found for this asset.</div>
+                <div className="text-sm text-content-secondary">
+                  No events found for this asset.
+                </div>
               )}
             </div>
           </div>
@@ -197,7 +199,9 @@ export default function TokenDetailDrawer({
                         <span className="font-mono">
                           {fmtQty(l.amountRemaining)} {symbol}
                         </span>
-                        <span className="text-content-secondary">{l.acquiredAtISO.slice(0, 10)}</span>
+                        <span className="text-content-secondary">
+                          {l.acquiredAtISO.slice(0, 10)}
+                        </span>
                       </div>
                       <div className="text-content-secondary font-mono">
                         cost {fmtMoney(l.costBasisBaseRemaining, baseCurrency)}

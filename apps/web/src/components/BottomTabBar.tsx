@@ -14,8 +14,10 @@ export default function BottomTabBar() {
   ];
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-10 bg-surface-raised/80 backdrop-blur-md border-t border-border/50 safe-area-bottom
-      before:absolute before:top-0 before:left-0 before:right-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-border before:to-transparent">
+    <nav
+      className="md:hidden fixed bottom-0 left-0 right-0 z-10 bg-surface-raised/80 backdrop-blur-md border-t border-border/50 safe-area-bottom
+      before:absolute before:top-0 before:left-0 before:right-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-border before:to-transparent"
+    >
       <div className="flex items-center justify-around h-14">
         {tabs.map(({ to, icon: Icon, label, testId }) => (
           <NavLink

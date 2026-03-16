@@ -23,12 +23,19 @@ export default function WelcomePage() {
       {/* Primary gradient orb */}
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[500px] rounded-full opacity-25 blur-3xl pointer-events-none animate-float"
-        style={{ background: 'radial-gradient(circle, var(--color-brand) 0%, transparent 70%)', animationDuration: '10s' }}
+        style={{
+          background: 'radial-gradient(circle, var(--color-brand) 0%, transparent 70%)',
+          animationDuration: '10s',
+        }}
       />
       {/* Secondary orb */}
       <div
         className="absolute bottom-20 -left-20 w-[400px] h-[400px] rounded-full opacity-[0.06] blur-3xl pointer-events-none animate-float"
-        style={{ background: 'radial-gradient(circle, #3b82f6 0%, transparent 70%)', animationDelay: '-4s', animationDuration: '12s' }}
+        style={{
+          background: 'radial-gradient(circle, #3b82f6 0%, transparent 70%)',
+          animationDelay: '-4s',
+          animationDuration: '12s',
+        }}
       />
 
       {/* Logo + Hero */}
@@ -45,7 +52,11 @@ export default function WelcomePage() {
       {/* USP Cards */}
       <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl w-full mb-10">
         {uspKeys.map(({ icon: Icon, key }, index) => (
-          <div key={key} className="animate-slide-up" style={{ animationDelay: `${index * 100 + 200}ms` }}>
+          <div
+            key={key}
+            className="animate-slide-up"
+            style={{ animationDelay: `${index * 100 + 200}ms` }}
+          >
             <Card hover className="text-center p-6">
               <div className="flex justify-center mb-3">
                 <div className="w-10 h-10 rounded-full bg-brand/10 flex items-center justify-center">
@@ -62,7 +73,10 @@ export default function WelcomePage() {
       </div>
 
       {/* CTAs */}
-      <div className="relative z-10 w-full max-w-sm space-y-3 animate-fade-in" style={{ animationDelay: '500ms' }}>
+      <div
+        className="relative z-10 w-full max-w-sm space-y-3 animate-fade-in"
+        style={{ animationDelay: '500ms' }}
+      >
         <Button
           data-testid="btn-signup"
           onClick={() => nav('/auth/signup')}
@@ -91,7 +105,10 @@ export default function WelcomePage() {
       </div>
 
       {/* Footer */}
-      <div className="relative z-10 mt-12 text-caption text-content-tertiary text-center animate-fade-in" style={{ animationDelay: '600ms' }}>
+      <div
+        className="relative z-10 mt-12 text-caption text-content-tertiary text-center animate-fade-in"
+        style={{ animationDelay: '600ms' }}
+      >
         {t('welcome.footer')}
       </div>
     </div>

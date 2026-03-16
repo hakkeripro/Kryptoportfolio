@@ -52,16 +52,41 @@ export default function Sidebar() {
     {
       label: t('nav.section.portfolio', { defaultValue: 'PORTFOLIO' }),
       items: [
-        { to: '/home', icon: Home, label: t('nav.dashboard', { defaultValue: 'Dashboard' }), testId: 'nav-home' },
-        { to: '/transactions', icon: ArrowLeftRight, label: t('nav.transactions'), testId: 'nav-transactions' },
-        { to: '/taxes', icon: FileText, label: t('nav.taxReports', { defaultValue: 'Tax Reports' }), testId: 'nav-taxes' },
+        {
+          to: '/home',
+          icon: Home,
+          label: t('nav.dashboard', { defaultValue: 'Dashboard' }),
+          testId: 'nav-home',
+        },
+        {
+          to: '/transactions',
+          icon: ArrowLeftRight,
+          label: t('nav.transactions'),
+          testId: 'nav-transactions',
+        },
+        {
+          to: '/taxes',
+          icon: FileText,
+          label: t('nav.taxReports', { defaultValue: 'Tax Reports' }),
+          testId: 'nav-taxes',
+        },
       ],
     },
     {
       label: t('nav.section.tools', { defaultValue: 'TOOLS' }),
       items: [
-        { to: '/settings/alerts', icon: Bell, label: t('nav.alerts', { defaultValue: 'Alerts' }), testId: 'nav-alerts' },
-        { to: '/transactions/import', icon: Upload, label: t('nav.import', { defaultValue: 'Import' }), testId: 'nav-import' },
+        {
+          to: '/settings/alerts',
+          icon: Bell,
+          label: t('nav.alerts', { defaultValue: 'Alerts' }),
+          testId: 'nav-alerts',
+        },
+        {
+          to: '/transactions/import',
+          icon: Upload,
+          label: t('nav.import', { defaultValue: 'Import' }),
+          testId: 'nav-import',
+        },
         { to: '/settings', icon: Settings, label: t('nav.settings'), testId: 'nav-settings' },
       ],
     },

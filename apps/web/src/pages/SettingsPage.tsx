@@ -51,9 +51,13 @@ export default function SettingsPage() {
         </h2>
         <div className="space-y-3">
           <div className="rounded-xl border border-border bg-surface-raised p-4">
-            <div className="text-body font-medium text-content-primary">{t('settings.account.title')}</div>
+            <div className="text-body font-medium text-content-primary">
+              {t('settings.account.title')}
+            </div>
             <div className="text-caption text-content-secondary mt-1">
-              {token ? t('settings.account.loggedIn', { email }) : t('settings.account.notLoggedIn')}
+              {token
+                ? t('settings.account.loggedIn', { email })
+                : t('settings.account.notLoggedIn')}
             </div>
           </div>
           <SecurityCard busy={busy} setBusy={setBusy} />
@@ -69,7 +73,9 @@ export default function SettingsPage() {
           {/* Language selector */}
           <div className="rounded-xl border border-border bg-surface-raised p-4">
             <div className="flex items-center justify-between">
-              <div className="text-body font-medium text-content-primary">{t('settings.language.title')}</div>
+              <div className="text-body font-medium text-content-primary">
+                {t('settings.language.title')}
+              </div>
               <div className="flex gap-2">
                 <button
                   data-testid="btn-lang-en"

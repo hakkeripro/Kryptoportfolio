@@ -145,9 +145,7 @@ export default function VaultSetupPage() {
                 placeholder={t('vaultSetup.confirmPlaceholder')}
               />
               {mismatch && (
-                <p className="text-xs text-semantic-error mt-1">
-                  {t('vaultSetup.error.mismatch')}
-                </p>
+                <p className="text-xs text-semantic-error mt-1">{t('vaultSetup.error.mismatch')}</p>
               )}
             </div>
 
@@ -241,7 +239,9 @@ export default function VaultSetupPage() {
               {isOffline && (
                 <div className="flex justify-between">
                   <span className="text-content-secondary">{t('vaultSetup.summary.mode')}</span>
-                  <span className="text-content-primary">{t('vaultSetup.summary.offlineMode')}</span>
+                  <span className="text-content-primary">
+                    {t('vaultSetup.summary.offlineMode')}
+                  </span>
                 </div>
               )}
               <div className="flex justify-between">
