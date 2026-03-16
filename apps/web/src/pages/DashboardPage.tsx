@@ -134,12 +134,14 @@ export default function DashboardPage() {
       label: t('dashboard.kpi.totalValue'),
       value: fmtMoney(metrics.totalValueBase, baseCurrency),
       numericValue: totalValue.toNumber(),
+      unit: baseCurrency,
     },
     {
       testId: 'metric-realized',
       label: t('dashboard.kpi.realizedPnl'),
       value: fmtMoney(metrics.realizedPnlBaseToDate, baseCurrency),
       numericValue: realizedDelta.toNumber(),
+      unit: baseCurrency,
       delta: realizedDelta.isZero()
         ? undefined
         : `${realizedDelta.isPositive() ? '+' : ''}${realizedDelta.toDecimalPlaces(2).toFixed()}`,

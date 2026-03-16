@@ -8,6 +8,7 @@ interface KpiCardProps {
   label: string;
   value: string;
   numericValue?: number;
+  unit?: string;
   delta?: string;
   deltaType?: 'positive' | 'negative' | 'neutral';
 }
@@ -36,6 +37,7 @@ export function KpiCard({
   label,
   value,
   numericValue,
+  unit,
   delta,
   deltaType = 'neutral',
 }: KpiCardProps) {
@@ -51,7 +53,16 @@ export function KpiCard({
       <Card className="p-5 h-full border-[#2E2E2E] bg-[#1A1A1A] transition-shadow hover:shadow-lg">
         <span className="text-xs font-medium text-muted-foreground">{label}</span>
         <div className="mt-2 text-2xl font-semibold font-heading text-card-foreground">
-          {numericValue !== undefined ? <AnimatedNumber value={numericValue} /> : value}
+          {numericValue !== undefined ? (
+            <>
+              <AnimatedNumber value={numericValue} />
+              {unit && (
+                <span className="ml-1 text-sm font-normal text-muted-foreground">{unit}</span>
+              )}
+            </>
+          ) : (
+            value
+          )}
         </div>
         {delta && <div className={cn('mt-2 text-xs', deltaColor)}>{delta}</div>}
       </Card>
