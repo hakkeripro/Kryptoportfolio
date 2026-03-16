@@ -1,11 +1,11 @@
 import { test, expect } from '@playwright/test';
 import { resetApp, signupAndSetupVault, spaNavigate } from './helpers';
 
-async function onboardAndRegister(page: any) {
+async function onboardAndRegister(page: Parameters<typeof signupAndSetupVault>[0]) {
   await signupAndSetupVault(page);
 }
 
-async function importFixture(page: any) {
+async function importFixture(page: Parameters<typeof signupAndSetupVault>[0]) {
   // Use SPA navigation to keep the in-memory vault state (avoid full reload).
   await spaNavigate(page, '/transactions/import');
   await expect(page.getByTestId('form-coinbase-keyname')).toBeVisible();
@@ -41,7 +41,10 @@ async function importFixture(page: any) {
   await page.getByTestId('badge-import-step-done').waitFor({ timeout: 20_000 });
 }
 
-test('tax report: generate for 2025 and export CSV', async ({ page, request }) => {
+test('tax report: generate for 2025 — free user sees KPI cards and gate wall', async ({
+  page,
+  request,
+}) => {
   await resetApp(page, request);
   await onboardAndRegister(page);
   await importFixture(page);
@@ -52,11 +55,15 @@ test('tax report: generate for 2025 and export CSV', async ({ page, request }) =
   await page.getByTestId('form-tax-year').selectOption('2025');
   await page.getByTestId('btn-tax-generate').click();
 
-  await expect(page.getByTestId('list-tax-disposals')).toBeVisible();
-  expect(await page.locator('[data-testid^="row-tax-disposal-"]').count()).toBeGreaterThan(0);
+  // Free user: KPI cards are visible after generating
+  await expect(page.getByTestId('kpi-total-gains')).toBeVisible({ timeout: 5_000 });
 
-  const downloadPromise = page.waitForEvent('download');
+  // Free user: gate wall is shown instead of full disposals table
+  await expect(page.getByTestId('gate-wall-tax-report-view')).toBeVisible();
+
+  // Free user: clicking Export CSV opens upgrade modal
   await page.getByTestId('btn-tax-export-csv').click();
-  const dl = await downloadPromise;
-  expect(dl.suggestedFilename()).toContain('tax_2025');
+  await expect(page.getByTestId('upgrade-modal')).toBeVisible();
+  await page.getByTestId('upgrade-modal-close').click();
+  await expect(page.getByTestId('upgrade-modal')).not.toBeVisible();
 });

@@ -1,15 +1,17 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
-import React from 'react'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import React from 'react';
 import { UpgradeModal, UpgradeTeaser } from './UpgradeModal';
 
 afterEach(() => cleanup());
 
+type MockAuthState = { plan: string; planExpiresAt: string | null; token: string };
+
 // Shared mock state — mutated per test for GateWall
-const authState = { plan: 'free' as string, planExpiresAt: null as string | null, token: 'tok' };
+const authState: MockAuthState = { plan: 'free', planExpiresAt: null, token: 'tok' };
 
 vi.mock('../../store/useAuthStore', () => ({
-  useAuthStore: (selector: (s: any) => any) => selector(authState),
+  useAuthStore: (selector: (s: MockAuthState) => unknown) => selector(authState),
 }));
 
 /* ── UpgradeModal ─────────────────────────────────── */
