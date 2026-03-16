@@ -87,7 +87,12 @@ export default function TokenDetailDrawer({
   }, [events, assetId]);
 
   return (
-    <Sheet open onOpenChange={(open) => { if (!open) onClose(); }}>
+    <Sheet
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
       <SheetContent
         side="right"
         className="w-full max-w-2xl bg-surface-base border-l border-border p-0 overflow-y-auto"
@@ -109,7 +114,10 @@ export default function TokenDetailDrawer({
               {[
                 { label: 'Amount', value: fmtQty(position.amount) },
                 { label: 'Value', value: fmtMoney(position.valueBase, baseCurrency) },
-                { label: 'Unrealized P&L', value: fmtMoney(position.unrealizedPnlBase, baseCurrency) },
+                {
+                  label: 'Unrealized P&L',
+                  value: fmtMoney(position.unrealizedPnlBase, baseCurrency),
+                },
               ].map(({ label, value }) => (
                 <div key={label} className="rounded-xl bg-surface-raised border border-border p-3">
                   <div className="text-[11px] text-content-secondary mb-1">{label}</div>
@@ -121,7 +129,9 @@ export default function TokenDetailDrawer({
 
           <div className="rounded-xl border border-border bg-surface-raised p-4 mb-4">
             <div className="flex items-center justify-between mb-3">
-              <div className="font-heading text-heading-4 text-content-primary">Price ({baseCurrency})</div>
+              <div className="font-heading text-heading-4 text-content-primary">
+                Price ({baseCurrency})
+              </div>
               {!priceSeries.length ? (
                 <span
                   className="text-[11px] rounded bg-amber-900/30 border border-amber-800 px-2 py-1 text-amber-200"
@@ -136,13 +146,23 @@ export default function TokenDetailDrawer({
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={priceSeries}>
                     <Tooltip
-                      contentStyle={{ background: '#1A1A1A', border: '1px solid #2E2E2E', borderRadius: '8px' }}
+                      contentStyle={{
+                        background: '#1A1A1A',
+                        border: '1px solid #2E2E2E',
+                        borderRadius: '8px',
+                      }}
                       labelStyle={{ color: '#B8B9B6' }}
                       itemStyle={{ color: '#FF8400' }}
                     />
                     <XAxis dataKey="t" hide />
                     <YAxis hide domain={['auto', 'auto']} />
-                    <Line type="monotone" dataKey="v" dot={false} stroke="#FF8400" strokeWidth={1.5} />
+                    <Line
+                      type="monotone"
+                      dataKey="v"
+                      dot={false}
+                      stroke="#FF8400"
+                      strokeWidth={1.5}
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               ) : (
@@ -162,7 +182,9 @@ export default function TokenDetailDrawer({
                     {assetEvents.map((e) => (
                       <li key={e.id} className="py-2.5">
                         <div className="flex items-center justify-between gap-2">
-                          <span className="text-sm font-semibold text-content-primary">{e.type}</span>
+                          <span className="text-sm font-semibold text-content-primary">
+                            {e.type}
+                          </span>
                           <span className="text-[11px] text-content-secondary">
                             {new Date(e.timestampISO).toLocaleDateString()}
                           </span>
@@ -170,14 +192,20 @@ export default function TokenDetailDrawer({
                         <div className="text-[11px] text-content-secondary font-mono mt-0.5">
                           {fmtQty(e.amount)} {assetsById.get(e.assetId ?? '')?.symbol ?? e.assetId}
                           {e.type === 'SWAP' ? (
-                            <> → {fmtQty(e.amountOut)} {assetsById.get(e.assetOutId)?.symbol ?? e.assetOutId}</>
+                            <>
+                              {' '}
+                              → {fmtQty(e.amountOut)}{' '}
+                              {assetsById.get(e.assetOutId)?.symbol ?? e.assetOutId}
+                            </>
                           ) : null}
                         </div>
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <div className="text-sm text-content-secondary">No events found for this asset.</div>
+                  <div className="text-sm text-content-secondary">
+                    No events found for this asset.
+                  </div>
                 )}
               </div>
             </div>
@@ -193,7 +221,9 @@ export default function TokenDetailDrawer({
                           <span className="text-sm font-mono text-content-primary">
                             {fmtQty(l.amountRemaining)} {symbol}
                           </span>
-                          <span className="text-[11px] text-content-secondary">{l.acquiredAtISO.slice(0, 10)}</span>
+                          <span className="text-[11px] text-content-secondary">
+                            {l.acquiredAtISO.slice(0, 10)}
+                          </span>
                         </div>
                         <div className="text-[11px] text-content-secondary font-mono">
                           cost {fmtMoney(l.costBasisBaseRemaining, baseCurrency)}
@@ -202,7 +232,9 @@ export default function TokenDetailDrawer({
                     ))}
                   </ul>
                 ) : (
-                  <div className="text-sm text-content-secondary">No lots (position is empty or not yet derived).</div>
+                  <div className="text-sm text-content-secondary">
+                    No lots (position is empty or not yet derived).
+                  </div>
                 )}
               </div>
             </div>

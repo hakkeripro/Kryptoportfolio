@@ -197,16 +197,12 @@ describe('KpiCard', () => {
   });
 
   it('renders delta text with positive type', () => {
-    render(
-      <KpiCard label="Change" value="€100" delta="+5%" deltaType="positive" />,
-    );
+    render(<KpiCard label="Change" value="€100" delta="+5%" deltaType="positive" />);
     expect(screen.getByText('+5%')).toBeTruthy();
   });
 
   it('renders delta text with negative type', () => {
-    render(
-      <KpiCard label="Change" value="€100" delta="-3%" deltaType="negative" />,
-    );
+    render(<KpiCard label="Change" value="€100" delta="-3%" deltaType="negative" />);
     expect(screen.getByText('-3%')).toBeTruthy();
   });
 

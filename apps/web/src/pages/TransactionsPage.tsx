@@ -12,9 +12,20 @@ import { ensureDefaultSettings } from '../derived/ensureDefaultSettings';
 import { useDbQuery } from '../hooks/useDbQuery';
 import { VirtualList } from '../components/VirtualList';
 import {
-  Button, Card, TokenIcon, Badge,
-  Dialog, DialogContent, DialogHeader, DialogTitle,
-  Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Button,
+  Card,
+  TokenIcon,
+  Badge,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '../components/ui';
 import { pageTransition, fadeInUp, staggerContainer } from '../lib/animations';
 
@@ -332,7 +343,12 @@ export default function TransactionsPage() {
   return (
     <motion.div className="space-y-section" {...pageTransition}>
       {/* Header */}
-      <motion.div className="flex items-start justify-between" variants={fadeInUp} initial="hidden" animate="show">
+      <motion.div
+        className="flex items-start justify-between"
+        variants={fadeInUp}
+        initial="hidden"
+        animate="show"
+      >
         <div>
           <h1 className="text-heading-1 font-heading text-content-primary">
             {t('transactions.title')}
@@ -343,25 +359,22 @@ export default function TransactionsPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            data-testid="btn-export-csv"
-          >
+          <Button variant="outline" size="sm" data-testid="btn-export-csv">
             <Download className="h-3.5 w-3.5 mr-1.5" /> Export CSV
           </Button>
-          <Button
-            variant="default"
-            size="sm"
-            onClick={() => setShowForm(!showForm)}
-          >
+          <Button variant="default" size="sm" onClick={() => setShowForm(!showForm)}>
             <Plus className="h-3.5 w-3.5 mr-1.5" /> {t('dashboard.btn.addTransaction')}
           </Button>
         </div>
       </motion.div>
 
       {/* Search + filters */}
-      <motion.div className="flex items-center gap-3 flex-wrap" variants={fadeInUp} initial="hidden" animate="show">
+      <motion.div
+        className="flex items-center gap-3 flex-wrap"
+        variants={fadeInUp}
+        initial="hidden"
+        animate="show"
+      >
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-content-tertiary pointer-events-none" />
           <Input
@@ -380,7 +393,9 @@ export default function TransactionsPage() {
         >
           <option value="ALL">All Types</option>
           {EVENT_TYPES.map((t) => (
-            <option key={t} value={t}>{t}</option>
+            <option key={t} value={t}>
+              {t}
+            </option>
           ))}
         </select>
       </motion.div>
@@ -443,7 +458,9 @@ export default function TransactionsPage() {
                     disabled={saving}
                   >
                     {EVENT_TYPES.map((t) => (
-                      <option key={t} value={t}>{t}</option>
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
                     ))}
                   </select>
                 </label>
@@ -457,7 +474,9 @@ export default function TransactionsPage() {
                     disabled={saving}
                   >
                     {dbState.data.assets.map((a: any) => (
-                      <option key={a.id} value={a.id}>{a.symbol}</option>
+                      <option key={a.id} value={a.id}>
+                        {a.symbol}
+                      </option>
                     ))}
                   </select>
                 </label>
@@ -515,7 +534,9 @@ export default function TransactionsPage() {
                         disabled={saving}
                       >
                         {dbState.data.assets.map((a: any) => (
-                          <option key={a.id} value={a.id}>{a.symbol}</option>
+                          <option key={a.id} value={a.id}>
+                            {a.symbol}
+                          </option>
                         ))}
                       </select>
                     </label>
@@ -569,9 +590,11 @@ export default function TransactionsPage() {
                   onClick={() => void submit()}
                   disabled={saving}
                 >
-                  {saving ? '...' : form.mode === 'edit'
-                    ? t('transactions.btn.saveReplacement')
-                    : t('transactions.btn.addEvent')}
+                  {saving
+                    ? '...'
+                    : form.mode === 'edit'
+                      ? t('transactions.btn.saveReplacement')
+                      : t('transactions.btn.addEvent')}
                 </Button>
                 <Button variant="outline" size="sm" onClick={resetForm} disabled={saving}>
                   {t('common.reset')}
@@ -680,7 +703,12 @@ export default function TransactionsPage() {
       </motion.div>
 
       {/* Event detail dialog */}
-      <Dialog open={!!selectedEvent} onOpenChange={(open) => { if (!open) setDetailsId(null); }}>
+      <Dialog
+        open={!!selectedEvent}
+        onOpenChange={(open) => {
+          if (!open) setDetailsId(null);
+        }}
+      >
         <DialogContent
           className="max-w-2xl bg-surface-base border-border"
           data-testid="drawer-ledger-event"
@@ -699,32 +727,48 @@ export default function TransactionsPage() {
                     {selectedEvent.assetSym}
                   </span>
                 </DialogTitle>
-                <p className="text-[11px] text-content-tertiary font-mono mt-0.5">{selectedEvent.id}</p>
+                <p className="text-[11px] text-content-tertiary font-mono mt-0.5">
+                  {selectedEvent.id}
+                </p>
               </DialogHeader>
 
               <div className="grid gap-2.5 text-body mt-2">
                 {[
-                  [t('transactions.detail.time'), new Date(selectedEvent.timestampISO).toLocaleString()],
+                  [
+                    t('transactions.detail.time'),
+                    new Date(selectedEvent.timestampISO).toLocaleString(),
+                  ],
                   [t('transactions.detail.account'), selectedEvent.accountName],
-                  [t('transactions.detail.amount'), `${fmt(selectedEvent.amount)} ${selectedEvent.assetSym}`],
+                  [
+                    t('transactions.detail.amount'),
+                    `${fmt(selectedEvent.amount)} ${selectedEvent.assetSym}`,
+                  ],
                 ].map(([label, value]) => (
-                  <div key={label} className="flex items-center justify-between py-1.5 border-b border-border/40">
+                  <div
+                    key={label}
+                    className="flex items-center justify-between py-1.5 border-b border-border/40"
+                  >
                     <span className="text-content-secondary text-sm">{label}</span>
                     <span className="font-mono text-content-primary text-sm">{value}</span>
                   </div>
                 ))}
                 {(selectedEvent as any).assetOutId && (
                   <div className="flex items-center justify-between py-1.5 border-b border-border/40">
-                    <span className="text-content-secondary text-sm">{t('transactions.detail.swapOut')}</span>
+                    <span className="text-content-secondary text-sm">
+                      {t('transactions.detail.swapOut')}
+                    </span>
                     <span className="font-mono text-content-primary text-sm">
                       {fmt((selectedEvent as any).amountOut)}{' '}
-                      {assetsById.get((selectedEvent as any).assetOutId)?.symbol ?? (selectedEvent as any).assetOutId}
+                      {assetsById.get((selectedEvent as any).assetOutId)?.symbol ??
+                        (selectedEvent as any).assetOutId}
                     </span>
                   </div>
                 )}
                 {((selectedEvent as any).feeBase || (selectedEvent as any).feeAssetId) && (
                   <div className="flex items-center justify-between py-1.5 border-b border-border/40">
-                    <span className="text-content-secondary text-sm">{t('transactions.detail.fee')}</span>
+                    <span className="text-content-secondary text-sm">
+                      {t('transactions.detail.fee')}
+                    </span>
                     <span className="font-mono text-content-primary text-sm">
                       {fmt((selectedEvent as any).feeBase)} {baseCurrency}
                       {(selectedEvent as any).feeAssetId
@@ -735,7 +779,9 @@ export default function TransactionsPage() {
                 )}
                 {selectedEvent.externalRef && (
                   <div className="flex items-center justify-between py-1.5 border-b border-border/40">
-                    <span className="text-content-secondary text-sm">{t('transactions.detail.externalRef')}</span>
+                    <span className="text-content-secondary text-sm">
+                      {t('transactions.detail.externalRef')}
+                    </span>
                     <span className="font-mono text-content-primary text-sm truncate max-w-[300px]">
                       {String(selectedEvent.externalRef)}
                     </span>

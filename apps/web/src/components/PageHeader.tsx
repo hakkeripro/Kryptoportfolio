@@ -16,12 +16,8 @@ export default function PageHeader({ title, subtitle, actions }: PageHeaderProps
       className="flex items-start justify-between mb-8"
     >
       <div>
-        <h1 className="text-2xl font-heading font-bold tracking-tight text-white">
-          {title}
-        </h1>
-        {subtitle && (
-          <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
-        )}
+        <h1 className="text-2xl font-heading font-bold tracking-tight text-white">{title}</h1>
+        {subtitle && <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>}
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}
     </motion.div>

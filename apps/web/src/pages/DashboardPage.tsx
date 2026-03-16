@@ -9,14 +9,16 @@ import { useDashboardRefresh } from '../hooks/useDashboardRefresh';
 import { useAuthStore } from '../store/useAuthStore';
 import { AllocationBars, ValueChart, colorForAsset } from '../components/DashboardCharts';
 import type { AllocationItem } from '../components/DashboardCharts';
-import {
-  KpiCard, Card, CardTitle, EmptyState, TokenIcon, Button, Input,
-} from '../components/ui';
+import { KpiCard, Card, CardTitle, EmptyState, TokenIcon, Button, Input } from '../components/ui';
 import { staggerContainer, fadeInUp, pageTransition } from '@/lib/animations';
 
 function d(s: string | undefined | null): Decimal {
   if (!s) return new Decimal(0);
-  try { return new Decimal(s); } catch { return new Decimal(0); }
+  try {
+    return new Decimal(s);
+  } catch {
+    return new Decimal(0);
+  }
 }
 
 function fmtMoney(val: string | undefined | null, currency: string): string {
@@ -30,7 +32,9 @@ export default function DashboardPage() {
   const dbState = useDashboardData();
   const baseCurrency = (dbState.data.settings?.baseCurrency ?? 'EUR').toUpperCase();
   const { status, refreshing, refreshNow, toggleAutoRefresh } = useDashboardRefresh(
-    apiBase, baseCurrency, dbState.data.latest?.dayISO,
+    apiBase,
+    baseCurrency,
+    dbState.data.latest?.dayISO,
   );
 
   const autoRefreshEnabled = (dbState.data.settings?.autoRefreshIntervalSec ?? 0) > 0;
@@ -83,7 +87,8 @@ export default function DashboardPage() {
     }));
     if (othersValue.gt(0)) {
       items.push({
-        assetId: 'others', name: 'Others',
+        assetId: 'others',
+        name: 'Others',
         value: othersValue.toNumber(),
         pct: othersValue.div(totalValue).mul(100).toNumber(),
         color: '#666666',

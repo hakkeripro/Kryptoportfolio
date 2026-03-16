@@ -32,7 +32,13 @@ function AnimatedNumber({ value }: { value: number }) {
   return <motion.span>{display}</motion.span>;
 }
 
-export function KpiCard({ label, value, numericValue, delta, deltaType = 'neutral' }: KpiCardProps) {
+export function KpiCard({
+  label,
+  value,
+  numericValue,
+  delta,
+  deltaType = 'neutral',
+}: KpiCardProps) {
   const deltaColor =
     deltaType === 'positive'
       ? 'text-[#B6FFCE]'
@@ -41,20 +47,13 @@ export function KpiCard({ label, value, numericValue, delta, deltaType = 'neutra
         : 'text-muted-foreground';
 
   return (
-    <motion.div
-      variants={cardHover}
-      initial="rest"
-      whileHover="hover"
-      className="h-full"
-    >
+    <motion.div variants={cardHover} initial="rest" whileHover="hover" className="h-full">
       <Card className="p-5 h-full border-[#2E2E2E] bg-[#1A1A1A] transition-shadow hover:shadow-lg">
         <span className="text-xs font-medium text-muted-foreground">{label}</span>
         <div className="mt-2 text-2xl font-semibold font-heading text-card-foreground">
           {numericValue !== undefined ? <AnimatedNumber value={numericValue} /> : value}
         </div>
-        {delta && (
-          <div className={cn('mt-2 text-xs', deltaColor)}>{delta}</div>
-        )}
+        {delta && <div className={cn('mt-2 text-xs', deltaColor)}>{delta}</div>}
       </Card>
     </motion.div>
   );

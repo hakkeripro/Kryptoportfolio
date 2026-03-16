@@ -218,16 +218,12 @@ export function generatePassphrase(wordCount: number = 6): string {
 
   const words: string[] = [];
   for (let i = 0; i < wordCount; i++) {
-    const idx = arr[i]! % WORDLIST.length;
-    const word = WORDLIST[idx]!;
-    // Avoid duplicates — resample if needed
-    if (words.includes(word)) {
-      // Simple retry: pick next index
-      const retryIdx = (idx + 1) % WORDLIST.length;
-      words.push(WORDLIST[retryIdx]!);
-    } else {
-      words.push(word);
+    let idx = arr[i]! % WORDLIST.length;
+    // Avoid duplicates — advance until a unique word is found
+    while (words.includes(WORDLIST[idx]!)) {
+      idx = (idx + 1) % WORDLIST.length;
     }
+    words.push(WORDLIST[idx]!);
   }
 
   return words.join('-');

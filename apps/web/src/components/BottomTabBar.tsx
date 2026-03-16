@@ -18,9 +18,7 @@ export default function BottomTabBar() {
   const activeIndex = tabs.findIndex((tab) => location.pathname.startsWith(tab.to));
 
   return (
-    <nav
-      className="md:hidden fixed bottom-0 left-0 right-0 z-10 bg-[#18181b] border-t border-white/10 safe-area-bottom"
-    >
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-10 bg-[#18181b] border-t border-white/10 safe-area-bottom">
       <div className="flex items-center justify-around h-14">
         {tabs.map(({ to, icon: Icon, label, testId }, index) => {
           const isActive = index === activeIndex;

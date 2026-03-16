@@ -222,7 +222,12 @@ export default function TaxPage() {
   return (
     <motion.div className="space-y-section" {...pageTransition}>
       {/* Header */}
-      <motion.div className="flex items-start justify-between flex-wrap gap-3" variants={fadeInUp} initial="hidden" animate="show">
+      <motion.div
+        className="flex items-start justify-between flex-wrap gap-3"
+        variants={fadeInUp}
+        initial="hidden"
+        animate="show"
+      >
         <div>
           <h1 className="text-heading-1 font-heading text-content-primary">{t('tax.title')}</h1>
           <p className="text-caption text-content-tertiary mt-0.5">
@@ -238,7 +243,9 @@ export default function TaxPage() {
             onChange={(e) => setYear(Number(e.target.value))}
           >
             {years.map((y) => (
-              <option key={y} value={y}>{y}</option>
+              <option key={y} value={y}>
+                {y}
+              </option>
             ))}
           </select>
 
@@ -332,7 +339,9 @@ export default function TaxPage() {
       <motion.div variants={fadeInUp} initial="hidden" animate="show">
         <Card className="p-0 overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-            <h2 className="font-heading text-heading-4 text-content-primary">{t('tax.disposals.title')}</h2>
+            <h2 className="font-heading text-heading-4 text-content-primary">
+              {t('tax.disposals.title')}
+            </h2>
             {report && (
               <div className="text-caption text-content-tertiary">
                 {report.disposals.length} {t('tax.disposals.title').toLowerCase()}
@@ -352,7 +361,10 @@ export default function TaxPage() {
                 t('tax.table.fees'),
                 t('tax.table.gainLoss'),
               ].map((h) => (
-                <span key={h} className="text-[11px] text-content-tertiary font-semibold uppercase tracking-wider">
+                <span
+                  key={h}
+                  className="text-[11px] text-content-tertiary font-semibold uppercase tracking-wider"
+                >
                   {h}
                 </span>
               ))}
@@ -375,7 +387,9 @@ export default function TaxPage() {
                     <TokenIcon symbol={sym} size="sm" />
                     <span className="text-[13px] text-content-primary font-medium">{sym}</span>
                   </div>
-                  <div className="text-[13px] font-mono text-content-secondary text-right">{r.amount}</div>
+                  <div className="text-[13px] font-mono text-content-secondary text-right">
+                    {r.amount}
+                  </div>
                   <div className="text-[13px] font-mono text-content-primary text-right">
                     {fmtMoney(r.proceedsBase, report?.baseCurrency ?? 'EUR')}
                   </div>
@@ -385,7 +399,9 @@ export default function TaxPage() {
                   <div className="text-[13px] font-mono text-content-tertiary text-right">
                     {fmtMoney(r.feeBase, report?.baseCurrency ?? 'EUR')}
                   </div>
-                  <div className={`text-[13px] font-mono text-right font-semibold ${gain.gte(0) ? 'text-semantic-success' : 'text-semantic-error'}`}>
+                  <div
+                    className={`text-[13px] font-mono text-right font-semibold ${gain.gte(0) ? 'text-semantic-success' : 'text-semantic-error'}`}
+                  >
                     {fmtMoney(r.realizedGainBase, report?.baseCurrency ?? 'EUR')}
                   </div>
                 </div>

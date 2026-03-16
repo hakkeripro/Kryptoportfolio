@@ -41,9 +41,7 @@ function NavItem({ to, icon: Icon, label, testId }: NavSection['items'][number])
               : 'text-white/60 hover:bg-white/5 hover:text-white/80'
           }`}
       >
-        <Icon
-          className={`h-[18px] w-[18px] ${isActive ? 'text-[#FF8400]' : ''}`}
-        />
+        <Icon className={`h-[18px] w-[18px] ${isActive ? 'text-[#FF8400]' : ''}`} />
         {label}
       </motion.div>
     </NavLink>
@@ -61,16 +59,41 @@ function SidebarContent() {
     {
       label: t('nav.section.portfolio', { defaultValue: 'PORTFOLIO' }),
       items: [
-        { to: '/home', icon: Home, label: t('nav.dashboard', { defaultValue: 'Dashboard' }), testId: 'nav-home' },
-        { to: '/transactions', icon: ArrowLeftRight, label: t('nav.transactions'), testId: 'nav-transactions' },
-        { to: '/taxes', icon: FileText, label: t('nav.taxReports', { defaultValue: 'Tax Reports' }), testId: 'nav-taxes' },
+        {
+          to: '/home',
+          icon: Home,
+          label: t('nav.dashboard', { defaultValue: 'Dashboard' }),
+          testId: 'nav-home',
+        },
+        {
+          to: '/transactions',
+          icon: ArrowLeftRight,
+          label: t('nav.transactions'),
+          testId: 'nav-transactions',
+        },
+        {
+          to: '/taxes',
+          icon: FileText,
+          label: t('nav.taxReports', { defaultValue: 'Tax Reports' }),
+          testId: 'nav-taxes',
+        },
       ],
     },
     {
       label: t('nav.section.tools', { defaultValue: 'TOOLS' }),
       items: [
-        { to: '/settings/alerts', icon: Bell, label: t('nav.alerts', { defaultValue: 'Alerts' }), testId: 'nav-alerts' },
-        { to: '/transactions/import', icon: Upload, label: t('nav.import', { defaultValue: 'Import' }), testId: 'nav-import' },
+        {
+          to: '/settings/alerts',
+          icon: Bell,
+          label: t('nav.alerts', { defaultValue: 'Alerts' }),
+          testId: 'nav-alerts',
+        },
+        {
+          to: '/transactions/import',
+          icon: Upload,
+          label: t('nav.import', { defaultValue: 'Import' }),
+          testId: 'nav-import',
+        },
         { to: '/settings', icon: Settings, label: t('nav.settings'), testId: 'nav-settings' },
       ],
     },
@@ -82,9 +105,7 @@ function SidebarContent() {
       <div className="px-5 py-4 border-b border-white/10">
         <span className="inline-flex items-center gap-2">
           <Shield className="h-6 w-6 text-[#FF8400]" />
-          <span className="font-semibold tracking-tight text-white text-sm">
-            VaultFolio
-          </span>
+          <span className="font-semibold tracking-tight text-white text-sm">VaultFolio</span>
         </span>
       </div>
 
@@ -170,10 +191,7 @@ export default function Sidebar() {
               <Menu className="h-5 w-5" />
             </button>
           </SheetTrigger>
-          <SheetContent
-            side="left"
-            className="w-60 p-0 bg-[#18181b] border-r border-white/10"
-          >
+          <SheetContent side="left" className="w-60 p-0 bg-[#18181b] border-r border-white/10">
             <SheetTitle className="sr-only">Navigation</SheetTitle>
             <div className="flex flex-col h-full" onClick={() => setOpen(false)}>
               <SidebarContent />

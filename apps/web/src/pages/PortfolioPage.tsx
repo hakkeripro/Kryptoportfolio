@@ -77,26 +77,22 @@ export default function PortfolioPage() {
       {/* Filters */}
       <div className="flex gap-3 items-end flex-wrap">
         <div className="w-44">
-          <Select
-            value={accountFilter}
-            onValueChange={setAccountFilter}
-          >
+          <Select value={accountFilter} onValueChange={setAccountFilter}>
             <SelectTrigger data-testid="filter-account">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t('portfolio.filter.allAccounts')}</SelectItem>
               {accounts.map((a) => (
-                <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
+                <SelectItem key={a.id} value={a.id}>
+                  {a.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
         <div className="w-36">
-          <Select
-            value={sort}
-            onValueChange={(v) => setSort(v as 'value' | 'name')}
-          >
+          <Select value={sort} onValueChange={(v) => setSort(v as 'value' | 'name')}>
             <SelectTrigger data-testid="sort-positions">
               <SelectValue />
             </SelectTrigger>

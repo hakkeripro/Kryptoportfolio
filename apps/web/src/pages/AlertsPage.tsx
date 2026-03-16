@@ -376,7 +376,12 @@ export default function AlertsPage() {
   return (
     <motion.div className="space-y-section" data-testid="panel-alerts" {...pageTransition}>
       {/* Header */}
-      <motion.div className="flex items-start justify-between" variants={fadeInUp} initial="hidden" animate="show">
+      <motion.div
+        className="flex items-start justify-between"
+        variants={fadeInUp}
+        initial="hidden"
+        animate="show"
+      >
         <div>
           <h1 className="text-heading-1 font-heading text-content-primary">{t('alerts.title')}</h1>
           <p className="text-caption text-content-tertiary mt-0.5">
@@ -401,7 +406,9 @@ export default function AlertsPage() {
               <div className="font-heading text-heading-4 text-content-primary mb-4">New Alert</div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <label className="block">
-                  <div className="text-caption text-content-secondary mb-1">{t('alerts.form.type')}</div>
+                  <div className="text-caption text-content-secondary mb-1">
+                    {t('alerts.form.type')}
+                  </div>
                   <select
                     className={inputCls}
                     value={formType}
@@ -416,7 +423,9 @@ export default function AlertsPage() {
                 </label>
                 {(formType === 'PORTFOLIO_VALUE' || formType === 'PRICE') && (
                   <label className="block">
-                    <div className="text-caption text-content-secondary mb-1">{t('alerts.form.direction')}</div>
+                    <div className="text-caption text-content-secondary mb-1">
+                      {t('alerts.form.direction')}
+                    </div>
                     <select
                       className={inputCls}
                       value={formDirection}
@@ -430,7 +439,9 @@ export default function AlertsPage() {
                 )}
                 {(formType === 'PRICE' || formType === 'PCT_CHANGE') && (
                   <label className="block">
-                    <div className="text-caption text-content-secondary mb-1">{t('alerts.form.asset')}</div>
+                    <div className="text-caption text-content-secondary mb-1">
+                      {t('alerts.form.asset')}
+                    </div>
                     <select
                       className={inputCls}
                       value={formAssetId}
@@ -439,13 +450,17 @@ export default function AlertsPage() {
                     >
                       <option value="">{t('alerts.form.assetPlaceholder')}</option>
                       {(assetsQ.data ?? []).map((a: any) => (
-                        <option key={a.id} value={a.id}>{a.symbol} — {a.name}</option>
+                        <option key={a.id} value={a.id}>
+                          {a.symbol} — {a.name}
+                        </option>
                       ))}
                     </select>
                   </label>
                 )}
                 <label className="block">
-                  <div className="text-caption text-content-secondary mb-1">{t('alerts.form.threshold')}</div>
+                  <div className="text-caption text-content-secondary mb-1">
+                    {t('alerts.form.threshold')}
+                  </div>
                   <input
                     className={inputCls}
                     value={formThreshold}
@@ -459,7 +474,9 @@ export default function AlertsPage() {
                   />
                 </label>
                 <label className="block">
-                  <div className="text-caption text-content-secondary mb-1">{t('alerts.form.cooldown')}</div>
+                  <div className="text-caption text-content-secondary mb-1">
+                    {t('alerts.form.cooldown')}
+                  </div>
                   <input
                     className={inputCls}
                     value={formCooldown}
@@ -469,7 +486,12 @@ export default function AlertsPage() {
                 </label>
               </div>
               <div className="mt-4">
-                <Button variant="default" size="sm" onClick={() => void addAlert()} data-testid="btn-save-alert">
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => void addAlert()}
+                  data-testid="btn-save-alert"
+                >
                   {t('alerts.btn.addAlert')}
                 </Button>
               </div>
@@ -545,8 +567,12 @@ export default function AlertsPage() {
         <Card data-testid="panel-alerts-server" className="p-5">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <div className="font-heading text-heading-4 text-content-primary">{t('alerts.server.title')}</div>
-              <div className="text-caption text-content-tertiary mt-0.5">{t('alerts.server.description')}</div>
+              <div className="font-heading text-heading-4 text-content-primary">
+                {t('alerts.server.title')}
+              </div>
+              <div className="text-caption text-content-tertiary mt-0.5">
+                {t('alerts.server.description')}
+              </div>
             </div>
           </div>
 
@@ -677,7 +703,9 @@ export default function AlertsPage() {
                       </div>
                     ))
                   ) : (
-                    <div className="text-caption text-content-tertiary">{t('alerts.triggerLog.empty')}</div>
+                    <div className="text-caption text-content-tertiary">
+                      {t('alerts.triggerLog.empty')}
+                    </div>
                   )}
                 </div>
               </div>
