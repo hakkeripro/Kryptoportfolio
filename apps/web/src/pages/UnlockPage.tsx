@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
 import { useVaultStore } from '../store/useVaultStore';
 import { Logo } from '../components/ui';
 import {
@@ -66,9 +67,12 @@ export default function UnlockPage() {
   };
 
   return (
-    <div
+    <motion.div
       data-testid="page-unlock"
       className="min-h-screen flex flex-col items-center justify-center px-4"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
     >
       <div className="w-full max-w-sm space-y-6">
         {/* Logo */}
@@ -120,12 +124,14 @@ export default function UnlockPage() {
           </button>
 
           {error && (
-            <div
+            <motion.div
               data-testid="alert-unlock-error"
               className="rounded-button border border-semantic-error/30 bg-semantic-error/5 p-3 text-caption text-semantic-error"
+              animate={{ x: [0, -8, 8, -6, 6, -4, 4, 0] }}
+              transition={{ duration: 0.5, ease: 'easeInOut' }}
             >
               {error}
-            </div>
+            </motion.div>
           )}
         </form>
 
@@ -150,6 +156,6 @@ export default function UnlockPage() {
           </p>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

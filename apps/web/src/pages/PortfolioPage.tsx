@@ -5,7 +5,14 @@ import { PieChart } from 'lucide-react';
 import { usePortfolioData } from '../hooks/usePortfolioData';
 import TokenDetailDrawer from '../components/TokenDetailDrawer';
 import PageHeader from '../components/PageHeader';
-import { Card, Select, EmptyState, TokenIcon } from '../components/ui';
+import { Card, EmptyState, TokenIcon } from '../components/ui';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/Select';
 
 function d(s: string | undefined | null): Decimal {
   if (!s) return new Decimal(0);
@@ -71,26 +78,32 @@ export default function PortfolioPage() {
       <div className="flex gap-3 items-end flex-wrap">
         <div className="w-44">
           <Select
-            data-testid="filter-account"
             value={accountFilter}
-            onChange={(e) => setAccountFilter(e.target.value)}
+            onValueChange={setAccountFilter}
           >
-            <option value="all">{t('portfolio.filter.allAccounts')}</option>
-            {accounts.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.name}
-              </option>
-            ))}
+            <SelectTrigger data-testid="filter-account">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t('portfolio.filter.allAccounts')}</SelectItem>
+              {accounts.map((a) => (
+                <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
+              ))}
+            </SelectContent>
           </Select>
         </div>
         <div className="w-36">
           <Select
-            data-testid="sort-positions"
             value={sort}
-            onChange={(e) => setSort(e.target.value as 'value' | 'name')}
+            onValueChange={(v) => setSort(v as 'value' | 'name')}
           >
-            <option value="value">{t('portfolio.sort.value')}</option>
-            <option value="name">{t('portfolio.sort.name')}</option>
+            <SelectTrigger data-testid="sort-positions">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="value">{t('portfolio.sort.value')}</SelectItem>
+              <SelectItem value="name">{t('portfolio.sort.name')}</SelectItem>
+            </SelectContent>
           </Select>
         </div>
       </div>

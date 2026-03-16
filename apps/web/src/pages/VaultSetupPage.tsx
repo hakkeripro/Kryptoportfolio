@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useVaultStore } from '../store/useVaultStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { createOrReplacePasskeyWrap, isPasskeySupported } from '../vault/passkey';
@@ -74,9 +75,12 @@ export default function VaultSetupPage() {
   };
 
   return (
-    <div
+    <motion.div
       data-testid="page-vault-setup"
       className="min-h-screen flex flex-col items-center justify-center px-4"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
     >
       <div className="w-full max-w-md space-y-6">
         {/* Logo */}
@@ -102,9 +106,20 @@ export default function VaultSetupPage() {
           ))}
         </div>
 
+        {/* Step content with transitions */}
+        <AnimatePresence mode="wait">
+
         {/* Step 1: Passphrase */}
         {step === 'passphrase' && (
-          <form onSubmit={handlePassphraseSubmit} className="space-y-4">
+          <motion.form
+            key="step-passphrase"
+            onSubmit={handlePassphraseSubmit}
+            className="space-y-4"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.25 }}
+          >
             <div className="text-center">
               <h1 className="text-heading-1 font-heading text-content-primary">
                 {t('vaultSetup.step1.title')}
@@ -175,12 +190,19 @@ export default function VaultSetupPage() {
                 {error}
               </div>
             )}
-          </form>
+          </motion.form>
         )}
 
         {/* Step 2: Passkey */}
         {step === 'passkey' && (
-          <div className="space-y-4">
+          <motion.div
+            key="step-passkey"
+            className="space-y-4"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.25 }}
+          >
             <div className="text-center">
               <h1 className="text-heading-1 font-heading text-content-primary">
                 {t('vaultSetup.step2.title')}
@@ -219,12 +241,19 @@ export default function VaultSetupPage() {
                 {error}
               </div>
             )}
-          </div>
+          </motion.div>
         )}
 
         {/* Step 3: Done */}
         {step === 'done' && (
-          <div className="space-y-4 text-center">
+          <motion.div
+            key="step-done"
+            className="space-y-4 text-center"
+            initial={{ opacity: 0, scale: 0.97 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
             <h1 className="text-heading-1 font-heading text-content-primary">
               {t('vaultSetup.step3.title')}
             </h1>
@@ -266,8 +295,10 @@ export default function VaultSetupPage() {
             >
               {t('vaultSetup.btn.goDashboard')}
             </button>
-          </div>
+          </motion.div>
         )}
+
+        </AnimatePresence>
 
         {/* Already have account link */}
         <p className="text-center text-[0.625rem] text-content-tertiary">
@@ -277,6 +308,6 @@ export default function VaultSetupPage() {
           </a>
         </p>
       </div>
-    </div>
+    </motion.div>
   );
 }

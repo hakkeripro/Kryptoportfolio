@@ -1,9 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Shield, ArrowLeftRight, FileText } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { Logo } from '../components/ui/Logo';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
+import { staggerContainer, fadeInUp } from '../lib/animations';
 
 const uspKeys = [
   { icon: Shield, key: 'encryption' },
@@ -39,7 +41,12 @@ export default function WelcomePage() {
       />
 
       {/* Logo + Hero */}
-      <div className="relative z-10 text-center mb-12 animate-fade-in">
+      <motion.div
+        className="relative z-10 text-center mb-12"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="flex justify-center mb-6">
           <Logo size="lg" showWordmark={false} />
         </div>
@@ -47,17 +54,18 @@ export default function WelcomePage() {
           {t('welcome.title')}
         </h1>
         <p className="text-lg text-content-secondary max-w-md mx-auto">{t('welcome.tagline')}</p>
-      </div>
+      </motion.div>
 
       {/* USP Cards */}
-      <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl w-full mb-10">
-        {uspKeys.map(({ icon: Icon, key }, index) => (
-          <div
-            key={key}
-            className="animate-slide-up"
-            style={{ animationDelay: `${index * 100 + 200}ms` }}
-          >
-            <Card hover className="text-center p-6">
+      <motion.div
+        className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl w-full mb-10"
+        variants={staggerContainer}
+        initial="hidden"
+        animate="show"
+      >
+        {uspKeys.map(({ icon: Icon, key }) => (
+          <motion.div key={key} variants={fadeInUp}>
+            <Card className="text-center p-6 hover:border-brand/30 hover:bg-surface-overlay/50 transition-colors cursor-default">
               <div className="flex justify-center mb-3">
                 <div className="w-10 h-10 rounded-full bg-brand/10 flex items-center justify-center">
                   <Icon className="h-5 w-5 text-brand" />
@@ -68,14 +76,16 @@ export default function WelcomePage() {
               </h3>
               <p className="text-caption text-content-secondary">{t(`welcome.usp.${key}.desc`)}</p>
             </Card>
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
 
       {/* CTAs */}
-      <div
-        className="relative z-10 w-full max-w-sm space-y-3 animate-fade-in"
-        style={{ animationDelay: '500ms' }}
+      <motion.div
+        className="relative z-10 w-full max-w-sm space-y-3"
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.5 }}
       >
         <Button
           data-testid="btn-signup"
@@ -102,15 +112,17 @@ export default function WelcomePage() {
         >
           {t('welcome.cta.offline')}
         </button>
-      </div>
+      </motion.div>
 
       {/* Footer */}
-      <div
-        className="relative z-10 mt-12 text-caption text-content-tertiary text-center animate-fade-in"
-        style={{ animationDelay: '600ms' }}
+      <motion.div
+        className="relative z-10 mt-12 text-caption text-content-tertiary text-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4, delay: 0.7 }}
       >
         {t('welcome.footer')}
-      </div>
+      </motion.div>
     </div>
   );
 }
