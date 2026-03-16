@@ -45,7 +45,7 @@ module.exports = {
       },
       fontFamily: {
         sans: ['Geist Sans', 'system-ui', 'sans-serif'],
-        heading: ['JetBrains Mono', 'monospace'],
+        heading: ['Geist Sans', 'system-ui', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
       fontSize: {

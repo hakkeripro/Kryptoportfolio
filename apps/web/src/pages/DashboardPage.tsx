@@ -9,8 +9,8 @@ import { useDashboardRefresh } from '../hooks/useDashboardRefresh';
 import { useAuthStore } from '../store/useAuthStore';
 import { AllocationBars, ValueChart, colorForAsset } from '../components/DashboardCharts';
 import type { AllocationItem } from '../components/DashboardCharts';
-import { KpiCard, Card, CardTitle, EmptyState, TokenIcon, Button, Input } from '../components/ui';
-import { staggerContainer, fadeInUp, pageTransition } from '@/lib/animations';
+import { KpiCard, Card, EmptyState, TokenIcon, Button, Input } from '../components/ui';
+import { staggerContainer, fadeInUp } from '@/lib/animations';
 
 function d(s: string | undefined | null): Decimal {
   if (!s) return new Decimal(0);
@@ -22,6 +22,13 @@ function d(s: string | undefined | null): Decimal {
 }
 
 function fmtMoney(val: string | undefined | null, currency: string): string {
+  return `${d(val).toDecimalPlaces(2).toFixed()} ${currency}`;
+}
+
+function fmtCompact(val: string | undefined | null, currency: string): string {
+  const n = d(val).toNumber();
+  if (Math.abs(n) >= 1_000_000) return `${(n / 1_000_000).toFixed(2)}M ${currency}`;
+  if (Math.abs(n) >= 1_000) return `${(n / 1_000).toFixed(2)}K ${currency}`;
   return `${d(val).toDecimalPlaces(2).toFixed()} ${currency}`;
 }
 
@@ -127,82 +134,25 @@ export default function DashboardPage() {
   );
 
   const realizedDelta = d(metrics.realizedPnlBaseToDate);
-
-  const kpiCards = [
-    {
-      testId: 'metric-total-value',
-      label: t('dashboard.kpi.totalValue'),
-      value: fmtMoney(metrics.totalValueBase, baseCurrency),
-      numericValue: totalValue.toNumber(),
-      unit: baseCurrency,
-    },
-    {
-      testId: 'metric-realized',
-      label: t('dashboard.kpi.realizedPnl'),
-      value: fmtMoney(metrics.realizedPnlBaseToDate, baseCurrency),
-      numericValue: realizedDelta.toNumber(),
-      unit: baseCurrency,
-      delta: realizedDelta.isZero()
-        ? undefined
-        : `${realizedDelta.isPositive() ? '+' : ''}${realizedDelta.toDecimalPlaces(2).toFixed()}`,
-      deltaType: (realizedDelta.isPositive()
-        ? 'positive'
-        : realizedDelta.isNegative()
-          ? 'negative'
-          : 'neutral') as 'positive' | 'negative' | 'neutral',
-    },
-    {
-      testId: 'metric-asset-count',
-      label: t('dashboard.kpi.totalAssets'),
-      value: String(positionCount),
-      numericValue: positionCount,
-    },
-    {
-      testId: 'metric-best-performer',
-      label: t('dashboard.kpi.bestPerformer'),
-      value: bestPerformer?.symbol ?? '\u2014',
-      delta: bestPerformer
-        ? `${bestPerformer.pct.isPositive() ? '+' : ''}${bestPerformer.pct.toDecimalPlaces(1).toFixed()}%`
-        : undefined,
-      deltaType: (bestPerformer?.pct.isPositive()
-        ? 'positive'
-        : bestPerformer?.pct.isNegative()
-          ? 'negative'
-          : 'neutral') as 'positive' | 'negative' | 'neutral',
-    },
-  ];
+  const unrealizedDelta = d(metrics.unrealizedPnlBase);
 
   return (
-    <motion.div
-      className="space-y-6"
-      variants={pageTransition}
-      initial="initial"
-      animate="animate"
-      exit="exit"
-    >
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="font-heading text-[28px] font-semibold text-card-foreground">
-            {t('dashboard.title')}
-          </h1>
-          <p className="text-sm text-muted-foreground mt-0.5">{t('dashboard.subtitle')}</p>
-        </div>
+    <div className="space-y-8">
+      {/* ── Top bar ── */}
+      <div className="flex items-center justify-between">
+        <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-white/25">
+          {t('dashboard.title')}
+        </span>
         <div className="flex items-center gap-2">
-          {status.lastRebuildISO && (
-            <span className="text-[0.625rem] text-muted-foreground hidden sm:inline">
-              {t('dashboard.lastUpdate')} {new Date(status.lastRebuildISO).toLocaleString()}
-            </span>
-          )}
           <label
-            className="flex items-center gap-1.5 text-xs text-muted-foreground cursor-pointer"
+            className="flex items-center gap-1.5 text-[11px] font-mono text-white/25 cursor-pointer"
             data-testid="toggle-auto-refresh"
           >
             <input
               type="checkbox"
               checked={autoRefreshEnabled}
               onChange={(e) => void toggleAutoRefresh(e.target.checked)}
-              className="accent-[#FF8400]"
+              className="accent-[#FF8400] w-3 h-3"
             />
             {t('dashboard.autoRefresh.label')}
           </label>
@@ -212,32 +162,112 @@ export default function DashboardPage() {
             disabled={refreshing}
             data-testid="btn-refresh-prices"
             onClick={() => void refreshNow()}
+            className="h-7 px-2.5 text-[11px] font-mono border-white/10 text-white/40 hover:text-white/70 hover:border-white/20"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-3 w-3 ${refreshing ? 'animate-spin' : ''}`} />
             {t('dashboard.btn.refresh')}
           </Button>
-          <Button size="sm" onClick={() => nav('/transactions/import')}>
-            <Plus className="h-3.5 w-3.5" />
+          <Button
+            size="sm"
+            onClick={() => nav('/transactions/import')}
+            className="h-7 px-2.5 text-[11px] font-mono bg-[#FF8400] hover:bg-[#FF8400]/90 text-black font-semibold"
+          >
+            <Plus className="h-3 w-3" />
             {t('dashboard.btn.addTransaction')}
           </Button>
         </div>
       </div>
 
-      {/* KPI Cards */}
+      {/* ── Hero: Total portfolio value ── */}
       <motion.div
-        className="grid grid-cols-2 sm:grid-cols-4 gap-4"
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        data-testid="metric-total-value"
+        className="space-y-1"
+      >
+        <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/25">
+          {t('dashboard.kpi.totalValue')} · {baseCurrency}
+        </p>
+        <div className="flex items-baseline gap-4 flex-wrap">
+          <span className="text-[clamp(2.5rem,6vw,4rem)] font-mono font-bold text-white leading-none tabular-nums tracking-tight">
+            {fmtCompact(metrics.totalValueBase, baseCurrency)}
+          </span>
+          {!unrealizedDelta.isZero() && (
+            <span
+              className={`text-sm font-mono px-2.5 py-1 rounded-full ${
+                unrealizedDelta.isPositive()
+                  ? 'bg-emerald-500/10 text-emerald-400'
+                  : 'bg-red-500/10 text-red-400'
+              }`}
+            >
+              {unrealizedDelta.isPositive() ? '+' : ''}
+              {fmtMoney(metrics.unrealizedPnlBase, baseCurrency)} unrealized
+            </span>
+          )}
+        </div>
+        {status.lastRebuildISO && (
+          <p className="text-[10px] font-mono text-white/20">
+            {t('dashboard.lastUpdate')} {new Date(status.lastRebuildISO).toLocaleString()}
+          </p>
+        )}
+      </motion.div>
+
+      {/* ── Secondary KPI row ── */}
+      <motion.div
+        className="grid grid-cols-1 sm:grid-cols-3 gap-3"
         variants={staggerContainer}
         initial="hidden"
         animate="show"
       >
-        {kpiCards.map((kpi) => (
-          <motion.div key={kpi.testId} variants={fadeInUp} data-testid={kpi.testId}>
-            <KpiCard {...kpi} />
-          </motion.div>
-        ))}
+        <motion.div variants={fadeInUp} data-testid="metric-realized">
+          <KpiCard
+            label={t('dashboard.kpi.realizedPnl')}
+            value={fmtMoney(metrics.realizedPnlBaseToDate, baseCurrency)}
+            numericValue={realizedDelta.toNumber()}
+            unit={baseCurrency}
+            delta={
+              realizedDelta.isZero()
+                ? undefined
+                : `${realizedDelta.isPositive() ? '+' : ''}${realizedDelta.toDecimalPlaces(2).toFixed()}`
+            }
+            deltaType={
+              realizedDelta.isPositive()
+                ? 'positive'
+                : realizedDelta.isNegative()
+                  ? 'negative'
+                  : 'neutral'
+            }
+          />
+        </motion.div>
+        <motion.div variants={fadeInUp} data-testid="metric-asset-count">
+          <KpiCard
+            label={t('dashboard.kpi.totalAssets')}
+            value={String(positionCount)}
+            numericValue={positionCount}
+          />
+        </motion.div>
+        <motion.div variants={fadeInUp} data-testid="metric-best-performer">
+          <KpiCard
+            label={t('dashboard.kpi.bestPerformer')}
+            value={bestPerformer?.symbol ?? '—'}
+            delta={
+              bestPerformer
+                ? `${bestPerformer.pct.isPositive() ? '+' : ''}${bestPerformer.pct.toDecimalPlaces(1).toFixed()}%`
+                : undefined
+            }
+            deltaType={
+              bestPerformer?.pct.isPositive()
+                ? 'positive'
+                : bestPerformer?.pct.isNegative()
+                  ? 'negative'
+                  : 'neutral'
+            }
+          />
+        </motion.div>
       </motion.div>
 
-      {/* Charts row */}
+      {/* ── Charts ── */}
       <motion.div
         className="grid grid-cols-1 lg:grid-cols-3 gap-4"
         variants={staggerContainer}
@@ -248,7 +278,7 @@ export default function DashboardPage() {
           <ValueChart data={valueSeries} />
         </motion.div>
         <motion.div variants={fadeInUp}>
-          <Card className="p-5 border-[#2E2E2E] bg-[#1A1A1A]">
+          <Card className="p-5 border-white/[0.08] bg-[#0F0F0F]">
             {allocation.length ? (
               <AllocationBars data={allocation} />
             ) : (
@@ -262,21 +292,25 @@ export default function DashboardPage() {
         </motion.div>
       </motion.div>
 
-      {/* Holdings Table */}
+      {/* ── Holdings ── */}
       <motion.div variants={fadeInUp} initial="hidden" animate="show">
-        <Card className="p-5 border-[#2E2E2E] bg-[#1A1A1A]" data-testid="card-portfolio-top">
-          <div className="flex items-center justify-between mb-4">
-            <CardTitle className="font-heading text-card-foreground">
-              {t('dashboard.topPositions.title')}
-            </CardTitle>
+        <Card
+          className="border-white/[0.08] bg-[#0F0F0F] overflow-hidden"
+          data-testid="card-portfolio-top"
+        >
+          {/* Table header */}
+          <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
+            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/30">
+              // {t('dashboard.topPositions.title')}
+            </span>
             <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-white/20 pointer-events-none" />
               <Input
                 type="text"
                 placeholder={t('dashboard.search')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8 h-8 w-36 sm:w-48 text-xs bg-transparent border-[#2E2E2E]"
+                className="pl-8 h-7 w-36 sm:w-48 text-[11px] font-mono bg-white/[0.04] border-white/[0.08] text-white/60 placeholder:text-white/20 focus:border-[#FF8400]/30"
               />
             </div>
           </div>
@@ -284,20 +318,18 @@ export default function DashboardPage() {
           <div data-testid="list-top-positions">
             {filteredPositions.length ? (
               <>
-                {/* Table header */}
-                <div className="grid grid-cols-[2fr_100px_120px_120px_80px] gap-2 px-5 pb-2.5 border-b border-[#2E2E2E]">
-                  {['Asset', 'Price', 'Holdings', 'Value', '24h'].map((col, i) => (
+                {/* Column headers */}
+                <div className="grid grid-cols-[2fr_1fr_1fr_1fr_80px] gap-2 px-5 py-2.5 border-b border-white/[0.04]">
+                  {['Asset', 'Price', 'Holdings', 'Value', 'PnL'].map((col, i) => (
                     <span
                       key={col}
-                      className={`text-[11px] text-muted-foreground font-semibold uppercase tracking-wider ${
-                        i === 4 ? 'text-right' : ''
-                      }`}
+                      className={`text-[10px] font-mono uppercase tracking-[0.15em] text-white/20 ${i >= 1 ? 'text-right' : ''}`}
                     >
                       {col}
                     </span>
                   ))}
                 </div>
-                {/* Table body */}
+                {/* Rows */}
                 <motion.ul variants={staggerContainer} initial="hidden" animate="show">
                   {filteredPositions.map((p) => {
                     const pnl = d(p.unrealizedPnlBase);
@@ -310,41 +342,51 @@ export default function DashboardPage() {
                       <motion.li
                         key={p.assetId}
                         variants={fadeInUp}
-                        className="grid grid-cols-[2fr_100px_120px_120px_80px] gap-2 items-center
-                          py-3 px-5 border-b border-[#2E2E2E] hover:bg-white/[0.03]
-                          transition-colors cursor-pointer"
+                        className="grid grid-cols-[2fr_1fr_1fr_1fr_80px] gap-2 items-center
+                          py-3.5 px-5 border-b border-white/[0.04] last:border-0
+                          hover:bg-[#FF8400]/[0.04] transition-colors cursor-pointer group"
                         onClick={() => nav(`/assets/${p.assetId}`)}
                       >
+                        {/* Asset */}
                         <div className="flex items-center gap-2.5">
                           <TokenIcon symbol={p.symbol} size="md" />
                           <div>
-                            <div className="text-[13px] font-mono text-card-foreground font-medium">
+                            <div className="text-[13px] font-mono text-white font-medium group-hover:text-[#FF8400] transition-colors">
                               {p.symbol}
                             </div>
-                            <div className="text-xs text-muted-foreground">{p.name}</div>
+                            <div className="text-[11px] font-mono text-white/30">{p.name}</div>
                           </div>
                         </div>
-                        <div className="text-[13px] font-mono text-card-foreground">
+                        {/* Price */}
+                        <div className="text-[13px] font-mono text-white/60 text-right tabular-nums">
                           {fmtMoney(pricePerUnit.toFixed(), baseCurrency)}
                         </div>
-                        <div className="text-[13px] font-mono text-card-foreground">
-                          {d(p.amount).toDecimalPlaces(4).toFixed()} {p.symbol}
+                        {/* Holdings */}
+                        <div className="text-[13px] font-mono text-white/60 text-right tabular-nums">
+                          {d(p.amount).toDecimalPlaces(4).toFixed()}
                         </div>
-                        <div className="text-[13px] font-mono text-card-foreground">
+                        {/* Value */}
+                        <div className="text-[13px] font-mono text-white text-right tabular-nums font-medium">
                           {fmtMoney(p.valueBase, baseCurrency)}
                         </div>
-                        <div
-                          className={`text-[13px] font-mono text-right ${
-                            pnl.isPositive()
-                              ? 'text-[#B6FFCE]'
-                              : pnl.isNegative()
-                                ? 'text-[#FF5C33]'
-                                : 'text-muted-foreground'
-                          }`}
-                        >
-                          {pnlPct
-                            ? `${pnlPct.isPositive() ? '+' : ''}${pnlPct.toDecimalPlaces(1).toFixed()}%`
-                            : '\u2014'}
+                        {/* PnL */}
+                        <div className="text-right">
+                          {pnlPct ? (
+                            <span
+                              className={`text-[11px] font-mono px-2 py-0.5 rounded-full tabular-nums ${
+                                pnl.isPositive()
+                                  ? 'bg-emerald-500/10 text-emerald-400'
+                                  : pnl.isNegative()
+                                    ? 'bg-red-500/10 text-red-400'
+                                    : 'bg-white/5 text-white/30'
+                              }`}
+                            >
+                              {pnlPct.isPositive() ? '+' : ''}
+                              {pnlPct.toDecimalPlaces(1).toFixed()}%
+                            </span>
+                          ) : (
+                            <span className="text-[13px] font-mono text-white/20">—</span>
+                          )}
                         </div>
                       </motion.li>
                     );
@@ -352,23 +394,21 @@ export default function DashboardPage() {
                 </motion.ul>
               </>
             ) : (
-              <EmptyState
-                icon={<BarChart3 className="h-10 w-10" />}
-                title={t('dashboard.empty.positions.title')}
-                description={t('dashboard.empty.positions.desc')}
-              />
+              <div className="p-8">
+                <EmptyState
+                  icon={<BarChart3 className="h-10 w-10" />}
+                  title={t('dashboard.empty.positions.title')}
+                  description={t('dashboard.empty.positions.desc')}
+                />
+              </div>
             )}
           </div>
         </Card>
       </motion.div>
 
-      {/* Status footer */}
-      {status.lastRebuildISO && (
-        <p className="text-xs text-muted-foreground text-right">
-          {t('dashboard.lastUpdate')} {new Date(status.lastRebuildISO).toLocaleString()}
-          {dbState.error && <span className="text-[#FF5C33] ml-2">{dbState.error}</span>}
-        </p>
+      {dbState.error && (
+        <p className="text-[11px] font-mono text-red-400/60 text-right">{dbState.error}</p>
       )}
-    </motion.div>
+    </div>
   );
 }

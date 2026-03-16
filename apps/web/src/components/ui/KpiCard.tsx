@@ -1,8 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { Card } from './Card';
 import { cn } from '@/lib/utils';
-import { cardHover, counterSpring } from '@/lib/animations';
+import { counterSpring } from '@/lib/animations';
 
 interface KpiCardProps {
   label: string;
@@ -30,7 +29,7 @@ function AnimatedNumber({ value }: { value: number }) {
     motionVal.set(value);
   }, [value, motionVal]);
 
-  return <motion.span>{display}</motion.span>;
+  return <motion.span className="tabular-nums">{display}</motion.span>;
 }
 
 export function KpiCard({
@@ -41,31 +40,49 @@ export function KpiCard({
   delta,
   deltaType = 'neutral',
 }: KpiCardProps) {
-  const deltaColor =
-    deltaType === 'positive'
-      ? 'text-[#B6FFCE]'
-      : deltaType === 'negative'
-        ? 'text-[#FF5C33]'
-        : 'text-muted-foreground';
-
   return (
-    <motion.div variants={cardHover} initial="rest" whileHover="hover" className="h-full">
-      <Card className="p-5 h-full border-[#2E2E2E] bg-[#1A1A1A] transition-shadow hover:shadow-lg">
-        <span className="text-xs font-medium text-muted-foreground">{label}</span>
-        <div className="mt-2 text-2xl font-semibold font-heading text-card-foreground">
+    <motion.div
+      className="relative h-full"
+      whileHover={{ y: -2 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+    >
+      {/* Top accent line — brand gradient */}
+      <div className="absolute top-0 left-0 right-0 h-px rounded-t-xl bg-gradient-to-r from-[#FF8400]/70 via-[#FF8400]/20 to-transparent z-10" />
+
+      <div className="relative h-full rounded-xl border border-white/[0.08] bg-[#0F0F0F] px-5 py-4 flex flex-col gap-2.5 overflow-hidden">
+        {/* Corner glow */}
+        <div className="absolute -top-10 -left-10 w-28 h-28 rounded-full bg-[#FF8400]/[0.04] blur-2xl pointer-events-none" />
+
+        <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/30">
+          {label}
+        </span>
+
+        <div className="text-[21px] font-mono font-semibold text-white leading-none tabular-nums">
           {numericValue !== undefined ? (
             <>
               <AnimatedNumber value={numericValue} />
-              {unit && (
-                <span className="ml-1 text-sm font-normal text-muted-foreground">{unit}</span>
-              )}
+              {unit && <span className="text-sm font-normal text-white/25 ml-1.5">{unit}</span>}
             </>
           ) : (
             value
           )}
         </div>
-        {delta && <div className={cn('mt-2 text-xs', deltaColor)}>{delta}</div>}
-      </Card>
+
+        {delta && (
+          <span
+            className={cn(
+              'self-start text-[11px] font-mono px-2 py-0.5 rounded-full',
+              deltaType === 'positive'
+                ? 'bg-emerald-500/10 text-emerald-400'
+                : deltaType === 'negative'
+                  ? 'bg-red-500/10 text-red-400'
+                  : 'bg-white/5 text-white/30',
+            )}
+          >
+            {delta}
+          </span>
+        )}
+      </div>
     </motion.div>
   );
 }
