@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Shield, ArrowLeftRight, FileText } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -6,6 +6,8 @@ import { Logo } from '../components/ui/Logo';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { staggerContainer, fadeInUp } from '../lib/animations';
+import { useAuthStore } from '../store/useAuthStore';
+import { useVaultStore } from '../store/useVaultStore';
 
 const uspKeys = [
   { icon: Shield, key: 'encryption' },
@@ -16,6 +18,17 @@ const uspKeys = [
 export default function WelcomePage() {
   const nav = useNavigate();
   const { t } = useTranslation();
+  const token = useAuthStore((s) => s.token);
+  const vaultReady = useVaultStore((s) => s.vaultReady);
+  const vaultSetup = useVaultStore((s) => s.vaultSetup);
+  const passphrase = useVaultStore((s) => s.passphrase);
+
+  // Authenticated users should not see the welcome/marketing page
+  if (vaultReady && token) {
+    if (!vaultSetup) return <Navigate to="/vault/setup?ondevice=1" replace />;
+    if (!passphrase) return <Navigate to="/vault/unlock" replace />;
+    return <Navigate to="/home" replace />;
+  }
 
   return (
     <div

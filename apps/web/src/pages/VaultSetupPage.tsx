@@ -22,6 +22,9 @@ export default function VaultSetupPage() {
   const setupVault = useVaultStore((s) => s.setupVault);
   const email = useAuthStore((s) => s.email);
 
+  const isOnDevice = new URLSearchParams(location.search).get('ondevice') === '1';
+  const nextPath = new URLSearchParams(location.search).get('next') ?? '/home';
+
   const [step, setStep] = useState<Step>('passphrase');
   const [passphrase, setPassphrase] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -31,7 +34,10 @@ export default function VaultSetupPage() {
   const [passkeyEnabled, setPasskeyEnabled] = useState(false);
 
   const mismatch = confirm.length > 0 && passphrase !== confirm;
-  const canSetup = passphrase.length >= 6 && passphrase === confirm && saved && !busy;
+  // ondevice mode: just needs a passphrase (no confirm, no checkbox)
+  const canSetup = isOnDevice
+    ? passphrase.length >= 6 && !busy
+    : passphrase.length >= 6 && passphrase === confirm && saved && !busy;
 
   const stepNumber = useMemo(() => {
     if (step === 'passphrase') return 1;
@@ -46,7 +52,12 @@ export default function VaultSetupPage() {
     setBusy(true);
     try {
       await setupVault(passphrase);
-      setStep('passkey');
+      // ondevice: skip passkey step and go straight to destination
+      if (isOnDevice) {
+        nav(nextPath, { replace: true });
+      } else {
+        setStep('passkey');
+      }
     } catch (err) {
       setError(errToMsg(err));
     } finally {
@@ -107,14 +118,16 @@ export default function VaultSetupPage() {
           <form onSubmit={handlePassphraseSubmit} className="space-y-4">
             <div className="text-center">
               <h1 className="text-heading-1 font-heading text-content-primary">
-                {t('vaultSetup.step1.title')}
+                {isOnDevice ? t('vaultSetup.ondevice.title') : t('vaultSetup.step1.title')}
               </h1>
               <p className="text-caption text-content-secondary mt-1">
-                {t('vaultSetup.step1.description')}
+                {isOnDevice
+                  ? t('vaultSetup.ondevice.description')
+                  : t('vaultSetup.step1.description')}
               </p>
             </div>
 
-            <PassphraseGenerator onAccept={handleAcceptGenerated} />
+            {!isOnDevice && <PassphraseGenerator onAccept={handleAcceptGenerated} />}
 
             <div>
               <label className="block text-body font-medium text-content-primary mb-1.5">
@@ -123,6 +136,7 @@ export default function VaultSetupPage() {
               <input
                 data-testid="form-vault-passphrase"
                 type="password"
+                autoComplete="current-password"
                 value={passphrase}
                 onChange={(e) => setPassphrase(e.target.value)}
                 className="w-full rounded-input bg-surface-base border border-border px-3 py-2.5 text-body
@@ -131,34 +145,40 @@ export default function VaultSetupPage() {
               />
             </div>
 
-            <div>
-              <label className="block text-body font-medium text-content-primary mb-1.5">
-                {t('vaultSetup.confirmLabel')}
-              </label>
-              <input
-                data-testid="form-vault-passphrase-confirm"
-                type="password"
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                className="w-full rounded-input bg-surface-base border border-border px-3 py-2.5 text-body
-                  focus:outline-none focus:border-brand/50 transition-colors"
-                placeholder={t('vaultSetup.confirmPlaceholder')}
-              />
-              {mismatch && (
-                <p className="text-xs text-semantic-error mt-1">{t('vaultSetup.error.mismatch')}</p>
-              )}
-            </div>
+            {!isOnDevice && (
+              <>
+                <div>
+                  <label className="block text-body font-medium text-content-primary mb-1.5">
+                    {t('vaultSetup.confirmLabel')}
+                  </label>
+                  <input
+                    data-testid="form-vault-passphrase-confirm"
+                    type="password"
+                    value={confirm}
+                    onChange={(e) => setConfirm(e.target.value)}
+                    className="w-full rounded-input bg-surface-base border border-border px-3 py-2.5 text-body
+                      focus:outline-none focus:border-brand/50 transition-colors"
+                    placeholder={t('vaultSetup.confirmPlaceholder')}
+                  />
+                  {mismatch && (
+                    <p className="text-xs text-semantic-error mt-1">
+                      {t('vaultSetup.error.mismatch')}
+                    </p>
+                  )}
+                </div>
 
-            <label className="flex items-center gap-2 text-caption text-content-secondary cursor-pointer">
-              <input
-                data-testid="form-saved-checkbox"
-                type="checkbox"
-                checked={saved}
-                onChange={(e) => setSaved(e.target.checked)}
-                className="rounded border-border accent-brand"
-              />
-              {t('vaultSetup.savedCheckbox')}
-            </label>
+                <label className="flex items-center gap-2 text-caption text-content-secondary cursor-pointer">
+                  <input
+                    data-testid="form-saved-checkbox"
+                    type="checkbox"
+                    checked={saved}
+                    onChange={(e) => setSaved(e.target.checked)}
+                    className="rounded border-border accent-brand"
+                  />
+                  {t('vaultSetup.savedCheckbox')}
+                </label>
+              </>
+            )}
 
             <button
               data-testid="btn-create-vault"
@@ -167,7 +187,11 @@ export default function VaultSetupPage() {
               className="w-full rounded-button bg-brand hover:bg-brand-dark disabled:opacity-60
                 px-4 py-2.5 text-body font-medium transition-colors shadow-glow-brand"
             >
-              {busy ? t('vaultSetup.btn.creating') : t('vaultSetup.btn.continue')}
+              {busy
+                ? t('vaultSetup.btn.creating')
+                : isOnDevice
+                  ? t('vaultSetup.ondevice.btn')
+                  : t('vaultSetup.btn.continue')}
             </button>
 
             {error && (
@@ -260,7 +284,7 @@ export default function VaultSetupPage() {
 
             <button
               data-testid="btn-go-dashboard"
-              onClick={() => nav('/dashboard', { replace: true })}
+              onClick={() => nav('/home', { replace: true })}
               className="w-full rounded-button bg-brand hover:bg-brand-dark
                 px-4 py-3 text-body font-medium transition-colors shadow-glow-brand"
             >
@@ -269,13 +293,15 @@ export default function VaultSetupPage() {
           </div>
         )}
 
-        {/* Already have account link */}
-        <p className="text-center text-[0.625rem] text-content-tertiary">
-          {t('signup.signinPrompt')}{' '}
-          <a href="/auth/signin" className="text-brand hover:text-brand-light underline">
-            {t('signup.signinLink')}
-          </a>
-        </p>
+        {/* Already have account link — hidden in ondevice mode */}
+        {!isOnDevice && (
+          <p className="text-center text-[0.625rem] text-content-tertiary">
+            {t('signup.signinPrompt')}{' '}
+            <a href="/auth/signin" className="text-brand hover:text-brand-light underline">
+              {t('signup.signinLink')}
+            </a>
+          </p>
+        )}
       </div>
     </div>
   );

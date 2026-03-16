@@ -34,7 +34,8 @@ export default function SigninPage() {
       if (vaultSetup) {
         nav('/vault/unlock', { replace: true });
       } else {
-        nav('/vault/setup', { replace: true });
+        // Returning user on a new device — prompt to enter their existing passphrase
+        nav('/vault/setup?ondevice=1', { replace: true });
       }
     } catch (err) {
       setError(errToMsg(err));

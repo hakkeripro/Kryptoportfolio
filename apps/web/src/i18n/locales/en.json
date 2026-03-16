@@ -100,6 +100,11 @@
       "title": "Set up your Vault",
       "description": "Your Vault Passphrase encrypts all data. Save it somewhere safe — it cannot be recovered."
     },
+    "ondevice": {
+      "title": "Set up on this device",
+      "description": "Enter the Vault Passphrase you created on your other device. The same passphrase unlocks your data on all devices.",
+      "btn": "Unlock my data"
+    },
     "passphraseLabel": "Vault Passphrase",
     "passphrasePlaceholder": "Enter passphrase (min 6 characters)",
     "confirmLabel": "Confirm Passphrase",

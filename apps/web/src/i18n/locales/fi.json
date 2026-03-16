@@ -100,6 +100,11 @@
       "title": "Aseta holvi",
       "description": "Holvin tunnuslause salaa kaiken tiedon. Tallenna se turvalliseen paikkaan — sitä ei voi palauttaa."
     },
+    "ondevice": {
+      "title": "Ota käyttöön tällä laitteella",
+      "description": "Syötä holvin tunnuslause, jonka loit toisella laitteellasi. Sama tunnuslause avaa tietosi kaikilla laitteilla.",
+      "btn": "Avaa tietoni"
+    },
     "passphraseLabel": "Holvin tunnuslause",
     "passphrasePlaceholder": "Syötä tunnuslause (vähintään 6 merkkiä)",
     "confirmLabel": "Vahvista tunnuslause",
