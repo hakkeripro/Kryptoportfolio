@@ -303,9 +303,7 @@ export default function TaxPage() {
             disabled={!report && exportCsvGate.allowed}
           >
             <Download className="h-3.5 w-3.5 mr-1.5" /> {t('tax.btn.exportCsv')}
-            {!exportCsvGate.allowed && (
-              <span className="ml-1 text-[#FF8400]">●</span>
-            )}
+            {!exportCsvGate.allowed && <span className="ml-1 text-[#FF8400]">●</span>}
           </Button>
         </div>
       </motion.div>
@@ -357,89 +355,89 @@ export default function TaxPage() {
       {/* Disposals table — gated for premium */}
       <motion.div variants={fadeInUp} initial="hidden" animate="show">
         <GateWall feature="tax-report-view">
-        <Card className="p-0 overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
-            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/30">
-              // {t('tax.disposals.title')}
-            </span>
-            {report && (
-              <div className="text-caption text-content-tertiary">
-                {report.disposals.length} {t('tax.disposals.title').toLowerCase()}
-              </div>
-            )}
-          </div>
-
-          <div data-testid="list-tax-disposals" className="overflow-auto">
-            {/* Table header */}
-            <div className="grid grid-cols-[1.2fr_1fr_0.8fr_1fr_1fr_0.8fr_1fr] gap-2 px-5 py-2.5 border-b border-white/[0.04]">
-              {[
-                t('tax.table.date'),
-                t('tax.table.asset'),
-                t('tax.table.amount'),
-                t('tax.table.proceeds'),
-                t('tax.table.costBasis'),
-                t('tax.table.fees'),
-                t('tax.table.gainLoss'),
-              ].map((h) => (
-                <span
-                  key={h}
-                  className="text-[10px] font-mono uppercase tracking-[0.15em] text-white/20"
-                >
-                  {h}
-                </span>
-              ))}
+          <Card className="p-0 overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
+              <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/30">
+                // {t('tax.disposals.title')}
+              </span>
+              {report && (
+                <div className="text-caption text-content-tertiary">
+                  {report.disposals.length} {t('tax.disposals.title').toLowerCase()}
+                </div>
+              )}
             </div>
 
-            {(report?.disposals ?? []).map((r) => {
-              const sym = assetsById.get(r.assetId)?.symbol ?? r.assetId;
-              const gain = d(r.realizedGainBase);
-              return (
-                <div
-                  key={r.eventId}
-                  data-testid={`row-tax-disposal-${r.eventId}`}
-                  className="grid grid-cols-[1.2fr_1fr_0.8fr_1fr_1fr_0.8fr_1fr] gap-2 items-center py-3 px-5
-                    border-b border-white/[0.04] hover:bg-[#FF8400]/[0.04] transition-colors"
-                >
-                  <div className="text-[13px] text-content-secondary font-mono">
-                    {new Date(r.disposedAtISO).toLocaleDateString()}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <TokenIcon symbol={sym} size="sm" />
-                    <span className="text-[13px] text-content-primary font-medium">{sym}</span>
-                  </div>
-                  <div className="text-[13px] font-mono text-content-secondary text-right">
-                    {r.amount}
-                  </div>
-                  <div className="text-[13px] font-mono text-content-primary text-right">
-                    {fmtMoney(r.proceedsBase, report?.baseCurrency ?? 'EUR')}
-                  </div>
-                  <div className="text-[13px] font-mono text-content-secondary text-right">
-                    {fmtMoney(r.costBasisBase, report?.baseCurrency ?? 'EUR')}
-                  </div>
-                  <div className="text-[13px] font-mono text-content-tertiary text-right">
-                    {fmtMoney(r.feeBase, report?.baseCurrency ?? 'EUR')}
-                  </div>
-                  <div
-                    className={`text-[13px] font-mono text-right font-semibold ${gain.gte(0) ? 'text-semantic-success' : 'text-semantic-error'}`}
+            <div data-testid="list-tax-disposals" className="overflow-auto">
+              {/* Table header */}
+              <div className="grid grid-cols-[1.2fr_1fr_0.8fr_1fr_1fr_0.8fr_1fr] gap-2 px-5 py-2.5 border-b border-white/[0.04]">
+                {[
+                  t('tax.table.date'),
+                  t('tax.table.asset'),
+                  t('tax.table.amount'),
+                  t('tax.table.proceeds'),
+                  t('tax.table.costBasis'),
+                  t('tax.table.fees'),
+                  t('tax.table.gainLoss'),
+                ].map((h) => (
+                  <span
+                    key={h}
+                    className="text-[10px] font-mono uppercase tracking-[0.15em] text-white/20"
                   >
-                    {fmtMoney(r.realizedGainBase, report?.baseCurrency ?? 'EUR')}
-                  </div>
-                </div>
-              );
-            })}
+                    {h}
+                  </span>
+                ))}
+              </div>
 
-            {!report && (
-              <div className="py-12 text-center text-caption text-content-tertiary">
-                {t('tax.disposals.generatePrompt')}
-              </div>
-            )}
-            {report && report.disposals.length === 0 && (
-              <div className="py-12 text-center text-caption text-content-tertiary">
-                {t('tax.disposals.empty', { year: report.year })}
-              </div>
-            )}
-          </div>
-        </Card>
+              {(report?.disposals ?? []).map((r) => {
+                const sym = assetsById.get(r.assetId)?.symbol ?? r.assetId;
+                const gain = d(r.realizedGainBase);
+                return (
+                  <div
+                    key={r.eventId}
+                    data-testid={`row-tax-disposal-${r.eventId}`}
+                    className="grid grid-cols-[1.2fr_1fr_0.8fr_1fr_1fr_0.8fr_1fr] gap-2 items-center py-3 px-5
+                    border-b border-white/[0.04] hover:bg-[#FF8400]/[0.04] transition-colors"
+                  >
+                    <div className="text-[13px] text-content-secondary font-mono">
+                      {new Date(r.disposedAtISO).toLocaleDateString()}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <TokenIcon symbol={sym} size="sm" />
+                      <span className="text-[13px] text-content-primary font-medium">{sym}</span>
+                    </div>
+                    <div className="text-[13px] font-mono text-content-secondary text-right">
+                      {r.amount}
+                    </div>
+                    <div className="text-[13px] font-mono text-content-primary text-right">
+                      {fmtMoney(r.proceedsBase, report?.baseCurrency ?? 'EUR')}
+                    </div>
+                    <div className="text-[13px] font-mono text-content-secondary text-right">
+                      {fmtMoney(r.costBasisBase, report?.baseCurrency ?? 'EUR')}
+                    </div>
+                    <div className="text-[13px] font-mono text-content-tertiary text-right">
+                      {fmtMoney(r.feeBase, report?.baseCurrency ?? 'EUR')}
+                    </div>
+                    <div
+                      className={`text-[13px] font-mono text-right font-semibold ${gain.gte(0) ? 'text-semantic-success' : 'text-semantic-error'}`}
+                    >
+                      {fmtMoney(r.realizedGainBase, report?.baseCurrency ?? 'EUR')}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {!report && (
+                <div className="py-12 text-center text-caption text-content-tertiary">
+                  {t('tax.disposals.generatePrompt')}
+                </div>
+              )}
+              {report && report.disposals.length === 0 && (
+                <div className="py-12 text-center text-caption text-content-tertiary">
+                  {t('tax.disposals.empty', { year: report.year })}
+                </div>
+              )}
+            </div>
+          </Card>
         </GateWall>
       </motion.div>
 
