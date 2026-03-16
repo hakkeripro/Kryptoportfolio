@@ -1,76 +1,53 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import * as React from "react"
+import * as TabsPrimitive from "@radix-ui/react-tabs"
 
-interface Tab {
-  id: string;
-  label: string;
-  icon?: React.ReactNode;
-}
+import { cn } from "@/lib/utils"
 
-interface TabsProps {
-  tabs: Tab[];
-  activeTab?: string;
-  onChange?: (tabId: string) => void;
-  children: (activeTab: string) => React.ReactNode;
-  className?: string;
-}
+const Tabs = TabsPrimitive.Root
 
-export function Tabs({
-  tabs,
-  activeTab: controlledTab,
-  onChange,
-  children,
-  className = '',
-}: TabsProps) {
-  const [internalTab, setInternalTab] = useState(tabs[0]?.id ?? '');
-  const active = controlledTab ?? internalTab;
-  const tabListRef = useRef<HTMLDivElement>(null);
-  const [indicator, setIndicator] = useState({ left: 0, width: 0 });
+const TabsList = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.List>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
+>(({ className, ...props }, ref) => (
+  <TabsPrimitive.List
+    ref={ref}
+    className={cn(
+      "inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground",
+      className
+    )}
+    {...props}
+  />
+))
+TabsList.displayName = TabsPrimitive.List.displayName
 
-  const handleChange = (tabId: string) => {
-    if (onChange) onChange(tabId);
-    else setInternalTab(tabId);
-  };
+const TabsTrigger = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
+>(({ className, ...props }, ref) => (
+  <TabsPrimitive.Trigger
+    ref={ref}
+    className={cn(
+      "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow",
+      className
+    )}
+    {...props}
+  />
+))
+TabsTrigger.displayName = TabsPrimitive.Trigger.displayName
 
-  const updateIndicator = useCallback(() => {
-    if (!tabListRef.current) return;
-    const activeBtn = tabListRef.current.querySelector<HTMLButtonElement>('[aria-selected="true"]');
-    if (activeBtn) {
-      setIndicator({ left: activeBtn.offsetLeft, width: activeBtn.offsetWidth });
-    }
-  }, []);
+const TabsContent = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
+>(({ className, ...props }, ref) => (
+  <TabsPrimitive.Content
+    ref={ref}
+    className={cn(
+      "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+      className
+    )}
+    {...props}
+  />
+))
+TabsContent.displayName = TabsPrimitive.Content.displayName
 
-  useEffect(() => {
-    updateIndicator();
-  }, [active, updateIndicator]);
-
-  return (
-    <div className={className}>
-      <div ref={tabListRef} className="relative flex border-b border-border mb-4" role="tablist">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            role="tab"
-            aria-selected={active === tab.id}
-            onClick={() => handleChange(tab.id)}
-            className={`flex items-center gap-2 px-4 py-2.5 text-body font-medium
-              transition-colors duration-200 ease-expo -mb-px
-              ${
-                active === tab.id
-                  ? 'text-content-primary'
-                  : 'text-content-tertiary hover:text-content-secondary'
-              }`}
-          >
-            {tab.icon}
-            {tab.label}
-          </button>
-        ))}
-        {/* Sliding indicator */}
-        <div
-          className="absolute bottom-0 h-0.5 bg-brand rounded-full transition-all duration-300 ease-expo"
-          style={{ left: indicator.left, width: indicator.width }}
-        />
-      </div>
-      <div role="tabpanel">{children(active)}</div>
-    </div>
-  );
-}
+export { Tabs, TabsList, TabsTrigger, TabsContent }

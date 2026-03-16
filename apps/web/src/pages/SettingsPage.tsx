@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
 import type { Settings } from '@kp/core';
 import { useDbQuery } from '../hooks/useDbQuery';
 import { useAuthStore } from '../store/useAuthStore';
@@ -35,7 +36,13 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="space-y-section max-w-[680px]" data-testid="page-settings">
+    <motion.div
+      className="space-y-section max-w-[680px]"
+      data-testid="page-settings"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
       {/* Header */}
       <div>
         <h1 className="text-heading-1 font-heading text-content-primary">{t('settings.title')}</h1>
@@ -132,6 +139,6 @@ export default function SettingsPage() {
         </h2>
         <AdvancedCard />
       </div>
-    </div>
+    </motion.div>
   );
 }

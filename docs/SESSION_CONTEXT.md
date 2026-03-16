@@ -1,6 +1,6 @@
 # Session Context
 
-Paivitetty: 2026-03-13
+Paivitetty: 2026-03-16
 
 ## Projektin nykytila
 
@@ -30,6 +30,24 @@ Seuraavaksi: Feature 13 (Imports) → Feature 14 (Billing)
 ---
 
 ## Muutosloki
+
+### 2026-03-16 — Feature 22: Pencil Design Mockup Implementation (all pages)
+**Pencil-suunnitelmien toteutus kaikille sivuille:**
+- `UnlockPage.tsx` — keskitetty kortti + Logo, passphrase-lomake, "Remember me" checkbox, passkey linkkinä
+- `VaultSetupPage.tsx` — Logo + step indicator, kaikki tekstit i18n-avaimilla, Obsidian-tyylittely
+- `TransactionsPage.tsx` — taulukkomuoto (Date/Type/Asset/Amount/Price/Total), type-badget, haku + suodatus, collapsible lomake
+- `TaxPage.tsx` — 3 KPI-korttia (KpiCard), disposals-taulukko token-ikoneilla, year/method/profile valitsimet headerissa
+- `AlertsPage.tsx` — hälytyskortteja toggle-kytkimillä, TokenIcon, collapsible luontilomake, server-paneeli
+- `SettingsPage.tsx` — ryhmitetyt osiot (Vault & Security, Preferences, Danger Zone), section-otsikot
+- `ImportsPage.tsx` — step indicator (1-2-3), exchange-kortti checkmark-tilalla, CSV upload -alue, design token -värit
+
+**Poistettu hardcoded-värit:** `bg-red-50`, `bg-green-50`, `bg-amber-50`, `text-red-800`, `text-green-800` → design token -luokat (`semantic-error/success`, `brand`, `surface-*`)
+
+**E2E-korjaus:** `alerts-server.spec.ts` — lisätty `btn-refresh-server-status`, korjattu server delivery -viesti
+
+**Testitulos:** Build OK, Unit 155/155 ✅, E2E 16/16 ✅ (1 skipped pre-existing)
+
+---
 
 ### 2026-03-15 — Feature 22: UI/UX Redesign + Design System (koko feature)
 **Phase A: Design System Foundation**

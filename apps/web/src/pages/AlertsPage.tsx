@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import Decimal from 'decimal.js';
 import { Plus, Bell, Trash2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ensureWebDbOpen, getWebDb } from '@kp/platform-web';
 import type { Alert, Asset } from '@kp/core';
 import { AlertSchema, uuid } from '@kp/core';
@@ -21,7 +22,8 @@ import {
   sendTestWebPush,
   updateServerMirrorState,
 } from '../alerts/serverAlertsApi';
-import { Button, Card, TokenIcon } from '../components/ui';
+import { Button, Card, TokenIcon, Switch } from '../components/ui';
+import { pageTransition, fadeInUp, staggerContainer } from '../lib/animations';
 
 type FormType = Alert['type'];
 
@@ -372,340 +374,317 @@ export default function AlertsPage() {
     'w-full rounded-input bg-surface-base border border-border px-3 py-2 text-body text-content-primary focus:outline-none focus:border-brand/50 transition-colors';
 
   return (
-    <div className="space-y-section" data-testid="panel-alerts">
+    <motion.div className="space-y-section" data-testid="panel-alerts" {...pageTransition}>
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <motion.div className="flex items-start justify-between" variants={fadeInUp} initial="hidden" animate="show">
         <div>
           <h1 className="text-heading-1 font-heading text-content-primary">{t('alerts.title')}</h1>
           <p className="text-caption text-content-tertiary mt-0.5">
             Get notified when prices hit your targets
           </p>
         </div>
-        <Button
-          variant="primary"
-          size="sm"
-          icon={<Plus className="h-3.5 w-3.5" />}
-          onClick={() => setShowForm(!showForm)}
-        >
-          Create Alert
+        <Button variant="default" size="sm" onClick={() => setShowForm(!showForm)}>
+          <Plus className="h-3.5 w-3.5 mr-1.5" /> Create Alert
         </Button>
-      </div>
+      </motion.div>
 
       {/* Create alert form (collapsible) */}
-      {showForm && (
-        <Card data-testid="panel-alerts-form">
-          <div className="text-body font-medium text-content-primary mb-3">New Alert</div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <label className="block">
-              <div className="text-caption text-content-secondary mb-1">
-                {t('alerts.form.type')}
+      <AnimatePresence>
+        {showForm && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
+          >
+            <Card data-testid="panel-alerts-form" className="p-5">
+              <div className="font-heading text-heading-4 text-content-primary mb-4">New Alert</div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <label className="block">
+                  <div className="text-caption text-content-secondary mb-1">{t('alerts.form.type')}</div>
+                  <select
+                    className={inputCls}
+                    value={formType}
+                    onChange={(e) => setFormType(e.target.value as any)}
+                    data-testid="form-alert-type"
+                  >
+                    <option value="PORTFOLIO_VALUE">{t('alerts.type.portfolioValue')}</option>
+                    <option value="PRICE">{t('alerts.type.price')}</option>
+                    <option value="DRAWDOWN">{t('alerts.type.drawdown')}</option>
+                    <option value="PCT_CHANGE">{t('alerts.type.pctChange')}</option>
+                  </select>
+                </label>
+                {(formType === 'PORTFOLIO_VALUE' || formType === 'PRICE') && (
+                  <label className="block">
+                    <div className="text-caption text-content-secondary mb-1">{t('alerts.form.direction')}</div>
+                    <select
+                      className={inputCls}
+                      value={formDirection}
+                      onChange={(e) => setFormDirection(e.target.value as any)}
+                      data-testid="form-alert-direction"
+                    >
+                      <option value="ABOVE">{t('alerts.direction.above')}</option>
+                      <option value="BELOW">{t('alerts.direction.below')}</option>
+                    </select>
+                  </label>
+                )}
+                {(formType === 'PRICE' || formType === 'PCT_CHANGE') && (
+                  <label className="block">
+                    <div className="text-caption text-content-secondary mb-1">{t('alerts.form.asset')}</div>
+                    <select
+                      className={inputCls}
+                      value={formAssetId}
+                      onChange={(e) => setFormAssetId(e.target.value)}
+                      data-testid="form-alert-asset"
+                    >
+                      <option value="">{t('alerts.form.assetPlaceholder')}</option>
+                      {(assetsQ.data ?? []).map((a: any) => (
+                        <option key={a.id} value={a.id}>{a.symbol} — {a.name}</option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+                <label className="block">
+                  <div className="text-caption text-content-secondary mb-1">{t('alerts.form.threshold')}</div>
+                  <input
+                    className={inputCls}
+                    value={formThreshold}
+                    onChange={(e) => setFormThreshold(e.target.value)}
+                    placeholder={
+                      formType === 'PCT_CHANGE' || formType === 'DRAWDOWN'
+                        ? t('alerts.form.thresholdPercent')
+                        : t('alerts.form.thresholdBase')
+                    }
+                    data-testid="form-alert-threshold"
+                  />
+                </label>
+                <label className="block">
+                  <div className="text-caption text-content-secondary mb-1">{t('alerts.form.cooldown')}</div>
+                  <input
+                    className={inputCls}
+                    value={formCooldown}
+                    onChange={(e) => setFormCooldown(e.target.value)}
+                    data-testid="form-alert-cooldown"
+                  />
+                </label>
               </div>
-              <select
-                className={inputCls}
-                value={formType}
-                onChange={(e) => setFormType(e.target.value as any)}
-                data-testid="form-alert-type"
-              >
-                <option value="PORTFOLIO_VALUE">{t('alerts.type.portfolioValue')}</option>
-                <option value="PRICE">{t('alerts.type.price')}</option>
-                <option value="DRAWDOWN">{t('alerts.type.drawdown')}</option>
-                <option value="PCT_CHANGE">{t('alerts.type.pctChange')}</option>
-              </select>
-            </label>
-            {(formType === 'PORTFOLIO_VALUE' || formType === 'PRICE') && (
-              <label className="block">
-                <div className="text-caption text-content-secondary mb-1">
-                  {t('alerts.form.direction')}
-                </div>
-                <select
-                  className={inputCls}
-                  value={formDirection}
-                  onChange={(e) => setFormDirection(e.target.value as any)}
-                  data-testid="form-alert-direction"
-                >
-                  <option value="ABOVE">{t('alerts.direction.above')}</option>
-                  <option value="BELOW">{t('alerts.direction.below')}</option>
-                </select>
-              </label>
-            )}
-            {(formType === 'PRICE' || formType === 'PCT_CHANGE') && (
-              <label className="block">
-                <div className="text-caption text-content-secondary mb-1">
-                  {t('alerts.form.asset')}
-                </div>
-                <select
-                  className={inputCls}
-                  value={formAssetId}
-                  onChange={(e) => setFormAssetId(e.target.value)}
-                  data-testid="form-alert-asset"
-                >
-                  <option value="">{t('alerts.form.assetPlaceholder')}</option>
-                  {(assetsQ.data ?? []).map((a: any) => (
-                    <option key={a.id} value={a.id}>
-                      {a.symbol} — {a.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            )}
-            <label className="block">
-              <div className="text-caption text-content-secondary mb-1">
-                {t('alerts.form.threshold')}
+              <div className="mt-4">
+                <Button variant="default" size="sm" onClick={() => void addAlert()} data-testid="btn-save-alert">
+                  {t('alerts.btn.addAlert')}
+                </Button>
               </div>
-              <input
-                className={inputCls}
-                value={formThreshold}
-                onChange={(e) => setFormThreshold(e.target.value)}
-                placeholder={
-                  formType === 'PCT_CHANGE' || formType === 'DRAWDOWN'
-                    ? t('alerts.form.thresholdPercent')
-                    : t('alerts.form.thresholdBase')
-                }
-                data-testid="form-alert-threshold"
-              />
-            </label>
-            <label className="block">
-              <div className="text-caption text-content-secondary mb-1">
-                {t('alerts.form.cooldown')}
-              </div>
-              <input
-                className={inputCls}
-                value={formCooldown}
-                onChange={(e) => setFormCooldown(e.target.value)}
-                data-testid="form-alert-cooldown"
-              />
-            </label>
-          </div>
-          <div className="mt-3">
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => void addAlert()}
-              data-testid="btn-save-alert"
-            >
-              {t('alerts.btn.addAlert')}
-            </Button>
-          </div>
-        </Card>
-      )}
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Alert cards */}
-      <div className="space-y-3" data-testid="list-alerts">
+      <motion.div
+        className="space-y-3"
+        data-testid="list-alerts"
+        variants={staggerContainer}
+        initial="hidden"
+        animate="show"
+      >
         {visibleAlerts.length ? (
-          visibleAlerts.map((a, i) => {
-            const sym = alertAssetSymbol(a, assetsById);
-            return (
-              <div
-                key={a.id}
-                className="flex items-center gap-4 rounded-xl border border-border bg-surface-raised p-4
-                  hover:border-border transition-colors animate-slide-up"
-                style={{ animationDelay: `${i * 40}ms` }}
-                data-testid={`row-alert-${a.id}`}
-              >
-                {sym ? (
-                  <TokenIcon symbol={sym} size="md" />
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-brand/10 flex items-center justify-center">
-                    <Bell className="h-5 w-5 text-brand" />
+          <AnimatePresence>
+            {visibleAlerts.map((a) => {
+              const sym = alertAssetSymbol(a, assetsById);
+              return (
+                <motion.div
+                  key={a.id}
+                  variants={fadeInUp}
+                  exit={{ opacity: 0, x: -20, transition: { duration: 0.2 } }}
+                  className="flex items-center gap-4 rounded-xl border border-border bg-surface-raised p-4
+                    hover:bg-surface-raised/80 transition-colors"
+                  data-testid={`row-alert-${a.id}`}
+                >
+                  {sym ? (
+                    <TokenIcon symbol={sym} size="md" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-brand/10 flex items-center justify-center">
+                      <Bell className="h-5 w-5 text-brand" />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm text-content-primary font-medium truncate">
+                      {formatAlert(a, assetsById, baseCurrency)}
+                    </div>
+                    <div className="text-caption text-content-tertiary mt-0.5">
+                      {t('alerts.row.cooldown', { n: a.cooldownMin ?? 0 })}
+                    </div>
                   </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <div className="text-body text-content-primary font-medium truncate">
-                    {formatAlert(a, assetsById, baseCurrency)}
+                  <div className="flex items-center gap-3">
+                    <div data-testid={`toggle-alert-${a.id}`}>
+                      <Switch
+                        checked={!!a.isEnabled}
+                        onCheckedChange={(checked) => void toggleAlert(a.id, checked)}
+                      />
+                    </div>
+                    <button
+                      className="p-1.5 rounded-lg text-content-tertiary hover:text-semantic-error hover:bg-semantic-error/5 transition-colors"
+                      onClick={() => void deleteAlert(a.id)}
+                      data-testid={`btn-delete-alert-${a.id}`}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
                   </div>
-                  <div className="text-caption text-content-tertiary">
-                    {t('alerts.row.cooldown', { n: a.cooldownMin ?? 0 })}
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <label
-                    className="relative inline-flex items-center cursor-pointer"
-                    data-testid={`toggle-alert-${a.id}`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={!!a.isEnabled}
-                      onChange={(e) => void toggleAlert(a.id, e.target.checked)}
-                      className="sr-only peer"
-                    />
-                    <div
-                      className="w-9 h-5 bg-surface-overlay rounded-full peer peer-checked:bg-brand transition-colors
-                      after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full
-                      after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full"
-                    />
-                  </label>
-                  <button
-                    className="p-1.5 rounded-button text-content-tertiary hover:text-semantic-error hover:bg-semantic-error/5 transition-colors"
-                    onClick={() => void deleteAlert(a.id)}
-                    data-testid={`btn-delete-alert-${a.id}`}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            );
-          })
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
         ) : (
-          <div className="py-8 text-center text-caption text-content-tertiary">
+          <div className="py-12 text-center text-caption text-content-tertiary">
             {t('alerts.empty')}
           </div>
         )}
-      </div>
+      </motion.div>
 
       {/* Server alerts panel */}
-      <Card data-testid="panel-alerts-server">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <div className="text-body font-medium text-content-primary">
-              {t('alerts.server.title')}
-            </div>
-            <div className="text-caption text-content-tertiary">
-              {t('alerts.server.description')}
-            </div>
-          </div>
-        </div>
-
-        {!token ? (
-          <div
-            className="rounded-button border border-border bg-surface-base p-3 text-caption text-content-secondary"
-            data-testid="box-alerts-login-required"
-          >
-            {t('alerts.server.loginRequired')}
-          </div>
-        ) : (
-          <div className="space-y-3">
-            <div
-              className="rounded-button border border-border bg-surface-base p-3 text-caption"
-              data-testid="box-alerts-server-status"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-content-secondary">{t('alerts.server.enabledRules')}</span>
-                <span className="font-mono text-content-primary">
-                  {serverStatus ? `${serverStatus.enabled}/${serverStatus.total}` : '—'}
-                </span>
-              </div>
-              <div className="flex items-center justify-between mt-1">
-                <span className="text-content-secondary">{t('alerts.server.mirrorUpdated')}</span>
-                <span className="font-mono text-content-primary">
-                  {serverStatus?.mirrorUpdatedAtISO
-                    ? new Date(serverStatus.mirrorUpdatedAtISO).toLocaleString()
-                    : '—'}
-                </span>
-              </div>
-              <button
-                className="mt-2 text-caption text-content-tertiary hover:text-content-secondary transition-colors"
-                onClick={() => void refreshServerStatus()}
-                data-testid="btn-refresh-server-status"
-              >
-                {t('common.refresh')}
-              </button>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => void syncRulesToServer()}
-                disabled={loading != null}
-                loading={loading === 'server'}
-                data-testid="btn-enable-server-alerts"
-              >
-                {t('alerts.server.btn.syncRules')}
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => void updateState()}
-                disabled={loading != null}
-                loading={loading === 'state'}
-                data-testid="btn-update-server-state"
-              >
-                {t('alerts.server.btn.updateState')}
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => void enableDelivery()}
-                disabled={loading != null}
-                loading={loading === 'enableDelivery'}
-                data-testid="btn-enable-delivery"
-              >
-                {t('alerts.server.btn.enableDelivery')}
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => void enablePush()}
-                disabled={loading != null}
-                loading={loading === 'push'}
-                data-testid="btn-enable-push"
-              >
-                {t('alerts.server.btn.enablePush')}
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => void testPush()}
-                disabled={loading != null}
-                loading={loading === 'pushTest'}
-                data-testid="btn-push-test"
-              >
-                {t('alerts.server.btn.testPush')}
-              </Button>
-            </div>
-
-            {serverMsg && (
-              <div
-                className="rounded-button border border-border bg-surface-base p-3 text-caption text-content-primary"
-                data-testid="txt-alert-server-message"
-              >
-                {serverMsg}
-              </div>
-            )}
-
-            {/* Trigger log */}
+      <motion.div variants={fadeInUp} initial="hidden" animate="show">
+        <Card data-testid="panel-alerts-server" className="p-5">
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <div className="text-caption font-medium text-content-secondary">
-                  {t('alerts.triggerLog.title')}
+              <div className="font-heading text-heading-4 text-content-primary">{t('alerts.server.title')}</div>
+              <div className="text-caption text-content-tertiary mt-0.5">{t('alerts.server.description')}</div>
+            </div>
+          </div>
+
+          {!token ? (
+            <div
+              className="rounded-lg border border-border bg-surface-base p-3 text-caption text-content-secondary"
+              data-testid="box-alerts-login-required"
+            >
+              {t('alerts.server.loginRequired')}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div
+                className="rounded-lg border border-border bg-surface-base p-3 text-caption"
+                data-testid="box-alerts-server-status"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-content-secondary">{t('alerts.server.enabledRules')}</span>
+                  <span className="font-mono text-content-primary">
+                    {serverStatus ? `${serverStatus.enabled}/${serverStatus.total}` : '—'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between mt-1.5">
+                  <span className="text-content-secondary">{t('alerts.server.mirrorUpdated')}</span>
+                  <span className="font-mono text-content-primary">
+                    {serverStatus?.mirrorUpdatedAtISO
+                      ? new Date(serverStatus.mirrorUpdatedAtISO).toLocaleString()
+                      : '—'}
+                  </span>
                 </div>
                 <button
-                  className="text-caption text-content-tertiary hover:text-content-secondary transition-colors"
-                  onClick={() => void refreshLog()}
-                  data-testid="btn-refresh-alert-log"
+                  className="mt-2 text-caption text-content-tertiary hover:text-content-secondary transition-colors"
+                  onClick={() => void refreshServerStatus()}
+                  data-testid="btn-refresh-server-status"
                 >
                   {t('common.refresh')}
                 </button>
               </div>
-              <div className="space-y-2" data-testid="list-trigger-log">
-                {logRows.length ? (
-                  logRows.map((r: any) => (
-                    <div
-                      key={r.id}
-                      className="rounded-button border border-border-subtle p-3 text-caption"
-                      data-testid={`row-trigger-log-${r.id}`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-mono text-content-secondary">
-                          {new Date(r.triggeredAtISO).toLocaleString()}
-                        </span>
-                        <span className="text-content-tertiary">{r.source}</span>
-                      </div>
-                      <div className="mt-1 text-content-primary">
-                        {r.context?.reason ? String(r.context.reason) : JSON.stringify(r.context)}
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-caption text-content-tertiary">
-                    {t('alerts.triggerLog.empty')}
+
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => void syncRulesToServer()}
+                  disabled={loading != null}
+                  data-testid="btn-enable-server-alerts"
+                >
+                  {loading === 'server' ? '...' : t('alerts.server.btn.syncRules')}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => void updateState()}
+                  disabled={loading != null}
+                  data-testid="btn-update-server-state"
+                >
+                  {loading === 'state' ? '...' : t('alerts.server.btn.updateState')}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => void enableDelivery()}
+                  disabled={loading != null}
+                  data-testid="btn-enable-delivery"
+                >
+                  {loading === 'enableDelivery' ? '...' : t('alerts.server.btn.enableDelivery')}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => void enablePush()}
+                  disabled={loading != null}
+                  data-testid="btn-enable-push"
+                >
+                  {loading === 'push' ? '...' : t('alerts.server.btn.enablePush')}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => void testPush()}
+                  disabled={loading != null}
+                  data-testid="btn-push-test"
+                >
+                  {loading === 'pushTest' ? '...' : t('alerts.server.btn.testPush')}
+                </Button>
+              </div>
+
+              {serverMsg && (
+                <div
+                  className="rounded-lg border border-border bg-surface-base p-3 text-caption text-content-primary"
+                  data-testid="txt-alert-server-message"
+                >
+                  {serverMsg}
+                </div>
+              )}
+
+              {/* Trigger log */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-caption font-medium text-content-secondary">
+                    {t('alerts.triggerLog.title')}
                   </div>
-                )}
+                  <button
+                    className="text-caption text-content-tertiary hover:text-content-secondary transition-colors"
+                    onClick={() => void refreshLog()}
+                    data-testid="btn-refresh-alert-log"
+                  >
+                    {t('common.refresh')}
+                  </button>
+                </div>
+                <div className="space-y-2" data-testid="list-trigger-log">
+                  {logRows.length ? (
+                    logRows.map((r: any) => (
+                      <div
+                        key={r.id}
+                        className="rounded-lg border border-border/60 p-3 text-caption"
+                        data-testid={`row-trigger-log-${r.id}`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-mono text-content-secondary">
+                            {new Date(r.triggeredAtISO).toLocaleString()}
+                          </span>
+                          <span className="text-content-tertiary">{r.source}</span>
+                        </div>
+                        <div className="mt-1 text-content-primary">
+                          {r.context?.reason ? String(r.context.reason) : JSON.stringify(r.context)}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-caption text-content-tertiary">{t('alerts.triggerLog.empty')}</div>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        )}
-      </Card>
-    </div>
+          )}
+        </Card>
+      </motion.div>
+    </motion.div>
   );
 }

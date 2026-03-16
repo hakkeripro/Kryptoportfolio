@@ -1,3 +1,4 @@
+import path from 'path';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
@@ -9,6 +10,11 @@ import { VitePWA } from 'vite-plugin-pwa';
 // Instead we use GenerateSW (default) and attach our push handlers via workbox.importScripts.
 
 export default defineConfig(({ mode }) => ({
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
   plugins: [
     react(),
     VitePWA({

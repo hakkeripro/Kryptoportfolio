@@ -28,6 +28,8 @@ import { ensureDefaultSettings } from '../derived/ensureDefaultSettings';
 import type { ImportIssue } from '@kp/core';
 import { useDbQuery } from '../hooks/useDbQuery';
 import { Button, Card } from '../components/ui';
+import { motion } from 'framer-motion';
+import { pageTransition } from '../lib/animations';
 
 function CoinbaseLogo() {
   return (
@@ -366,7 +368,7 @@ export default function ImportsPage() {
     'w-full rounded-input bg-surface-base border border-border px-3 py-2 text-body text-content-primary focus:outline-none focus:border-brand/50 transition-colors';
 
   return (
-    <div className="space-y-section">
+    <motion.div className="space-y-section" {...pageTransition}>
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
@@ -486,13 +488,12 @@ export default function ImportsPage() {
                 />
               </label>
               <Button
-                variant="primary"
+                variant="default"
                 size="sm"
                 onClick={() => void connect()}
                 disabled={
                   !!loading || !passphrase || !token || !keyName.trim() || !privateKeyPem.trim()
                 }
-                loading={!!loading}
                 data-testid="btn-coinbase-connect"
               >
                 {loading ? loading : t('imports.btn.connect')}
@@ -562,7 +563,7 @@ export default function ImportsPage() {
             </div>
             <div className="flex gap-2">
               <Button
-                variant="secondary"
+                variant="outline"
                 size="sm"
                 onClick={() => void runFetch('newest')}
                 disabled={!!loading || !connected}
@@ -571,14 +572,13 @@ export default function ImportsPage() {
                 {t('imports.btn.fetchNewest')}
               </Button>
               <Button
-                variant="primary"
+                variant="default"
                 size="sm"
                 onClick={() => void runFetch('all')}
                 disabled={!!loading || !connected}
-                loading={!!loading && loading.includes('Fetch')}
                 data-testid="btn-import-run-all"
               >
-                {t('imports.btn.fetchAll')}
+                {loading?.includes('Fetch') ? loading : t('imports.btn.fetchAll')}
               </Button>
             </div>
           </div>
@@ -761,7 +761,7 @@ export default function ImportsPage() {
 
             <div className="mt-3 flex gap-2">
               <Button
-                variant="secondary"
+                variant="outline"
                 size="sm"
                 onClick={() => void rebuildPreview()}
                 disabled={!!loading || !preview}
@@ -770,14 +770,13 @@ export default function ImportsPage() {
                 {t('imports.btn.rebuildPreview')}
               </Button>
               <Button
-                variant="primary"
+                variant="default"
                 size="sm"
                 onClick={() => void doCommit(preview!, accounts, items)}
                 disabled={!!loading || !connected || !canCommit}
-                loading={loading === 'Committing…'}
                 data-testid="btn-import-commit"
               >
-                {t('imports.btn.commit')}
+                {loading === 'Committing…' ? loading : t('imports.btn.commit')}
               </Button>
             </div>
 
@@ -1001,6 +1000,6 @@ export default function ImportsPage() {
           </div>
         </Card>
       )}
-    </div>
+    </motion.div>
   );
 }

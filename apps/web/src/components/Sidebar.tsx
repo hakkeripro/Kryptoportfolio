@@ -1,5 +1,7 @@
-import { NavLink } from 'react-router-dom';
+import { useState } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
 import {
   Home,
   ArrowLeftRight,
@@ -10,8 +12,10 @@ import {
   Lock,
   Unlock,
   RefreshCw,
+  Shield,
+  Menu,
 } from 'lucide-react';
-import { Logo } from './ui';
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from './ui/sheet';
 import { useVaultStore } from '../store/useVaultStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { useSyncStore } from '../store/useSyncStore';
@@ -22,26 +26,31 @@ interface NavSection {
 }
 
 function NavItem({ to, icon: Icon, label, testId }: NavSection['items'][number]) {
+  const location = useLocation();
+  const isActive = location.pathname === to;
+
   return (
-    <NavLink
-      to={to}
-      data-testid={testId}
-      className={({ isActive }) =>
-        `relative flex items-center gap-3 px-3 py-2 rounded-button text-body font-medium
-        transition-all duration-150 ease-expo ${
-          isActive
-            ? 'bg-brand/10 text-brand shadow-sm shadow-brand/5 before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-5 before:w-0.5 before:rounded-full before:bg-brand'
-            : 'text-content-secondary hover:text-content-primary hover:bg-surface-overlay/60'
-        }`
-      }
-    >
-      <Icon className="h-[18px] w-[18px]" />
-      {label}
+    <NavLink to={to} data-testid={testId}>
+      <motion.div
+        whileHover={{ scale: 1.02 }}
+        transition={{ duration: 0.15 }}
+        className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium
+          transition-colors duration-150 ${
+            isActive
+              ? 'bg-white/10 text-white'
+              : 'text-white/60 hover:bg-white/5 hover:text-white/80'
+          }`}
+      >
+        <Icon
+          className={`h-[18px] w-[18px] ${isActive ? 'text-[#FF8400]' : ''}`}
+        />
+        {label}
+      </motion.div>
     </NavLink>
   );
 }
 
-export default function Sidebar() {
+function SidebarContent() {
   const { t } = useTranslation();
   const { passphrase, lockVault } = useVaultStore();
   const token = useAuthStore((s) => s.token);
@@ -52,58 +61,38 @@ export default function Sidebar() {
     {
       label: t('nav.section.portfolio', { defaultValue: 'PORTFOLIO' }),
       items: [
-        {
-          to: '/home',
-          icon: Home,
-          label: t('nav.dashboard', { defaultValue: 'Dashboard' }),
-          testId: 'nav-home',
-        },
-        {
-          to: '/transactions',
-          icon: ArrowLeftRight,
-          label: t('nav.transactions'),
-          testId: 'nav-transactions',
-        },
-        {
-          to: '/taxes',
-          icon: FileText,
-          label: t('nav.taxReports', { defaultValue: 'Tax Reports' }),
-          testId: 'nav-taxes',
-        },
+        { to: '/home', icon: Home, label: t('nav.dashboard', { defaultValue: 'Dashboard' }), testId: 'nav-home' },
+        { to: '/transactions', icon: ArrowLeftRight, label: t('nav.transactions'), testId: 'nav-transactions' },
+        { to: '/taxes', icon: FileText, label: t('nav.taxReports', { defaultValue: 'Tax Reports' }), testId: 'nav-taxes' },
       ],
     },
     {
       label: t('nav.section.tools', { defaultValue: 'TOOLS' }),
       items: [
-        {
-          to: '/settings/alerts',
-          icon: Bell,
-          label: t('nav.alerts', { defaultValue: 'Alerts' }),
-          testId: 'nav-alerts',
-        },
-        {
-          to: '/transactions/import',
-          icon: Upload,
-          label: t('nav.import', { defaultValue: 'Import' }),
-          testId: 'nav-import',
-        },
+        { to: '/settings/alerts', icon: Bell, label: t('nav.alerts', { defaultValue: 'Alerts' }), testId: 'nav-alerts' },
+        { to: '/transactions/import', icon: Upload, label: t('nav.import', { defaultValue: 'Import' }), testId: 'nav-import' },
         { to: '/settings', icon: Settings, label: t('nav.settings'), testId: 'nav-settings' },
       ],
     },
   ];
 
   return (
-    <aside className="hidden md:flex flex-col w-60 h-screen fixed left-0 top-0 bg-[var(--color-sidebar)] border-r border-[var(--color-sidebar-border)]">
+    <>
       {/* Brand */}
       <div className="px-5 py-4 border-b border-white/10">
-        <Logo size="sm" />
+        <span className="inline-flex items-center gap-2">
+          <Shield className="h-6 w-6 text-[#FF8400]" />
+          <span className="font-semibold tracking-tight text-white text-sm">
+            VaultFolio
+          </span>
+        </span>
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-5 overflow-y-auto">
         {sections.map((section) => (
           <div key={section.label}>
-            <div className="px-3 mb-2 text-[0.625rem] font-semibold uppercase tracking-widest text-content-tertiary">
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground px-4 pt-4 pb-1">
               {section.label}
             </div>
             <div className="space-y-0.5">
@@ -121,9 +110,9 @@ export default function Sidebar() {
           <button
             data-testid="btn-sync-now"
             onClick={() => void syncNow()}
-            className="flex items-center gap-2 w-full px-3 py-2 rounded-button text-caption
-              text-content-secondary hover:text-content-primary hover:bg-white/5
-              transition-all duration-150 ease-expo"
+            className="flex items-center gap-2 w-full px-3 py-2 rounded-md text-xs
+              text-white/60 hover:text-white hover:bg-white/5
+              transition-colors duration-150"
           >
             <RefreshCw className="h-4 w-4" />
             {t('nav.sync')}
@@ -133,9 +122,9 @@ export default function Sidebar() {
           <button
             data-testid="btn-lock"
             onClick={() => lockVault()}
-            className="flex items-center gap-2 w-full px-3 py-2 rounded-button text-caption
-              text-content-secondary hover:text-content-primary hover:bg-white/5
-              transition-all duration-150 ease-expo"
+            className="flex items-center gap-2 w-full px-3 py-2 rounded-md text-xs
+              text-white/60 hover:text-white hover:bg-white/5
+              transition-colors duration-150"
           >
             <Lock className="h-4 w-4" />
             {t('nav.lockVault')}
@@ -143,7 +132,7 @@ export default function Sidebar() {
         ) : (
           <span
             data-testid="badge-locked"
-            className="flex items-center gap-2 px-3 py-2 text-caption text-content-tertiary"
+            className="flex items-center gap-2 px-3 py-2 text-xs text-white/40"
           >
             <Unlock className="h-4 w-4" />
             {t('nav.locked')}
@@ -151,11 +140,51 @@ export default function Sidebar() {
         )}
         {email && (
           <div className="px-3 pt-2">
-            <div className="text-sm text-content-primary truncate">{email.split('@')[0]}</div>
-            <div className="text-xs text-content-tertiary truncate">{email}</div>
+            <div className="text-sm text-white truncate">{email.split('@')[0]}</div>
+            <div className="text-xs text-white/40 truncate">{email}</div>
           </div>
         )}
       </div>
-    </aside>
+    </>
+  );
+}
+
+export default function Sidebar() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      {/* Desktop sidebar */}
+      <aside className="hidden md:flex flex-col w-60 h-screen fixed left-0 top-0 bg-[#18181b] border-r border-white/10">
+        <SidebarContent />
+      </aside>
+
+      {/* Mobile hamburger + Sheet */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-20 flex items-center h-14 px-4 bg-[#18181b] border-b border-white/10">
+        <Sheet open={open} onOpenChange={setOpen}>
+          <SheetTrigger asChild>
+            <button
+              data-testid="btn-mobile-menu"
+              className="p-2 rounded-md text-white/60 hover:text-white hover:bg-white/5 transition-colors"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+          </SheetTrigger>
+          <SheetContent
+            side="left"
+            className="w-60 p-0 bg-[#18181b] border-r border-white/10"
+          >
+            <SheetTitle className="sr-only">Navigation</SheetTitle>
+            <div className="flex flex-col h-full" onClick={() => setOpen(false)}>
+              <SidebarContent />
+            </div>
+          </SheetContent>
+        </Sheet>
+        <span className="ml-3 inline-flex items-center gap-2">
+          <Shield className="h-5 w-5 text-[#FF8400]" />
+          <span className="font-semibold text-white text-sm tracking-tight">VaultFolio</span>
+        </span>
+      </div>
+    </>
   );
 }

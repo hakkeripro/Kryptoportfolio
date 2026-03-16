@@ -4,6 +4,18 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        /* shadcn/ui semantic tokens */
+        background: 'var(--color-surface-base)',
+        foreground: 'var(--color-content-primary)',
+        card: { DEFAULT: 'var(--color-card)', foreground: 'var(--color-content-primary)' },
+        primary: { DEFAULT: 'var(--color-brand)', foreground: '#ffffff' },
+        secondary: { DEFAULT: 'var(--color-card)', foreground: 'var(--color-content-secondary)' },
+        muted: { DEFAULT: 'var(--color-border)', foreground: 'var(--color-content-secondary)' },
+        accent: { DEFAULT: 'var(--color-brand)', foreground: '#ffffff' },
+        destructive: { DEFAULT: 'var(--color-semantic-error)', foreground: '#ffffff' },
+        input: 'var(--color-border)',
+        ring: 'var(--color-brand)',
+        /* Original tokens */
         brand: {
           DEFAULT: 'var(--color-brand)',
           light: 'var(--color-brand-light)',
@@ -32,7 +44,7 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ['Geist', 'system-ui', 'sans-serif'],
+        sans: ['Geist Sans', 'system-ui', 'sans-serif'],
         heading: ['JetBrains Mono', 'monospace'],
         mono: ['JetBrains Mono', 'monospace'],
       },
@@ -51,8 +63,9 @@ module.exports = {
         badge: '9999px',
       },
       spacing: {
-        page: '1.5rem',
-        section: '1.5rem',
+        page: '2.5rem',
+        'page-y': '2rem',
+        section: '1.75rem',
         card: '1.25rem',
       },
       boxShadow: {
@@ -84,5 +97,5 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [require('tailwindcss-animate')],
 };

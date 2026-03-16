@@ -1,10 +1,10 @@
 // Side-effect: migrates old kp_app_state_v3 → split store keys on module load.
 import './store/migrateStoreKeys';
 
-import '@fontsource/inter/400.css';
-import '@fontsource/inter/500.css';
-import '@fontsource/inter/600.css';
-import '@fontsource/inter/700.css';
+import '@fontsource/geist-sans/400.css';
+import '@fontsource/geist-sans/500.css';
+import '@fontsource/geist-sans/600.css';
+import '@fontsource/geist-sans/700.css';
 
 import './i18n';
 
