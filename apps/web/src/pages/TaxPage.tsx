@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Decimal from 'decimal.js';
+import { FileText, Download } from 'lucide-react';
 import type { Asset, LedgerEvent, Settings, TaxYearReport } from '@kp/core';
 import { generateTaxYearReport } from '@kp/core';
 import { ensureWebDbOpen } from '@kp/platform-web';
 import { useDbQuery } from '../hooks/useDbQuery';
 import { ensureDefaultSettings } from '../derived/ensureDefaultSettings';
-import PageHeader from '../components/PageHeader';
+import { Card, KpiCard, Button, TokenIcon } from '../components/ui';
 
 function d(s: string | undefined | null): Decimal {
   if (!s) return new Decimal(0);
@@ -18,7 +19,7 @@ function d(s: string | undefined | null): Decimal {
 }
 
 function fmtMoney(s: string | undefined | null, cur: string): string {
-  return `${d(s).toFixed()} ${cur}`;
+  return `${d(s).toDecimalPlaces(2).toFixed()} ${cur}`;
 }
 
 function downloadTextFile(filename: string, content: string, mime = 'text/plain') {
@@ -37,70 +38,39 @@ function buildCsv(report: TaxYearReport, assetsById: Map<string, Asset>): string
   lines.push(`Tax Report,${report.year},Profile,${report.taxProfile},Lot,${report.lotMethodUsed}`);
   lines.push(`Generated At,${report.generatedAtISO}`);
   lines.push('');
-
   lines.push('Realized disposals');
   lines.push(
-    [
-      'date',
-      'asset',
-      'amount',
-      `proceeds_${cur}`,
-      `costBasis_${cur}`,
-      `fees_${cur}`,
-      `gain_${cur}`,
-      'eventId',
-    ].join(','),
+    ['date', 'asset', 'amount', `proceeds_${cur}`, `costBasis_${cur}`, `fees_${cur}`, `gain_${cur}`, 'eventId'].join(','),
   );
   for (const d0 of report.disposals) {
     const sym = assetsById.get(d0.assetId)?.symbol ?? d0.assetId;
-    lines.push(
-      [
-        d0.disposedAtISO,
-        sym,
-        d0.amount,
-        d0.proceedsBase,
-        d0.costBasisBase,
-        d0.feeBase,
-        d0.realizedGainBase,
-        d0.eventId,
-      ].join(','),
-    );
+    lines.push([d0.disposedAtISO, sym, d0.amount, d0.proceedsBase, d0.costBasisBase, d0.feeBase, d0.realizedGainBase, d0.eventId].join(','));
   }
   lines.push('');
   lines.push(`Totals,,,,,${report.totals.feesBase},${report.totals.realizedGainBase},`);
   lines.push(`Proceeds,${report.totals.proceedsBase}`);
   lines.push(`CostBasis,${report.totals.costBasisBase}`);
   lines.push('');
-
   lines.push('Income (rewards/airdrops)');
-  lines.push(
-    ['date', 'type', 'asset', 'amount', `income_${cur}`, `fmv_${cur}`, 'eventId'].join(','),
-  );
+  lines.push(['date', 'type', 'asset', 'amount', `income_${cur}`, `fmv_${cur}`, 'eventId'].join(','));
   for (const r of report.income) {
     const sym = assetsById.get(r.assetId)?.symbol ?? r.assetId;
-    lines.push(
-      [r.timestampISO, r.type, sym, r.amount, r.incomeBase, r.fmvTotalBase ?? '', r.eventId].join(
-        ',',
-      ),
-    );
+    lines.push([r.timestampISO, r.type, sym, r.amount, r.incomeBase, r.fmvTotalBase ?? '', r.eventId].join(','));
   }
   lines.push('');
   lines.push(`IncomeTotal,${report.totals.incomeBase}`);
   lines.push('');
-
   lines.push('Year-end holdings');
   lines.push(['asset', 'amount', `costBasis_${cur}`].join(','));
   for (const h of report.yearEndHoldings) {
     const sym = assetsById.get(h.assetId)?.symbol ?? h.assetId;
     lines.push([sym, h.amount, h.costBasisBase].join(','));
   }
-
   if (report.warnings.length) {
     lines.push('');
     lines.push('Warnings');
     for (const w of report.warnings) lines.push(w);
   }
-
   return lines.join('\n');
 }
 
@@ -109,103 +79,19 @@ function buildSummaryHtml(report: TaxYearReport, assetsById: Map<string, Asset>)
   const rows = report.disposals
     .map((d0) => {
       const sym = assetsById.get(d0.assetId)?.symbol ?? d0.assetId;
-      return `
-        <tr>
-          <td>${d0.disposedAtISO}</td>
-          <td>${sym}</td>
-          <td style="text-align:right">${d0.amount}</td>
-          <td style="text-align:right">${d0.proceedsBase}</td>
-          <td style="text-align:right">${d0.costBasisBase}</td>
-          <td style="text-align:right">${d0.feeBase}</td>
-          <td style="text-align:right">${d0.realizedGainBase}</td>
-        </tr>`;
-    })
-    .join('');
-
+      return `<tr><td>${d0.disposedAtISO}</td><td>${sym}</td><td style="text-align:right">${d0.amount}</td><td style="text-align:right">${d0.proceedsBase}</td><td style="text-align:right">${d0.costBasisBase}</td><td style="text-align:right">${d0.feeBase}</td><td style="text-align:right">${d0.realizedGainBase}</td></tr>`;
+    }).join('');
   const incomeRows = report.income
     .map((r) => {
       const sym = assetsById.get(r.assetId)?.symbol ?? r.assetId;
-      return `
-        <tr>
-          <td>${r.timestampISO}</td>
-          <td>${r.type}</td>
-          <td>${sym}</td>
-          <td style="text-align:right">${r.amount}</td>
-          <td style="text-align:right">${r.incomeBase}</td>
-        </tr>`;
-    })
-    .join('');
-
+      return `<tr><td>${r.timestampISO}</td><td>${r.type}</td><td>${sym}</td><td style="text-align:right">${r.amount}</td><td style="text-align:right">${r.incomeBase}</td></tr>`;
+    }).join('');
   const holdingsRows = report.yearEndHoldings
     .map((h) => {
       const sym = assetsById.get(h.assetId)?.symbol ?? h.assetId;
-      return `
-        <tr>
-          <td>${sym}</td>
-          <td style="text-align:right">${h.amount}</td>
-          <td style="text-align:right">${h.costBasisBase}</td>
-        </tr>`;
-    })
-    .join('');
-
-  return `<!doctype html>
-  <html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Tax Summary ${report.year}</title>
-    <style>
-      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; padding: 24px; }
-      h1, h2 { margin: 0 0 12px 0; }
-      .muted { color: #555; }
-      table { width: 100%; border-collapse: collapse; margin: 12px 0 24px 0; }
-      th, td { border: 1px solid #ddd; padding: 8px; font-size: 12px; }
-      th { background: #f6f6f6; text-align: left; }
-      .totals { display: flex; gap: 16px; flex-wrap: wrap; margin: 12px 0 24px 0; }
-      .card { border: 1px solid #ddd; border-radius: 12px; padding: 12px 14px; min-width: 200px; }
-      .k { font-size: 12px; color: #666; }
-      .v { font-size: 18px; font-weight: 700; }
-    </style>
-  </head>
-  <body>
-    <h1>Tax summary ${report.year}</h1>
-    <div class="muted">Profile: ${report.taxProfile} • Lot method: ${report.lotMethodUsed} • Base: ${report.baseCurrency}</div>
-    <div class="muted">Generated: ${report.generatedAtISO}</div>
-    <div class="totals">
-      <div class="card"><div class="k">Realized gain (${cur})</div><div class="v">${report.totals.realizedGainBase}</div></div>
-      <div class="card"><div class="k">Proceeds (${cur})</div><div class="v">${report.totals.proceedsBase}</div></div>
-      <div class="card"><div class="k">Cost basis (${cur})</div><div class="v">${report.totals.costBasisBase}</div></div>
-      <div class="card"><div class="k">Fees (${cur})</div><div class="v">${report.totals.feesBase}</div></div>
-      <div class="card"><div class="k">Income (${cur})</div><div class="v">${report.totals.incomeBase}</div></div>
-    </div>
-
-    <h2>Realized disposals</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Date (UTC)</th><th>Asset</th><th style="text-align:right">Amount</th>
-          <th style="text-align:right">Proceeds (${cur})</th><th style="text-align:right">Cost basis (${cur})</th>
-          <th style="text-align:right">Fees (${cur})</th><th style="text-align:right">Gain (${cur})</th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>
-
-    <h2>Income (rewards/airdrops)</h2>
-    <table>
-      <thead><tr><th>Date (UTC)</th><th>Type</th><th>Asset</th><th style="text-align:right">Amount</th><th style="text-align:right">Income (${cur})</th></tr></thead>
-      <tbody>${incomeRows}</tbody>
-    </table>
-
-    <h2>Year-end holdings</h2>
-    <table>
-      <thead><tr><th>Asset</th><th style="text-align:right">Amount</th><th style="text-align:right">Cost basis (${cur})</th></tr></thead>
-      <tbody>${holdingsRows}</tbody>
-    </table>
-
-    <div class="muted">Note: This report is a calculation tool. It is not tax advice.</div>
-    <script>window.onload = () => { setTimeout(() => window.print(), 300); };</script>
-  </body>
-  </html>`;
+      return `<tr><td>${sym}</td><td style="text-align:right">${h.amount}</td><td style="text-align:right">${h.costBasisBase}</td></tr>`;
+    }).join('');
+  return `<!doctype html><html><head><meta charset="utf-8"/><title>Tax Summary ${report.year}</title><style>body{font-family:system-ui,-apple-system,sans-serif;padding:24px}h1,h2{margin:0 0 12px}table{width:100%;border-collapse:collapse;margin:12px 0 24px}th,td{border:1px solid #ddd;padding:8px;font-size:12px}th{background:#f6f6f6;text-align:left}.totals{display:flex;gap:16px;flex-wrap:wrap;margin:12px 0 24px}.card{border:1px solid #ddd;border-radius:12px;padding:12px 14px;min-width:200px}.k{font-size:12px;color:#666}.v{font-size:18px;font-weight:700}</style></head><body><h1>Tax summary ${report.year}</h1><div style="color:#555">Profile: ${report.taxProfile} • Lot method: ${report.lotMethodUsed} • Base: ${report.baseCurrency}</div><div style="color:#555">Generated: ${report.generatedAtISO}</div><div class="totals"><div class="card"><div class="k">Realized gain (${cur})</div><div class="v">${report.totals.realizedGainBase}</div></div><div class="card"><div class="k">Proceeds (${cur})</div><div class="v">${report.totals.proceedsBase}</div></div><div class="card"><div class="k">Cost basis (${cur})</div><div class="v">${report.totals.costBasisBase}</div></div><div class="card"><div class="k">Fees (${cur})</div><div class="v">${report.totals.feesBase}</div></div><div class="card"><div class="k">Income (${cur})</div><div class="v">${report.totals.incomeBase}</div></div></div><h2>Realized disposals</h2><table><thead><tr><th>Date</th><th>Asset</th><th style="text-align:right">Amount</th><th style="text-align:right">Proceeds (${cur})</th><th style="text-align:right">Cost basis (${cur})</th><th style="text-align:right">Fees (${cur})</th><th style="text-align:right">Gain (${cur})</th></tr></thead><tbody>${rows}</tbody></table><h2>Income</h2><table><thead><tr><th>Date</th><th>Type</th><th>Asset</th><th style="text-align:right">Amount</th><th style="text-align:right">Income (${cur})</th></tr></thead><tbody>${incomeRows}</tbody></table><h2>Year-end holdings</h2><table><thead><tr><th>Asset</th><th style="text-align:right">Amount</th><th style="text-align:right">Cost basis (${cur})</th></tr></thead><tbody>${holdingsRows}</tbody></table><div style="color:#555">Note: This report is a calculation tool. It is not tax advice.</div><script>window.onload=()=>{setTimeout(()=>window.print(),300)}</script></body></html>`;
 }
 
 export default function TaxPage() {
@@ -213,8 +99,7 @@ export default function TaxPage() {
   const dbState = useDbQuery(
     async (db) => {
       await ensureWebDbOpen();
-      const settings =
-        ((await db.settings.get('settings_1')) as any) ?? (await ensureDefaultSettings());
+      const settings = ((await db.settings.get('settings_1')) as any) ?? (await ensureDefaultSettings());
       const assets = (await db.assets.toArray()) as any as Asset[];
       const events = (await db.ledgerEvents.toArray()) as any as LedgerEvent[];
       return { settings: settings as Settings, assets, events };
@@ -233,7 +118,6 @@ export default function TaxPage() {
       const y = Number(String(e.timestampISO).slice(0, 4));
       if (y >= 2000 && y <= 2100) ys.add(y);
     }
-    // Always include current year
     ys.add(new Date().getUTCFullYear());
     return [...ys].sort((a, b) => b - a);
   }, [dbState.data.events]);
@@ -242,15 +126,11 @@ export default function TaxPage() {
   const [report, setReport] = useState<TaxYearReport | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [taxProfileOverride, setTaxProfileOverride] = useState<'GENERIC' | 'FINLAND'>('GENERIC');
-  const [lotMethodOverride, setLotMethodOverride] = useState<'FIFO' | 'LIFO' | 'HIFO' | 'AVG_COST'>(
-    'FIFO',
-  );
+  const [lotMethodOverride, setLotMethodOverride] = useState<'FIFO' | 'LIFO' | 'HIFO' | 'AVG_COST'>('FIFO');
 
   useEffect(() => {
     if (!years.length) return;
-    // Default to latest year that exists in the ledger.
     setYear((prev) => (years.includes(prev) ? prev : years[0]!));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [years.join(',')]);
 
   useEffect(() => {
@@ -258,7 +138,6 @@ export default function TaxPage() {
     if (!s) return;
     setTaxProfileOverride(s.taxProfile as any);
     setLotMethodOverride(s.lotMethodDefault as any);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dbState.data.settings?.updatedAtISO]);
 
   const baseCurrency = String(dbState.data.settings?.baseCurrency ?? 'EUR').toUpperCase();
@@ -274,9 +153,7 @@ export default function TaxPage() {
         dbState.data.events,
         { ...settings, taxProfile: effProfile } as any,
         year,
-        {
-          lotMethodOverride: effLot,
-        },
+        { lotMethodOverride: effLot },
       );
       setReport(r);
     } catch (e) {
@@ -286,313 +163,270 @@ export default function TaxPage() {
 
   function exportCsv() {
     if (!report) return;
-    const csv = buildCsv(report, assetsById);
-    downloadTextFile(`tax_${report.year}_${report.taxProfile}.csv`, csv, 'text/csv');
+    downloadTextFile(`tax_${report.year}_${report.taxProfile}.csv`, buildCsv(report, assetsById), 'text/csv');
   }
 
   function exportPdf() {
     if (!report) return;
     const html = buildSummaryHtml(report, assetsById);
     const w = window.open('', '_blank');
-    if (!w) {
-      setMsg('popup_blocked');
-      return;
-    }
+    if (!w) { setMsg('popup_blocked'); return; }
     w.document.open();
     w.document.write(html);
     w.document.close();
   }
 
+  const realizedGain = report ? d(report.totals.realizedGainBase) : new Decimal(0);
+
   return (
-    <div className="space-y-4">
-      <PageHeader title={t('tax.title')} />
-
-      <div className="rounded-xl border border-border bg-surface-raised p-4">
-        <div className="flex items-end gap-3 flex-wrap">
-          <label className="text-sm">
-            <div className="text-xs text-content-secondary mb-1">{t('tax.form.year')}</div>
-            <select
-              data-testid="form-tax-year"
-              className="rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
-              value={year}
-              onChange={(e) => setYear(Number(e.target.value))}
-            >
-              {years.map((y) => (
-                <option key={y} value={y}>
-                  {y}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className="text-sm">
-            <div className="text-xs text-content-secondary mb-1">{t('tax.form.profile')}</div>
-            <select
-              data-testid="form-tax-profile"
-              className="rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
-              value={taxProfileOverride}
-              onChange={(e) => setTaxProfileOverride(e.target.value as any)}
-            >
-              <option value="GENERIC">{t('tax.profile.generic')}</option>
-              <option value="FINLAND">{t('tax.profile.finland')}</option>
-            </select>
-          </label>
-
-          <label className="text-sm">
-            <div className="text-xs text-content-secondary mb-1">{t('tax.form.lotMethod')}</div>
-            <select
-              data-testid="form-tax-lot-method"
-              className="rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
-              value={taxProfileOverride === 'FINLAND' ? 'FIFO' : lotMethodOverride}
-              disabled={taxProfileOverride === 'FINLAND'}
-              onChange={(e) => setLotMethodOverride(e.target.value as any)}
-            >
-              <option value="FIFO">FIFO</option>
-              <option value="LIFO">LIFO</option>
-              <option value="HIFO">HIFO</option>
-              <option value="AVG_COST">AVG_COST</option>
-            </select>
-          </label>
-
-          <button
-            data-testid="btn-tax-generate"
-            onClick={() => void generate()}
-            className="rounded-lg bg-brand hover:bg-brand-dark px-3 py-2 text-sm font-medium"
+    <div className="space-y-section">
+      {/* Header */}
+      <div className="flex items-start justify-between flex-wrap gap-3">
+        <div>
+          <h1 className="text-heading-1 text-content-primary">{t('tax.title')}</h1>
+          <p className="text-caption text-content-tertiary mt-0.5">
+            Disposals, gains & calculations for tax filing
+          </p>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <select
+            data-testid="form-tax-year"
+            className="rounded-input bg-surface-base border border-border px-3 py-2 text-body text-content-primary
+              focus:outline-none focus:border-brand/40 transition-colors"
+            value={year}
+            onChange={(e) => setYear(Number(e.target.value))}
           >
+            {years.map((y) => <option key={y} value={y}>{y}</option>)}
+          </select>
+
+          <select
+            data-testid="form-tax-lot-method"
+            className="rounded-input bg-surface-base border border-border px-3 py-2 text-body text-content-primary
+              focus:outline-none focus:border-brand/40 transition-colors"
+            value={taxProfileOverride === 'FINLAND' ? 'FIFO' : lotMethodOverride}
+            disabled={taxProfileOverride === 'FINLAND'}
+            onChange={(e) => setLotMethodOverride(e.target.value as any)}
+          >
+            <option value="FIFO">FIFO</option>
+            <option value="LIFO">LIFO</option>
+            <option value="HIFO">HIFO</option>
+            <option value="AVG_COST">AVG_COST</option>
+          </select>
+
+          <select
+            data-testid="form-tax-profile"
+            className="rounded-input bg-surface-base border border-border px-3 py-2 text-body text-content-primary
+              focus:outline-none focus:border-brand/40 transition-colors"
+            value={taxProfileOverride}
+            onChange={(e) => setTaxProfileOverride(e.target.value as any)}
+          >
+            <option value="GENERIC">{t('tax.profile.generic')}</option>
+            <option value="FINLAND">{t('tax.profile.finland')}</option>
+          </select>
+
+          <Button variant="primary" size="sm" icon={<FileText className="h-3.5 w-3.5" />}
+            data-testid="btn-tax-generate" onClick={() => void generate()}>
             {t('tax.btn.generate')}
-          </button>
+          </Button>
 
-          <button
-            data-testid="btn-tax-export-csv"
-            onClick={exportCsv}
-            disabled={!report}
-            className="rounded-lg bg-surface-raised hover:bg-surface-overlay disabled:opacity-50 px-3 py-2 text-sm"
-          >
+          <Button variant="secondary" size="sm" icon={<Download className="h-3.5 w-3.5" />}
+            data-testid="btn-tax-export-csv" onClick={exportCsv} disabled={!report}>
             {t('tax.btn.exportCsv')}
-          </button>
-
-          <button
-            data-testid="btn-tax-export-pdf"
-            onClick={exportPdf}
-            disabled={!report}
-            className="rounded-lg bg-surface-raised hover:bg-surface-overlay disabled:opacity-50 px-3 py-2 text-sm"
-          >
-            {t('tax.btn.exportPdf')}
-          </button>
-
-          <div className="ml-auto text-xs text-content-secondary">
-            {t('tax.baseCurrency')} <span className="font-semibold">{baseCurrency}</span>
-          </div>
-        </div>
-
-        {msg ? <div className="mt-3 text-sm text-semantic-error">{msg}</div> : null}
-      </div>
-
-      {report ? (
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
-          <div className="rounded-xl border border-border bg-surface-raised p-4">
-            <div className="text-xs text-content-secondary">{t('tax.kpi.realizedGain')}</div>
-            <div className="text-lg font-semibold">
-              {fmtMoney(report.totals.realizedGainBase, report.baseCurrency)}
-            </div>
-          </div>
-          <div className="rounded-xl border border-border bg-surface-raised p-4">
-            <div className="text-xs text-content-secondary">{t('tax.kpi.proceeds')}</div>
-            <div className="text-lg font-semibold">
-              {fmtMoney(report.totals.proceedsBase, report.baseCurrency)}
-            </div>
-          </div>
-          <div className="rounded-xl border border-border bg-surface-raised p-4">
-            <div className="text-xs text-content-secondary">{t('tax.kpi.costBasis')}</div>
-            <div className="text-lg font-semibold">
-              {fmtMoney(report.totals.costBasisBase, report.baseCurrency)}
-            </div>
-          </div>
-          <div className="rounded-xl border border-border bg-surface-raised p-4">
-            <div className="text-xs text-content-secondary">{t('tax.kpi.fees')}</div>
-            <div className="text-lg font-semibold">
-              {fmtMoney(report.totals.feesBase, report.baseCurrency)}
-            </div>
-          </div>
-          <div className="rounded-xl border border-border bg-surface-raised p-4">
-            <div className="text-xs text-content-secondary">{t('tax.kpi.income')}</div>
-            <div className="text-lg font-semibold">
-              {fmtMoney(report.totals.incomeBase, report.baseCurrency)}
-            </div>
-          </div>
-        </div>
-      ) : null}
-
-      <div className="rounded-xl border border-border bg-surface-raised p-4">
-        <div className="flex items-center gap-2">
-          <h2 className="text-lg font-semibold">{t('tax.disposals.title')}</h2>
-          {report ? (
-            <div className="text-xs text-content-secondary">
-              {t('tax.disposals.profileLabel')}{' '}
-              <span className="font-semibold">{report.taxProfile}</span> •{' '}
-              {t('tax.disposals.lotLabel')}{' '}
-              <span className="font-semibold">{report.lotMethodUsed}</span>
-            </div>
-          ) : null}
-        </div>
-
-        <div data-testid="list-tax-disposals" className="mt-3 overflow-auto">
-          <table className="min-w-full text-sm">
-            <thead className="text-content-secondary">
-              <tr className="border-b border-border">
-                <th className="text-left py-2 pr-3">{t('tax.table.date')}</th>
-                <th className="text-left py-2 pr-3">{t('tax.table.asset')}</th>
-                <th className="text-right py-2 pl-3">{t('tax.table.amount')}</th>
-                <th className="text-right py-2 pl-3">{t('tax.table.proceeds')}</th>
-                <th className="text-right py-2 pl-3">{t('tax.table.costBasis')}</th>
-                <th className="text-right py-2 pl-3">{t('tax.table.fees')}</th>
-                <th className="text-right py-2 pl-3">{t('tax.table.gainLoss')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(report?.disposals ?? []).map((r) => {
-                const sym = assetsById.get(r.assetId)?.symbol ?? r.assetId;
-                const gain = d(r.realizedGainBase);
-                return (
-                  <tr
-                    key={r.eventId}
-                    data-testid={`row-tax-disposal-${r.eventId}`}
-                    className="border-b border-border-subtle hover:bg-surface-base/40"
-                  >
-                    <td className="py-2 pr-3 whitespace-nowrap">{r.disposedAtISO}</td>
-                    <td className="py-2 pr-3">{sym}</td>
-                    <td className="py-2 pl-3 text-right">{r.amount}</td>
-                    <td className="py-2 pl-3 text-right">
-                      {fmtMoney(r.proceedsBase, report?.baseCurrency ?? 'EUR')}
-                    </td>
-                    <td className="py-2 pl-3 text-right">
-                      {fmtMoney(r.costBasisBase, report?.baseCurrency ?? 'EUR')}
-                    </td>
-                    <td className="py-2 pl-3 text-right">
-                      {fmtMoney(r.feeBase, report?.baseCurrency ?? 'EUR')}
-                    </td>
-                    <td
-                      className={`py-2 pl-3 text-right ${gain.gte(0) ? 'text-semantic-success' : 'text-semantic-error'}`}
-                    >
-                      {fmtMoney(r.realizedGainBase, report?.baseCurrency ?? 'EUR')}
-                    </td>
-                  </tr>
-                );
-              })}
-              {!report ? (
-                <tr>
-                  <td colSpan={7} className="py-3 text-content-secondary">
-                    {t('tax.disposals.generatePrompt')}
-                  </td>
-                </tr>
-              ) : null}
-              {report && report.disposals.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="py-3 text-content-secondary">
-                    {t('tax.disposals.empty', { year: report.year })}
-                  </td>
-                </tr>
-              ) : null}
-            </tbody>
-          </table>
+          </Button>
         </div>
       </div>
 
-      {report ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div className="rounded-xl border border-border bg-surface-raised p-4">
-            <h2 className="text-lg font-semibold">{t('tax.income.title')}</h2>
-            <div className="mt-3 overflow-auto">
-              <table className="min-w-full text-sm">
-                <thead className="text-content-secondary">
-                  <tr className="border-b border-border">
-                    <th className="text-left py-2 pr-3">{t('tax.income.table.date')}</th>
-                    <th className="text-left py-2 pr-3">{t('tax.income.table.type')}</th>
-                    <th className="text-left py-2 pr-3">{t('tax.table.asset')}</th>
-                    <th className="text-right py-2 pl-3">{t('tax.table.amount')}</th>
-                    <th className="text-right py-2 pl-3">{t('tax.income.table.income')}</th>
+      {msg && <div className="text-caption text-semantic-error">{msg}</div>}
+
+      {/* KPI Cards — 3 columns */}
+      {report && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {[
+            {
+              testId: 'kpi-total-gains',
+              label: t('tax.kpi.realizedGain'),
+              value: fmtMoney(report.totals.realizedGainBase, report.baseCurrency),
+              delta: `${report.disposals.length} disposals`,
+              deltaType: realizedGain.gte(0) ? 'positive' as const : 'negative' as const,
+            },
+            {
+              testId: 'kpi-total-income',
+              label: t('tax.kpi.income'),
+              value: fmtMoney(report.totals.incomeBase, report.baseCurrency),
+              delta: `${report.income.length} events`,
+              deltaType: 'neutral' as const,
+            },
+            {
+              testId: 'kpi-cost-basis',
+              label: t('tax.kpi.costBasis'),
+              value: fmtMoney(report.totals.costBasisBase, report.baseCurrency),
+              delta: `Tax profile: ${report.taxProfile}`,
+              deltaType: 'neutral' as const,
+            },
+          ].map((kpi, i) => (
+            <div key={kpi.testId} data-testid={kpi.testId}
+              className="animate-slide-up" style={{ animationDelay: `${i * 60}ms` }}>
+              <KpiCard {...kpi} />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Disposals table */}
+      <Card>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-body font-medium text-content-primary">{t('tax.disposals.title')}</h2>
+          {report && (
+            <div className="text-caption text-content-tertiary">
+              {report.disposals.length} {t('tax.disposals.title').toLowerCase()}
+            </div>
+          )}
+        </div>
+
+        <div data-testid="list-tax-disposals" className="overflow-auto">
+          {/* Table header */}
+          <div className="grid grid-cols-[1.2fr_1fr_0.8fr_1fr_1fr_0.8fr_1fr] gap-2 px-3 pb-2 border-b border-border-subtle">
+            {[t('tax.table.date'), t('tax.table.asset'), t('tax.table.amount'), t('tax.table.proceeds'), t('tax.table.costBasis'), t('tax.table.fees'), t('tax.table.gainLoss')].map((h) => (
+              <span key={h} className="text-[0.625rem] text-content-tertiary font-medium uppercase tracking-wider">
+                {h}
+              </span>
+            ))}
+          </div>
+
+          {(report?.disposals ?? []).map((r, i) => {
+            const sym = assetsById.get(r.assetId)?.symbol ?? r.assetId;
+            const gain = d(r.realizedGainBase);
+            return (
+              <div
+                key={r.eventId}
+                data-testid={`row-tax-disposal-${r.eventId}`}
+                className="grid grid-cols-[1.2fr_1fr_0.8fr_1fr_1fr_0.8fr_1fr] gap-2 items-center py-2.5 px-3
+                  border-b border-border-subtle hover:bg-surface-overlay/30 transition-colors animate-slide-up"
+                style={{ animationDelay: `${i * 30}ms` }}
+              >
+                <div className="text-caption text-content-secondary font-mono">
+                  {new Date(r.disposedAtISO).toLocaleDateString()}
+                </div>
+                <div className="flex items-center gap-2">
+                  <TokenIcon symbol={sym} size="sm" />
+                  <span className="text-body text-content-primary font-medium">{sym}</span>
+                </div>
+                <div className="text-caption font-mono text-content-secondary text-right">{r.amount}</div>
+                <div className="text-caption font-mono text-content-primary text-right">
+                  {fmtMoney(r.proceedsBase, report?.baseCurrency ?? 'EUR')}
+                </div>
+                <div className="text-caption font-mono text-content-secondary text-right">
+                  {fmtMoney(r.costBasisBase, report?.baseCurrency ?? 'EUR')}
+                </div>
+                <div className="text-caption font-mono text-content-tertiary text-right">
+                  {fmtMoney(r.feeBase, report?.baseCurrency ?? 'EUR')}
+                </div>
+                <div className={`text-caption font-mono text-right font-medium ${
+                  gain.gte(0) ? 'text-semantic-success' : 'text-semantic-error'
+                }`}>
+                  {fmtMoney(r.realizedGainBase, report?.baseCurrency ?? 'EUR')}
+                </div>
+              </div>
+            );
+          })}
+
+          {!report && (
+            <div className="py-8 text-center text-caption text-content-tertiary">
+              {t('tax.disposals.generatePrompt')}
+            </div>
+          )}
+          {report && report.disposals.length === 0 && (
+            <div className="py-8 text-center text-caption text-content-tertiary">
+              {t('tax.disposals.empty', { year: report.year })}
+            </div>
+          )}
+        </div>
+
+        {/* Pagination hint */}
+        {report && report.disposals.length > 0 && (
+          <div className="mt-3 flex items-center justify-end gap-3 text-caption text-content-tertiary">
+            <span>Previous</span>
+            <span>Next</span>
+          </div>
+        )}
+      </Card>
+
+      {/* Income + Holdings (side by side) */}
+      {report && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card>
+            <h2 className="text-body font-medium text-content-primary mb-3">{t('tax.income.title')}</h2>
+            <div className="overflow-auto">
+              <table className="min-w-full text-caption">
+                <thead>
+                  <tr className="border-b border-border-subtle">
+                    <th className="text-left py-2 pr-3 text-content-tertiary font-medium">{t('tax.income.table.date')}</th>
+                    <th className="text-left py-2 pr-3 text-content-tertiary font-medium">{t('tax.income.table.type')}</th>
+                    <th className="text-left py-2 pr-3 text-content-tertiary font-medium">{t('tax.table.asset')}</th>
+                    <th className="text-right py-2 pl-3 text-content-tertiary font-medium">{t('tax.table.amount')}</th>
+                    <th className="text-right py-2 pl-3 text-content-tertiary font-medium">{t('tax.income.table.income')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {report.income.map((r) => {
                     const sym = assetsById.get(r.assetId)?.symbol ?? r.assetId;
                     return (
-                      <tr
-                        key={r.eventId}
-                        className="border-b border-border-subtle hover:bg-surface-base/40"
-                      >
-                        <td className="py-2 pr-3 whitespace-nowrap">{r.timestampISO}</td>
-                        <td className="py-2 pr-3">{r.type}</td>
-                        <td className="py-2 pr-3">{sym}</td>
-                        <td className="py-2 pl-3 text-right">{r.amount}</td>
-                        <td className="py-2 pl-3 text-right">
-                          {fmtMoney(r.incomeBase, report.baseCurrency)}
-                        </td>
+                      <tr key={r.eventId} className="border-b border-border-subtle hover:bg-surface-overlay/30">
+                        <td className="py-2 pr-3 text-content-secondary">{new Date(r.timestampISO).toLocaleDateString()}</td>
+                        <td className="py-2 pr-3 text-content-primary">{r.type}</td>
+                        <td className="py-2 pr-3 text-content-primary">{sym}</td>
+                        <td className="py-2 pl-3 text-right font-mono text-content-secondary">{r.amount}</td>
+                        <td className="py-2 pl-3 text-right font-mono text-content-primary">{fmtMoney(r.incomeBase, report.baseCurrency)}</td>
                       </tr>
                     );
                   })}
-                  {report.income.length === 0 ? (
-                    <tr>
-                      <td colSpan={5} className="py-3 text-content-secondary">
-                        {t('tax.income.empty', { year: report.year })}
-                      </td>
-                    </tr>
-                  ) : null}
+                  {report.income.length === 0 && (
+                    <tr><td colSpan={5} className="py-4 text-content-tertiary text-center">{t('tax.income.empty', { year: report.year })}</td></tr>
+                  )}
                 </tbody>
               </table>
             </div>
-          </div>
+          </Card>
 
-          <div className="rounded-xl border border-border bg-surface-raised p-4">
-            <h2 className="text-lg font-semibold">{t('tax.holdings.title')}</h2>
-            <div className="mt-3 overflow-auto">
-              <table className="min-w-full text-sm">
-                <thead className="text-content-secondary">
-                  <tr className="border-b border-border">
-                    <th className="text-left py-2 pr-3">{t('tax.table.asset')}</th>
-                    <th className="text-right py-2 pl-3">{t('tax.table.amount')}</th>
-                    <th className="text-right py-2 pl-3">{t('tax.kpi.costBasis')}</th>
+          <Card>
+            <h2 className="text-body font-medium text-content-primary mb-3">{t('tax.holdings.title')}</h2>
+            <div className="overflow-auto">
+              <table className="min-w-full text-caption">
+                <thead>
+                  <tr className="border-b border-border-subtle">
+                    <th className="text-left py-2 pr-3 text-content-tertiary font-medium">{t('tax.table.asset')}</th>
+                    <th className="text-right py-2 pl-3 text-content-tertiary font-medium">{t('tax.table.amount')}</th>
+                    <th className="text-right py-2 pl-3 text-content-tertiary font-medium">{t('tax.kpi.costBasis')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {report.yearEndHoldings.map((h) => {
                     const sym = assetsById.get(h.assetId)?.symbol ?? h.assetId;
                     return (
-                      <tr
-                        key={h.assetId}
-                        className="border-b border-border-subtle hover:bg-surface-base/40"
-                      >
-                        <td className="py-2 pr-3">{sym}</td>
-                        <td className="py-2 pl-3 text-right">{h.amount}</td>
-                        <td className="py-2 pl-3 text-right">
-                          {fmtMoney(h.costBasisBase, report.baseCurrency)}
-                        </td>
+                      <tr key={h.assetId} className="border-b border-border-subtle hover:bg-surface-overlay/30">
+                        <td className="py-2 pr-3 text-content-primary">{sym}</td>
+                        <td className="py-2 pl-3 text-right font-mono text-content-secondary">{h.amount}</td>
+                        <td className="py-2 pl-3 text-right font-mono text-content-primary">{fmtMoney(h.costBasisBase, report.baseCurrency)}</td>
                       </tr>
                     );
                   })}
-                  {report.yearEndHoldings.length === 0 ? (
-                    <tr>
-                      <td colSpan={3} className="py-3 text-content-secondary">
-                        {t('tax.holdings.empty', { year: report.year })}
-                      </td>
-                    </tr>
-                  ) : null}
+                  {report.yearEndHoldings.length === 0 && (
+                    <tr><td colSpan={3} className="py-4 text-content-tertiary text-center">{t('tax.holdings.empty', { year: report.year })}</td></tr>
+                  )}
                 </tbody>
               </table>
             </div>
-          </div>
+          </Card>
         </div>
-      ) : null}
+      )}
 
       {report?.warnings?.length ? (
-        <div className="rounded-xl border border-border bg-surface-raised p-4">
-          <h2 className="text-lg font-semibold">{t('tax.warnings.title')}</h2>
-          <ul className="mt-2 list-disc pl-5 text-sm text-amber-200">
-            {report.warnings.map((w) => (
-              <li key={w}>{w}</li>
-            ))}
+        <Card>
+          <h2 className="text-body font-medium text-content-primary mb-2">{t('tax.warnings.title')}</h2>
+          <ul className="list-disc pl-5 text-caption text-brand-light">
+            {report.warnings.map((w) => <li key={w}>{w}</li>)}
           </ul>
-        </div>
+        </Card>
       ) : null}
     </div>
   );
