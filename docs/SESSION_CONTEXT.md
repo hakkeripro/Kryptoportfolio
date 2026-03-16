@@ -22,14 +22,46 @@ Ei avoimia P0-bugeja. Kaikki korjattu 2026-03-14.
 - CI: puuttuu typecheck, lint, coverage, audit, preview deploy
 
 ### Seuraava tyovaihe
-**→ Feature 14: Billing + Feature Gating** — seuraava
-Feature 13 (Imports Plugin Registry) valmis 2026-03-16.
+Feature 14 (Billing + Feature Gating) valmis 2026-03-16.
 
-Seuraavaksi: Feature 14 (Billing) → Feature 15 (PDF Tax Export)
+Seuraavaksi: Feature 15 (PDF Tax Export) → Feature 16 (Multi-exchange imports)
 
 ---
 
 ## Muutosloki
+
+### 2026-03-16 — Feature 14: Billing + Feature Gating
+
+**Uudet tiedostot:**
+- `packages/core/src/billing/planTypes.ts` — Plan, PlanInfo, GatedFeature, isFeatureAllowed (pure fn)
+- `packages/core/src/billing/index.ts` — re-export
+- `packages/core/src/billing/planTypes.test.ts` — 9 unit-testiä
+- `functions/api/routes/billing.ts` — GET /v1/billing/plan + POST /v1/billing/activate (Hono)
+- `apps/api/src/routes/billing.ts` — samat endpointit (Fastify)
+- `scripts/migrations/2026-03-16-add-user-plan.sql` — Neon migraatio
+- `apps/web/src/hooks/useFeatureGate.ts` — useFeatureGate hook
+- `apps/web/src/components/billing/UpgradeModal.tsx` — UpgradeModal + UpgradeTeaser
+- `apps/web/src/components/billing/GateWall.tsx` — GateWall komponentti
+- `apps/web/src/components/billing/billing.test.tsx` — 8 unit-testiä
+
+**Muutettu:**
+- `packages/core/src/index.ts` — lisätty `./billing/index.js` export
+- `packages/core/src/api/authJwt.ts` — plan claim JWT:hen (signToken + AuthPayload)
+- `functions/_lib/db.ts` — HOSTED_SCHEMA_SQL: plan + plan_expires_at kolumnit
+- `functions/api/routes/auth.ts` — login/register palauttaa plan, JWT sisältää plan
+- `functions/api/[[path]].ts` — rekisteröi billing route
+- `apps/api/src/db/db.ts` — ensureColumn: plan + planExpiresAt users-tauluun
+- `apps/api/src/routes/auth.ts` — login/register palauttaa plan
+- `apps/api/src/services/authHooks.ts` — signToken hyväksyy plan-parametrin
+- `apps/api/src/server.ts` — rekisteröi billing route
+- `packages/platform-web/src/db/webDb.ts` — planCache Dexie v4
+- `apps/web/src/store/useAuthStore.ts` — plan + planExpiresAt + fetchPlan()
+- `apps/web/src/pages/TaxPage.tsx` — GateWall + UpgradeModal export-napeille
+- `apps/web/src/pages/AccountPage.tsx` — BillingSection
+
+**Testitulos:** Unit 172/172 ✅ (112 core + 2 api + 60 web), Build OK
+
+---
 
 ### 2026-03-16 — Feature 13: Imports Plugin Registry (Vaihe 1)
 

@@ -105,6 +105,10 @@ export async function initDb(dbFile: string) {
   ensureColumn('sync_envelopes', 'kdfSaltBase64', "kdfSaltBase64 TEXT NOT NULL DEFAULT ''");
   ensureColumn('sync_envelopes', 'kdfIterations', 'kdfIterations INTEGER NOT NULL DEFAULT 0');
 
+  // Feature 14: billing plan
+  ensureColumn('users', 'plan', "plan TEXT NOT NULL DEFAULT 'free'");
+  ensureColumn('users', 'planExpiresAt', 'planExpiresAt TEXT');
+
   const persist = async () => {
     const data = db.export();
     fs.writeFileSync(abs, Buffer.from(data));

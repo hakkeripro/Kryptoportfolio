@@ -7,8 +7,11 @@ import type { Asset, LedgerEvent, Settings, TaxYearReport } from '@kp/core';
 import { generateTaxYearReport } from '@kp/core';
 import { ensureWebDbOpen } from '@kp/platform-web';
 import { useDbQuery } from '../hooks/useDbQuery';
+import { useFeatureGate } from '../hooks/useFeatureGate';
 import { ensureDefaultSettings } from '../derived/ensureDefaultSettings';
 import { Card, KpiCard, Button, TokenIcon } from '../components/ui';
+import { GateWall } from '../components/billing/GateWall';
+import { UpgradeModal } from '../components/billing/UpgradeModal';
 import { pageTransition, fadeInUp, staggerContainer } from '../lib/animations';
 
 function d(s: string | undefined | null): Decimal {
@@ -157,6 +160,9 @@ export default function TaxPage() {
   const [year, setYear] = useState<number>(new Date().getUTCFullYear());
   const [report, setReport] = useState<TaxYearReport | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
+
+  const exportCsvGate = useFeatureGate('tax-export-csv');
+  const exportPdfGate = useFeatureGate('tax-export-pdf');
   const [taxProfileOverride, setTaxProfileOverride] = useState<'GENERIC' | 'FINLAND'>('GENERIC');
   const [lotMethodOverride, setLotMethodOverride] = useState<'FIFO' | 'LIFO' | 'HIFO' | 'AVG_COST'>(
     'FIFO',
@@ -287,13 +293,26 @@ export default function TaxPage() {
             variant="outline"
             size="sm"
             data-testid="btn-tax-export-csv"
-            onClick={exportCsv}
-            disabled={!report}
+            onClick={() => {
+              if (!exportCsvGate.allowed) {
+                exportCsvGate.openUpgrade();
+              } else {
+                exportCsv();
+              }
+            }}
+            disabled={!report && exportCsvGate.allowed}
           >
             <Download className="h-3.5 w-3.5 mr-1.5" /> {t('tax.btn.exportCsv')}
+            {!exportCsvGate.allowed && (
+              <span className="ml-1 text-[#FF8400]">●</span>
+            )}
           </Button>
         </div>
       </motion.div>
+
+      {/* Upgrade modals for export gates */}
+      <UpgradeModal open={exportCsvGate.upgradeModalOpen} onClose={exportCsvGate.closeUpgrade} />
+      <UpgradeModal open={exportPdfGate.upgradeModalOpen} onClose={exportPdfGate.closeUpgrade} />
 
       {msg && <div className="text-caption text-semantic-error">{msg}</div>}
 
@@ -335,8 +354,9 @@ export default function TaxPage() {
         </motion.div>
       )}
 
-      {/* Disposals table */}
+      {/* Disposals table — gated for premium */}
       <motion.div variants={fadeInUp} initial="hidden" animate="show">
+        <GateWall feature="tax-report-view">
         <Card className="p-0 overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
             <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/30">
@@ -420,6 +440,7 @@ export default function TaxPage() {
             )}
           </div>
         </Card>
+        </GateWall>
       </motion.div>
 
       {/* Income + Holdings (side by side) */}

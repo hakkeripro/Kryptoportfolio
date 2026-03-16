@@ -9,6 +9,7 @@ import { coingecko } from './routes/coingecko';
 import { push } from './routes/push';
 import { alerts } from './routes/alerts';
 import { runner } from './routes/runner';
+import { billing } from './routes/billing';
 
 type Bindings = Env;
 
@@ -43,6 +44,7 @@ app.route('/', coingecko);
 app.route('/', push);
 app.route('/', alerts);
 app.route('/', runner);
+app.route('/', billing);
 
 // --- Test-only reset (matches local Fastify API contract) ---
 app.post('/__test/reset', async (c) => {

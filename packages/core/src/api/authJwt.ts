@@ -14,12 +14,17 @@ async function jwtSecretKey(secret: string) {
 }
 
 /**
- * Sign a JWT with HS256 containing `sub` (userId) and `email` claims.
+ * Sign a JWT with HS256 containing `sub` (userId), `email`, and `plan` claims.
  * Expires in 30 days.
  */
-export async function signToken(secret: string, userId: string, email: string): Promise<string> {
+export async function signToken(
+  secret: string,
+  userId: string,
+  email: string,
+  plan: string = 'free',
+): Promise<string> {
   const key = await jwtSecretKey(secret);
-  return new SignJWT({ email })
+  return new SignJWT({ email, plan })
     .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
     .setSubject(userId)
     .setIssuedAt()
@@ -30,6 +35,7 @@ export async function signToken(secret: string, userId: string, email: string): 
 export interface AuthPayload {
   userId: string;
   email?: string;
+  plan?: string;
 }
 
 /**
@@ -48,7 +54,11 @@ export async function verifyToken(
   const { payload } = await jwtVerify(token, key);
   const userId = String(payload.sub ?? '');
   if (!userId) throw new Error('unauthorized');
-  return { userId, email: typeof payload.email === 'string' ? payload.email : undefined };
+  return {
+    userId,
+    email: typeof payload.email === 'string' ? payload.email : undefined,
+    plan: typeof payload.plan === 'string' ? payload.plan : 'free',
+  };
 }
 
 /**

@@ -5,6 +5,13 @@ import type { Settings } from '@kp/core';
 import type { LedgerEvent } from '@kp/core';
 import type { Alert, PricePoint, PortfolioSnapshot } from '@kp/core';
 
+export interface PlanCache {
+  id: string; // always 'current'
+  plan: string;
+  planExpiresAt: string | null;
+  syncedAt: string;
+}
+
 export type KeyValue = { key: string; value: string };
 
 export class WebDb extends Dexie {
@@ -16,6 +23,7 @@ export class WebDb extends Dexie {
   alerts!: Table<Alert, string>;
   pricePoints!: Table<PricePoint, string>;
   portfolioSnapshots!: Table<PortfolioSnapshot, string>;
+  planCache!: Table<PlanCache, string>;
 
   constructor(name = 'kp_web_v3') {
     super(name);
@@ -50,6 +58,19 @@ export class WebDb extends Dexie {
       alerts: '&id, type, assetId, isEnabled',
       pricePoints: '&id, [assetId+timestampISO], assetId, provider, timestampISO',
       portfolioSnapshots: '&dayISO',
+    });
+
+    // v4: planCache — offline-safe billing plan cache
+    this.version(4).stores({
+      meta: '&key',
+      assets: '&id, symbol, name',
+      accounts: '&id, type, name',
+      settings: '&id',
+      ledgerEvents: '&id, type, timestampISO, assetId, externalRef, replacesEventId, isDeleted',
+      alerts: '&id, type, assetId, isEnabled',
+      pricePoints: '&id, [assetId+timestampISO], assetId, provider, timestampISO',
+      portfolioSnapshots: '&dayISO',
+      planCache: '&id',
     });
   }
 }

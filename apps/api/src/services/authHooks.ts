@@ -4,8 +4,13 @@
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { signToken as coreSignToken, verifyToken } from '@kp/core';
 
-export async function signToken(app: FastifyInstance, userId: string, email: string) {
-  return coreSignToken(app.config.JWT_SECRET, userId, email);
+export async function signToken(
+  app: FastifyInstance,
+  userId: string,
+  email: string,
+  plan: string = 'free',
+) {
+  return coreSignToken(app.config.JWT_SECRET, userId, email, plan);
 }
 
 export async function requireAuth(request: FastifyRequest, reply: any) {

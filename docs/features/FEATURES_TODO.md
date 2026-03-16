@@ -391,8 +391,8 @@ Ks. [ISSUE_LOG.md](../ISSUE_LOG.md) tarkemmat kuvaukset.
 
 ---
 
-### Feature 14: Billing + Feature Gating 📋
-**Status:** 📋 SUUNNITTEILLA (speksi valmis 2026-03-16)
+### Feature 14: Billing + Feature Gating ✅
+**Status:** ✅ VALMIS (2026-03-16)
 **ADR:** ADR-020
 **Speksi:** [14_billing-feature-gating.md](14_billing-feature-gating.md)
 **Edellyttää:** Feature 13 (Imports Registry)
@@ -400,17 +400,17 @@ Ks. [ISSUE_LOG.md](../ISSUE_LOG.md) tarkemmat kuvaukset.
 **Tavoite:** Freemium-maksumuuri — vain verolaskenta + veroraportit (PDF/CSV) ovat premium. Kaikki muu free.
 
 **Vaihe 1 (MVP — tämä feature):**
-- [ ] `Plan`-tyyppi + `isFeatureAllowed` (`packages/core/src/billing/planTypes.ts`)
-- [ ] DB-migraatio: `users.plan` + `users.plan_expires_at` (Neon)
-- [ ] JWT: plan claim loginiin + refreshiin
-- [ ] `GET /v1/billing/plan` + `requirePlan` middleware
-- [ ] `planCache` Dexieen (platform-web, v4)
-- [ ] `useAuthStore`: plan-kenttä + `fetchPlan()` action
-- [ ] `useFeatureGate(feature)` hook (yksi paikka kaikille tarkistuksille)
-- [ ] `UpgradeModal` + `GateWall` komponentit
-- [ ] `TaxPage` gating: summary free, täysi raportti + export premium
-- [ ] `AccountPage`: billing-osio (nykyinen plan + upgrade-linkki)
-- [ ] Unit-testit (core + web), E2E-testit
+- [x] `Plan`-tyyppi + `isFeatureAllowed` (`packages/core/src/billing/planTypes.ts`)
+- [x] DB-migraatio: `users.plan` + `users.plan_expires_at` (Neon)
+- [x] JWT: plan claim loginiin + refreshiin
+- [x] `GET /v1/billing/plan` + `POST /v1/billing/activate` endpointit (Hono + Fastify)
+- [x] `planCache` Dexieen (platform-web, v4)
+- [x] `useAuthStore`: plan-kenttä + `fetchPlan()` action
+- [x] `useFeatureGate(feature)` hook (yksi paikka kaikille tarkistuksille)
+- [x] `UpgradeModal` + `GateWall` komponentit
+- [x] `TaxPage` gating: täysi raportti + export premium
+- [x] `AccountPage`: billing-osio (nykyinen plan + upgrade-linkki)
+- [x] Unit-testit: `planTypes.test.ts` (9 testiä) + `billing.test.tsx` (8 testiä)
 
 **Vaihe 2 (myöhemmin, erillinen feature):**
 - [ ] Stripe Checkout session + webhook

@@ -37,7 +37,9 @@ CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
   email TEXT NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
-  created_at_iso TEXT NOT NULL
+  created_at_iso TEXT NOT NULL,
+  plan TEXT NOT NULL DEFAULT 'free',
+  plan_expires_at TIMESTAMPTZ
 );
 
 CREATE TABLE IF NOT EXISTS devices (

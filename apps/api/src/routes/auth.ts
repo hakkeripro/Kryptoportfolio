@@ -35,24 +35,33 @@ export function registerAuthRoutes(app: FastifyInstance) {
       createdAtISO,
     ]);
 
-    const token = await signToken(app, userId, email);
+    const token = await signToken(app, userId, email, 'free');
     return reply.send({ user: { id: userId, email, createdAtISO }, token });
   });
 
   app.post('/v1/auth/login', async (req, reply) => {
     const body = LoginSchema.parse(req.body);
     const email = normalizeEmail(body.email);
-    const user = app.db.getOne<{ id: string; passwordHash: string; createdAtISO: string }>(
-      'SELECT id,passwordHash,createdAtISO FROM users WHERE email=?',
-      [email],
-    );
+    const user = app.db.getOne<{
+      id: string;
+      passwordHash: string;
+      createdAtISO: string;
+      plan: string | null;
+      planExpiresAt: string | null;
+    }>('SELECT id,passwordHash,createdAtISO,plan,planExpiresAt FROM users WHERE email=?', [email]);
     if (!user) return reply.code(401).send({ error: 'invalid_credentials' });
 
     const ok = await verifyPassword(body.password, user.passwordHash);
     if (!ok) return reply.code(401).send({ error: 'invalid_credentials' });
 
-    const token = await signToken(app, user.id, email);
-    return reply.send({ user: { id: user.id, email, createdAtISO: user.createdAtISO }, token });
+    const plan = user.plan ?? 'free';
+    const token = await signToken(app, user.id, email, plan);
+    return reply.send({
+      user: { id: user.id, email, createdAtISO: user.createdAtISO },
+      token,
+      plan,
+      planExpiresAt: user.planExpiresAt ?? null,
+    });
   });
 
   const ChangePasswordSchema = z.object({

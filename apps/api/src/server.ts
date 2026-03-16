@@ -10,6 +10,7 @@ import { registerPushRoutes } from './routes/push.js';
 import { registerAlertRoutes } from './routes/alerts.js';
 import { registerImportRoutes } from './routes/imports.js';
 import { registerCoingeckoRoutes } from './routes/coingecko.js';
+import { registerBillingRoutes } from './routes/billing.js';
 import { startAlertRunner } from './runner/alertRunner.js';
 
 const EnvSchema = z.object({
@@ -93,6 +94,7 @@ registerPushRoutes(app);
 registerAlertRoutes(app);
 registerImportRoutes(app);
 registerCoingeckoRoutes(app);
+registerBillingRoutes(app);
 
 // Runner (server-side alerts)
 startAlertRunner(app);

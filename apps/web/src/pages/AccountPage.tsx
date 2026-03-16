@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/useAuthStore';
 import { useVaultStore } from '../store/useVaultStore';
+import { UpgradeModal } from '../components/billing/UpgradeModal';
 import {
   isPasskeySupported,
   listPasskeyWraps,
@@ -218,6 +219,53 @@ function ChangePassphraseSection() {
   );
 }
 
+function BillingSection() {
+  const plan = useAuthStore((s) => s.plan);
+  const planExpiresAt = useAuthStore((s) => s.planExpiresAt);
+  const token = useAuthStore((s) => s.token);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+
+  if (!token) return null;
+
+  return (
+    <div className="rounded-xl border border-border bg-surface-raised p-4 space-y-3">
+      <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/30">
+        // BILLING
+      </div>
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-content-tertiary">Plan</span>
+          <span
+            data-testid="billing-plan"
+            className={`text-sm font-medium ${plan === 'tax' ? 'text-[#FF8400]' : 'text-content-primary'}`}
+          >
+            {plan === 'tax' ? 'Tax' : 'Free'}
+          </span>
+        </div>
+        {planExpiresAt && (
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-content-tertiary">Expires</span>
+            <span className="text-sm text-content-secondary">
+              {new Date(planExpiresAt).toLocaleDateString()}
+            </span>
+          </div>
+        )}
+        {plan === 'free' && (
+          <button
+            data-testid="btn-upgrade-plan"
+            onClick={() => setUpgradeOpen(true)}
+            className="mt-2 w-full rounded-xl bg-[#FF8400]/10 hover:bg-[#FF8400]/20 border border-[#FF8400]/20
+              text-[#FF8400] text-sm font-medium py-2 transition-colors"
+          >
+            Upgrade to Tax plan
+          </button>
+        )}
+      </div>
+      <UpgradeModal open={upgradeOpen} onClose={() => setUpgradeOpen(false)} />
+    </div>
+  );
+}
+
 export default function AccountPage() {
   const { t } = useTranslation();
   const email = useAuthStore((s) => s.email);
@@ -226,6 +274,8 @@ export default function AccountPage() {
     <div data-testid="page-account" className="space-y-6">
       <h1 className="text-xl font-semibold">{t('account.title')}</h1>
       {email && <p className="text-sm text-content-secondary">{email}</p>}
+
+      <BillingSection />
 
       <PasskeysSection />
 

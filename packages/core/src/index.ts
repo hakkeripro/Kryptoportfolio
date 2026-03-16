@@ -24,3 +24,5 @@ export * from './import/coinbaseV2.js';
 export * from './api/index.js';
 
 export * from './imports/index.js';
+
+export * from './billing/index.js';

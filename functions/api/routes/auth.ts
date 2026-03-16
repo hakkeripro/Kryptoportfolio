@@ -22,7 +22,7 @@ auth.post('/v1/auth/register', async (c) => {
 
   await sql`INSERT INTO users (id, email, password_hash, created_at_iso) VALUES (${userId}, ${email}, ${passwordHash}, ${createdAtISO})`;
 
-  const token = await signToken(c.env.JWT_SECRET, userId, email);
+  const token = await signToken(c.env.JWT_SECRET, userId, email, 'free');
   return json({ user: { id: userId, email, createdAtISO }, token });
 });
 
@@ -31,8 +31,14 @@ auth.post('/v1/auth/login', async (c) => {
   const email = normalizeEmail(body.email);
   const sql = getSql(c.env);
 
-  const rows = await sql<{ id: string; password_hash: string; created_at_iso: string }[]>`
-    SELECT id, password_hash, created_at_iso FROM users WHERE email = ${email} LIMIT 1
+  const rows = await sql<{
+    id: string;
+    password_hash: string;
+    created_at_iso: string;
+    plan: string;
+    plan_expires_at: string | null;
+  }[]>`
+    SELECT id, password_hash, created_at_iso, plan, plan_expires_at FROM users WHERE email = ${email} LIMIT 1
   `;
   if (!rows.length) return json({ error: 'invalid_credentials' }, { status: 401 });
   const user = rows[0];
@@ -41,8 +47,14 @@ auth.post('/v1/auth/login', async (c) => {
   const ok = await verifyPassword(body.password, user.password_hash);
   if (!ok) return json({ error: 'invalid_credentials' }, { status: 401 });
 
-  const token = await signToken(c.env.JWT_SECRET, user.id, email);
-  return json({ user: { id: user.id, email, createdAtISO: user.created_at_iso }, token });
+  const plan = user.plan ?? 'free';
+  const token = await signToken(c.env.JWT_SECRET, user.id, email, plan);
+  return json({
+    user: { id: user.id, email, createdAtISO: user.created_at_iso },
+    token,
+    plan,
+    planExpiresAt: user.plan_expires_at ?? null,
+  });
 });
 
 const ChangePasswordSchema = z.object({
