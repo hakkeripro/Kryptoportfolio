@@ -53,11 +53,11 @@ export default function SettingsPage() {
 
       {/* Vault & Security */}
       <div>
-        <h2 className="text-caption font-semibold uppercase tracking-widest text-content-tertiary mb-3">
+        <h2 className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/25 mb-3">
           Vault & Security
         </h2>
         <div className="space-y-3">
-          <div className="rounded-xl border border-border bg-surface-raised p-4">
+          <div className="rounded-xl border border-white/[0.08] bg-[#0F0F0F] p-4">
             <div className="text-body font-medium text-content-primary">
               {t('settings.account.title')}
             </div>
@@ -73,12 +73,12 @@ export default function SettingsPage() {
 
       {/* Preferences */}
       <div>
-        <h2 className="text-caption font-semibold uppercase tracking-widest text-content-tertiary mb-3">
+        <h2 className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/25 mb-3">
           Preferences
         </h2>
         <div className="space-y-3">
           {/* Language selector */}
-          <div className="rounded-xl border border-border bg-surface-raised p-4">
+          <div className="rounded-xl border border-white/[0.08] bg-[#0F0F0F] p-4">
             <div className="flex items-center justify-between">
               <div className="text-body font-medium text-content-primary">
                 {t('settings.language.title')}
@@ -134,7 +134,7 @@ export default function SettingsPage() {
 
       {/* Danger Zone */}
       <div>
-        <h2 className="text-caption font-semibold uppercase tracking-widest text-semantic-error mb-3">
+        <h2 className="text-[10px] font-mono uppercase tracking-[0.2em] text-red-500/60 mb-3">
           Danger Zone
         </h2>
         <AdvancedCard />

@@ -372,12 +372,14 @@ export default function ImportsPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
+          <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/25 mb-1">
+            {t('imports.description')}
+          </p>
           <h1 className="text-heading-1 font-heading text-content-primary">Import Transactions</h1>
-          <p className="text-caption text-content-tertiary mt-0.5">{t('imports.description')}</p>
         </div>
-        <div className="text-caption text-content-tertiary">
-          Step {stepIdx + 1} of {stepLabels.length}
-        </div>
+        <span className="text-[11px] font-mono text-white/25 mt-1">
+          {stepIdx + 1} / {stepLabels.length}
+        </span>
       </div>
 
       {/* Step indicator */}
@@ -420,10 +422,10 @@ export default function ImportsPage() {
       <div className="grid gap-4 md:grid-cols-2" data-testid="list-import-sources">
         {/* Coinbase card */}
         <div
-          className={`rounded-xl border-2 p-5 transition-colors cursor-pointer ${
+          className={`rounded-xl border-2 p-5 transition-all duration-200 cursor-pointer ${
             connected
-              ? 'border-brand bg-brand/5'
-              : 'border-border bg-surface-raised hover:border-brand/50'
+              ? 'border-[#FF8400]/50 bg-[#FF8400]/[0.04] shadow-[0_0_20px_rgba(255,132,0,0.08)]'
+              : 'border-white/[0.08] bg-[#0F0F0F] hover:border-[#FF8400]/30 hover:bg-[#FF8400]/[0.02]'
           }`}
           data-testid="card-import-coinbase"
         >
@@ -513,7 +515,7 @@ export default function ImportsPage() {
         </div>
 
         {/* CSV upload area (placeholder from design) */}
-        <div className="rounded-xl border-2 border-dashed border-border bg-surface-raised p-5 flex flex-col items-center justify-center gap-3">
+        <div className="rounded-xl border-2 border-dashed border-white/[0.08] bg-[#0A0A0A] p-5 flex flex-col items-center justify-center gap-3">
           <div className="w-12 h-12 rounded-full bg-surface-overlay flex items-center justify-center">
             <Upload className="h-6 w-6 text-content-tertiary" />
           </div>

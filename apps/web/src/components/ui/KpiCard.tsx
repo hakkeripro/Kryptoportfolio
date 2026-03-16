@@ -49,7 +49,7 @@ export function KpiCard({
       {/* Top accent line — brand gradient */}
       <div className="absolute top-0 left-0 right-0 h-px rounded-t-xl bg-gradient-to-r from-[#FF8400]/70 via-[#FF8400]/20 to-transparent z-10" />
 
-      <div className="relative h-full rounded-xl border border-white/[0.08] bg-[#0F0F0F] px-5 py-4 flex flex-col gap-2.5 overflow-hidden">
+      <div className="relative h-full rounded-xl border border-white/[0.08] bg-[#0F0F0F] px-5 py-4 flex flex-col gap-2.5 overflow-hidden transition-all duration-300 hover:border-[#FF8400]/25 hover:shadow-[0_0_30px_rgba(255,132,0,0.12),0_0_60px_rgba(255,132,0,0.05)]">
         {/* Corner glow */}
         <div className="absolute -top-10 -left-10 w-28 h-28 rounded-full bg-[#FF8400]/[0.04] blur-2xl pointer-events-none" />
 

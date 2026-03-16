@@ -338,10 +338,10 @@ export default function TaxPage() {
       {/* Disposals table */}
       <motion.div variants={fadeInUp} initial="hidden" animate="show">
         <Card className="p-0 overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-            <h2 className="font-heading text-heading-4 text-content-primary">
-              {t('tax.disposals.title')}
-            </h2>
+          <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
+            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/30">
+              // {t('tax.disposals.title')}
+            </span>
             {report && (
               <div className="text-caption text-content-tertiary">
                 {report.disposals.length} {t('tax.disposals.title').toLowerCase()}
@@ -351,7 +351,7 @@ export default function TaxPage() {
 
           <div data-testid="list-tax-disposals" className="overflow-auto">
             {/* Table header */}
-            <div className="grid grid-cols-[1.2fr_1fr_0.8fr_1fr_1fr_0.8fr_1fr] gap-2 px-5 py-2.5 border-b border-border bg-surface-raised/50">
+            <div className="grid grid-cols-[1.2fr_1fr_0.8fr_1fr_1fr_0.8fr_1fr] gap-2 px-5 py-2.5 border-b border-white/[0.04]">
               {[
                 t('tax.table.date'),
                 t('tax.table.asset'),
@@ -363,7 +363,7 @@ export default function TaxPage() {
               ].map((h) => (
                 <span
                   key={h}
-                  className="text-[11px] text-content-tertiary font-semibold uppercase tracking-wider"
+                  className="text-[10px] font-mono uppercase tracking-[0.15em] text-white/20"
                 >
                   {h}
                 </span>
@@ -378,7 +378,7 @@ export default function TaxPage() {
                   key={r.eventId}
                   data-testid={`row-tax-disposal-${r.eventId}`}
                   className="grid grid-cols-[1.2fr_1fr_0.8fr_1fr_1fr_0.8fr_1fr] gap-2 items-center py-3 px-5
-                    border-b border-border/50 hover:bg-white/[0.03] transition-colors"
+                    border-b border-white/[0.04] hover:bg-[#FF8400]/[0.04] transition-colors"
                 >
                   <div className="text-[13px] text-content-secondary font-mono">
                     {new Date(r.disposedAtISO).toLocaleDateString()}
@@ -432,7 +432,7 @@ export default function TaxPage() {
             <div className="overflow-auto">
               <table className="min-w-full text-caption">
                 <thead>
-                  <tr className="border-b border-border-subtle">
+                  <tr className="border-b border-white/[0.06]">
                     <th className="text-left py-2 pr-3 text-content-tertiary font-medium">
                       {t('tax.income.table.date')}
                     </th>
@@ -456,7 +456,7 @@ export default function TaxPage() {
                     return (
                       <tr
                         key={r.eventId}
-                        className="border-b border-border-subtle hover:bg-surface-overlay/30"
+                        className="border-b border-white/[0.04] hover:bg-[#FF8400]/[0.03]"
                       >
                         <td className="py-2 pr-3 text-content-secondary">
                           {new Date(r.timestampISO).toLocaleDateString()}
@@ -491,7 +491,7 @@ export default function TaxPage() {
             <div className="overflow-auto">
               <table className="min-w-full text-caption">
                 <thead>
-                  <tr className="border-b border-border-subtle">
+                  <tr className="border-b border-white/[0.06]">
                     <th className="text-left py-2 pr-3 text-content-tertiary font-medium">
                       {t('tax.table.asset')}
                     </th>
@@ -509,7 +509,7 @@ export default function TaxPage() {
                     return (
                       <tr
                         key={h.assetId}
-                        className="border-b border-border-subtle hover:bg-surface-overlay/30"
+                        className="border-b border-white/[0.04] hover:bg-[#FF8400]/[0.03]"
                       >
                         <td className="py-2 pr-3 text-content-primary">{sym}</td>
                         <td className="py-2 pl-3 text-right font-mono text-content-secondary">

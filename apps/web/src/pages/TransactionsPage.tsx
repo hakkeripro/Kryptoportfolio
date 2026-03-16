@@ -608,19 +608,19 @@ export default function TransactionsPage() {
       {/* Transactions table */}
       <motion.div variants={fadeInUp} initial="hidden" animate="show">
         <Card data-testid="panel-ledger" className="p-0 overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-            <div className="font-heading text-heading-4 text-content-primary">
-              {t('transactions.ledger.title')}
-            </div>
-            <div className="text-caption text-content-tertiary">{filteredEvents.length} events</div>
+          <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
+            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/30">
+              // {t('transactions.ledger.title')}
+            </span>
+            <div className="text-[11px] font-mono text-white/20">{filteredEvents.length} events</div>
           </div>
 
           {/* Table header */}
-          <div className="grid grid-cols-[1.5fr_0.7fr_1.2fr_1fr_1fr_1fr] gap-2 px-5 py-2.5 border-b border-border bg-surface-raised/50">
+          <div className="grid grid-cols-[1.5fr_0.7fr_1.2fr_1fr_1fr_1fr] gap-2 px-5 py-2.5 border-b border-white/[0.04]">
             {['Date', 'Type', 'Asset', 'Amount', 'Price', 'Total'].map((h) => (
               <span
                 key={h}
-                className="text-[11px] text-content-tertiary font-semibold uppercase tracking-wider"
+                className="text-[10px] font-mono uppercase tracking-[0.15em] text-white/20"
               >
                 {h}
               </span>
@@ -644,7 +644,7 @@ export default function TransactionsPage() {
                   return (
                     <div
                       className="grid grid-cols-[1.5fr_0.7fr_1.2fr_1fr_1fr_1fr] gap-2 items-center py-3 px-5
-                        border-b border-border/50 hover:bg-white/[0.03] transition-colors cursor-pointer"
+                        border-b border-white/[0.04] hover:bg-[#FF8400]/[0.04] transition-colors cursor-pointer group"
                       data-testid={`row-ledger-${e.id}`}
                       onClick={() => setDetailsId(String(e.id))}
                     >
@@ -710,7 +710,7 @@ export default function TransactionsPage() {
         }}
       >
         <DialogContent
-          className="max-w-2xl bg-surface-base border-border"
+          className="max-w-2xl bg-[#0F0F0F] border-white/[0.1]"
           data-testid="drawer-ledger-event"
         >
           {selectedEvent && (

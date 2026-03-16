@@ -88,7 +88,7 @@ export function ValueChart({ data }: { data: { day: string; value: number }[] })
   const filtered = data.slice(-RANGE_DAYS[range]);
 
   return (
-    <Card data-testid="chart-portfolio-value">
+    <Card data-testid="chart-portfolio-value" className="p-5">
       <div className="flex items-center justify-between mb-3">
         <CardTitle>{t('dashboard.chart.portfolioValue')}</CardTitle>
         <div className="flex gap-1">

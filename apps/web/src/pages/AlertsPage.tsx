@@ -517,8 +517,8 @@ export default function AlertsPage() {
                   key={a.id}
                   variants={fadeInUp}
                   exit={{ opacity: 0, x: -20, transition: { duration: 0.2 } }}
-                  className="flex items-center gap-4 rounded-xl border border-border bg-surface-raised p-4
-                    hover:bg-surface-raised/80 transition-colors"
+                  className="flex items-center gap-4 rounded-xl border border-white/[0.08] bg-[#0F0F0F] p-4
+                    hover:bg-[#FF8400]/[0.04] hover:border-[#FF8400]/20 transition-all duration-200"
                   data-testid={`row-alert-${a.id}`}
                 >
                   {sym ? (
@@ -567,9 +567,9 @@ export default function AlertsPage() {
         <Card data-testid="panel-alerts-server" className="p-5">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <div className="font-heading text-heading-4 text-content-primary">
-                {t('alerts.server.title')}
-              </div>
+              <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/30">
+                // {t('alerts.server.title')}
+              </span>
               <div className="text-caption text-content-tertiary mt-0.5">
                 {t('alerts.server.description')}
               </div>
@@ -578,7 +578,7 @@ export default function AlertsPage() {
 
           {!token ? (
             <div
-              className="rounded-lg border border-border bg-surface-base p-3 text-caption text-content-secondary"
+              className="rounded-lg border border-white/[0.06] bg-[#080808] p-3 text-caption text-content-secondary"
               data-testid="box-alerts-login-required"
             >
               {t('alerts.server.loginRequired')}
@@ -586,7 +586,7 @@ export default function AlertsPage() {
           ) : (
             <div className="space-y-4">
               <div
-                className="rounded-lg border border-border bg-surface-base p-3 text-caption"
+                className="rounded-lg border border-white/[0.06] bg-[#080808] p-3 text-caption"
                 data-testid="box-alerts-server-status"
               >
                 <div className="flex items-center justify-between">
@@ -662,7 +662,7 @@ export default function AlertsPage() {
 
               {serverMsg && (
                 <div
-                  className="rounded-lg border border-border bg-surface-base p-3 text-caption text-content-primary"
+                  className="rounded-lg border border-white/[0.06] bg-[#080808] p-3 text-caption text-content-primary"
                   data-testid="txt-alert-server-message"
                 >
                   {serverMsg}
