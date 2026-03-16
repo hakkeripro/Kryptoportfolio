@@ -67,12 +67,9 @@ export default function UnlockPage() {
   };
 
   return (
-    <motion.div
+    <div
       data-testid="page-unlock"
       className="min-h-screen flex flex-col items-center justify-center px-4"
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
     >
       <div className="w-full max-w-sm space-y-6">
         {/* Logo */}
@@ -156,6 +153,6 @@ export default function UnlockPage() {
           </p>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }
