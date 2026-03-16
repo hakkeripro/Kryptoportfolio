@@ -399,6 +399,32 @@ Ks. [ISSUE_LOG.md](../ISSUE_LOG.md) tarkemmat kuvaukset.
 
 ## SEURAAVA VAIHE: UI/UX Remontti
 
+### Feature 23: Premium UI — shadcn/ui + Framer Motion ✅
+**Status:** ✅ VALMIS (2026-03-16)
+**Prioriteetti:** Kriittinen — toteutettu Feature 22 jälkeen
+**Speksi:** `docs/features/23_ui_premium.md`
+
+**Tavoite:** Premium-tason UI-kokemus: shadcn/ui-komponentit, Framer Motion -animaatiot, Geist-fontti.
+
+**Toteutettu:**
+- [x] shadcn/ui: Card, Button, Input, Select, Dialog, Sheet, Table, Tabs, Badge, Tooltip, DropdownMenu jne.
+- [x] Framer Motion: stagger entrance, fadeInUp, animated KPI counters (useSpring/useTransform)
+- [x] Geist-fontti, JetBrains Mono, Obsidian dark theme (shadcn CSS variables)
+- [x] Dashboard: animated KPI cards + unit suffix, AllocationBars, ValueChart, stagger entrance
+- [x] Kaikki sivut päivitetty: Transactions, Tax, Alerts, Import, Settings, Auth
+- [x] AppShell: poistettu AnimatePresence/motion.main (E2E stability fix)
+- [x] KpiCard: animated number counter + currency unit prop
+
+**Bugifixit:**
+- [x] passphraseGenerator deduplicate while-loop (oli yksi retry — saattoi kuitenkin törmätä jo valittuun)
+- [x] AppShell y-transform poisto (Playwright E2E stability)
+- [x] KpiCard currency unit (E2E test currency suffix)
+
+**Testitulos:** Unit 155/155 ✅, E2E 17/17 ✅, CI kaikki 5 jobbia vihreä
+**Release:** Deployttu Cloudflare Pages → `kryptoportfolio.pages.dev` 2026-03-16
+
+---
+
 ### Feature 22: UI/UX Redesign + Design System ✅
 **Status:** ✅ VALMIS (2026-03-15)
 **Prioriteetti:** Kriittinen — tehdaan ENNEN Feature 13 (Imports) ja Feature 14 (Billing)
@@ -513,8 +539,8 @@ Ks. [ISSUE_LOG.md](../ISSUE_LOG.md) tarkemmat kuvaukset.
 |-----------|-------|
 | Vaihe 0 (tekninen velka) | 8/8 ✅ |
 | P0-bugit | 4/4 ✅ |
-| Toteutetut featuret | 12 (01-11, 22) + 21 |
-| Toteutuksessa | 1 (12) |
+| Toteutetut featuret | 13 (01-12, 22-23) + 21 |
+| Toteutuksessa | 0 |
 | Suunnitteilla | 2 (13, 14) |
 | Backlog | 5 (15-17, 19-20) |
 | Avoimet P1-bugit | 5 |
@@ -526,10 +552,10 @@ Ks. [ISSUE_LOG.md](../ISSUE_LOG.md) tarkemmat kuvaukset.
 VAIHE 0: Tekninen velka ✅ VALMIS
 VAIHE 1: P0-bugit ✅ VALMIS
 Feature 21: AI-kehitysymparisto ✅ VALMIS
-Feature 12: Auth/Vault UX 🚧 (E2E-testit kesken)
+Feature 12: Auth/Vault UX ✅ VALMIS
+Feature 22: UI/UX Redesign + Design System ✅ VALMIS
+Feature 23: Premium UI shadcn/ui + Framer Motion ✅ VALMIS
 
-→ PRODUCT_VISION.md (tuotteen suunta + kohderyhmä)
-→ Feature 22: UI/UX Redesign + Design System
 → Feature 13: Imports Registry
 → Feature 14: Billing
 → Feature 15-20: backlogista prioriteettien mukaan

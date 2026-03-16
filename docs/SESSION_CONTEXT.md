@@ -23,13 +23,44 @@ Ei avoimia P0-bugeja. Kaikki korjattu 2026-03-14.
 
 ### Seuraava tyovaihe
 **→ Feature 13: Imports Plugin Registry + Wizard** — seuraava
-Feature 22 (UI/UX Redesign) valmis. Feature 12 (Auth/Vault UX) valmis.
+Feature 22 (UI/UX Redesign) valmis. Feature 12 (Auth/Vault UX) valmis. Feature 23 (Premium UI shadcn/ui + Framer Motion) valmis + deployttu.
 
 Seuraavaksi: Feature 13 (Imports) → Feature 14 (Billing)
 
 ---
 
 ## Muutosloki
+
+### 2026-03-16 — Feature 23: Premium UI — shadcn/ui + Framer Motion + release
+
+**Commitit:**
+- `feat(web): premium UI overhaul — shadcn/ui + Framer Motion (Feature 23)` — kaikki sivut
+- `feat(web): auth pages + PortfolioPage — Framer Motion + shadcn Select fix`
+- `fix(ci): passphrase duplicate-word bug + Prettier formatting`
+- `fix(e2e): remove Framer Motion opacity-0 initial state from auth pages`
+- `fix(web): remove AppShell page transition animation to fix E2E tests`
+- `fix(web): show currency unit in KpiCard AnimatedNumber to fix E2E test`
+
+**Toteutettu:**
+- shadcn/ui asennettu (Card, Button, Input, Select, Dialog, Sheet, Table, Tabs, Badge, Tooltip jne.)
+- Geist-fontti + JetBrains Mono + Framer Motion animaatiot
+- Obsidian dark theme (shadcn CSS variables)
+- KpiCard animated number counter (useSpring/useTransform)
+- Dashboard: stagger entrance, hover effects, AllocationBars, ValueChart
+- Transactions, Tax, Alerts, Import, Settings — kaikki sivut päivitetty
+- Auth: WelcomePage (orb + stagger), VaultSetupPage (step indicator), UnlockPage (error shake)
+
+**Bugifixit:**
+- passphraseGenerator: deduplicate-logiikan while-loop (oli `idx+1` yksi retry)
+- AppShell: poistettu `AnimatePresence mode="wait"` + `motion.main y:8` — Playwright E2E stability
+- KpiCard: lisätty `unit` prop — currency näkyy AnimatedNumber-kentässä
+
+**Release:**
+- CI: 17/17 E2E-testiä ✅, kaikki 5 CI-jobbia vihreä
+- Tuotanto: `https://kryptoportfolio.pages.dev/api/health` → `{"ok":true}`
+- Deployttu: `main` → Cloudflare Pages automaattisesti
+
+---
 
 ### 2026-03-16 — Feature 22: Pencil Design Mockup Implementation (all pages)
 **Pencil-suunnitelmien toteutus kaikille sivuille:**
