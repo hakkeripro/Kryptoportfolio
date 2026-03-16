@@ -22,14 +22,39 @@ Ei avoimia P0-bugeja. Kaikki korjattu 2026-03-14.
 - CI: puuttuu typecheck, lint, coverage, audit, preview deploy
 
 ### Seuraava tyovaihe
-**→ Feature 13: Imports Plugin Registry + Wizard** — seuraava
-Feature 22 (UI/UX Redesign) valmis. Feature 12 (Auth/Vault UX) valmis. Feature 23 (Premium UI shadcn/ui + Framer Motion) valmis + deployttu.
+**→ Feature 14: Billing + Feature Gating** — seuraava
+Feature 13 (Imports Plugin Registry) valmis 2026-03-16.
 
-Seuraavaksi: Feature 13 (Imports) → Feature 14 (Billing)
+Seuraavaksi: Feature 14 (Billing) → Feature 15 (PDF Tax Export)
 
 ---
 
 ## Muutosloki
+
+### 2026-03-16 — Feature 13: Imports Plugin Registry (Vaihe 1)
+
+**Uudet tiedostot:**
+- `packages/core/src/imports/providerTypes.ts` — ProviderDescriptor, AuthMethod, ProviderStatus tyypit
+- `packages/core/src/imports/index.ts` — re-export
+- `apps/web/src/integrations/importPlugin.ts` — ImportPlugin interface, ImportContext, ConnectFormProps, FetchPanelProps
+- `apps/web/src/integrations/providerRegistry.ts` — PROVIDER_REGISTRY + COMING_SOON_PROVIDERS
+- `apps/web/src/integrations/coinbase/coinbasePlugin.ts` — Coinbase plugin (wrappaa vault/sync/import)
+- `apps/web/src/components/imports/CoinbaseConnectForm.tsx` — extracted connect form (~110r)
+- `apps/web/src/components/imports/CoinbaseFetchPanel.tsx` — extracted fetch/preview/issues/done (~300r)
+- `apps/web/src/components/imports/ProviderCard.tsx` — provider card UI + coming-soon card (~130r)
+- `apps/web/src/components/imports/ProviderGrid.tsx` — grid + inline FetchPanel (~60r)
+- `apps/web/src/components/imports/ImportWizard.tsx` — Sheet-kuori (reserved for Phase 2)
+- `apps/web/src/integrations/providerRegistry.test.ts` — 4 unit-testiä
+- `apps/web/src/integrations/coinbase/coinbasePlugin.test.ts` — 4 unit-testiä
+- `apps/web/tests-e2e/imports-provider-grid.spec.ts` — E2E: grid + coming-soon cards
+
+**Muutettu:**
+- `packages/core/src/index.ts` — lisätty `./imports/index.js` export
+- `apps/web/src/pages/ImportsPage.tsx` — refaktoroitu 1007r → 25r (käyttää ProviderGrid)
+
+**Testitulos:** Unit 52/52 ✅, Build OK
+
+---
 
 ### 2026-03-16 — Feature 23: Premium UI — shadcn/ui + Framer Motion + release
 

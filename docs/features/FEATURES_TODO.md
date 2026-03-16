@@ -360,39 +360,61 @@ Ks. [ISSUE_LOG.md](../ISSUE_LOG.md) tarkemmat kuvaukset.
 
 ---
 
-### Feature 13: Imports Plugin Registry 📋
-**Status:** 📋 SUUNNITTEILLA
+### Feature 13: Imports Plugin Registry ✅
+**Status:** ✅ VALMIS (Vaihe 1 toteutettu 2026-03-16)
 **ADR:** ADR-019
+**Speksi:** [13_imports-registry.md](13_imports-registry.md)
 **Playbook:** [EXCHANGE_INTEGRATION_PLAYBOOK.md](../EXCHANGE_INTEGRATION_PLAYBOOK.md)
-**Edellyttaa:** Vaihe 0 (T-002 API-hajotus, T-004 duplikaation poisto)
+**Edellyttaa:** Vaihe 0 (T-002 ✅, T-004 ✅), Feature 22+23 ✅
 
-**Tavoite:** Provider grid + wizard -malli, skaalautuu uusille integraatioille
+**Tavoite:** Provider registry -arkkitehtuuri + wizard-UI. Skaalautuu uusille integraatioille.
 
-- [ ] Provider registry arkkitehtuuri
-- [ ] Provider grid UI (ikonit + statusbadge)
-- [ ] Connect wizard (API ensisijainen, CSV toissijainen)
-- [ ] Coinbase: migrointi registryyn
-- [ ] Binance-provider
-- [ ] MEXC-provider
+**Vaihe 1 (MVP — toteutettu 2026-03-16):**
+- [x] `ProviderDescriptor` / `ImportPlugin` -tyypit (`@kp/core` + `apps/web`)
+- [x] `providerRegistry.ts` + coming-soon -placeholderit
+- [x] Provider grid UI (`ProviderGrid`, `ProviderCard`, `ImportWizard`)
+- [x] Coinbase: migrointi registryyn (`coinbasePlugin.ts`)
+- [x] `ImportsPage.tsx` refaktorointi (1007r → ~25r)
+- [x] Unit-testit: providerRegistry.test.ts + coinbasePlugin.test.ts (8 testia)
+- [x] E2E-testi: imports-provider-grid.spec.ts (provider grid + coming-soon kortit)
+
+**Vaihe 2 (myöhemmin):**
+- [ ] Binance-provider (HMAC API)
+- [ ] MEXC-provider (HMAC API)
+
+**Vaihe 3 (backlog):**
 - [ ] Bitvavo-provider
 - [ ] Ledger-provider (CSV)
-- [ ] MetaMask-provider (CSV/API)
+- [ ] MetaMask-provider (osoitetuonti)
 
-**Ratkaisee:** KP-UI-003, KP-IMPORT-001
+**Ratkaisee:** KP-UI-003
 
 ---
 
 ### Feature 14: Billing + Feature Gating 📋
-**Status:** 📋 SUUNNITTEILLA
+**Status:** 📋 SUUNNITTEILLA (speksi valmis 2026-03-16)
 **ADR:** ADR-020
+**Speksi:** [14_billing-feature-gating.md](14_billing-feature-gating.md)
+**Edellyttää:** Feature 13 (Imports Registry)
 
-**Tavoite:** Premium-ominaisuudet + Stripe-integraatio
+**Tavoite:** Freemium-maksumuuri — vain verolaskenta + veroraportit (PDF/CSV) ovat premium. Kaikki muu free.
 
-- [ ] Plan-malli: Free / Premium
-- [ ] Feature gating (UI + backend)
-- [ ] Stripe-integraatio (tai stub)
-- [ ] "Upgrade" UI
-- [ ] Maksulliset: server alerts (rajoitettu free), strategy advanced, multi-exchange autosync, export/reporting
+**Vaihe 1 (MVP — tämä feature):**
+- [ ] `Plan`-tyyppi + `isFeatureAllowed` (`packages/core/src/billing/planTypes.ts`)
+- [ ] DB-migraatio: `users.plan` + `users.plan_expires_at` (Neon)
+- [ ] JWT: plan claim loginiin + refreshiin
+- [ ] `GET /v1/billing/plan` + `requirePlan` middleware
+- [ ] `planCache` Dexieen (platform-web, v4)
+- [ ] `useAuthStore`: plan-kenttä + `fetchPlan()` action
+- [ ] `useFeatureGate(feature)` hook (yksi paikka kaikille tarkistuksille)
+- [ ] `UpgradeModal` + `GateWall` komponentit
+- [ ] `TaxPage` gating: summary free, täysi raportti + export premium
+- [ ] `AccountPage`: billing-osio (nykyinen plan + upgrade-linkki)
+- [ ] Unit-testit (core + web), E2E-testit
+
+**Vaihe 2 (myöhemmin, erillinen feature):**
+- [ ] Stripe Checkout session + webhook
+- [ ] Subscription management
 
 ---
 ---
