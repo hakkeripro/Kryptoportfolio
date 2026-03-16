@@ -110,6 +110,31 @@ Jos havaitset ristiriitoja dokumentaation, koodin tai ominaisuuksien valilla:
 | `/generate-feature-summary <nro>` | Luo CHEAT_SHEET.md + TODO.md isosta speksista (kontekstin tiivistys) |
 | `/update-session` | Session lopussa: paivittaa SESSION_CONTEXT.md, FEATURES_TODO.md, ISSUE_LOG.md |
 | `/release` | **Julkaisu:** Tarkistukset → preview → seuranta → DB-migraatiot → tuotanto (Cloudflare Pages) |
+| `/frontend-design` | **UI-muutoksiin:** Luo tai uudelleenkirjoita frontend-komponentteja "Encrypted Luxury" -estetiikalla |
+
+## UI-kehityksen periaatteet (frontend-design skill)
+
+**AINA kun tehdaan visuaalisia muutoksia tai uusia UI-komponentteja:**
+
+1. **Kayta `/frontend-design` -skillaa** — lue ensin nykyinen koodi, sitten toteuta muutos
+2. **Lue tiedosto ennen muutosta** — ei sokeita CSS-overhaul-rewriteja
+3. **Sailyta data-testid -attribuutit** — kaikki E2E-testit riippuvat niista
+
+### Projektin visuaalinen identiteetti: "Encrypted Luxury"
+- **Teema:** Dark premium, `#111111` sivupohja, `#0F0F0F` kortit
+- **Brand:** `#FF8400` oranssi — aksentteina, ei dominoivana
+- **Typografia:** `font-mono` (JetBrains Mono) numeroille ja labeleille, `font-sans` (Geist) otsikoille
+- **Kortit:** `border border-white/[0.08] bg-[#0F0F0F]` + 1px oranssi gradientti top-border erikoiskorteissa
+- **Hover:** `hover:bg-[#FF8400]/[0.04]` riveille, `hover:shadow-[0_0_30px_rgba(255,132,0,0.12)]` korteille
+- **Taulukoiden otsikot:** `text-[10px] font-mono uppercase tracking-[0.15em] text-white/20`
+- **Osiotunnisteet:** `// SECTION_NAME` terminal-tyylilla (`text-[10px] font-mono uppercase tracking-[0.2em] text-white/30`)
+- **Ambient glow:** Kiinteat oranssit glow-blobit AppShellissa kaiken takana
+
+### Kiellettyja patterneja
+- Ei `border-border` ilman varia-maarittelya (→ kayttaa Tailwindin gray-200 = valkoinen tumman taustan paalla)
+- Ei `bg-surface-raised` hover-efekteissa (→ liian hillitty, kayta oranssia tinttia)
+- Ei `hover:bg-white/[0.03]` (→ liian heikko, kayta `hover:bg-[#FF8400]/[0.04]`)
+- Ei `max-w-6xl` AppShellissa (→ PC:lla liian kapea)
 
 ## Session-tyoskentely
 
@@ -121,10 +146,18 @@ Jos havaitset ristiriitoja dokumentaation, koodin tai ominaisuuksien valilla:
 ### Uuden featuren workflow
 ```
 /spec-feature <nro>        → Speksi ensin (vaatimukset, suunnitelma, testit)
-/generate-feature-summary  → Tiivista iso speksi (valinnainen)
 /implement-feature <nro>   → Toteutus valmiin speksin pohjalta
 /update-session            → Paivita seurantadokumentit
 ```
+
+### Feature summary vs. taysi speksi (toteutussession paatos)
+`/implement-feature` tarkistaa onko featurelle olemassa CHEAT_SHEET.md + TODO.md:
+- **Jos loytyy** → kayttaa niita (tiivistetty konteksti)
+- **Jos EI loydy** → kayttaa taytta speksitiedostoa (`docs/features/XX_nimi.md`)
+
+`/generate-feature-summary` luo CHEAT_SHEET.md + TODO.md isosta speksista. AI paattaa speksaus-session lopussa, kannattaako summary generoida:
+- **Generoi summary** kun: speksi on selkea, lineaarinen toteutus, ei DB-muutoksia, ei monimutkaisia riippuvuuksia
+- **ALA generoi summarya** kun: laaja/monimutkainen kokonaisuus, DB-migraatioita, paljon ristikkaisriippuvuuksia, laadunvarmistus vaatii tayden kontekstin (esim. Feature 22 UI/UX redesign, DB-skeemat)
 
 ### Bugikorjaus
 ```
