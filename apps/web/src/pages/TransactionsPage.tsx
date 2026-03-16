@@ -295,7 +295,7 @@ export default function TransactionsPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-heading-1 text-content-primary">{t('transactions.title')}</h1>
+          <h1 className="text-heading-1 font-heading text-content-primary">{t('transactions.title')}</h1>
           <p className="text-caption text-content-tertiary mt-0.5">
             {eventsView.length} {t('transactions.ledger.count', { n: eventsView.length }).replace(/^\d+ /, '')}
           </p>

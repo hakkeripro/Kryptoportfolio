@@ -68,9 +68,9 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="hidden md:flex flex-col w-60 h-screen fixed left-0 top-0 bg-surface-raised/80 backdrop-blur-md border-r border-border">
+    <aside className="hidden md:flex flex-col w-60 h-screen fixed left-0 top-0 bg-[var(--color-sidebar)] border-r border-[var(--color-sidebar-border)]">
       {/* Brand */}
-      <div className="px-5 py-4 border-b border-border/50 bg-gradient-brand-subtle">
+      <div className="px-5 py-4 border-b border-white/10">
         <Logo size="sm" />
       </div>
 
@@ -91,13 +91,13 @@ export default function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="px-3 py-4 border-t border-border/50 space-y-2">
+      <div className="px-3 py-4 border-t border-white/10 space-y-2">
         {token && (
           <button
             data-testid="btn-sync-now"
             onClick={() => void syncNow()}
             className="flex items-center gap-2 w-full px-3 py-2 rounded-button text-caption
-              text-content-secondary hover:text-content-primary hover:bg-surface-overlay/60
+              text-content-secondary hover:text-content-primary hover:bg-white/5
               transition-all duration-150 ease-expo"
           >
             <RefreshCw className="h-4 w-4" />
@@ -109,7 +109,7 @@ export default function Sidebar() {
             data-testid="btn-lock"
             onClick={() => lockVault()}
             className="flex items-center gap-2 w-full px-3 py-2 rounded-button text-caption
-              text-content-secondary hover:text-content-primary hover:bg-surface-overlay/60
+              text-content-secondary hover:text-content-primary hover:bg-white/5
               transition-all duration-150 ease-expo"
           >
             <Lock className="h-4 w-4" />
@@ -125,8 +125,9 @@ export default function Sidebar() {
           </span>
         )}
         {email && (
-          <div className="px-3 pt-1 text-[0.625rem] text-content-tertiary truncate">
-            {email}
+          <div className="px-3 pt-2">
+            <div className="text-sm text-content-primary truncate">{email.split('@')[0]}</div>
+            <div className="text-xs text-content-tertiary truncate">{email}</div>
           </div>
         )}
       </div>

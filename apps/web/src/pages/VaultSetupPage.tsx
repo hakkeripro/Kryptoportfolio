@@ -106,7 +106,7 @@ export default function VaultSetupPage() {
         {step === 'passphrase' && (
           <form onSubmit={handlePassphraseSubmit} className="space-y-4">
             <div className="text-center">
-              <h1 className="text-heading-1 text-content-primary">
+              <h1 className="text-heading-1 font-heading text-content-primary">
                 {t('vaultSetup.step1.title')}
               </h1>
               <p className="text-caption text-content-secondary mt-1">
@@ -184,7 +184,7 @@ export default function VaultSetupPage() {
         {step === 'passkey' && (
           <div className="space-y-4">
             <div className="text-center">
-              <h1 className="text-heading-1 text-content-primary">
+              <h1 className="text-heading-1 font-heading text-content-primary">
                 {t('vaultSetup.step2.title')}
               </h1>
               <p className="text-caption text-content-secondary mt-1">
@@ -227,7 +227,7 @@ export default function VaultSetupPage() {
         {/* Step 3: Done */}
         {step === 'done' && (
           <div className="space-y-4 text-center">
-            <h1 className="text-heading-1 text-content-primary">
+            <h1 className="text-heading-1 font-heading text-content-primary">
               {t('vaultSetup.step3.title')}
             </h1>
 

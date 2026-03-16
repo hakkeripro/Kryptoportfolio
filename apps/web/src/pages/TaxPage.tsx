@@ -183,7 +183,7 @@ export default function TaxPage() {
       {/* Header */}
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-heading-1 text-content-primary">{t('tax.title')}</h1>
+          <h1 className="text-heading-1 font-heading text-content-primary">{t('tax.title')}</h1>
           <p className="text-caption text-content-tertiary mt-0.5">
             Disposals, gains & calculations for tax filing
           </p>

@@ -59,7 +59,7 @@ export function Modal({ open, onClose, title, children, className = '' }: ModalP
       >
         {title && (
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-heading-3 text-content-primary">{title}</h2>
+            <h2 className="text-heading-3 font-heading text-content-primary">{title}</h2>
             <button
               onClick={handleClose}
               className="p-1 rounded-button text-content-tertiary hover:text-content-primary

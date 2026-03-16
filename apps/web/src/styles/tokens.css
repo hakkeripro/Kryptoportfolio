@@ -21,11 +21,11 @@
   --color-content-tertiary: #666666;
   --color-content-inverse: #111111;
 
-  /* Semantic */
-  --color-semantic-success: #10b981;
-  --color-semantic-warning: #f59e0b;
-  --color-semantic-error: #ef4444;
-  --color-semantic-info: #3b82f6;
+  /* Semantic — matched from Pencil design system */
+  --color-semantic-success: #B6FFCE;
+  --color-semantic-error: #FF5C33;
+  --color-semantic-warning: #FF8400;
+  --color-semantic-info: #B2B2FF;
 
   /* Shadows — brand-tinted for depth */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(255, 132, 0, 0.03);
@@ -48,9 +48,15 @@
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
+  /* Card */
+  --color-card: #1A1A1A;
+  --color-card-border: #2E2E2E;
+
+  /* Sidebar */
+  --color-sidebar: #18181b;
+  --color-sidebar-border: rgba(255, 255, 255, 0.1);
+
   /* Gradients */
-  --gradient-card-bg: linear-gradient(135deg, rgba(26, 26, 26, 0.8), rgba(17, 17, 17, 0.6));
-  --gradient-card-border: linear-gradient(135deg, rgba(255, 132, 0, 0.1), rgba(46, 46, 46, 0.5), rgba(255, 132, 0, 0.05));
   --gradient-brand-subtle: linear-gradient(135deg, rgba(255, 132, 0, 0.05), transparent);
 }
 

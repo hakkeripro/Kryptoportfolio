@@ -246,7 +246,7 @@ export default function AlertsPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-heading-1 text-content-primary">{t('alerts.title')}</h1>
+          <h1 className="text-heading-1 font-heading text-content-primary">{t('alerts.title')}</h1>
           <p className="text-caption text-content-tertiary mt-0.5">
             Get notified when prices hit your targets
           </p>

@@ -35,10 +35,10 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="space-y-section" data-testid="page-settings">
+    <div className="space-y-section max-w-[680px]" data-testid="page-settings">
       {/* Header */}
       <div>
-        <h1 className="text-heading-1 text-content-primary">{t('settings.title')}</h1>
+        <h1 className="text-heading-1 font-heading text-content-primary">{t('settings.title')}</h1>
         <p className="text-caption text-content-tertiary mt-0.5">
           Manage your vault, preferences, and account
         </p>

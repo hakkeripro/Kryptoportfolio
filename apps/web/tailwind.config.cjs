@@ -32,14 +32,15 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Geist', 'system-ui', 'sans-serif'],
+        heading: ['JetBrains Mono', 'monospace'],
         mono: ['JetBrains Mono', 'monospace'],
       },
       fontSize: {
-        'heading-1': ['1.875rem', { lineHeight: '2.25rem', fontWeight: '700' }],
+        'heading-1': ['1.75rem', { lineHeight: '2.25rem', fontWeight: '600' }],
         'heading-2': ['1.5rem', { lineHeight: '2rem', fontWeight: '600' }],
         'heading-3': ['1.25rem', { lineHeight: '1.75rem', fontWeight: '600' }],
-        'heading-4': ['1.125rem', { lineHeight: '1.5rem', fontWeight: '500' }],
+        'heading-4': ['1rem', { lineHeight: '1.5rem', fontWeight: '600' }],
         body: ['0.875rem', { lineHeight: '1.25rem' }],
         caption: ['0.75rem', { lineHeight: '1rem' }],
       },
@@ -52,7 +53,7 @@ module.exports = {
       spacing: {
         page: '1.5rem',
         section: '1.5rem',
-        card: '1rem',
+        card: '1.25rem',
       },
       boxShadow: {
         sm: 'var(--shadow-sm)',
@@ -79,7 +80,6 @@ module.exports = {
         spring: 'var(--ease-spring)',
       },
       backgroundImage: {
-        'gradient-card': 'var(--gradient-card-bg)',
         'gradient-brand-subtle': 'var(--gradient-brand-subtle)',
       },
     },

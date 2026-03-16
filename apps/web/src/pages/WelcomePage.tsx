@@ -36,7 +36,7 @@ export default function WelcomePage() {
         <div className="flex justify-center mb-6">
           <Logo size="lg" showWordmark={false} />
         </div>
-        <h1 className="text-heading-1 text-content-primary mb-2 text-3xl md:text-4xl font-bold">
+        <h1 className="text-heading-1 font-heading text-content-primary mb-2 text-3xl md:text-4xl font-bold">
           {t('welcome.title')}
         </h1>
         <p className="text-lg text-content-secondary max-w-md mx-auto">{t('welcome.tagline')}</p>

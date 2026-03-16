@@ -132,7 +132,7 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-heading-1 text-content-primary">{t('dashboard.title')}</h1>
+          <h1 className="text-heading-1 font-heading text-content-primary">{t('dashboard.title')}</h1>
           <p className="text-caption text-content-tertiary mt-0.5">
             {t('dashboard.subtitle')}
           </p>
@@ -252,7 +252,7 @@ export default function DashboardPage() {
       {/* Holdings table */}
       <Card data-testid="card-portfolio-top">
         <div className="flex items-center justify-between mb-3">
-          <CardTitle>{t('dashboard.topPositions.title')}</CardTitle>
+          <CardTitle className="font-heading">{t('dashboard.topPositions.title')}</CardTitle>
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-content-tertiary" />
             <input
@@ -271,18 +271,21 @@ export default function DashboardPage() {
           {filteredPositions.length ? (
             <>
               {/* Table header */}
-              <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-2 px-2 pb-2 border-b border-border-subtle">
-                <span className="text-[0.625rem] text-content-tertiary font-medium uppercase tracking-wider">
+              <div className="grid grid-cols-[2fr_100px_120px_120px_80px] gap-2 px-5 pb-2.5 border-b border-[var(--color-card-border)]">
+                <span className="text-[11px] text-content-tertiary font-semibold uppercase tracking-wider">
                   Asset
                 </span>
-                <span className="text-[0.625rem] text-content-tertiary font-medium uppercase tracking-wider text-right">
+                <span className="text-[11px] text-content-tertiary font-semibold uppercase tracking-wider">
+                  Price
+                </span>
+                <span className="text-[11px] text-content-tertiary font-semibold uppercase tracking-wider">
                   Holdings
                 </span>
-                <span className="text-[0.625rem] text-content-tertiary font-medium uppercase tracking-wider text-right">
+                <span className="text-[11px] text-content-tertiary font-semibold uppercase tracking-wider">
                   Value
                 </span>
-                <span className="text-[0.625rem] text-content-tertiary font-medium uppercase tracking-wider text-right">
-                  PnL
+                <span className="text-[11px] text-content-tertiary font-semibold uppercase tracking-wider text-right">
+                  24h
                 </span>
               </div>
               {/* Table body */}
@@ -293,30 +296,37 @@ export default function DashboardPage() {
                   const pnlPct = costBasis.isZero()
                     ? null
                     : pnl.div(costBasis).mul(100);
+                  const pricePerUnit = d(p.amount).isZero()
+                    ? new Decimal(0)
+                    : d(p.valueBase).div(d(p.amount));
                   return (
                     <li
                       key={p.assetId}
-                      className="group grid grid-cols-[2fr_1fr_1fr_1fr] gap-2 items-center py-2.5 px-2
-                        rounded-button hover:bg-surface-overlay/30 transition-all duration-150 ease-expo
+                      className="grid grid-cols-[2fr_100px_120px_120px_80px] gap-2 items-center py-3 px-5
+                        border-b border-[var(--color-card-border)] hover:bg-white/[0.02] transition-colors
                         animate-slide-up"
                       style={{ animationDelay: `${i * 40 + 360}ms` }}
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2.5">
                         <TokenIcon symbol={p.symbol} size="md" />
                         <div>
-                          <div className="text-body text-content-primary font-medium">
+                          <div className="text-[13px] font-mono text-content-primary font-medium">
                             {p.symbol}
                           </div>
+                          <div className="text-xs text-content-tertiary">{p.name}</div>
                         </div>
                       </div>
-                      <div className="text-right font-mono text-caption text-content-secondary">
+                      <div className="text-[13px] font-mono text-content-primary">
+                        {fmtMoney(pricePerUnit.toFixed(), baseCurrency)}
+                      </div>
+                      <div className="text-[13px] font-mono text-content-primary">
                         {d(p.amount).toDecimalPlaces(4).toFixed()} {p.symbol}
                       </div>
-                      <div className="text-right font-mono text-body text-content-primary">
+                      <div className="text-[13px] font-mono text-content-primary">
                         {fmtMoney(p.valueBase, baseCurrency)}
                       </div>
                       <div
-                        className={`text-right font-mono text-caption ${
+                        className={`text-[13px] font-mono text-right ${
                           pnl.isPositive()
                             ? 'text-semantic-success'
                             : pnl.isNegative()

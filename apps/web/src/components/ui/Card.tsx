@@ -4,16 +4,17 @@ interface CardProps {
   children: React.ReactNode;
   className?: string;
   hover?: boolean;
+  'data-testid'?: string;
 }
 
-export function Card({ children, className = '', hover = false }: CardProps) {
+export function Card({ children, className = '', hover = false, ...rest }: CardProps) {
   return (
     <div
-      className={`relative bg-gradient-card backdrop-blur-md border border-border-subtle
-        rounded-card p-card shadow-md transition-all duration-300 ease-expo
-        before:absolute before:inset-0 before:rounded-card before:border before:border-white/[0.04] before:pointer-events-none
-        ${hover ? 'hover:shadow-lg hover:-translate-y-0.5 hover:border-brand/20 hover:shadow-brand/5' : ''}
+      className={`bg-[var(--color-card)] border border-[var(--color-card-border)]
+        rounded-card p-card transition-colors duration-200
+        ${hover ? 'hover:border-brand/20' : ''}
         ${className}`}
+      {...rest}
     >
       {children}
     </div>
@@ -25,5 +26,5 @@ export function CardHeader({ children, className = '' }: { children: React.React
 }
 
 export function CardTitle({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <h3 className={`text-heading-4 text-content-primary ${className}`}>{children}</h3>;
+  return <h3 className={`text-heading-4 font-heading text-content-primary ${className}`}>{children}</h3>;
 }

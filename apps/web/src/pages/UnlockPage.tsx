@@ -77,7 +77,7 @@ export default function UnlockPage() {
 
         {/* Title */}
         <div className="text-center">
-          <h1 className="text-heading-1 text-content-primary">{t('unlock.title')}</h1>
+          <h1 className="text-heading-1 font-heading text-content-primary">{t('unlock.title')}</h1>
           <p className="text-caption text-content-secondary mt-1">{t('unlock.description')}</p>
         </div>
 
