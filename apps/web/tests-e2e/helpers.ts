@@ -67,6 +67,11 @@ export async function signupAndSetupVault(page: any) {
   await expect(page.getByTestId('page-vault-setup')).toBeVisible({ timeout: 10_000 });
   await waitForToken(page);
 
+  // Country step: skip
+  if (await page.getByTestId('btn-country-skip').isVisible()) {
+    await page.getByTestId('btn-country-skip').click();
+  }
+
   // Vault setup: passphrase
   await page.getByTestId('form-vault-passphrase').fill('passphrase123');
   await page.getByTestId('form-vault-passphrase-confirm').fill('passphrase123');
@@ -88,6 +93,11 @@ export async function signupAndSetupVault(page: any) {
  */
 export async function setupVaultOffline(page: any) {
   await page.goto('/vault/setup?offline=1');
+
+  // Country step: skip
+  if (await page.getByTestId('btn-country-skip').isVisible()) {
+    await page.getByTestId('btn-country-skip').click();
+  }
 
   await page.getByTestId('form-vault-passphrase').fill('passphrase123');
   await page.getByTestId('form-vault-passphrase-confirm').fill('passphrase123');

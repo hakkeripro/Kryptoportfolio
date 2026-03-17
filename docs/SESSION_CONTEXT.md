@@ -22,13 +22,34 @@ Ei avoimia P0-bugeja. Kaikki korjattu 2026-03-14.
 - CI: puuttuu typecheck, lint, coverage, audit, preview deploy
 
 ### Seuraava tyovaihe
-Feature 14 (Billing + Feature Gating) valmis 2026-03-16.
+Feature 24 (Settings siivous + Tax Profile) valmis 2026-03-17.
 
-Seuraavaksi: Feature 15 (PDF Tax Export) → Feature 16 (Multi-exchange imports)
+Seuraavaksi: Feature 25 (Finnish Tax Parity) → Feature 26 (Dashboard + UX Polish)
 
 ---
 
 ## Muutosloki
+
+### 2026-03-17 — Feature 24: Settings siivous + Tax Profile
+
+**Uudet tiedostot:**
+- `apps/web/src/components/settings/TaxProfileCard.tsx` — korvaa PortfolioSettingsCard; taxCountry, lotMethod (FI: locked FIFO), hmoEnabled toggle (vain FI)
+- `apps/web/src/components/settings/IntegrationsCard.tsx` — auto-refresh + sync + linkki ImportsPage:lle
+- `apps/web/src/components/settings/DangerZoneCard.tsx` — export JSON + delete account placeholder
+- `apps/web/src/components/settings/TaxProfileCard.test.tsx` — 5 unit-testiä
+- `apps/web/src/components/settings/DangerZoneCard.test.tsx` — 4 unit-testiä
+- `apps/web/tests-e2e/settings-tax-profile.spec.ts` — 4 E2E-testiä
+
+**Muutettu:**
+- `packages/core/src/domain/settings.ts` — TaxCountry enum + taxCountry/hmoEnabled optional kentät
+- `packages/core/src/domain/settings.test.ts` — 6 testiä (taxCountry/hmoEnabled + backward compat)
+- `apps/web/src/pages/SettingsPage.tsx` — 5-osion rakenne (Account/Tax Profile/Notifications/Integrations/Danger Zone)
+- `apps/web/src/pages/VaultSetupPage.tsx` — country step lisätty (step 0), 4 askelta yhteensä
+- `apps/web/tests-e2e/helpers.ts` — signupAndSetupVault + setupVaultOffline: skip country step
+
+**Testitulos:** Unit 186/186 ✅ (117 core + 69 web)
+
+---
 
 ### 2026-03-16 — Feature 14: Billing + Feature Gating
 

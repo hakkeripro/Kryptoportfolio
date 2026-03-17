@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import type { Settings } from '@kp/core';
 import { useDbQuery } from '../hooks/useDbQuery';
 import { useAuthStore } from '../store/useAuthStore';
 import { ensureDefaultSettings } from '../derived/ensureDefaultSettings';
-import PortfolioSettingsCard from '../components/settings/PortfolioSettingsCard';
+import TaxProfileCard from '../components/settings/TaxProfileCard';
 import SecurityCard from '../components/settings/SecurityCard';
 import NotificationsCard from '../components/settings/NotificationsCard';
-import SyncCard from '../components/settings/SyncCard';
+import IntegrationsCard from '../components/settings/IntegrationsCard';
+import DangerZoneCard from '../components/settings/DangerZoneCard';
 import AdvancedCard from '../components/settings/AdvancedCard';
 
 export default function SettingsPage() {
@@ -51,34 +53,26 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      {/* Vault & Security */}
-      <div>
+      {/* // ACCOUNT */}
+      <div data-testid="section-account">
         <h2 className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/25 mb-3">
-          Vault & Security
+          // Account
         </h2>
         <div className="space-y-3">
-          <div className="rounded-xl border border-white/[0.08] bg-[#0F0F0F] p-4">
-            <div className="text-body font-medium text-content-primary">
-              {t('settings.account.title')}
+          {/* Account info + language */}
+          <div className="rounded-xl border border-white/[0.08] bg-[#0F0F0F] p-4 space-y-4">
+            <div>
+              <div className="text-body font-medium text-content-primary">
+                {t('settings.account.title')}
+              </div>
+              <div className="text-caption text-content-secondary mt-1">
+                {token
+                  ? t('settings.account.loggedIn', { email })
+                  : t('settings.account.notLoggedIn')}
+              </div>
             </div>
-            <div className="text-caption text-content-secondary mt-1">
-              {token
-                ? t('settings.account.loggedIn', { email })
-                : t('settings.account.notLoggedIn')}
-            </div>
-          </div>
-          <SecurityCard busy={busy} setBusy={setBusy} />
-        </div>
-      </div>
 
-      {/* Preferences */}
-      <div>
-        <h2 className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/25 mb-3">
-          Preferences
-        </h2>
-        <div className="space-y-3">
-          {/* Language selector */}
-          <div className="rounded-xl border border-white/[0.08] bg-[#0F0F0F] p-4">
+            {/* Language */}
             <div className="flex items-center justify-between">
               <div className="text-body font-medium text-content-primary">
                 {t('settings.language.title')}
@@ -108,16 +102,41 @@ export default function SettingsPage() {
                 </button>
               </div>
             </div>
+
+            {/* Link to AccountPage */}
+            <div className="pt-1">
+              <Link
+                to="/account"
+                className="text-caption text-brand hover:text-brand-light transition-colors"
+              >
+                Passkeys, password & vault passphrase →
+              </Link>
+            </div>
           </div>
+        </div>
+      </div>
 
-          <PortfolioSettingsCard
-            settings={settingsQ.data}
-            loading={settingsQ.loading}
-            error={settingsQ.error}
-            busy={busy}
-            setBusy={setBusy}
-          />
+      {/* // TAX PROFILE */}
+      <div data-testid="section-tax-profile">
+        <h2 className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/25 mb-3">
+          // Tax Profile
+        </h2>
+        <TaxProfileCard
+          settings={settingsQ.data}
+          loading={settingsQ.loading}
+          error={settingsQ.error}
+          busy={busy}
+          setBusy={setBusy}
+        />
+      </div>
 
+      {/* // NOTIFICATIONS */}
+      <div data-testid="section-notifications">
+        <h2 className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/25 mb-3">
+          // Notifications
+        </h2>
+        <div className="space-y-3">
+          <SecurityCard busy={busy} setBusy={setBusy} />
           <NotificationsCard
             settings={settingsQ.data}
             token={token ?? ''}
@@ -129,15 +148,28 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* Sync */}
-      <SyncCard busy={busy} setBusy={setBusy} />
-
-      {/* Danger Zone */}
-      <div>
-        <h2 className="text-[10px] font-mono uppercase tracking-[0.2em] text-red-500/60 mb-3">
-          Danger Zone
+      {/* // INTEGRATIONS */}
+      <div data-testid="section-integrations">
+        <h2 className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/25 mb-3">
+          // Integrations
         </h2>
-        <AdvancedCard />
+        <IntegrationsCard
+          settings={settingsQ.data}
+          autoRefreshIntervalSec={settingsQ.data?.autoRefreshIntervalSec ?? 300}
+          busy={busy}
+          setBusy={setBusy}
+        />
+      </div>
+
+      {/* // DANGER ZONE */}
+      <div data-testid="section-danger-zone">
+        <h2 className="text-[10px] font-mono uppercase tracking-[0.2em] text-red-500/60 mb-3">
+          // Danger Zone
+        </h2>
+        <div className="space-y-3">
+          <DangerZoneCard />
+          <AdvancedCard />
+        </div>
       </div>
     </motion.div>
   );

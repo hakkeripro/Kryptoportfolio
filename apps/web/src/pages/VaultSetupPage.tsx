@@ -1,6 +1,8 @@
 import { useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import type { TaxCountry } from '@kp/core';
+import { ensureWebDbOpen, getWebDb } from '@kp/platform-web';
 import { useVaultStore } from '../store/useVaultStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { createOrReplacePasskeyWrap, isPasskeySupported } from '../vault/passkey';
@@ -12,7 +14,35 @@ function errToMsg(e: unknown): string {
   return String(e);
 }
 
-type Step = 'passphrase' | 'passkey' | 'done';
+type Step = 'country' | 'passphrase' | 'passkey' | 'done';
+
+const COUNTRY_OPTIONS: { value: TaxCountry; label: string; flag: string }[] = [
+  { value: 'FI', label: 'Finland', flag: '🇫🇮' },
+  { value: 'SE', label: 'Sweden', flag: '🇸🇪' },
+  { value: 'DE', label: 'Germany', flag: '🇩🇪' },
+  { value: 'OTHER', label: 'Other', flag: '🌍' },
+];
+
+const STEP_NUMBERS: Record<Step, number> = {
+  country: 1,
+  passphrase: 2,
+  passkey: 3,
+  done: 4,
+};
+const TOTAL_STEPS = 4;
+
+async function saveCountryToSettings(taxCountry: TaxCountry) {
+  try {
+    await ensureWebDbOpen();
+    const db = getWebDb();
+    const existing = await db.settings.get('settings_1');
+    if (!existing) return;
+    const now = new Date().toISOString();
+    await db.settings.put({ ...existing, taxCountry, updatedAtISO: now } as typeof existing);
+  } catch {
+    // Non-critical — settings may not exist yet
+  }
+}
 
 export default function VaultSetupPage() {
   const { t } = useTranslation();
@@ -25,7 +55,8 @@ export default function VaultSetupPage() {
   const isOnDevice = new URLSearchParams(location.search).get('ondevice') === '1';
   const nextPath = new URLSearchParams(location.search).get('next') ?? '/home';
 
-  const [step, setStep] = useState<Step>('passphrase');
+  const [step, setStep] = useState<Step>(isOnDevice ? 'passphrase' : 'country');
+  const [selectedCountry, setSelectedCountry] = useState<TaxCountry | null>(null);
   const [passphrase, setPassphrase] = useState('');
   const [confirm, setConfirm] = useState('');
   const [saved, setSaved] = useState(false);
@@ -34,16 +65,20 @@ export default function VaultSetupPage() {
   const [passkeyEnabled, setPasskeyEnabled] = useState(false);
 
   const mismatch = confirm.length > 0 && passphrase !== confirm;
-  // ondevice mode: just needs a passphrase (no confirm, no checkbox)
   const canSetup = isOnDevice
     ? passphrase.length >= 6 && !busy
     : passphrase.length >= 6 && passphrase === confirm && saved && !busy;
 
   const stepNumber = useMemo(() => {
-    if (step === 'passphrase') return 1;
-    if (step === 'passkey') return 2;
-    return 3;
-  }, [step]);
+    if (isOnDevice) {
+      // ondevice skips country step, renumber: passphrase=1, done=2
+      if (step === 'passphrase') return 1;
+      return 2;
+    }
+    return STEP_NUMBERS[step];
+  }, [step, isOnDevice]);
+
+  const totalSteps = isOnDevice ? 2 : TOTAL_STEPS;
 
   const handlePassphraseSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,7 +87,10 @@ export default function VaultSetupPage() {
     setBusy(true);
     try {
       await setupVault(passphrase);
-      // ondevice: skip passkey step and go straight to destination
+      // Save country if selected
+      if (selectedCountry) {
+        await saveCountryToSettings(selectedCountry);
+      }
       if (isOnDevice) {
         nav(nextPath, { replace: true });
       } else {
@@ -97,7 +135,7 @@ export default function VaultSetupPage() {
 
         {/* Progress */}
         <div className="flex items-center justify-center gap-2 text-caption text-content-secondary">
-          {[1, 2, 3].map((n) => (
+          {Array.from({ length: totalSteps }, (_, i) => i + 1).map((n) => (
             <div
               key={n}
               className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-colors ${
@@ -112,6 +150,57 @@ export default function VaultSetupPage() {
             </div>
           ))}
         </div>
+
+        {/* Step 0: Country */}
+        {step === 'country' && (
+          <div className="space-y-4">
+            <div className="text-center">
+              <h1 className="text-heading-1 font-heading text-content-primary">
+                Where do you pay crypto taxes?
+              </h1>
+              <p className="text-caption text-content-secondary mt-1">
+                We'll set up your tax profile automatically.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3" data-testid="country-selector">
+              {COUNTRY_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  data-testid={`btn-country-${opt.value.toLowerCase()}`}
+                  type="button"
+                  onClick={() => setSelectedCountry(opt.value)}
+                  className={`flex items-center gap-3 rounded-xl px-4 py-3 border transition-colors text-body ${
+                    selectedCountry === opt.value
+                      ? 'border-[#FF8400] bg-[#FF8400]/[0.08] text-content-primary'
+                      : 'border-white/[0.08] bg-surface-raised text-content-secondary hover:border-white/20'
+                  }`}
+                >
+                  <span className="text-2xl">{opt.flag}</span>
+                  <span>{opt.label}</span>
+                </button>
+              ))}
+            </div>
+
+            <button
+              data-testid="btn-country-continue"
+              disabled={!selectedCountry}
+              onClick={() => setStep('passphrase')}
+              className="w-full rounded-button bg-brand hover:bg-brand-dark disabled:opacity-60
+                px-4 py-2.5 text-body font-medium transition-colors shadow-glow-brand"
+            >
+              Continue
+            </button>
+
+            <button
+              data-testid="btn-country-skip"
+              onClick={() => setStep('passphrase')}
+              className="w-full text-body text-content-tertiary hover:text-content-secondary py-2 underline transition-colors"
+            >
+              Skip for now →
+            </button>
+          </div>
+        )}
 
         {/* Step 1: Passphrase */}
         {step === 'passphrase' && (
@@ -265,6 +354,14 @@ export default function VaultSetupPage() {
                   <span className="text-content-secondary">{t('vaultSetup.summary.mode')}</span>
                   <span className="text-content-primary">
                     {t('vaultSetup.summary.offlineMode')}
+                  </span>
+                </div>
+              )}
+              {selectedCountry && (
+                <div className="flex justify-between">
+                  <span className="text-content-secondary">Tax country</span>
+                  <span className="text-content-primary">
+                    {COUNTRY_OPTIONS.find((o) => o.value === selectedCountry)?.label}
                   </span>
                 </div>
               )}

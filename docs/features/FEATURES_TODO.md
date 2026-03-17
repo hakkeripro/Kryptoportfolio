@@ -474,6 +474,66 @@ Ks. [ISSUE_LOG.md](../ISSUE_LOG.md) tarkemmat kuvaukset.
 ---
 ---
 
+## SUUNNITELTU 2026 — Tuoteparannukset
+
+> **Täydellinen suunnitelma:** [`docs/PRODUCT_ROADMAP_2026.md`](../PRODUCT_ROADMAP_2026.md)
+> Laadittu kaupallinen + UX-arviointisessiossa 2026-03-17.
+
+### Feature 24: Settings-sivu siivous + Tax Profile ✅
+**Status:** ✅ VALMIS (2026-03-17)
+**Speksi:** [24_settings-tax-profile.md](24_settings-tax-profile.md)
+**Edellyttää:** Feature 13 ✅, Feature 14 ✅, Feature 22/23 ✅
+- [x] Settings-sivu uudelleenorganisointi (Account / Tax Profile / Notifications / Integrations / Danger Zone)
+- [x] Tax Profile -osio: maa, base currency, lot method, HMO default
+- [x] `taxCountry` + `hmoEnabled` Settings-skeemaan
+- [x] Maa-valinta onboardingiin (VaultSetupWizard)
+
+### Feature 25: Finnish Tax Parity ❌
+**Speksi:** [25_finnish-tax-parity.md](25_finnish-tax-parity.md)
+**Prioriteetti:** P1 — kriittinen kilpailupariteetti
+- [ ] **Vaihe 1:** HMO-laskuri (20%/40%, automaattinen omistusaikalaskenta)
+- [ ] **Vaihe 1:** Blur-gate verolaskennan tuloksille (Free-käyttäjille)
+- [ ] **Vaihe 1:** OmaVero copy-paste -opas (Pro-gated)
+- [ ] **Vaihe 1:** Tax issue -filter TransactionsPage:lla
+- [ ] **Vaihe 2:** Lompakkokohtainen FIFO (Verohallinnon ohje)
+- [ ] **Vaihe 2:** Transfer detection + review UI (omat siirrot pörssien välillä)
+
+### Feature 26: Dashboard + UX Polish ❌
+**Speksi:** PRODUCT_ROADMAP_2026.md § 2.3, 2.4
+- [ ] ValueChart aikajännevalitsin (7D/30D/90D/1Y/ALL)
+- [ ] 24h muutos % per positio
+- [ ] Unrealized P&L % per positio (portfolio-sivu)
+- [ ] Sync-status indikaattori dashboardilla
+- [ ] Sidebar: passiivinen vault sync -status (poistetaan Sync-nappi)
+- [ ] Import success -banneri (joka importin jälkeen)
+- [ ] Setup progress -banneri (häviää 1. importin jälkeen)
+- [ ] Get Started -widget (tyhjä tila)
+- [ ] Alert badge dashboardilla
+- [ ] Onboarding: signup+vault yhdelle näkymälle
+- [ ] Passkey deferred dashboardin banneriin
+
+### Feature 27: Domain + Landing Page + Markkinointi ❌
+**Speksi:** PRODUCT_ROADMAP_2026.md § 1.5, 1.6
+- [ ] Domain (vaultfolio.app tai vaultfolio.fi)
+- [ ] Landing page (ZK-selitys, dashboard-preview, pricing)
+- [ ] Suomenkielinen SEO-artikkeli (Verohallinto + OmaVero)
+- [ ] Show HN -launch
+
+### Feature 28: AI Transaction Classification ❌
+**Speksi:** PRODUCT_ROADMAP_2026.md § 3
+- [ ] Transaktion tyyppiluokittelu epäselvistä kuvauksista (Claude API, client-side)
+- [ ] ZK-yhteensopiva: data ei kulje VaultFolion palvelimen kautta
+- [ ] Käyttäjän opt-in ennen AI-kutsua
+
+### Feature 13 Vaihe 2: Binance + Kraken ❌
+**Speksi:** PRODUCT_ROADMAP_2026.md § 1.3
+- [ ] Binance plugin (CSV + API)
+- [ ] Kraken plugin (API)
+- [ ] Northcrypto CSV-import
+- [ ] Coinmotion CSV-import
+
+---
+
 ## EI TOTEUTETTU (backlogissa)
 
 ### Feature 15: Dashboard Alert Popup ❌
@@ -563,7 +623,7 @@ Ks. [ISSUE_LOG.md](../ISSUE_LOG.md) tarkemmat kuvaukset.
 | P0-bugit | 4/4 ✅ |
 | Toteutetut featuret | 13 (01-12, 22-23) + 21 |
 | Toteutuksessa | 0 |
-| Suunnitteilla | 2 (13, 14) |
+| Suunnitteilla 2026 | 6 (24-28, 13v2) — ks. PRODUCT_ROADMAP_2026.md |
 | Backlog | 5 (15-17, 19-20) |
 | Avoimet P1-bugit | 5 |
 | Avoimet P2/P3-bugit | 4 |
@@ -578,7 +638,15 @@ Feature 12: Auth/Vault UX ✅ VALMIS
 Feature 22: UI/UX Redesign + Design System ✅ VALMIS
 Feature 23: Premium UI shadcn/ui + Framer Motion ✅ VALMIS
 
-→ Feature 13: Imports Registry
-→ Feature 14: Billing
+→ Feature 13: Imports Registry ✅
+→ Feature 14: Billing ✅
+→ Feature 24: Settings siivous + Tax Profile
+→ Feature 25: Finnish Tax Parity (HMO, transfer detection, OmaVero)
+→ Feature 13 Vaihe 2: Binance + Kraken
+→ Feature 26: Dashboard + UX Polish
+→ Feature 27: Domain + Landing Page
+→ Feature 28: AI Transaction Classification
 → Feature 15-20: backlogista prioriteettien mukaan
+
+Täydellinen suunnitelma: docs/PRODUCT_ROADMAP_2026.md
 ```
