@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../ui';
-import { fetchCoinbaseAccounts, type CoinbaseCreds } from '../../integrations/coinbase/coinbaseSync';
+import {
+  fetchCoinbaseAccounts,
+  type CoinbaseCreds,
+} from '../../integrations/coinbase/coinbaseSync';
 import {
   loadCoinbaseIntegration,
   saveCoinbaseIntegration,
@@ -118,7 +121,9 @@ export function CoinbaseConnectForm({ ctx, onConnected }: ConnectFormProps) {
         variant="default"
         size="sm"
         onClick={() => void connect()}
-        disabled={loading || !ctx.passphrase || !ctx.token || !keyName.trim() || !privateKeyPem.trim()}
+        disabled={
+          loading || !ctx.passphrase || !ctx.token || !keyName.trim() || !privateKeyPem.trim()
+        }
         data-testid="btn-coinbase-connect"
       >
         {loading ? 'Connecting…' : t('imports.btn.connect')}

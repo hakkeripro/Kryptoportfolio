@@ -2,12 +2,7 @@
 // Currently unused — Coinbase uses inline form via ProviderCard.
 // Reserved for Phase 2+ providers that benefit from a stepped wizard UX.
 
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '../ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '../ui/sheet';
 
 interface ImportWizardProps {
   open: boolean;

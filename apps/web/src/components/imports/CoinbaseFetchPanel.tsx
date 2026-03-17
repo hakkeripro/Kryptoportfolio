@@ -89,7 +89,9 @@ export function CoinbaseFetchPanel({ ctx }: FetchPanelProps) {
 
   const canCommit = !!preview && preview.issues.length === 0 && preview.newEvents.length > 0;
 
-  async function loadAccountsIfNeeded(creds: Awaited<ReturnType<typeof loadCoinbaseIntegration>>['credentials']) {
+  async function loadAccountsIfNeeded(
+    creds: Awaited<ReturnType<typeof loadCoinbaseIntegration>>['credentials'],
+  ) {
     if (!creds) throw new Error('Not connected');
     if (accounts.length) return accounts;
     const accs = await fetchCoinbaseAccounts(ctx.apiBase, ctx.token, creds);
@@ -148,7 +150,12 @@ export function CoinbaseFetchPanel({ ctx }: FetchPanelProps) {
         tradeValuationBaseByTradeKey,
         rewardFmvTotalBaseByTxId,
       };
-      const p0 = buildCoinbaseImportPreview({ items: fetched, baseCurrency: base, settings, overrides });
+      const p0 = buildCoinbaseImportPreview({
+        items: fetched,
+        baseCurrency: base,
+        settings,
+        overrides,
+      });
       const p = await computeCoinbaseDedupe(p0);
       setPreview(p);
       if (autoCommit && !p.issues.length) {
@@ -284,7 +291,10 @@ export function CoinbaseFetchPanel({ ctx }: FetchPanelProps) {
           <div className="grid grid-cols-2 gap-2">
             <div className="flex items-center justify-between">
               <span className="text-content-secondary">{t('imports.autosync.status')}</span>
-              <span className="font-mono text-content-primary" data-testid="badge-coinbase-autosync-inflight">
+              <span
+                className="font-mono text-content-primary"
+                data-testid="badge-coinbase-autosync-inflight"
+              >
                 {cbStatus.data?.inFlight
                   ? t('imports.autosync.running')
                   : t('imports.autosync.idle')}
@@ -307,7 +317,9 @@ export function CoinbaseFetchPanel({ ctx }: FetchPanelProps) {
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-content-secondary">{t('imports.autosync.fetchedLastTime')}</span>
+              <span className="text-content-secondary">
+                {t('imports.autosync.fetchedLastTime')}
+              </span>
               <span className="font-mono text-content-primary">
                 {typeof cbStatus.data?.lastFetchedCount === 'number'
                   ? cbStatus.data.lastFetchedCount
@@ -410,10 +422,11 @@ export function CoinbaseFetchPanel({ ctx }: FetchPanelProps) {
                       <div className="flex items-center justify-between">
                         <div className="text-caption font-medium text-content-primary">
                           {e.type} {e.amount}{' '}
-                          {String(e.assetId).replace(/^asset_/, '').toUpperCase()}
+                          {String(e.assetId)
+                            .replace(/^asset_/, '')
+                            .toUpperCase()}
                         </div>
-                        {e.externalRef &&
-                        preview.duplicateExternalRefs.includes(e.externalRef) ? (
+                        {e.externalRef && preview.duplicateExternalRefs.includes(e.externalRef) ? (
                           <span
                             className="rounded-full bg-surface-overlay text-content-tertiary px-2 py-0.5 text-[0.625rem]"
                             data-testid={`badge-import-dup-${e.id}`}
@@ -657,7 +670,8 @@ export function CoinbaseFetchPanel({ ctx }: FetchPanelProps) {
           </div>
           <div className="grid gap-1 text-caption text-content-primary">
             <div>
-              {t('imports.done.fetched')} <span className="font-mono">{String(commitResult.fetched)}</span>
+              {t('imports.done.fetched')}{' '}
+              <span className="font-mono">{String(commitResult.fetched)}</span>
             </div>
             <div>
               {t('imports.done.mappedEvents')}{' '}

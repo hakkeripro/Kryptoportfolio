@@ -33,7 +33,12 @@ describe('coinbasePlugin', () => {
     vi.mocked(loadCoinbaseIntegration).mockResolvedValue({
       schemaVersion: 1,
       credentials: undefined,
-      settings: { autoSync: true, autoCommit: true, intervalMinutes: 10, lastSeenTxIdByAccount: {} },
+      settings: {
+        autoSync: true,
+        autoCommit: true,
+        intervalMinutes: 10,
+        lastSeenTxIdByAccount: {},
+      },
     });
     const result = await coinbasePlugin.isConnected('test-passphrase');
     expect(result).toBe(false);
@@ -43,7 +48,12 @@ describe('coinbasePlugin', () => {
     vi.mocked(loadCoinbaseIntegration).mockResolvedValue({
       schemaVersion: 1,
       credentials: { keyName: 'key', privateKeyPem: '---PEM---' },
-      settings: { autoSync: true, autoCommit: true, intervalMinutes: 10, lastSeenTxIdByAccount: {} },
+      settings: {
+        autoSync: true,
+        autoCommit: true,
+        intervalMinutes: 10,
+        lastSeenTxIdByAccount: {},
+      },
     });
     const result = await coinbasePlugin.isConnected('test-passphrase');
     expect(result).toBe(true);

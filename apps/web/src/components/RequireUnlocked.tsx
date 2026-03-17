@@ -22,12 +22,7 @@ export default function RequireUnlocked({ children }: { children: React.ReactNod
 
   if (!vaultSetup) {
     if (token) {
-      return (
-        <Navigate
-          to={`/vault/setup?ondevice=1&next=${encodeURIComponent(next)}`}
-          replace
-        />
-      );
+      return <Navigate to={`/vault/setup?ondevice=1&next=${encodeURIComponent(next)}`} replace />;
     }
     return <Navigate to={`/welcome?next=${encodeURIComponent(next)}`} replace />;
   }

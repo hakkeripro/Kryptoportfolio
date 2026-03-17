@@ -612,7 +612,9 @@ export default function TransactionsPage() {
             <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/30">
               // {t('transactions.ledger.title')}
             </span>
-            <div className="text-[11px] font-mono text-white/20">{filteredEvents.length} events</div>
+            <div className="text-[11px] font-mono text-white/20">
+              {filteredEvents.length} events
+            </div>
           </div>
 
           {/* Table header */}

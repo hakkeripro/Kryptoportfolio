@@ -96,9 +96,7 @@ export function ProviderCard({
       </div>
 
       {/* Connect form (when not connected) */}
-      {!isConnected && (
-        <plugin.ConnectForm ctx={ctx} onConnected={onConnected} />
-      )}
+      {!isConnected && <plugin.ConnectForm ctx={ctx} onConnected={onConnected} />}
 
       {/* Connected badge */}
       {isConnected && (

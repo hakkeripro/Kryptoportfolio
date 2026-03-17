@@ -42,9 +42,7 @@ export function UpgradeModal({ open, onClose }: UpgradeModalProps) {
               <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/30 mb-1">
                 // TAX_REPORT
               </p>
-              <h2 className="text-lg font-semibold text-white leading-tight">
-                Tax Plan — Premium
-              </h2>
+              <h2 className="text-lg font-semibold text-white leading-tight">Tax Plan — Premium</h2>
               <p className="text-[13px] text-white/50 mt-0.5">~29–49 EUR / year</p>
             </div>
             <button
