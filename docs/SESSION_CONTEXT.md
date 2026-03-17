@@ -22,13 +22,33 @@ Ei avoimia P0-bugeja. Kaikki korjattu 2026-03-14.
 - CI: puuttuu typecheck, lint, coverage, audit, preview deploy
 
 ### Seuraava tyovaihe
-Feature 24 (Settings siivous + Tax Profile) valmis 2026-03-17.
+Feature 25 Vaihe 1 (Finnish Tax Parity — HMO, blur-gate, OmaVero, issue filter) valmis 2026-03-17.
 
-Seuraavaksi: Feature 25 (Finnish Tax Parity) → Feature 26 (Dashboard + UX Polish)
+Seuraavaksi: Feature 25 Vaihe 2 (wallet-level FIFO + transfer detection) → Feature 26 (Dashboard + UX Polish)
 
 ---
 
 ## Muutosloki
+
+### 2026-03-17 — Feature 25 Vaihe 1: Finnish Tax Parity
+
+**Uudet tiedostot:**
+- `packages/core/src/tax/hmoCalculator.ts` — HMO-laskuri (applyHmo), 20%/40%, omistusaika-laskenta lotsMatched.acquiredAtISO:sta
+- `packages/core/src/__tests__/hmoCalculator.test.ts` — 7 unit-testiä (kaikki läpi)
+- `apps/web/src/components/ui/BlurOverlay.tsx` — blur-efekti free-käyttäjille (CSS filter, ei DOM-piilotus)
+- `apps/web/src/components/tax/OmaVeroGuide.tsx` — OmaVero-täyttöopas Pro-käyttäjille + copy-painikkeet
+
+**Muutetut tiedostot:**
+- `packages/core/src/domain/portfolio.ts` — DisposalLotMatch: `acquiredAtISO?: IsoString` lisätty
+- `packages/core/src/portfolio/lotEngine.ts` — takeFromLot välittää `acquiredAtISO`, lotsMatched-mapissa
+- `packages/core/src/domain/tax.ts` — HmoAdjustment + HmoResult skeema, TaxYearReport: hmoEnabled/hmoTotalSavingBase/hmoAdjustments
+- `packages/core/src/tax/taxEngine.ts` — `hmoEnabled` optio GenerateTaxReportOptions, kutsuu applyHmo()
+- `packages/core/src/billing/planTypes.ts` — GatedFeature: `hmo-calculator` + `omavero-guide` (Pro-only)
+- `apps/web/src/components/ui/index.ts` — BlurOverlay export
+- `apps/web/src/pages/TaxPage.tsx` — HMO-toggle (Finland-profiili), BlurOverlay KPI+disposals, OmaVero-osio, HMO-säästöbanneri
+- `apps/web/src/pages/TransactionsPage.tsx` — issue filter napit (All/Issues/Missing value/Unmatched transfer)
+
+**Testit:** 130 → 137 testiä (kaikki läpi)
 
 ### 2026-03-17 — Feature 24: Settings siivous + Tax Profile
 
@@ -47,7 +67,7 @@ Seuraavaksi: Feature 25 (Finnish Tax Parity) → Feature 26 (Dashboard + UX Poli
 - `apps/web/src/pages/VaultSetupPage.tsx` — country step lisätty (step 0), 4 askelta yhteensä
 - `apps/web/tests-e2e/helpers.ts` — signupAndSetupVault + setupVaultOffline: skip country step
 
-**Testitulos:** Unit 186/186 ✅ (117 core + 69 web)
+**Testitulos:** Unit 188/188 ✅ (117 core + 2 api + 69 web)
 
 ---
 

@@ -134,6 +134,7 @@ export default function TransactionsPage() {
   const [showForm, setShowForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('ALL');
+  const [issueFilter, setIssueFilter] = useState<'ALL' | 'ISSUES' | 'MISSING_VALUE' | 'UNMATCHED_TRANSFER'>('ALL');
 
   const dbState = useDbQuery(
     async (db) => {
@@ -316,9 +317,29 @@ export default function TransactionsPage() {
     }));
   }, [dbState.data.events, assetsById, accountsById]);
 
+  function isMissingValue(e: any): boolean {
+    return (
+      (e.type === 'REWARD' || e.type === 'STAKING_REWARD' || e.type === 'AIRDROP') &&
+      !e.fmvTotalBase &&
+      !e.fmvPerUnitBase
+    );
+  }
+
+  function isUnmatchedTransfer(e: any): boolean {
+    // V1 heuristic: negative TRANSFER amount (outgoing) without a match flag
+    return e.type === 'TRANSFER' && Number(e.amount) < 0;
+  }
+
   const filteredEvents = useMemo(() => {
     let list = eventsView;
     if (typeFilter !== 'ALL') list = list.filter((e: any) => e.type === typeFilter);
+    if (issueFilter === 'ISSUES') {
+      list = list.filter((e: any) => isMissingValue(e) || isUnmatchedTransfer(e));
+    } else if (issueFilter === 'MISSING_VALUE') {
+      list = list.filter((e: any) => isMissingValue(e));
+    } else if (issueFilter === 'UNMATCHED_TRANSFER') {
+      list = list.filter((e: any) => isUnmatchedTransfer(e));
+    }
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       list = list.filter(
@@ -329,7 +350,7 @@ export default function TransactionsPage() {
       );
     }
     return list;
-  }, [eventsView, typeFilter, searchQuery]);
+  }, [eventsView, typeFilter, issueFilter, searchQuery]);
 
   const selectedEvent = useMemo(() => {
     if (!detailsId) return null;
@@ -398,6 +419,34 @@ export default function TransactionsPage() {
             </option>
           ))}
         </select>
+
+        {/* Issue filter buttons */}
+        <div
+          data-testid="issue-filter-buttons"
+          className="flex items-center gap-1 rounded-input border border-border bg-surface-base px-1 h-9"
+        >
+          {(
+            [
+              { id: 'ALL', label: 'All' },
+              { id: 'ISSUES', label: '⚠ Issues' },
+              { id: 'MISSING_VALUE', label: 'Missing value' },
+              { id: 'UNMATCHED_TRANSFER', label: 'Unmatched transfer' },
+            ] as const
+          ).map((f) => (
+            <button
+              key={f.id}
+              data-testid={`filter-issue-${f.id.toLowerCase().replace('_', '-')}`}
+              onClick={() => setIssueFilter(f.id)}
+              className={`px-2.5 py-1 rounded text-[11px] font-mono transition-colors ${
+                issueFilter === f.id
+                  ? 'bg-[#FF8400]/20 text-[#FF8400]'
+                  : 'text-content-tertiary hover:text-content-secondary'
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
       </motion.div>
 
       <AnimatePresence>

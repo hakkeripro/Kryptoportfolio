@@ -62,3 +62,4 @@ export { EmptyState } from './EmptyState';
 export { TokenIcon } from './TokenIcon';
 export { KpiCard } from './KpiCard';
 export { Logo } from './Logo';
+export { BlurOverlay } from './BlurOverlay';

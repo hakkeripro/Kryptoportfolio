@@ -4,6 +4,7 @@ import { normalizeActiveLedger } from '../domain/ledger.js';
 import type { Settings } from '../domain/settings.js';
 import type { TaxYearReport, TaxIncomeRow, TaxHoldingRow, TaxYearTotals } from '../domain/tax.js';
 import { replayLedgerToLotsAndDisposals } from '../portfolio/lotEngine.js';
+import { applyHmo } from './hmoCalculator.js';
 
 function d(s: string | undefined | null): Decimal {
   if (!s) return new Decimal(0);
@@ -23,6 +24,8 @@ function endOfTaxYearISO(year: number): string {
 export type GenerateTaxReportOptions = {
   /** Override tax year lot method (defaults to settings + taxProfile). */
   lotMethodOverride?: Settings['lotMethodDefault'];
+  /** Apply Finnish acquisition cost assumption (HMO) to disposals. Finland profile only. */
+  hmoEnabled?: boolean;
 };
 
 export function lotMethodForTax(
@@ -103,6 +106,10 @@ export function generateTaxYearReport(
     incomeBase: toFixed(income.reduce((acc, x) => acc.add(d(x.incomeBase)), new Decimal(0))),
   };
 
+  // HMO (hankintameno-olettama) — Finland only
+  const hmoEnabled = !!(opts.hmoEnabled && settings.taxProfile === 'FINLAND');
+  const hmoResult = hmoEnabled ? applyHmo(disposals, true) : undefined;
+
   return {
     year,
     baseCurrency: settings.baseCurrency,
@@ -114,5 +121,12 @@ export function generateTaxYearReport(
     yearEndHoldings,
     totals,
     warnings,
+    ...(hmoResult
+      ? {
+          hmoEnabled: true,
+          hmoTotalSavingBase: hmoResult.totalSavingBase,
+          hmoAdjustments: hmoResult.adjustments,
+        }
+      : {}),
   };
 }

@@ -16,6 +16,7 @@ export const DisposalLotMatch = z.object({
   lotId: z.string().min(1),
   amount: DecimalString,
   costBasisBase: DecimalString,
+  acquiredAtISO: IsoString.optional(),
 });
 
 export const Disposal = z.object({

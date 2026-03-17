@@ -488,13 +488,13 @@ Ks. [ISSUE_LOG.md](../ISSUE_LOG.md) tarkemmat kuvaukset.
 - [x] `taxCountry` + `hmoEnabled` Settings-skeemaan
 - [x] Maa-valinta onboardingiin (VaultSetupWizard)
 
-### Feature 25: Finnish Tax Parity ❌
+### Feature 25: Finnish Tax Parity 🔄 (Vaihe 1 valmis)
 **Speksi:** [25_finnish-tax-parity.md](25_finnish-tax-parity.md)
 **Prioriteetti:** P1 — kriittinen kilpailupariteetti
-- [ ] **Vaihe 1:** HMO-laskuri (20%/40%, automaattinen omistusaikalaskenta)
-- [ ] **Vaihe 1:** Blur-gate verolaskennan tuloksille (Free-käyttäjille)
-- [ ] **Vaihe 1:** OmaVero copy-paste -opas (Pro-gated)
-- [ ] **Vaihe 1:** Tax issue -filter TransactionsPage:lla
+- [x] **Vaihe 1:** HMO-laskuri (20%/40%, automaattinen omistusaikalaskenta)
+- [x] **Vaihe 1:** Blur-gate verolaskennan tuloksille (Free-käyttäjille)
+- [x] **Vaihe 1:** OmaVero copy-paste -opas (Pro-gated)
+- [x] **Vaihe 1:** Tax issue -filter TransactionsPage:lla
 - [ ] **Vaihe 2:** Lompakkokohtainen FIFO (Verohallinnon ohje)
 - [ ] **Vaihe 2:** Transfer detection + review UI (omat siirrot pörssien välillä)
 
@@ -526,11 +526,13 @@ Ks. [ISSUE_LOG.md](../ISSUE_LOG.md) tarkemmat kuvaukset.
 - [ ] Käyttäjän opt-in ennen AI-kutsua
 
 ### Feature 13 Vaihe 2: Binance + Kraken ❌
-**Speksi:** PRODUCT_ROADMAP_2026.md § 1.3
-- [ ] Binance plugin (CSV + API)
-- [ ] Kraken plugin (API)
-- [ ] Northcrypto CSV-import
-- [ ] Coinmotion CSV-import
+**Speksi:** [13v2_imports-phase2.md](13v2_imports-phase2.md)
+**Vaihe 2B (erillinen speksi):** Northcrypto CSV + Coinmotion CSV
+**Vaihe 3 (erillinen speksi):** MetaMask (korkea prioriteetti)
+- [ ] A: ImportPlugin capability-redesign (api + csv) + Coinbase-migraatio
+- [ ] B: Binance plugin (HMAC API + Statement CSV)
+- [ ] C: Kraken plugin (HMAC API)
+- [ ] D: Coming-soon lista päivitetty (Northcrypto, Coinmotion, Bybit, MetaMask, Bitstamp jne.)
 
 ---
 

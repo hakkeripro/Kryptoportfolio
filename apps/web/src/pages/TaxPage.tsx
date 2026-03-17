@@ -9,9 +9,9 @@ import { ensureWebDbOpen } from '@kp/platform-web';
 import { useDbQuery } from '../hooks/useDbQuery';
 import { useFeatureGate } from '../hooks/useFeatureGate';
 import { ensureDefaultSettings } from '../derived/ensureDefaultSettings';
-import { Card, KpiCard, Button, TokenIcon } from '../components/ui';
-import { GateWall } from '../components/billing/GateWall';
+import { Card, KpiCard, Button, TokenIcon, BlurOverlay } from '../components/ui';
 import { UpgradeModal } from '../components/billing/UpgradeModal';
+import { OmaVeroGuide } from '../components/tax/OmaVeroGuide';
 import { pageTransition, fadeInUp, staggerContainer } from '../lib/animations';
 
 function d(s: string | undefined | null): Decimal {
@@ -75,6 +75,9 @@ function buildCsv(report: TaxYearReport, assetsById: Map<string, Asset>): string
   lines.push(`Totals,,,,,${report.totals.feesBase},${report.totals.realizedGainBase},`);
   lines.push(`Proceeds,${report.totals.proceedsBase}`);
   lines.push(`CostBasis,${report.totals.costBasisBase}`);
+  if (report.hmoEnabled) {
+    lines.push(`HMO total saving,${report.hmoTotalSavingBase ?? '0'}`);
+  }
   lines.push('');
   lines.push('Income (rewards/airdrops)');
   lines.push(
@@ -160,9 +163,14 @@ export default function TaxPage() {
   const [year, setYear] = useState<number>(new Date().getUTCFullYear());
   const [report, setReport] = useState<TaxYearReport | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
+  const [hmoEnabled, setHmoEnabled] = useState(false);
 
   const exportCsvGate = useFeatureGate('tax-export-csv');
   const exportPdfGate = useFeatureGate('tax-export-pdf');
+  const hmoGate = useFeatureGate('hmo-calculator');
+  const omaveroGate = useFeatureGate('omavero-guide');
+  const taxViewGate = useFeatureGate('tax-report-view');
+
   const [taxProfileOverride, setTaxProfileOverride] = useState<'GENERIC' | 'FINLAND'>('GENERIC');
   const [lotMethodOverride, setLotMethodOverride] = useState<'FIFO' | 'LIFO' | 'HIFO' | 'AVG_COST'>(
     'FIFO',
@@ -181,6 +189,7 @@ export default function TaxPage() {
   }, [dbState.data.settings?.updatedAtISO]);
 
   const baseCurrency = String(dbState.data.settings?.baseCurrency ?? 'EUR').toUpperCase();
+  const isFinland = taxProfileOverride === 'FINLAND';
 
   async function generate() {
     setMsg(null);
@@ -193,7 +202,7 @@ export default function TaxPage() {
         dbState.data.events,
         { ...settings, taxProfile: effProfile } as any,
         year,
-        { lotMethodOverride: effLot },
+        { lotMethodOverride: effLot, hmoEnabled: isFinland && hmoGate.allowed && hmoEnabled },
       );
       setReport(r);
     } catch (e) {
@@ -224,6 +233,32 @@ export default function TaxPage() {
   }
 
   const realizedGain = report ? d(report.totals.realizedGainBase) : new Decimal(0);
+
+  const kpiCards = report
+    ? [
+        {
+          testId: 'kpi-total-gains',
+          label: t('tax.kpi.realizedGain'),
+          value: fmtMoney(report.totals.realizedGainBase, report.baseCurrency),
+          delta: `${report.disposals.length} disposals`,
+          deltaType: realizedGain.gte(0) ? ('positive' as const) : ('negative' as const),
+        },
+        {
+          testId: 'kpi-total-income',
+          label: t('tax.kpi.income'),
+          value: fmtMoney(report.totals.incomeBase, report.baseCurrency),
+          delta: `${report.income.length} events`,
+          deltaType: 'neutral' as const,
+        },
+        {
+          testId: 'kpi-cost-basis',
+          label: t('tax.kpi.costBasis'),
+          value: fmtMoney(report.totals.costBasisBase, report.baseCurrency),
+          delta: `Tax profile: ${report.taxProfile}`,
+          deltaType: 'neutral' as const,
+        },
+      ]
+    : [];
 
   return (
     <motion.div className="space-y-section" {...pageTransition}>
@@ -259,8 +294,8 @@ export default function TaxPage() {
             data-testid="form-tax-lot-method"
             className="rounded-input bg-surface-base border border-border px-3 py-2 text-body text-content-primary
               focus:outline-none focus:border-brand/40 transition-colors h-9"
-            value={taxProfileOverride === 'FINLAND' ? 'FIFO' : lotMethodOverride}
-            disabled={taxProfileOverride === 'FINLAND'}
+            value={isFinland ? 'FIFO' : lotMethodOverride}
+            disabled={isFinland}
             onChange={(e) => setLotMethodOverride(e.target.value as any)}
           >
             <option value="FIFO">FIFO</option>
@@ -279,6 +314,27 @@ export default function TaxPage() {
             <option value="GENERIC">{t('tax.profile.generic')}</option>
             <option value="FINLAND">{t('tax.profile.finland')}</option>
           </select>
+
+          {/* HMO toggle — Finland profile only */}
+          {isFinland && (
+            <label
+              data-testid="toggle-hmo"
+              className="flex items-center gap-2 cursor-pointer select-none"
+            >
+              <input
+                type="checkbox"
+                checked={hmoEnabled}
+                onChange={(e) => setHmoEnabled(e.target.checked)}
+                className="w-3.5 h-3.5 accent-[#FF8400]"
+              />
+              <span className="text-[12px] text-content-secondary">
+                HMO
+                {!hmoGate.allowed && (
+                  <span className="ml-1 text-[#FF8400]">🔒</span>
+                )}
+              </span>
+            </label>
+          )}
 
           <Button
             variant="default"
@@ -308,137 +364,48 @@ export default function TaxPage() {
         </div>
       </motion.div>
 
-      {/* Upgrade modals for export gates */}
+      {/* Upgrade modals */}
       <UpgradeModal open={exportCsvGate.upgradeModalOpen} onClose={exportCsvGate.closeUpgrade} />
       <UpgradeModal open={exportPdfGate.upgradeModalOpen} onClose={exportPdfGate.closeUpgrade} />
+      <UpgradeModal open={hmoGate.upgradeModalOpen} onClose={hmoGate.closeUpgrade} />
+      <UpgradeModal open={omaveroGate.upgradeModalOpen} onClose={omaveroGate.closeUpgrade} />
 
       {msg && <div className="text-caption text-semantic-error">{msg}</div>}
 
-      {/* KPI Cards — 3 columns */}
+      {/* KPI Cards — blurred for free users */}
       {report && (
-        <motion.div
-          className="grid grid-cols-1 sm:grid-cols-3 gap-4"
-          variants={staggerContainer}
-          initial="hidden"
-          animate="show"
-        >
-          {[
-            {
-              testId: 'kpi-total-gains',
-              label: t('tax.kpi.realizedGain'),
-              value: fmtMoney(report.totals.realizedGainBase, report.baseCurrency),
-              delta: `${report.disposals.length} disposals`,
-              deltaType: realizedGain.gte(0) ? ('positive' as const) : ('negative' as const),
-            },
-            {
-              testId: 'kpi-total-income',
-              label: t('tax.kpi.income'),
-              value: fmtMoney(report.totals.incomeBase, report.baseCurrency),
-              delta: `${report.income.length} events`,
-              deltaType: 'neutral' as const,
-            },
-            {
-              testId: 'kpi-cost-basis',
-              label: t('tax.kpi.costBasis'),
-              value: fmtMoney(report.totals.costBasisBase, report.baseCurrency),
-              delta: `Tax profile: ${report.taxProfile}`,
-              deltaType: 'neutral' as const,
-            },
-          ].map((kpi) => (
-            <motion.div key={kpi.testId} data-testid={kpi.testId} variants={fadeInUp}>
-              <KpiCard {...kpi} />
-            </motion.div>
-          ))}
+        <motion.div variants={staggerContainer} initial="hidden" animate="show">
+          {taxViewGate.allowed ? (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {kpiCards.map((kpi) => (
+                <motion.div key={kpi.testId} data-testid={kpi.testId} variants={fadeInUp}>
+                  <KpiCard {...kpi} />
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <BlurOverlay onUpgrade={taxViewGate.openUpgrade}>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {kpiCards.map((kpi) => (
+                  <div key={kpi.testId} data-testid={kpi.testId}>
+                    <KpiCard {...kpi} />
+                  </div>
+                ))}
+              </div>
+            </BlurOverlay>
+          )}
         </motion.div>
       )}
 
-      {/* Disposals table — gated for premium */}
+      {/* Disposals table — blurred for free users */}
       <motion.div variants={fadeInUp} initial="hidden" animate="show">
-        <GateWall feature="tax-report-view">
-          <Card className="p-0 overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
-              <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/30">
-                // {t('tax.disposals.title')}
-              </span>
-              {report && (
-                <div className="text-caption text-content-tertiary">
-                  {report.disposals.length} {t('tax.disposals.title').toLowerCase()}
-                </div>
-              )}
-            </div>
-
-            <div data-testid="list-tax-disposals" className="overflow-auto">
-              {/* Table header */}
-              <div className="grid grid-cols-[1.2fr_1fr_0.8fr_1fr_1fr_0.8fr_1fr] gap-2 px-5 py-2.5 border-b border-white/[0.04]">
-                {[
-                  t('tax.table.date'),
-                  t('tax.table.asset'),
-                  t('tax.table.amount'),
-                  t('tax.table.proceeds'),
-                  t('tax.table.costBasis'),
-                  t('tax.table.fees'),
-                  t('tax.table.gainLoss'),
-                ].map((h) => (
-                  <span
-                    key={h}
-                    className="text-[10px] font-mono uppercase tracking-[0.15em] text-white/20"
-                  >
-                    {h}
-                  </span>
-                ))}
-              </div>
-
-              {(report?.disposals ?? []).map((r) => {
-                const sym = assetsById.get(r.assetId)?.symbol ?? r.assetId;
-                const gain = d(r.realizedGainBase);
-                return (
-                  <div
-                    key={r.eventId}
-                    data-testid={`row-tax-disposal-${r.eventId}`}
-                    className="grid grid-cols-[1.2fr_1fr_0.8fr_1fr_1fr_0.8fr_1fr] gap-2 items-center py-3 px-5
-                    border-b border-white/[0.04] hover:bg-[#FF8400]/[0.04] transition-colors"
-                  >
-                    <div className="text-[13px] text-content-secondary font-mono">
-                      {new Date(r.disposedAtISO).toLocaleDateString()}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <TokenIcon symbol={sym} size="sm" />
-                      <span className="text-[13px] text-content-primary font-medium">{sym}</span>
-                    </div>
-                    <div className="text-[13px] font-mono text-content-secondary text-right">
-                      {r.amount}
-                    </div>
-                    <div className="text-[13px] font-mono text-content-primary text-right">
-                      {fmtMoney(r.proceedsBase, report?.baseCurrency ?? 'EUR')}
-                    </div>
-                    <div className="text-[13px] font-mono text-content-secondary text-right">
-                      {fmtMoney(r.costBasisBase, report?.baseCurrency ?? 'EUR')}
-                    </div>
-                    <div className="text-[13px] font-mono text-content-tertiary text-right">
-                      {fmtMoney(r.feeBase, report?.baseCurrency ?? 'EUR')}
-                    </div>
-                    <div
-                      className={`text-[13px] font-mono text-right font-semibold ${gain.gte(0) ? 'text-semantic-success' : 'text-semantic-error'}`}
-                    >
-                      {fmtMoney(r.realizedGainBase, report?.baseCurrency ?? 'EUR')}
-                    </div>
-                  </div>
-                );
-              })}
-
-              {!report && (
-                <div className="py-12 text-center text-caption text-content-tertiary">
-                  {t('tax.disposals.generatePrompt')}
-                </div>
-              )}
-              {report && report.disposals.length === 0 && (
-                <div className="py-12 text-center text-caption text-content-tertiary">
-                  {t('tax.disposals.empty', { year: report.year })}
-                </div>
-              )}
-            </div>
-          </Card>
-        </GateWall>
+        {taxViewGate.allowed ? (
+          <DisposalsTable report={report} assetsById={assetsById} t={t} baseCurrency={baseCurrency} />
+        ) : (
+          <BlurOverlay onUpgrade={taxViewGate.openUpgrade}>
+            <DisposalsTable report={report} assetsById={assetsById} t={t} baseCurrency={baseCurrency} />
+          </BlurOverlay>
+        )}
       </motion.div>
 
       {/* Income + Holdings (side by side) */}
@@ -554,6 +521,41 @@ export default function TaxPage() {
         </div>
       )}
 
+      {/* HMO saving banner */}
+      {report?.hmoEnabled && report.hmoTotalSavingBase && d(report.hmoTotalSavingBase).gt(0) && (
+        <div className="rounded-lg border border-[#FF8400]/20 bg-[#FF8400]/[0.04] px-4 py-3 text-[12px] text-white/70">
+          HMO reduced taxable gain by{' '}
+          <span className="text-[#FF8400] font-semibold">
+            {fmtMoney(report.hmoTotalSavingBase, baseCurrency)}
+          </span>{' '}
+          — applied in {(report.hmoAdjustments ?? []).filter((a) => a.applied).length} disposals
+        </div>
+      )}
+
+      {/* OmaVero Guide — Finland profile + report generated + Pro */}
+      {report && isFinland && (
+        omaveroGate.allowed ? (
+          <OmaVeroGuide report={report} />
+        ) : (
+          <Card data-testid="panel-omavero-locked">
+            <div className="flex items-center gap-3">
+              <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/30">
+                // OMAVERO GUIDE
+              </span>
+              <span className="text-[12px] text-white/40">
+                🔒 Pro — step-by-step OmaVero filing guide
+              </span>
+              <button
+                onClick={omaveroGate.openUpgrade}
+                className="ml-auto text-[11px] text-[#FF8400] hover:underline"
+              >
+                Upgrade →
+              </button>
+            </div>
+          </Card>
+        )
+      )}
+
       {report?.warnings?.length ? (
         <Card>
           <h2 className="text-body font-medium text-content-primary mb-2">
@@ -567,5 +569,104 @@ export default function TaxPage() {
         </Card>
       ) : null}
     </motion.div>
+  );
+}
+
+// Sub-component to avoid duplication between gated/ungated renders
+function DisposalsTable({
+  report,
+  assetsById,
+  t,
+  baseCurrency,
+}: {
+  report: TaxYearReport | null;
+  assetsById: Map<string, Asset>;
+  t: (key: string, opts?: any) => string;
+  baseCurrency: string;
+}) {
+  return (
+    <Card className="p-0 overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
+        <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/30">
+          // {t('tax.disposals.title')}
+        </span>
+        {report && (
+          <div className="text-caption text-content-tertiary">
+            {report.disposals.length} {t('tax.disposals.title').toLowerCase()}
+          </div>
+        )}
+      </div>
+
+      <div data-testid="list-tax-disposals" className="overflow-auto">
+        <div className="grid grid-cols-[1.2fr_1fr_0.8fr_1fr_1fr_0.8fr_1fr] gap-2 px-5 py-2.5 border-b border-white/[0.04]">
+          {[
+            t('tax.table.date'),
+            t('tax.table.asset'),
+            t('tax.table.amount'),
+            t('tax.table.proceeds'),
+            t('tax.table.costBasis'),
+            t('tax.table.fees'),
+            t('tax.table.gainLoss'),
+          ].map((h) => (
+            <span
+              key={h}
+              className="text-[10px] font-mono uppercase tracking-[0.15em] text-white/20"
+            >
+              {h}
+            </span>
+          ))}
+        </div>
+
+        {(report?.disposals ?? []).map((r) => {
+          const sym = assetsById.get(r.assetId)?.symbol ?? r.assetId;
+          const gain = new Decimal(r.realizedGainBase);
+          const cur = report?.baseCurrency ?? baseCurrency;
+          return (
+            <div
+              key={r.eventId}
+              data-testid={`row-tax-disposal-${r.eventId}`}
+              className="grid grid-cols-[1.2fr_1fr_0.8fr_1fr_1fr_0.8fr_1fr] gap-2 items-center py-3 px-5
+              border-b border-white/[0.04] hover:bg-[#FF8400]/[0.04] transition-colors"
+            >
+              <div className="text-[13px] text-content-secondary font-mono">
+                {new Date(r.disposedAtISO).toLocaleDateString()}
+              </div>
+              <div className="flex items-center gap-2">
+                <TokenIcon symbol={sym} size="sm" />
+                <span className="text-[13px] text-content-primary font-medium">{sym}</span>
+              </div>
+              <div className="text-[13px] font-mono text-content-secondary text-right">
+                {r.amount}
+              </div>
+              <div className="text-[13px] font-mono text-content-primary text-right">
+                {`${new Decimal(r.proceedsBase).toDecimalPlaces(2).toFixed()} ${cur}`}
+              </div>
+              <div className="text-[13px] font-mono text-content-secondary text-right">
+                {`${new Decimal(r.costBasisBase).toDecimalPlaces(2).toFixed()} ${cur}`}
+              </div>
+              <div className="text-[13px] font-mono text-content-tertiary text-right">
+                {`${new Decimal(r.feeBase).toDecimalPlaces(2).toFixed()} ${cur}`}
+              </div>
+              <div
+                className={`text-[13px] font-mono text-right font-semibold ${gain.gte(0) ? 'text-semantic-success' : 'text-semantic-error'}`}
+              >
+                {`${gain.toDecimalPlaces(2).toFixed()} ${cur}`}
+              </div>
+            </div>
+          );
+        })}
+
+        {!report && (
+          <div className="py-12 text-center text-caption text-content-tertiary">
+            {t('tax.disposals.generatePrompt')}
+          </div>
+        )}
+        {report && report.disposals.length === 0 && (
+          <div className="py-12 text-center text-caption text-content-tertiary">
+            {t('tax.disposals.empty', { year: report.year })}
+          </div>
+        )}
+      </div>
+    </Card>
   );
 }

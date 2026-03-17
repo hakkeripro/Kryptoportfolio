@@ -3,6 +3,25 @@ import { DecimalString, IsoString, UuidString } from './common.js';
 import { TaxProfile } from './settings.js';
 import { Disposal } from './portfolio.js';
 
+export const HmoAdjustment = z.object({
+  disposalEventId: UuidString,
+  holdingYears: z.number(),
+  hmoRate: z.union([z.literal(0.2), z.literal(0.4)]),
+  hmoCostBasisBase: DecimalString,
+  actualCostBasisBase: DecimalString,
+  savedBase: DecimalString,
+  applied: z.boolean(),
+});
+
+export type HmoAdjustment = z.infer<typeof HmoAdjustment>;
+
+export const HmoResult = z.object({
+  adjustments: z.array(HmoAdjustment),
+  totalSavingBase: DecimalString,
+});
+
+export type HmoResult = z.infer<typeof HmoResult>;
+
 /**
  * Derived report row for reward / airdrop income.
  *
@@ -53,6 +72,9 @@ export const TaxYearReport = z.object({
   yearEndHoldings: z.array(TaxHoldingRow),
   totals: TaxYearTotals,
   warnings: z.array(z.string()),
+  hmoEnabled: z.boolean().optional(),
+  hmoTotalSavingBase: DecimalString.optional(),
+  hmoAdjustments: z.array(HmoAdjustment).optional(),
 });
 
 export type TaxYearReport = z.infer<typeof TaxYearReport>;

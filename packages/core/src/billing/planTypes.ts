@@ -5,7 +5,12 @@ export interface PlanInfo {
   planExpiresAt: string | null; // ISO 8601, null = no expiry
 }
 
-export type GatedFeature = 'tax-report-view' | 'tax-export-pdf' | 'tax-export-csv';
+export type GatedFeature =
+  | 'tax-report-view'
+  | 'tax-export-pdf'
+  | 'tax-export-csv'
+  | 'hmo-calculator'
+  | 'omavero-guide';
 
 /**
  * Pure function — determines whether a given plan allows a feature.
@@ -23,6 +28,8 @@ export function isFeatureAllowed(
       return effectivePlan === 'tax';
     case 'tax-export-pdf':
     case 'tax-export-csv':
+    case 'hmo-calculator':
+    case 'omavero-guide':
       return effectivePlan === 'tax';
     default:
       return false;

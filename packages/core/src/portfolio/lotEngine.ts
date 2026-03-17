@@ -51,7 +51,7 @@ function lotCostPerUnit(lot: Lot): Decimal {
 }
 
 type LotPick = {
-  matched: { lotId: string; amount: Decimal; costBasisBase: Decimal }[];
+  matched: { lotId: string; amount: Decimal; costBasisBase: Decimal; acquiredAtISO?: string }[];
   costBasisBase: Decimal;
 };
 
@@ -77,7 +77,7 @@ function pickLots(
     lot.amountRemaining = toFixed(lotAmt.sub(actual));
     lot.costBasisBaseRemaining = toFixed(lotCost.sub(costPart));
 
-    matched.push({ lotId: lot.lotId, amount: actual, costBasisBase: costPart });
+    matched.push({ lotId: lot.lotId, amount: actual, costBasisBase: costPart, acquiredAtISO: lot.acquiredAtISO });
     cost = cost.add(costPart);
     remaining = remaining.sub(actual);
   };
@@ -250,6 +250,7 @@ export function createLotEngine(settings: Settings): LotEngine {
           lotId: m.lotId,
           amount: toFixed(m.amount),
           costBasisBase: toFixed(m.costBasisBase),
+          ...(m.acquiredAtISO ? { acquiredAtISO: m.acquiredAtISO } : {}),
         })),
         taxYear: yearFromISO(e.timestampISO),
       });
@@ -300,6 +301,7 @@ export function createLotEngine(settings: Settings): LotEngine {
           lotId: m.lotId,
           amount: toFixed(m.amount),
           costBasisBase: toFixed(m.costBasisBase),
+          ...(m.acquiredAtISO ? { acquiredAtISO: m.acquiredAtISO } : {}),
         })),
         taxYear: yearFromISO(e.timestampISO),
       });
