@@ -3,7 +3,9 @@ import { initReactI18next } from 'react-i18next';
 import en from './locales/en.json';
 import fi from './locales/fi.json';
 
-const savedLang = localStorage.getItem('vaultfolio-lang') || 'en';
+const savedLang =
+  localStorage.getItem('privateledger-lang') || localStorage.getItem('vaultfolio-lang') || 'en';
+if (savedLang !== 'en') localStorage.setItem('privateledger-lang', savedLang);
 
 void i18n.use(initReactI18next).init({
   resources: { en: { translation: en }, fi: { translation: fi } },

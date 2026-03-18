@@ -12,6 +12,7 @@ import { ensureDefaultSettings } from '../derived/ensureDefaultSettings';
 import { Card, KpiCard, Button, TokenIcon, BlurOverlay } from '../components/ui';
 import { UpgradeModal } from '../components/billing/UpgradeModal';
 import { OmaVeroGuide } from '../components/tax/OmaVeroGuide';
+import { DataQualityCheck } from '../components/tax/DataQualityCheck';
 import { pageTransition, fadeInUp, staggerContainer } from '../lib/animations';
 
 function d(s: string | undefined | null): Decimal {
@@ -202,7 +203,11 @@ export default function TaxPage() {
         dbState.data.events,
         { ...settings, taxProfile: effProfile } as any,
         year,
-        { lotMethodOverride: effLot, hmoEnabled: isFinland && hmoGate.allowed && hmoEnabled },
+        {
+          lotMethodOverride: effLot,
+          hmoEnabled: isFinland && hmoGate.allowed && hmoEnabled,
+          enableTransferDetection: isFinland,
+        },
       );
       setReport(r);
     } catch (e) {
@@ -369,6 +374,11 @@ export default function TaxPage() {
       <UpgradeModal open={omaveroGate.upgradeModalOpen} onClose={omaveroGate.closeUpgrade} />
 
       {msg && <div className="text-caption text-semantic-error">{msg}</div>}
+
+      {/* Data Quality Check — always visible, helps user fix issues before generating */}
+      {dbState.data.events.length > 0 && (
+        <DataQualityCheck events={dbState.data.events} assets={dbState.data.assets} />
+      )}
 
       {/* KPI Cards — blurred for free users */}
       {report && (

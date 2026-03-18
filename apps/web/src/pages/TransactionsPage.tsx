@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Decimal from 'decimal.js';
 import { Plus, Search, Download, X, Edit2, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -130,6 +130,7 @@ function typeBadgeColor(type: string): string {
 export default function TransactionsPage() {
   const { t } = useTranslation();
   const nav = useNavigate();
+  const [searchParams] = useSearchParams();
   const [detailsId, setDetailsId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');

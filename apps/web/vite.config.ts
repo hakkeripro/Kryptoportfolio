@@ -21,8 +21,8 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg'],
       manifest: {
-        name: 'VaultFolio',
-        short_name: 'VaultFolio',
+        name: 'PrivateLedger',
+        short_name: 'PrivateLedger',
         description: 'Privacy-first crypto portfolio tracker',
         theme_color: '#0a0f1a',
         background_color: '#0a0f1a',

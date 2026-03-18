@@ -34,7 +34,7 @@ export default function SettingsPage() {
 
   const changeLang = (lng: string) => {
     void i18n.changeLanguage(lng);
-    localStorage.setItem('vaultfolio-lang', lng);
+    localStorage.setItem('privateledger-lang', lng);
   };
 
   return (

@@ -4,7 +4,9 @@ import { normalizeActiveLedger } from '../domain/ledger.js';
 import type { Settings } from '../domain/settings.js';
 import type { TaxYearReport, TaxIncomeRow, TaxHoldingRow, TaxYearTotals } from '../domain/tax.js';
 import { replayLedgerToLotsAndDisposals } from '../portfolio/lotEngine.js';
+import type { LotEngineOptions } from '../portfolio/lotEngine.js';
 import { applyHmo } from './hmoCalculator.js';
+import { detectSelfTransfers } from './transferDetection.js';
 
 function d(s: string | undefined | null): Decimal {
   if (!s) return new Decimal(0);
@@ -26,6 +28,12 @@ export type GenerateTaxReportOptions = {
   lotMethodOverride?: Settings['lotMethodDefault'];
   /** Apply Finnish acquisition cost assumption (HMO) to disposals. Finland profile only. */
   hmoEnabled?: boolean;
+  /**
+   * Detect self-transfers between wallets and propagate cost basis.
+   * When true (Finland profile only): runs detectSelfTransfers + walletLevelFifo in lot engine.
+   * Unmatched outgoing transfers are added to report warnings.
+   */
+  enableTransferDetection?: boolean;
 };
 
 export function lotMethodForTax(
@@ -47,13 +55,28 @@ export function generateTaxYearReport(
   const lotMethodUsed = lotMethodForTax(settings, opts.lotMethodOverride);
   const taxSettings: Settings = { ...settings, lotMethodDefault: lotMethodUsed };
 
+  const extraWarnings: string[] = [];
+
+  // Transfer detection: Finland profile + enableTransferDetection=true
+  let engineOptions: LotEngineOptions | undefined;
+  if (opts.enableTransferDetection && settings.taxProfile === 'FINLAND') {
+    const transferResult = detectSelfTransfers(active);
+    engineOptions = {
+      walletLevelFifo: true,
+      selfTransferMatches: transferResult.matched,
+    };
+    for (const eventId of transferResult.unmatchedOut) {
+      extraWarnings.push(`unmatched_transfer:${eventId}`);
+    }
+  }
+
   // 1) Realized disposals (SELL + SWAP disposal leg)
-  const replay = replayLedgerToLotsAndDisposals(active, taxSettings);
+  const replay = replayLedgerToLotsAndDisposals(active, taxSettings, engineOptions);
   const disposals = replay.disposals.filter((dsp) => dsp.taxYear === year);
 
   // 2) Income rows (rewards/airdrops)
   const income: TaxIncomeRow[] = [];
-  const warnings: string[] = [...replay.warnings];
+  const warnings: string[] = [...replay.warnings, ...extraWarnings];
   for (const e of active) {
     const y = Number(e.timestampISO.slice(0, 4));
     if (y !== year) continue;
@@ -84,7 +107,20 @@ export function generateTaxYearReport(
   // 3) Year-end holdings
   const cutISO = endOfTaxYearISO(year);
   const activeToYearEnd = active.filter((e) => e.timestampISO <= cutISO);
-  const replayEOY = replayLedgerToLotsAndDisposals(activeToYearEnd, taxSettings);
+
+  // EOY engine options: reuse walletLevelFifo with self-transfer matches filtered to EOY range
+  let eoyEngineOptions: LotEngineOptions | undefined;
+  if (engineOptions) {
+    const eoyIds = new Set(activeToYearEnd.map((e) => e.id));
+    eoyEngineOptions = {
+      walletLevelFifo: engineOptions.walletLevelFifo,
+      selfTransferMatches: (engineOptions.selfTransferMatches ?? []).filter(
+        (m) => eoyIds.has(m.outEventId) && eoyIds.has(m.inEventId),
+      ),
+    };
+  }
+
+  const replayEOY = replayLedgerToLotsAndDisposals(activeToYearEnd, taxSettings, eoyEngineOptions);
   const yearEndHoldings: TaxHoldingRow[] = replayEOY.positions.map((p) => ({
     assetId: p.assetId,
     amount: p.amount,

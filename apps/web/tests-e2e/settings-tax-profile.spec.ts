@@ -58,32 +58,18 @@ test.describe('Feature 24: Settings Tax Profile', () => {
     await expect(page.getByTestId('metric-settings-save-status')).toBeVisible({ timeout: 5_000 });
   });
 
-  test('onboarding: country step shown before passphrase', async ({ page, request }) => {
+  test('onboarding: country selector and passphrase visible on signup page', async ({
+    page,
+    request,
+  }) => {
     await resetApp(page, request);
-    await page.goto('/welcome');
+    await page.goto('/auth/signup');
 
-    // Create account → vault setup
-    await page.getByTestId('btn-create-account').click();
-    await expect(page).toHaveURL(/\/auth\/signup/, { timeout: 5_000 });
-
-    const email = `e2e_country_${Date.now()}@example.com`;
-    await page.getByTestId('form-email').fill(email);
-    await page.getByTestId('form-password').fill('supersecret1');
-    await page.getByTestId('form-password-confirm').fill('supersecret1');
-    await page.getByTestId('btn-signup').click();
-
-    await expect(page.getByTestId('page-vault-setup')).toBeVisible({ timeout: 10_000 });
-
-    // Country step should be visible
+    // Both country selector and passphrase form are on the same combined signup+vault page
     await expect(page.getByTestId('country-selector')).toBeVisible();
-    // Passphrase form should NOT be visible yet
-    await expect(page.getByTestId('form-vault-passphrase')).not.toBeVisible();
+    await expect(page.getByTestId('form-vault-passphrase')).toBeVisible();
 
-    // Select Finland and continue
+    // Can select Finland
     await page.getByTestId('btn-country-fi').click();
-    await page.getByTestId('btn-country-continue').click();
-
-    // Passphrase step should now be visible
-    await expect(page.getByTestId('form-vault-passphrase')).toBeVisible({ timeout: 5_000 });
   });
 });

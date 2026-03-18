@@ -9,7 +9,7 @@ test.describe('Feature 22: UI/UX Redesign', () => {
 
     // Logo (scoped to welcome page to avoid sidebar duplicate)
     await expect(
-      page.getByTestId('page-welcome').locator('svg[aria-label="VaultFolio"]'),
+      page.getByTestId('page-welcome').locator('svg[aria-label="PrivateLedger"]'),
     ).toBeVisible();
 
     // Tagline

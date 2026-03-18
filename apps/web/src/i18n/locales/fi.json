@@ -36,7 +36,7 @@
   },
 
   "welcome": {
-    "title": "VaultFolio",
+    "title": "PrivateLedger",
     "tagline": "Ainoa kryptoseurantasovellus, joka ei koskaan näe tietojasi.",
     "usp": {
       "encryption": {

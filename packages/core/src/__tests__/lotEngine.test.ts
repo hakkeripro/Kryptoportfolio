@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { replayLedgerToLotsAndDisposals } from '../portfolio/lotEngine.js';
+import type { LotEngineOptions } from '../portfolio/lotEngine.js';
 import type { LedgerEvent } from '../domain/ledger.js';
 import type { Settings } from '../domain/settings.js';
 
@@ -517,5 +518,122 @@ describe('lot engine', () => {
     ];
     const r = replayLedgerToLotsAndDisposals(events, s());
     expect(r.positions).toEqual([]);
+  });
+
+  // ── Wallet-level FIFO tests ──
+
+  it('walletLevelFifo: BUY on different accounts creates separate lot buckets (positions aggregate)', () => {
+    const opts: LotEngineOptions = { walletLevelFifo: true };
+    const events: LedgerEvent[] = [
+      ev({
+        type: 'BUY',
+        assetId: 'asset_btc',
+        amount: '1',
+        pricePerUnitBase: '10000',
+        accountId: 'acc-coinbase' as any,
+        timestampISO: '2025-01-01T00:00:00.000Z',
+      }),
+      ev({
+        type: 'BUY',
+        assetId: 'asset_btc',
+        amount: '2',
+        pricePerUnitBase: '20000',
+        accountId: 'acc-kraken' as any,
+        timestampISO: '2025-01-02T00:00:00.000Z',
+      }),
+      ev({
+        type: 'SELL',
+        assetId: 'asset_btc',
+        amount: '1',
+        pricePerUnitBase: '25000',
+        accountId: 'acc-kraken' as any,
+        timestampISO: '2025-01-03T00:00:00.000Z',
+      }),
+    ];
+    const r = replayLedgerToLotsAndDisposals(events, s({ lotMethodDefault: 'FIFO' }), opts);
+    // Position aggregates across both wallets: 1 (coinbase) + 1 (kraken remaining) = 2 BTC
+    expect(r.positions).toHaveLength(1);
+    expect(r.positions[0]!.amount).toBe('2');
+    // Kraken SELL uses Kraken's own lot (cost 20000/BTC), not Coinbase's cheaper lot
+    expect(r.disposals[0]!.costBasisBase).toBe('20000');
+    expect(r.disposals[0]!.realizedGainBase).toBe('5000'); // 25000 - 20000
+  });
+
+  it('walletLevelFifo: events without accountId fall back to _global bucket', () => {
+    const opts: LotEngineOptions = { walletLevelFifo: true };
+    const events: LedgerEvent[] = [
+      ev({
+        type: 'BUY',
+        assetId: 'asset_eth',
+        amount: '5',
+        pricePerUnitBase: '2000',
+        // no accountId
+        timestampISO: '2025-01-01T00:00:00.000Z',
+      }),
+      ev({
+        type: 'SELL',
+        assetId: 'asset_eth',
+        amount: '2',
+        pricePerUnitBase: '3000',
+        // no accountId — same _global bucket
+        timestampISO: '2025-01-02T00:00:00.000Z',
+      }),
+    ];
+    const r = replayLedgerToLotsAndDisposals(events, s(), opts);
+    expect(r.disposals).toHaveLength(1);
+    expect(r.disposals[0]!.costBasisBase).toBe('4000'); // 2 * 2000
+    expect(r.positions[0]!.amount).toBe('3');
+  });
+
+  it('selfTransferMatches: incoming TRANSFER carries outgoing cost basis', () => {
+    const outId = 'e_out_transfer_001';
+    const inId = 'e_in_transfer_001';
+    const opts: LotEngineOptions = {
+      walletLevelFifo: true,
+      selfTransferMatches: [{ outEventId: outId, inEventId: inId }],
+    };
+    const events: LedgerEvent[] = [
+      // BUY 1 BTC on Coinbase at 5000 EUR
+      ev({
+        type: 'BUY',
+        assetId: 'asset_btc',
+        amount: '1',
+        pricePerUnitBase: '5000',
+        accountId: 'acc-coinbase' as any,
+        timestampISO: '2025-01-01T00:00:00.000Z',
+      }),
+      // TRANSFER out from Coinbase (matched self-transfer)
+      ev({
+        id: outId,
+        type: 'TRANSFER',
+        assetId: 'asset_btc',
+        amount: '-1',
+        accountId: 'acc-coinbase' as any,
+        timestampISO: '2025-01-02T00:00:00.000Z',
+      }),
+      // TRANSFER in to hardware wallet (matched — gets cost basis from out)
+      ev({
+        id: inId,
+        type: 'TRANSFER',
+        assetId: 'asset_btc',
+        amount: '1',
+        accountId: 'acc-ledger' as any,
+        timestampISO: '2025-01-02T01:00:00.000Z',
+      }),
+      // SELL from hardware wallet — should use original 5000 EUR cost basis
+      ev({
+        type: 'SELL',
+        assetId: 'asset_btc',
+        amount: '1',
+        pricePerUnitBase: '8000',
+        accountId: 'acc-ledger' as any,
+        timestampISO: '2025-01-03T00:00:00.000Z',
+      }),
+    ];
+    const r = replayLedgerToLotsAndDisposals(events, s({ lotMethodDefault: 'FIFO' }), opts);
+    expect(r.disposals).toHaveLength(1);
+    // Cost basis should be 5000 (carried from Coinbase BUY via self-transfer)
+    expect(r.disposals[0]!.costBasisBase).toBe('5000');
+    expect(r.disposals[0]!.realizedGainBase).toBe('3000'); // 8000 - 5000
   });
 });

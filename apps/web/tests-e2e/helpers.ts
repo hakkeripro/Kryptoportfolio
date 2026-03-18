@@ -51,39 +51,23 @@ export async function resetApp(page: any, request: any) {
 }
 
 /**
- * New auth flow: signup → vault setup → skip passkey → dashboard
+ * New auth flow: combined signup + vault setup page → dashboard
  */
 export async function signupAndSetupVault(page: any) {
   const email = `e2e_${Date.now()}@example.com`;
 
-  // Signup
+  // Combined signup + vault setup page
   await page.goto('/auth/signup');
   await page.getByTestId('form-email').fill(email);
   await page.getByTestId('form-password').fill('supersecret1');
   await page.getByTestId('form-password-confirm').fill('supersecret1');
-  await page.getByTestId('btn-signup').click();
-
-  // Wait for redirect to vault setup
-  await expect(page.getByTestId('page-vault-setup')).toBeVisible({ timeout: 10_000 });
-  await waitForToken(page);
-
-  // Country step: skip
-  if (await page.getByTestId('btn-country-skip').isVisible()) {
-    await page.getByTestId('btn-country-skip').click();
-  }
-
-  // Vault setup: passphrase
   await page.getByTestId('form-vault-passphrase').fill('passphrase123');
   await page.getByTestId('form-vault-passphrase-confirm').fill('passphrase123');
-  await page.getByTestId('form-saved-checkbox').check();
-  await page.getByTestId('btn-create-vault').click();
+  await page.getByTestId('btn-signup').click();
 
-  // Skip passkey step
-  await page.getByTestId('btn-skip-passkey').click();
-
-  // Done → go to dashboard
-  await page.getByTestId('btn-go-dashboard').click();
-  await expect(page).toHaveURL(/\/home/, { timeout: 10_000 });
+  // Wait for redirect to dashboard
+  await expect(page).toHaveURL(/\/home/, { timeout: 15_000 });
+  await waitForToken(page);
 
   return email;
 }
@@ -104,10 +88,7 @@ export async function setupVaultOffline(page: any) {
   await page.getByTestId('form-saved-checkbox').check();
   await page.getByTestId('btn-create-vault').click();
 
-  // Skip passkey
-  await page.getByTestId('btn-skip-passkey').click();
-
-  // Done → dashboard
+  // Done → dashboard (passkey step removed from normal flow)
   await page.getByTestId('btn-go-dashboard').click();
   await expect(page).toHaveURL(/\/home/, { timeout: 10_000 });
 }

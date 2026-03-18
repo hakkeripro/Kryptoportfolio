@@ -90,7 +90,7 @@ async function coinbaseGetJson<T>(cred: CoinbaseCredentials | null, pathOrUri: s
 
   const headers: Record<string, string> = {
     accept: 'application/json',
-    'user-agent': 'kryptoportfolio-v3/coinbase-import',
+    'user-agent': 'privateledger/coinbase-import',
   };
 
   if (cred) {

@@ -20,7 +20,7 @@ export function Logo({ size = 'md', showWordmark = true, className = '' }: LogoP
           viewBox="0 0 48 48"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          aria-label="VaultFolio"
+          aria-label="PrivateLedger"
         >
           {/* Shield outline */}
           <path
@@ -41,7 +41,7 @@ export function Logo({ size = 'md', showWordmark = true, className = '' }: LogoP
           className="font-semibold tracking-tight text-content-primary"
           style={{ fontSize: px * 0.6 }}
         >
-          VaultFolio
+          PrivateLedger
         </span>
       )}
     </span>

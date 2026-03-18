@@ -216,13 +216,13 @@ describe('KpiCard', () => {
 describe('Logo', () => {
   it('renders SVG and wordmark by default', () => {
     render(<Logo />);
-    expect(screen.getByLabelText('VaultFolio')).toBeTruthy(); // svg aria-label
-    expect(screen.getByText('VaultFolio')).toBeTruthy();
+    expect(screen.getByLabelText('PrivateLedger')).toBeTruthy(); // svg aria-label
+    expect(screen.getByText('PrivateLedger')).toBeTruthy();
   });
 
   it('hides wordmark when showWordmark=false', () => {
     render(<Logo showWordmark={false} />);
-    expect(screen.queryByText('VaultFolio')).toBeNull();
+    expect(screen.queryByText('PrivateLedger')).toBeNull();
   });
 
   it('applies size', () => {

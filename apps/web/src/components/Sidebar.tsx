@@ -175,7 +175,7 @@ function SidebarContent() {
       <div className="px-5 py-4 border-b border-white/10">
         <span className="inline-flex items-center gap-2">
           <Shield className="h-6 w-6 text-[#FF8400]" />
-          <span className="font-semibold tracking-tight text-white text-sm">VaultFolio</span>
+          <span className="font-semibold tracking-tight text-white text-sm">PrivateLedger</span>
         </span>
       </div>
 
@@ -259,7 +259,7 @@ export default function Sidebar() {
         </Sheet>
         <span className="ml-3 inline-flex items-center gap-2">
           <Shield className="h-5 w-5 text-[#FF8400]" />
-          <span className="font-semibold text-white text-sm tracking-tight">VaultFolio</span>
+          <span className="font-semibold text-white text-sm tracking-tight">PrivateLedger</span>
         </span>
       </div>
     </>

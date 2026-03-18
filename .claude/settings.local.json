@@ -5,7 +5,15 @@
       "Bash(wc -l apps/web/src/pages/*.tsx)",
       "Bash(pnpm test:e2e -- --grep \"smoke|KP-UI-001\")",
       "Skill(implement-feature)",
-      "Skill(implement-feature:*)"
+      "Skill(implement-feature:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm --filter @kp/web build)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm --filter @kp/web test)",
+      "Bash(pnpm typecheck:*)",
+      "WebSearch"
     ]
   }
 }
