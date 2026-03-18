@@ -58,8 +58,8 @@ test('tax report: generate for 2025 — free user sees KPI cards and gate wall',
   // Free user: KPI cards are visible after generating
   await expect(page.getByTestId('kpi-total-gains')).toBeVisible({ timeout: 5_000 });
 
-  // Free user: gate wall is shown instead of full disposals table
-  await expect(page.getByTestId('gate-wall-tax-report-view')).toBeVisible();
+  // Free user: blur overlay is shown instead of full disposals table
+  await expect(page.getByTestId('blur-overlay').first()).toBeVisible();
 
   // Free user: clicking Export CSV opens upgrade modal
   await page.getByTestId('btn-tax-export-csv').click();
