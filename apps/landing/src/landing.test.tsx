@@ -3,8 +3,8 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
 // Mock framer-motion: replace all motion.* with plain divs/sections/etc.
-vi.mock('framer-motion', () => {
-  const React = require('react');
+vi.mock('framer-motion', async () => {
+  const React = await import('react');
   const createEl = (tag: string) =>
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ({ children, initial: _i, animate: _a, whileInView: _w, viewport: _vp, transition: _t, ...rest }: any) =>

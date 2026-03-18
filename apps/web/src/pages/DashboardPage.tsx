@@ -234,6 +234,8 @@ export default function DashboardPage() {
   );
 
   // 24h price change per assetId from recent pricePoints
+  // eslint-disable-next-line react-hooks/purity
+  const cutoff24h = useMemo(() => new Date(Date.now() - 23 * 60 * 60 * 1000).toISOString(), []);
   const priceChange24h = useMemo(() => {
     const result = new Map<string, number | null>();
     const byAsset = new Map<string, { ts: string; price: number }[]>();
@@ -245,7 +247,7 @@ export default function DashboardPage() {
       const sorted = points.sort((a, b) => a.ts.localeCompare(b.ts));
       const latest = sorted.at(-1);
       // Find a point roughly 24h ago
-      const cutoff = new Date(Date.now() - 23 * 60 * 60 * 1000).toISOString();
+      const cutoff = cutoff24h;
       const older = sorted.filter((p) => p.ts <= cutoff).at(-1);
       if (latest && older && older.price > 0) {
         result.set(assetId, ((latest.price - older.price) / older.price) * 100);

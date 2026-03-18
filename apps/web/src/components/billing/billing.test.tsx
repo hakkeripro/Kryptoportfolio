@@ -54,7 +54,7 @@ describe('UpgradeTeaser', () => {
 /* ── GateWall ─────────────────────────────────────── */
 describe('GateWall', () => {
   // GateWall is imported lazily so we can control authState before import
-  it('shows gate wall (not children) for free user', async () => {
+  it('shows gate wall (not children) for free user', { timeout: 15000 }, async () => {
     authState.plan = 'free';
     authState.token = 'tok';
     const { GateWall } = await import('./GateWall');

@@ -92,6 +92,8 @@ export function ProviderCard({
   const hasApi = !!plugin.api;
   const hasCsv = !!plugin.csv;
   const hasBoth = hasApi && hasCsv;
+  const ApiConnectForm = plugin.api?.ConnectForm;
+  const CsvUploadForm = plugin.csv?.UploadForm;
 
   // When provider has both API + CSV, show choice screen first
   const [capabilityChoice, setCapabilityChoice] = useState<CapabilityChoice>(
@@ -164,7 +166,7 @@ export function ProviderCard({
                   ← Back
                 </button>
               )}
-              <plugin.api.ConnectForm ctx={ctx} onConnected={onConnected} />
+              {ApiConnectForm && <ApiConnectForm ctx={ctx} onConnected={onConnected} />}
             </>
           )}
 
@@ -179,7 +181,7 @@ export function ProviderCard({
                   ← Back
                 </button>
               )}
-              <plugin.csv.UploadForm ctx={ctx} />
+              {CsvUploadForm && <CsvUploadForm ctx={ctx} />}
             </>
           )}
         </>
