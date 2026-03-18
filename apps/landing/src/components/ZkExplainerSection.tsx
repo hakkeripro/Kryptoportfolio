@@ -1,45 +1,29 @@
 import { motion } from 'framer-motion';
 import { Lock, Package, Unlock } from 'lucide-react';
-
-const STEPS = [
-  {
-    icon: Lock,
-    number: '01',
-    title: 'You enter transactions',
-    description:
-      'Your data is encrypted with your passphrase before it touches the network. AES-256-GCM encryption runs entirely in your browser using the Web Crypto API.',
-  },
-  {
-    icon: Package,
-    number: '02',
-    title: 'We store an envelope',
-    description:
-      "Our server receives an encrypted blob. Without your passphrase, it's mathematically unreadable — even to us. We never see your balances, trades, or portfolio value.",
-  },
-  {
-    icon: Unlock,
-    number: '03',
-    title: 'You decrypt locally',
-    description:
-      'When you open the app, data decrypts in your browser. Your key never leaves your device. You can even use the app offline — your vault is local.',
-  },
-];
+import { useLang } from '../i18n/LangContext';
 
 export default function ZkExplainerSection() {
+  const { t } = useLang();
+  const zk = t.zk;
+
+  const STEPS = [
+    { icon: Lock, number: '01', title: zk.step1Title, description: zk.step1Desc },
+    { icon: Package, number: '02', title: zk.step2Title, description: zk.step2Desc },
+    { icon: Unlock, number: '03', title: zk.step3Title, description: zk.step3Desc },
+  ];
+
   return (
     <section id="how-it-works" className="relative py-32 px-6">
       <div className="max-w-6xl mx-auto">
         {/* Section header */}
         <div className="text-center mb-20">
           <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/30 mb-4">
-            // HOW_IT_WORKS
+            {zk.label}
           </p>
           <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-5">
-            Zero-knowledge, <span className="text-[#FF8400]">zero trust required</span>
+            {zk.headline1} <span className="text-[#FF8400]">{zk.headline2}</span>
           </h2>
-          <p className="text-white/50 text-lg max-w-xl mx-auto">
-            You don't have to trust us. The math doesn't allow it.
-          </p>
+          <p className="text-white/50 text-lg max-w-xl mx-auto">{zk.sub}</p>
         </div>
 
         {/* Steps */}
@@ -95,7 +79,7 @@ export default function ZkExplainerSection() {
             </span>
           </div>
           <pre className="text-xs leading-6 overflow-x-auto">
-            <span className="text-white/30">{'// Your passphrase never leaves the browser'}</span>
+            <span className="text-white/30">{`// ${zk.codeComment1.replace('// ', '')}`}</span>
             {'\n'}
             <span className="text-[#FF8400]/80">const</span>
             <span className="text-white/70"> key </span>
@@ -117,7 +101,7 @@ export default function ZkExplainerSection() {
             <span className="text-[#B2B2FF]/80">crypto.subtle.encrypt</span>
             <span className="text-white/40">({'{ name: "AES-GCM", iv }'}, key, plaintext);</span>
             {'\n'}
-            <span className="text-white/30">{'// ↑ This is all the server ever sees'}</span>
+            <span className="text-white/30">{`// ${zk.codeComment2.replace('// ', '')}`}</span>
           </pre>
         </motion.div>
       </div>

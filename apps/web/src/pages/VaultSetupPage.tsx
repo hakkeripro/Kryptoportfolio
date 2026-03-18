@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { TaxCountry } from '@kp/core';
 import { ensureWebDbOpen, getWebDb } from '@kp/platform-web';
@@ -16,10 +16,10 @@ function errToMsg(e: unknown): string {
 // passkey step removed from normal flow (deferred to dashboard banner)
 type Step = 'country' | 'passphrase' | 'done';
 
-const COUNTRY_OPTIONS: { value: TaxCountry; label: string; flag: string }[] = [
+const COUNTRY_OPTIONS: { value: TaxCountry; label: string; flag: string; comingSoon?: boolean }[] = [
   { value: 'FI', label: 'Finland', flag: '🇫🇮' },
-  { value: 'SE', label: 'Sweden', flag: '🇸🇪' },
-  { value: 'DE', label: 'Germany', flag: '🇩🇪' },
+  { value: 'SE', label: 'Sweden', flag: '🇸🇪', comingSoon: true },
+  { value: 'DE', label: 'Germany', flag: '🇩🇪', comingSoon: true },
   { value: 'OTHER', label: 'Other', flag: '🌍' },
 ];
 
@@ -50,6 +50,12 @@ export default function VaultSetupPage() {
   const isOffline = new URLSearchParams(location.search).get('offline') === '1';
   const setupVault = useVaultStore((s) => s.setupVault);
   const email = useAuthStore((s) => s.email);
+  const token = useAuthStore((s) => s.token);
+
+  // Guard: vault setup requires auth unless in offline mode
+  if (!token && !isOffline) {
+    return <Navigate to="/welcome" replace />;
+  }
 
   const isOnDevice = new URLSearchParams(location.search).get('ondevice') === '1';
   const nextPath = new URLSearchParams(location.search).get('next') ?? '/home';
@@ -152,15 +158,23 @@ export default function VaultSetupPage() {
                   key={opt.value}
                   data-testid={`btn-country-${opt.value.toLowerCase()}`}
                   type="button"
-                  onClick={() => setSelectedCountry(opt.value)}
-                  className={`flex items-center gap-3 rounded-xl px-4 py-3 border transition-colors text-body ${
-                    selectedCountry === opt.value
-                      ? 'border-[#FF8400] bg-[#FF8400]/[0.08] text-content-primary'
-                      : 'border-white/[0.08] bg-surface-raised text-content-secondary hover:border-white/20'
+                  disabled={opt.comingSoon}
+                  onClick={() => !opt.comingSoon && setSelectedCountry(opt.value)}
+                  className={`relative flex items-center gap-3 rounded-xl px-4 py-3 border transition-colors text-body ${
+                    opt.comingSoon
+                      ? 'border-white/[0.04] bg-surface-raised/50 text-content-tertiary cursor-not-allowed opacity-50'
+                      : selectedCountry === opt.value
+                        ? 'border-[#FF8400] bg-[#FF8400]/[0.08] text-content-primary'
+                        : 'border-white/[0.08] bg-surface-raised text-content-secondary hover:border-white/20'
                   }`}
                 >
                   <span className="text-2xl">{opt.flag}</span>
-                  <span>{opt.label}</span>
+                  <span className="flex-1 text-left">{opt.label}</span>
+                  {opt.comingSoon && (
+                    <span className="text-[9px] font-mono uppercase tracking-wider text-white/30">
+                      Soon
+                    </span>
+                  )}
                 </button>
               ))}
             </div>

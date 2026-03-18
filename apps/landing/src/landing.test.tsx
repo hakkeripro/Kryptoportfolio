@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { LangProvider } from './i18n/LangContext';
 
 // Mock framer-motion: replace all motion.* with plain divs/sections/etc.
 vi.mock('framer-motion', async () => {
@@ -39,23 +40,22 @@ import PricingSection from './components/PricingSection';
 import DashboardMockup from './components/DashboardMockup';
 import BlogArticleFi from './pages/BlogArticleFi';
 
+function Wrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <LangProvider>
+      <MemoryRouter>{children}</MemoryRouter>
+    </LangProvider>
+  );
+}
+
 describe('LandingPage', () => {
   it('renders without errors', () => {
-    const { container } = render(
-      <MemoryRouter>
-        <LandingPage />
-      </MemoryRouter>,
-    );
+    const { container } = render(<LandingPage />, { wrapper: Wrapper });
     expect(container).toBeTruthy();
   });
 
   it('contains hero headline about privacy', () => {
-    render(
-      <MemoryRouter>
-        <LandingPage />
-      </MemoryRouter>,
-    );
-    // The word "data" appears in the ZK tagline
+    render(<LandingPage />, { wrapper: Wrapper });
     const allText = document.body.textContent ?? '';
     expect(allText.toLowerCase()).toContain('data');
   });
@@ -63,23 +63,15 @@ describe('LandingPage', () => {
 
 describe('PricingSection', () => {
   it('renders Free and Pro pricing options', () => {
-    render(
-      <MemoryRouter>
-        <PricingSection />
-      </MemoryRouter>,
-    );
+    render(<PricingSection />, { wrapper: Wrapper });
     expect(screen.getByText('€4,99')).toBeTruthy();
     expect(screen.getByText('€0')).toBeTruthy();
   });
 
   it('shows comparison table features', () => {
-    render(
-      <MemoryRouter>
-        <PricingSection />
-      </MemoryRouter>,
-    );
+    render(<PricingSection />, { wrapper: Wrapper });
     expect(screen.getAllByText('Portfolio tracking').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('HMO-laskuri').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('HMO tax optimization').length).toBeGreaterThan(0);
   });
 });
 
@@ -99,40 +91,24 @@ describe('DashboardMockup', () => {
 
 describe('BlogArticleFi', () => {
   it('renders without errors', () => {
-    const { container } = render(
-      <MemoryRouter>
-        <BlogArticleFi />
-      </MemoryRouter>,
-    );
+    const { container } = render(<BlogArticleFi />, { wrapper: Wrapper });
     expect(container).toBeTruthy();
   });
 
   it('contains main article heading', () => {
-    render(
-      <MemoryRouter>
-        <BlogArticleFi />
-      </MemoryRouter>,
-    );
+    render(<BlogArticleFi />, { wrapper: Wrapper });
     const h1 = screen.getByRole('heading', { level: 1 });
     expect(h1.textContent?.toLowerCase()).toContain('verotus');
   });
 
   it('contains HMO section heading', () => {
-    render(
-      <MemoryRouter>
-        <BlogArticleFi />
-      </MemoryRouter>,
-    );
+    render(<BlogArticleFi />, { wrapper: Wrapper });
     const allText = document.body.textContent ?? '';
     expect(allText).toContain('Hankintameno-olettama');
   });
 
   it('contains OmaVero reference', () => {
-    render(
-      <MemoryRouter>
-        <BlogArticleFi />
-      </MemoryRouter>,
-    );
+    render(<BlogArticleFi />, { wrapper: Wrapper });
     const allText = document.body.textContent ?? '';
     expect(allText).toContain('OmaVero');
   });

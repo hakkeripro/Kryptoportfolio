@@ -7,7 +7,9 @@ import { BarChart3, RefreshCw, Plus, Search, X, CheckCircle2, AlertTriangle } fr
 import { useDashboardData } from '../hooks/useDashboardData';
 import { useDashboardRefresh } from '../hooks/useDashboardRefresh';
 import { useAuthStore } from '../store/useAuthStore';
+import { useVaultStore } from '../store/useVaultStore';
 import { useImportSuccessStore } from '../store/useImportSuccessStore';
+import { isPasskeySupported, getStoredPasskeyWrap } from '../vault/passkey';
 import { AllocationBars, ValueChart, colorForAsset } from '../components/DashboardCharts';
 import type { AllocationItem } from '../components/DashboardCharts';
 import { KpiCard, Card, EmptyState, TokenIcon, Button, Input } from '../components/ui';
@@ -130,6 +132,49 @@ function PartialDataWarning({ count, onMap }: { count: number; onMap: () => void
   );
 }
 
+// ── Passkey banner ───────────────────────────────────────────────────────────
+const PASSKEY_BANNER_DISMISSED_KEY = 'pl_passkey_banner_dismissed';
+
+function PasskeyBanner({ onSetup }: { onSetup: () => void }) {
+  const [dismissed, setDismissed] = useState(
+    () => localStorage.getItem(PASSKEY_BANNER_DISMISSED_KEY) === '1',
+  );
+
+  const dismiss = () => {
+    localStorage.setItem(PASSKEY_BANNER_DISMISSED_KEY, '1');
+    setDismissed(true);
+  };
+
+  if (dismissed || !isPasskeySupported() || !!getStoredPasskeyWrap()) return null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex items-center gap-3 px-4 py-3 rounded-lg
+        bg-[#FF8400]/[0.06] border border-[#FF8400]/20"
+    >
+      <span className="text-lg shrink-0">🔑</span>
+      <span className="flex-1 text-[11px] font-mono text-white/60">
+        Add Face ID / fingerprint for faster unlock — no passphrase needed.
+      </span>
+      <button
+        onClick={onSetup}
+        className="text-[11px] font-mono text-[#FF8400] hover:text-[#FF8400]/80 transition-colors shrink-0"
+      >
+        [Set up →]
+      </button>
+      <button
+        onClick={dismiss}
+        className="shrink-0 text-white/20 hover:text-white/50 transition-colors"
+        aria-label="Dismiss"
+      >
+        <X className="h-3.5 w-3.5" />
+      </button>
+    </motion.div>
+  );
+}
+
 // ── Get Started widget ───────────────────────────────────────────────────────
 const EXCHANGES = [
   { name: 'Coinbase', emoji: '🟠' },
@@ -185,6 +230,7 @@ export default function DashboardPage() {
 
   const autoRefreshEnabled = (dbState.data.settings?.autoRefreshIntervalSec ?? 0) > 0;
   const [searchQuery, setSearchQuery] = useState('');
+  const passphrase = useVaultStore((s) => s.passphrase);
 
   const hasTransactions = dbState.data.ledgerEventCount > 0;
 
@@ -356,6 +402,9 @@ export default function DashboardPage() {
         <SetupProgressBanner onImport={() => nav('/transactions/import')} />
       )}
       <PartialDataWarning count={unmappedCount} onMap={() => nav('/settings/assets')} />
+      {!!passphrase && (
+        <PasskeyBanner onSetup={() => nav('/settings')} />
+      )}
 
       {/* ── Hero: Total portfolio value ── */}
       <motion.div

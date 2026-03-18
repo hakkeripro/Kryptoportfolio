@@ -15,10 +15,10 @@ interface Props {
   setBusy: (v: boolean) => void;
 }
 
-const COUNTRY_OPTIONS: { value: TaxCountry; label: string; flag: string }[] = [
+const COUNTRY_OPTIONS: { value: TaxCountry; label: string; flag: string; comingSoon?: boolean }[] = [
   { value: 'FI', label: 'Finland', flag: '🇫🇮' },
-  { value: 'SE', label: 'Sweden', flag: '🇸🇪' },
-  { value: 'DE', label: 'Germany', flag: '🇩🇪' },
+  { value: 'SE', label: 'Sweden', flag: '🇸🇪', comingSoon: true },
+  { value: 'DE', label: 'Germany', flag: '🇩🇪', comingSoon: true },
   { value: 'OTHER', label: 'Other', flag: '🌍' },
 ];
 
@@ -119,15 +119,23 @@ export default function TaxProfileCard({ settings, loading, error, busy, setBusy
             <button
               key={opt.value}
               type="button"
-              onClick={() => setTaxCountry(opt.value)}
-              className={`flex items-center gap-2 rounded-button px-3 py-2 text-caption border transition-colors ${
-                taxCountry === opt.value
-                  ? 'border-[#FF8400] bg-[#FF8400]/[0.08] text-content-primary'
-                  : 'border-white/[0.08] bg-surface-raised text-content-secondary hover:border-white/20'
+              disabled={opt.comingSoon}
+              onClick={() => !opt.comingSoon && setTaxCountry(opt.value)}
+              className={`relative flex items-center gap-2 rounded-button px-3 py-2 text-caption border transition-colors ${
+                opt.comingSoon
+                  ? 'border-white/[0.04] bg-surface-raised/50 text-content-tertiary cursor-not-allowed opacity-50'
+                  : taxCountry === opt.value
+                    ? 'border-[#FF8400] bg-[#FF8400]/[0.08] text-content-primary'
+                    : 'border-white/[0.08] bg-surface-raised text-content-secondary hover:border-white/20'
               }`}
             >
               <span>{opt.flag}</span>
-              <span>{opt.label}</span>
+              <span className="flex-1 text-left">{opt.label}</span>
+              {opt.comingSoon && (
+                <span className="text-[8px] font-mono uppercase tracking-wider text-white/25">
+                  Soon
+                </span>
+              )}
             </button>
           ))}
         </div>

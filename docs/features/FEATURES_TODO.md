@@ -355,6 +355,7 @@ Ks. [ISSUE_LOG.md](../ISSUE_LOG.md) tarkemmat kuvaukset.
 - [x] E2E-testit paivitetty uuteen flowiin
 - [ ] Erilliset E2E-testit (auth-signup-flow, auth-signin-flow, auth-offline-flow, account-change-password)
 - [ ] Multi-device e2e -testaus (manuaalinen)
+- [ ] **/welcome-sivu pelkistys:** poista USP-kortit + markkinointisisältö → pelkkä "Luo tili / Kirjaudu / Offline" -näkymä. Nykyinen /welcome näyttää markkinointisivulta, mikä sekoittaa navigaatiorakennetta (ks. KP-UX-003).
 
 **Ratkaisee:** KP-UX-001
 
@@ -517,6 +518,8 @@ Ks. [ISSUE_LOG.md](../ISSUE_LOG.md) tarkemmat kuvaukset.
 - [x] Alert-skeema: triggeredAtISO + acknowledgedAtISO
 - [x] Alert badge sidebarin nav-itemissä
 - [x] AlertsPage: acknowledge kaikki kun sivu avataan
+**Vaihe 5 — Import UX (backlog):**
+- [ ] **Import FetchPanel → Drawer:** ConnectFormsit + FetchPanellit avataan Sheet/Drawer-komponentissa inlinen sijaan. Tällä hetkellä FetchPanel renderöityy koko levyisenä osiona gridin alla → sivu kasvaa luvattomasti kun useampi pörssi yhdistetty (ks. KP-UX-002).
 
 ### Feature 27: Domain + Landing Page + Markkinointi ✅
 **Speksi:** [27_domain-landing-page.md](27_domain-landing-page.md)
@@ -525,6 +528,7 @@ Ks. [ISSUE_LOG.md](../ISSUE_LOG.md) tarkemmat kuvaukset.
 - [ ] Domain: `private-ledger.app` → landing, `app.private-ledger.app` → nykyinen PWA (DNS manuaalinen)
 - [x] Hero + ZK-selitys + animoitu dashboard-mockup (Framer Motion) + pricing
 - [x] Meta-tagit, OG-image, sitemap.xml, robots.txt
+- [x] **Korjaukset 2026-03-18:** i18n (EN+FI, selaimen kielen autodetektio), kielivalitsin naviin, poistettu GitHub-linkki + "Open source" badge, korjattu "1 exchange" → kaikki ilmaiseksi, "HMO-laskuri" → englanti, SE+DE maa-valinta disabled "Coming soon"
 **Vaihe 2 — SEO-artikkeli:**
 - [x] `/blog/krypto-verotus-suomi-2026` (FI, Article structured data)
 **Vaihe 3 — Launch:**

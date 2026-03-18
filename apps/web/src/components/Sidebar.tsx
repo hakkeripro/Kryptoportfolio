@@ -16,6 +16,7 @@ import {
   Menu,
   Circle,
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from './ui/sheet';
 import { useVaultStore } from '../store/useVaultStore';
 import { useAuthStore } from '../store/useAuthStore';
@@ -173,10 +174,10 @@ function SidebarContent() {
     <>
       {/* Brand */}
       <div className="px-5 py-4 border-b border-white/10">
-        <span className="inline-flex items-center gap-2">
+        <Link to="/home" className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity">
           <Shield className="h-6 w-6 text-[#FF8400]" />
           <span className="font-semibold tracking-tight text-white text-sm">PrivateLedger</span>
-        </span>
+        </Link>
       </div>
 
       {/* Navigation */}
@@ -257,10 +258,10 @@ export default function Sidebar() {
             </div>
           </SheetContent>
         </Sheet>
-        <span className="ml-3 inline-flex items-center gap-2">
+        <Link to="/home" className="ml-3 inline-flex items-center gap-2 hover:opacity-80 transition-opacity">
           <Shield className="h-5 w-5 text-[#FF8400]" />
           <span className="font-semibold text-white text-sm tracking-tight">PrivateLedger</span>
-        </span>
+        </Link>
       </div>
     </>
   );

@@ -1,48 +1,28 @@
 import { motion } from 'framer-motion';
 import { ShieldCheck, Calculator, RefreshCw, EyeOff } from 'lucide-react';
-
-const FEATURES = [
-  {
-    icon: ShieldCheck,
-    tag: 'SECURITY',
-    title: 'Zero-knowledge vault',
-    description:
-      'Your data is encrypted with AES-256-GCM using your passphrase as the key. We store only ciphertext. No backdoors, no master keys.',
-  },
-  {
-    icon: Calculator,
-    tag: 'FINNISH TAX',
-    title: 'Verolaskenta valmiina',
-    description:
-      'FIFO, LIFO, HIFO ja AVG-menetelmät. HMO-laskuri (hankintameno-olettama). OmaVero-täyttöopas. Tukee kaikkia Verohallinnon vaatimuksia.',
-  },
-  {
-    icon: RefreshCw,
-    tag: 'INTEGRATIONS',
-    title: 'Exchange sync',
-    description:
-      'Automatic import from Coinbase, Binance, Kraken and more. API keys are encrypted with your vault — they never leave your device unencrypted.',
-  },
-  {
-    icon: EyeOff,
-    tag: 'PRIVACY',
-    title: 'No tracking, ever',
-    description:
-      "No analytics, no cookies, no fingerprinting. We don't know what you own, when you trade, or how much you're worth. Mathematically.",
-  },
-];
+import { useLang } from '../i18n/LangContext';
 
 export default function FeatureCards() {
+  const { t } = useLang();
+  const f = t.features;
+
+  const FEATURES = [
+    { icon: ShieldCheck, tag: 'SECURITY', title: f.f1Title, description: f.f1Desc },
+    { icon: Calculator, tag: 'FINNISH TAX', title: f.f2Title, description: f.f2Desc },
+    { icon: RefreshCw, tag: 'INTEGRATIONS', title: f.f3Title, description: f.f3Desc },
+    { icon: EyeOff, tag: 'PRIVACY', title: f.f4Title, description: f.f4Desc },
+  ];
+
   return (
     <section className="relative py-24 px-6">
       <div className="max-w-6xl mx-auto">
         {/* Section header */}
         <div className="text-center mb-16">
           <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/30 mb-4">
-            // FEATURES
+            {f.label}
           </p>
           <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
-            Everything you need, <span className="text-[#FF8400]">nothing you don't</span>
+            {f.headline1} <span className="text-[#FF8400]">{f.headline2}</span>
           </h2>
         </div>
 

@@ -1,6 +1,6 @@
 # Issue log (bugit + tuoteaukot)
 
-Päivitetty: 2026-01-06
+Päivitetty: 2026-03-18
 
 Prioriteetit:
 - **P0** = estää käytön / rikkoo peruspolun / data integrity / turvallisuus
@@ -53,7 +53,28 @@ Prioriteetit:
 ### KP-TAX-001: Verolaskelmat: maille sopivuus epäselvä + Suomen hankintameno-olettama puuttuu
 **Korjaus:** tax profile UI (“Country”) + selkeä disclaimer + FI: hankintameno-olettama optiona.
 
+### ~~KP-UI-006: Sidebar-logo ei navigoinut mihinkään~~ ✅ KORJATTU
+**Oire:** Desktop-sidebarin ja mobiiliheaderin "PrivateLedger"-logo oli `<span>`, ei linkki.
+**Korjaus:** Molemmat kääritty `<Link to="/home">` -komponentilla.
+**Korjattu:** 2026-03-18
+
+### ~~KP-AUTH-001: VaultSetupPage saavutettavissa ilman kirjautumista~~ ✅ KORJATTU
+**Oire:** `/vault/setup` ei ollut `ProtectedRoute`:n takana → käyttäjä pystyi luomaan holvin ilman tunnusta ja jäi jumiin (ei pääse suojatuille reiteille, ei takaisin-linkkiä).
+**Korjaus:** `VaultSetupPage` lisätty guard: jos ei tokenia eikä `?offline=1`, redirect `/welcome`:en.
+**Korjattu:** 2026-03-18
+
 ## P2 / P3
+
+### KP-UX-002: Import FetchPanel vie liikaa tilaa (inline → Drawer)
+**Oire:** Yhdistettyjen pörssien FetchPanel (wizard-stepit, transaction preview jne.) renderöityy koko levyisenä osiona Import-gridin alla. Useamman pörssin kanssa sivu kasvaa luvattomasti.
+**Korjaus:** FetchPanel + ConnectForm siirretään Sheet/Drawer-komponenttiin — klikataan provider-korttia → avautuu sivupaneeli.
+**Sijainti:** Feature 26 Vaihe 5 (backlog)
+
+### KP-UX-003: /welcome-sivu näyttää markkinointisivulta, ei auth-sivulta
+**Oire:** `/welcome` sisältää USP-kortit + hero + tagline → muistuttaa landing pagea, ei kirjautumissivua. Käyttäjille syntyy vaikutelma kahdesta "etusivusta" (landing page + app welcome).
+**Huom:** Reititys on oikein (kirjautuneet redirectataan `/home`:een automaattisesti).
+**Korjaus:** Pelkistä `/welcome` minimalistiseksi auth-sivuksi: logo + "Luo tili" / "Kirjaudu" / "Käytä offline" — ilman markkinointisisältöä.
+**Sijainti:** Feature 12 jatkotehtävä
 
 - KP-UI-004: Token ikonit puuttuvat laajasti (UX polish)
 - KP-BRAND-001: Logo + värimaailma eivät ole yhtenäisiä kaikkialla

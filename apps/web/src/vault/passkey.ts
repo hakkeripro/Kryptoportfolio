@@ -169,7 +169,7 @@ export async function createOrReplacePasskeyWrap(passphrase: string): Promise<vo
   // Try creating with PRF extension first
   const cred = (await navigator.credentials.create({
     publicKey: {
-      rp: { name: 'Kryptoportfolio' },
+      rp: { name: 'PrivateLedger' },
       user: {
         id: randomBytes(16),
         name: 'vault',

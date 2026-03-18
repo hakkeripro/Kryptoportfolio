@@ -1,29 +1,33 @@
 import { motion } from 'framer-motion';
 import { Check, X, ArrowRight, Zap } from 'lucide-react';
+import { useLang } from '../i18n/LangContext';
 
 const APP_URL = 'https://app.private-ledger.app';
 
-type PlanFeature = { text: string; free: boolean | string; pro: boolean | string };
+type CellValue = boolean | string;
 
-const FEATURES: PlanFeature[] = [
-  { text: 'Portfolio tracking', free: true, pro: true },
-  { text: 'Price alerts', free: '3 alerts', pro: 'Unlimited' },
-  { text: 'Exchange integrations', free: '1 exchange', pro: 'All exchanges' },
-  { text: 'Transaction history', free: '1 year', pro: 'Unlimited' },
-  { text: 'Tax calculation preview', free: true, pro: true },
-  { text: 'Full tax export (CSV / PDF)', free: false, pro: true },
-  { text: 'HMO-laskuri', free: false, pro: true },
-  { text: 'OmaVero step-by-step guide', free: false, pro: true },
-  { text: 'Priority support', free: false, pro: true },
-];
-
-function FeatureCell({ value }: { value: boolean | string }) {
+function FeatureCell({ value }: { value: CellValue }) {
   if (value === false) return <X className="w-4 h-4 text-white/20 mx-auto" />;
   if (value === true) return <Check className="w-4 h-4 text-[#B6FFCE] mx-auto" />;
   return <span className="text-xs font-mono text-[#FF8400]">{value}</span>;
 }
 
 export default function PricingSection() {
+  const { t } = useLang();
+  const p = t.pricing;
+
+  const FEATURES = [
+    { text: p.f1, free: true, pro: true },
+    { text: p.f2, free: p.alerts3, pro: p.unlimited },
+    { text: p.f3, free: true, pro: true },
+    { text: p.f4, free: p.year1, pro: p.unlimited },
+    { text: p.f5, free: true, pro: true },
+    { text: p.f6, free: false, pro: true },
+    { text: p.f7, free: false, pro: true },
+    { text: p.f8, free: false, pro: true },
+    { text: p.f9, free: false, pro: true },
+  ];
+
   return (
     <section id="pricing" className="relative py-24 px-6">
       {/* Background accent */}
@@ -36,12 +40,12 @@ export default function PricingSection() {
         {/* Section header */}
         <div className="text-center mb-16">
           <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/30 mb-4">
-            // PRICING
+            {p.label}
           </p>
           <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-4">
-            Simple, <span className="text-[#FF8400]">transparent</span> pricing
+            {p.headline1} <span className="text-[#FF8400]">{p.headline2}</span> {p.headline3}
           </h2>
-          <p className="text-white/50">Start free. Upgrade when you need the full tax suite.</p>
+          <p className="text-white/50">{p.sub}</p>
         </div>
 
         {/* Pricing cards */}
@@ -56,19 +60,19 @@ export default function PricingSection() {
           >
             <div className="mb-6">
               <p className="text-[10px] font-mono uppercase tracking-[0.15em] text-white/30 mb-3">
-                Free
+                {p.freeLabel}
               </p>
               <div className="flex items-end gap-2">
                 <span className="text-4xl font-bold text-white">€0</span>
-                <span className="text-white/40 mb-1.5 text-sm">/month</span>
+                <span className="text-white/40 mb-1.5 text-sm">{p.freePriceSuffix}</span>
               </div>
-              <p className="text-sm text-white/40 mt-2">Forever free. No credit card required.</p>
+              <p className="text-sm text-white/40 mt-2">{p.freeTagline}</p>
             </div>
             <a
               href={`${APP_URL}/welcome`}
               className="w-full block text-center py-3 rounded-xl border border-white/[0.12] text-white hover:bg-white/[0.04] transition-colors text-sm font-medium mb-6"
             >
-              Get started free
+              {p.freeCta}
             </a>
             <ul className="space-y-3">
               {FEATURES.filter((f) => f.free).map((f) => (
@@ -98,25 +102,25 @@ export default function PricingSection() {
             <div className="absolute top-5 right-5 flex items-center gap-1.5 bg-[#FF8400]/10 border border-[#FF8400]/20 rounded-full px-3 py-1">
               <Zap className="w-2.5 h-2.5 text-[#FF8400]" />
               <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-[#FF8400]">
-                Pro
+                {p.proLabel}
               </span>
             </div>
 
             <div className="mb-6">
               <p className="text-[10px] font-mono uppercase tracking-[0.15em] text-[#FF8400]/70 mb-3">
-                Pro
+                {p.proLabel}
               </p>
               <div className="flex items-end gap-2">
                 <span className="text-4xl font-bold text-white">€4,99</span>
-                <span className="text-white/40 mb-1.5 text-sm">/month</span>
+                <span className="text-white/40 mb-1.5 text-sm">{p.proPriceSuffix}</span>
               </div>
-              <p className="text-sm text-white/40 mt-2">Cancel anytime. No hidden fees.</p>
+              <p className="text-sm text-white/40 mt-2">{p.proTagline}</p>
             </div>
             <a
               href={`${APP_URL}/welcome`}
               className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[#FF8400] hover:bg-[#FFA040] text-black text-sm font-semibold mb-6 transition-all hover:shadow-[0_0_20px_rgba(255,132,0,0.3)]"
             >
-              Start Pro trial
+              {p.proCta}
               <ArrowRight className="w-3.5 h-3.5" />
             </a>
             <ul className="space-y-3">
@@ -144,13 +148,13 @@ export default function PricingSection() {
             <thead>
               <tr className="border-b border-white/[0.06]">
                 <th className="text-left px-6 py-4 text-[10px] font-mono uppercase tracking-[0.15em] text-white/20">
-                  Feature
+                  {p.tableFeature}
                 </th>
                 <th className="px-6 py-4 text-[10px] font-mono uppercase tracking-[0.15em] text-white/20 text-center">
-                  Free
+                  {p.freeLabel}
                 </th>
                 <th className="px-6 py-4 text-[10px] font-mono uppercase tracking-[0.15em] text-[#FF8400]/60 text-center">
-                  Pro
+                  {p.proLabel}
                 </th>
               </tr>
             </thead>
