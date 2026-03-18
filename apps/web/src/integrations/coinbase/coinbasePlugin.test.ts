@@ -29,6 +29,11 @@ describe('coinbasePlugin', () => {
     expect(coinbasePlugin.descriptor.category).toBe('exchange');
   });
 
+  it('has api capability, no csv capability', () => {
+    expect(coinbasePlugin.api).toBeDefined();
+    expect(coinbasePlugin.csv).toBeUndefined();
+  });
+
   it('isConnected returns false when vault is empty', async () => {
     vi.mocked(loadCoinbaseIntegration).mockResolvedValue({
       schemaVersion: 1,
@@ -40,7 +45,7 @@ describe('coinbasePlugin', () => {
         lastSeenTxIdByAccount: {},
       },
     });
-    const result = await coinbasePlugin.isConnected('test-passphrase');
+    const result = await coinbasePlugin.api!.isConnected('test-passphrase');
     expect(result).toBe(false);
   });
 
@@ -55,13 +60,13 @@ describe('coinbasePlugin', () => {
         lastSeenTxIdByAccount: {},
       },
     });
-    const result = await coinbasePlugin.isConnected('test-passphrase');
+    const result = await coinbasePlugin.api!.isConnected('test-passphrase');
     expect(result).toBe(true);
   });
 
   it('disconnect calls clearCoinbaseIntegration', async () => {
     vi.mocked(clearCoinbaseIntegration).mockResolvedValue(undefined);
-    await coinbasePlugin.disconnect();
+    await coinbasePlugin.api!.disconnect();
     expect(clearCoinbaseIntegration).toHaveBeenCalledOnce();
   });
 });

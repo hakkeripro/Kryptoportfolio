@@ -10,11 +10,13 @@ export const coinbasePlugin: ImportPlugin = {
     authMethods: ['api-key'],
     category: 'exchange',
   },
-  ConnectForm: CoinbaseConnectForm,
-  FetchPanel: CoinbaseFetchPanel,
-  isConnected: async (passphrase: string) => {
-    const cfg = await loadCoinbaseIntegration(passphrase);
-    return !!cfg.credentials;
+  api: {
+    ConnectForm: CoinbaseConnectForm,
+    FetchPanel: CoinbaseFetchPanel,
+    isConnected: async (passphrase: string) => {
+      const cfg = await loadCoinbaseIntegration(passphrase);
+      return !!cfg.credentials;
+    },
+    disconnect: clearCoinbaseIntegration,
   },
-  disconnect: clearCoinbaseIntegration,
 };

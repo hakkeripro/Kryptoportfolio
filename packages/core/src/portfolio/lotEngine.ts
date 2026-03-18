@@ -8,6 +8,16 @@ import {
 import type { Settings } from '../domain/settings.js';
 import type { Disposal, Lot, Position } from '../domain/portfolio.js';
 
+export type LotEngineOptions = {
+  /** When true, lot buckets are keyed by "accountId:assetId" instead of just "assetId". */
+  walletLevelFifo?: boolean;
+  /**
+   * Known self-transfer pairs. When an outgoing TRANSFER's cost basis is consumed,
+   * it is stored and applied to the matching incoming TRANSFER lot instead of 0.
+   */
+  selfTransferMatches?: { outEventId: string; inEventId: string }[];
+};
+
 export type ReplayResult = {
   lotsByAssetId: Record<string, Lot[]>;
   disposals: Disposal[];
@@ -134,23 +144,58 @@ function computePositions(lotsByAssetId: Record<string, Lot[]>): Position[] {
   return positions;
 }
 
-export function createLotEngine(settings: Settings): LotEngine {
-  const lotsByAssetId: Record<string, Lot[]> = {};
+export function createLotEngine(settings: Settings, engineOpts: LotEngineOptions = {}): LotEngine {
+  // Internal lot storage: key is assetId (normal) or "accountId:assetId" (walletLevelFifo)
+  const lotsByKey: Record<string, Lot[]> = {};
   const disposals: Disposal[] = [];
   const warnings: string[] = [];
   let realized = new Decimal(0);
 
-  // For AVG_COST we keep a rolling pool by asset.
+  // For AVG_COST we keep a rolling pool by asset (always global per asset, not wallet-level).
   const avgPool: Record<string, { amount: Decimal; cost: Decimal }> = {};
 
-  const ensureLots = (assetId: string): Lot[] => {
-    lotsByAssetId[assetId] ??= [];
-    return lotsByAssetId[assetId]!;
+  // Self-transfer lookups
+  const selfTransferByOut = new Map<string, string>(); // outEventId -> inEventId
+  const selfTransferByIn = new Map<string, string>(); // inEventId -> outEventId
+  for (const m of engineOpts.selfTransferMatches ?? []) {
+    selfTransferByOut.set(m.outEventId, m.inEventId);
+    selfTransferByIn.set(m.inEventId, m.outEventId);
+  }
+  // Stores cost basis consumed by matched outgoing TRANSFERs for the incoming leg
+  const selfTransferCostStore = new Map<string, Decimal>(); // outEventId -> costBasis
+
+  /** Build internal key: wallet-level or asset-level. */
+  const keyOf = (assetId: string, accountId?: string): string => {
+    if (!engineOpts.walletLevelFifo) return assetId;
+    return `${accountId ?? '_global'}:${assetId}`;
+  };
+
+  const ensureLots = (assetId: string, accountId?: string): Lot[] => {
+    const key = keyOf(assetId, accountId);
+    lotsByKey[key] ??= [];
+    return lotsByKey[key]!;
   };
 
   const ensurePool = (assetId: string): { amount: Decimal; cost: Decimal } => {
     avgPool[assetId] ??= { amount: new Decimal(0), cost: new Decimal(0) };
     return avgPool[assetId]!;
+  };
+
+  /**
+   * Aggregate internal lot map back to assetId keys.
+   * When walletLevelFifo=false, keys are already assetIds — returns as-is.
+   * When walletLevelFifo=true, strips the "accountId:" prefix and merges.
+   */
+  const aggregateLotsByAssetId = (): Record<string, Lot[]> => {
+    if (!engineOpts.walletLevelFifo) return lotsByKey;
+    const result: Record<string, Lot[]> = {};
+    for (const [key, lots] of Object.entries(lotsByKey)) {
+      const colonIdx = key.indexOf(':');
+      const assetId = colonIdx >= 0 ? key.slice(colonIdx + 1) : key;
+      result[assetId] ??= [];
+      result[assetId]!.push(...lots);
+    }
+    return result;
   };
 
   const applyEvent = (e: LedgerEvent) => {
@@ -171,7 +216,7 @@ export function createLotEngine(settings: Settings): LotEngine {
         costBasisBaseRemaining: toFixed(cost),
         originEventId: e.id,
       };
-      const lots = ensureLots(e.assetId);
+      const lots = ensureLots(e.assetId, e.accountId);
       const pool = ensurePool(e.assetId);
       addLot(lots, lot);
       pool.amount = pool.amount.add(qty);
@@ -199,7 +244,7 @@ export function createLotEngine(settings: Settings): LotEngine {
         costBasisBaseRemaining: toFixed(cost),
         originEventId: e.id,
       };
-      const lots = ensureLots(e.assetId);
+      const lots = ensureLots(e.assetId, e.accountId);
       const pool = ensurePool(e.assetId);
       addLot(lots, lot);
       pool.amount = pool.amount.add(qty);
@@ -213,9 +258,9 @@ export function createLotEngine(settings: Settings): LotEngine {
       const gross = qty.mul(px);
       const proceeds = gross.sub(fee); // SELL disposal fee -> proceeds reduction
 
-      const lots = ensureLots(e.assetId);
+      const lots = ensureLots(e.assetId, e.accountId);
       let costBasis: Decimal;
-      let matched: { lotId: string; amount: Decimal; costBasisBase: Decimal }[] = [];
+      let matched: { lotId: string; amount: Decimal; costBasisBase: Decimal; acquiredAtISO?: string }[] = [];
 
       if (settings.lotMethodDefault === 'AVG_COST') {
         const pool = ensurePool(e.assetId);
@@ -267,9 +312,9 @@ export function createLotEngine(settings: Settings): LotEngine {
       const proceeds = gross.sub(fee); // swap disposal fee reduces proceeds
 
       // Dispose assetIn
-      const lotsIn = ensureLots(e.assetId);
+      const lotsIn = ensureLots(e.assetId, e.accountId);
       let costBasis: Decimal;
-      let matched: { lotId: string; amount: Decimal; costBasisBase: Decimal }[] = [];
+      let matched: { lotId: string; amount: Decimal; costBasisBase: Decimal; acquiredAtISO?: string }[] = [];
       if (settings.lotMethodDefault === 'AVG_COST') {
         const pool = ensurePool(e.assetId);
         const avg = pool.amount.gt(0) ? pool.cost.div(pool.amount) : new Decimal(0);
@@ -320,7 +365,7 @@ export function createLotEngine(settings: Settings): LotEngine {
         warnings.push(`swap_missing_asset_out:${e.id}`);
         return;
       }
-      const lotsOut = ensureLots(assetOutId);
+      const lotsOut = ensureLots(assetOutId, e.accountId);
       const poolOut = ensurePool(assetOutId);
       addLot(lotsOut, lotOut);
       poolOut.amount = poolOut.amount.add(qtyOut);
@@ -334,20 +379,32 @@ export function createLotEngine(settings: Settings): LotEngine {
       if (qty.isZero()) return;
 
       if (qtySigned.gt(0)) {
+        // Incoming transfer — normally 0-cost lot, unless it's a matched self-transfer
+        let costBasis = new Decimal(0);
+        const outEventId = selfTransferByIn.get(e.id);
+        if (outEventId) {
+          const stored = selfTransferCostStore.get(outEventId);
+          if (stored) {
+            costBasis = stored;
+          }
+        }
+
         const lot: Lot = {
           lotId: `lot_${e.id}`,
           assetId: e.assetId,
           acquiredAtISO: e.timestampISO,
           amountRemaining: toFixed(qty),
-          costBasisBaseRemaining: '0',
+          costBasisBaseRemaining: toFixed(costBasis),
           originEventId: e.id,
         };
-        const lots = ensureLots(e.assetId);
+        const lots = ensureLots(e.assetId, e.accountId);
         const pool = ensurePool(e.assetId);
         addLot(lots, lot);
         pool.amount = pool.amount.add(qty);
+        pool.cost = pool.cost.add(costBasis);
       } else {
-        const lots = ensureLots(e.assetId);
+        // Outgoing transfer — consume lots from this wallet's bucket
+        const lots = ensureLots(e.assetId, e.accountId);
         const pick = pickLots(
           lots,
           qty,
@@ -357,15 +414,20 @@ export function createLotEngine(settings: Settings): LotEngine {
         const pool = ensurePool(e.assetId);
         pool.amount = pool.amount.sub(qty);
         pool.cost = pool.cost.sub(pick.costBasisBase);
+
+        // Store consumed cost basis for matched self-transfer incoming leg
+        if (selfTransferByOut.has(e.id)) {
+          selfTransferCostStore.set(e.id, pick.costBasisBase);
+        }
       }
     }
   };
 
   return {
     applyEvent,
-    getPositions: () => computePositions(lotsByAssetId),
+    getPositions: () => computePositions(aggregateLotsByAssetId()),
     getRealizedPnlBaseToDate: () => toFixed(realized),
-    getLotsByAssetId: () => lotsByAssetId,
+    getLotsByAssetId: aggregateLotsByAssetId,
     getDisposals: () => disposals,
     getWarnings: () => warnings,
   };
@@ -374,9 +436,10 @@ export function createLotEngine(settings: Settings): LotEngine {
 export function replayLedgerToLotsAndDisposals(
   allEvents: LedgerEvent[],
   settings: Settings,
+  engineOptions?: LotEngineOptions,
 ): ReplayResult {
   const events = normalizeActiveLedger(allEvents);
-  const engine = createLotEngine(settings);
+  const engine = createLotEngine(settings, engineOptions);
   for (const e of events) engine.applyEvent(e);
 
   return {

@@ -15,10 +15,11 @@ export * from './portfolio/lotEngine.js';
 export * from './portfolio/snapshots.js';
 
 export * from './tax/taxEngine.js';
+export * from './tax/transferDetection.js';
 
 export * from './catalog/assetCatalog.js';
 
-export * from './import/coinbaseV2.js';
+export * from './import/index.js';
 
 // Shared API business logic (auth, sync, alerts, coingecko, push schemas)
 export * from './api/index.js';

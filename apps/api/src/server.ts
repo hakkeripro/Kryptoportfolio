@@ -9,6 +9,8 @@ import { registerSyncRoutes } from './routes/sync.js';
 import { registerPushRoutes } from './routes/push.js';
 import { registerAlertRoutes } from './routes/alerts.js';
 import { registerImportRoutes } from './routes/imports.js';
+import { registerBinanceImportRoutes } from './routes/imports-binance.js';
+import { registerKrakenImportRoutes } from './routes/imports-kraken.js';
 import { registerCoingeckoRoutes } from './routes/coingecko.js';
 import { registerBillingRoutes } from './routes/billing.js';
 import { startAlertRunner } from './runner/alertRunner.js';
@@ -93,6 +95,8 @@ registerSyncRoutes(app);
 registerPushRoutes(app);
 registerAlertRoutes(app);
 registerImportRoutes(app);
+registerBinanceImportRoutes(app);
+registerKrakenImportRoutes(app);
 registerCoingeckoRoutes(app);
 registerBillingRoutes(app);
 

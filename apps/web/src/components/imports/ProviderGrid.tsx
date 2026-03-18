@@ -23,7 +23,9 @@ export function ProviderGrid() {
     void (async () => {
       const results: Record<string, boolean> = {};
       for (const plugin of PROVIDER_REGISTRY) {
-        results[plugin.descriptor.id] = await plugin.isConnected(passphrase);
+        if (plugin.api) {
+          results[plugin.descriptor.id] = await plugin.api.isConnected(passphrase);
+        }
       }
       setConnections(results);
     })();
@@ -55,10 +57,11 @@ export function ProviderGrid() {
         ))}
       </div>
 
-      {/* Render FetchPanel for each connected provider */}
-      {PROVIDER_REGISTRY.filter((p) => connections[p.descriptor.id]).map((plugin) => (
-        <plugin.FetchPanel key={plugin.descriptor.id} ctx={ctx} />
-      ))}
+      {/* Render FetchPanel for each connected provider that has api capability */}
+      {PROVIDER_REGISTRY.filter((p) => p.api && connections[p.descriptor.id]).map((plugin) => {
+        const FetchPanel = plugin.api!.FetchPanel;
+        return <FetchPanel key={plugin.descriptor.id} ctx={ctx} />;
+      })}
     </div>
   );
 }

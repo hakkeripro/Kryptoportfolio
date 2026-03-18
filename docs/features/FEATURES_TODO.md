@@ -488,15 +488,15 @@ Ks. [ISSUE_LOG.md](../ISSUE_LOG.md) tarkemmat kuvaukset.
 - [x] `taxCountry` + `hmoEnabled` Settings-skeemaan
 - [x] Maa-valinta onboardingiin (VaultSetupWizard)
 
-### Feature 25: Finnish Tax Parity 🔄 (Vaihe 1 valmis)
+### Feature 25: Finnish Tax Parity ✅
 **Speksi:** [25_finnish-tax-parity.md](25_finnish-tax-parity.md)
 **Prioriteetti:** P1 — kriittinen kilpailupariteetti
 - [x] **Vaihe 1:** HMO-laskuri (20%/40%, automaattinen omistusaikalaskenta)
 - [x] **Vaihe 1:** Blur-gate verolaskennan tuloksille (Free-käyttäjille)
 - [x] **Vaihe 1:** OmaVero copy-paste -opas (Pro-gated)
 - [x] **Vaihe 1:** Tax issue -filter TransactionsPage:lla
-- [ ] **Vaihe 2:** Lompakkokohtainen FIFO (Verohallinnon ohje)
-- [ ] **Vaihe 2:** Transfer detection + review UI (omat siirrot pörssien välillä)
+- [x] **Vaihe 2:** Lompakkokohtainen FIFO (Verohallinnon ohje)
+- [x] **Vaihe 2:** Transfer detection + review UI (omat siirrot pörssien välillä)
 
 ### Feature 26: Dashboard + UX Polish ❌
 **Speksi:** PRODUCT_ROADMAP_2026.md § 2.3, 2.4
@@ -525,14 +525,15 @@ Ks. [ISSUE_LOG.md](../ISSUE_LOG.md) tarkemmat kuvaukset.
 - [ ] ZK-yhteensopiva: data ei kulje VaultFolion palvelimen kautta
 - [ ] Käyttäjän opt-in ennen AI-kutsua
 
-### Feature 13 Vaihe 2: Binance + Kraken ❌
+### Feature 13 Vaihe 2: Binance + Kraken ✅
 **Speksi:** [13v2_imports-phase2.md](13v2_imports-phase2.md)
 **Vaihe 2B (erillinen speksi):** Northcrypto CSV + Coinmotion CSV
 **Vaihe 3 (erillinen speksi):** MetaMask (korkea prioriteetti)
-- [ ] A: ImportPlugin capability-redesign (api + csv) + Coinbase-migraatio
-- [ ] B: Binance plugin (HMAC API + Statement CSV)
-- [ ] C: Kraken plugin (HMAC API)
-- [ ] D: Coming-soon lista päivitetty (Northcrypto, Coinmotion, Bybit, MetaMask, Bitstamp jne.)
+- [x] A: ImportPlugin capability-redesign (api + csv) + Coinbase-migraatio
+- [x] B: Binance plugin (HMAC API + Statement CSV mapper + UI + backend proxy)
+- [x] C: Kraken plugin (HMAC API + Ledger mapper + UI + backend proxy)
+- [x] D: Coming-soon lista päivitetty (Northcrypto, Coinmotion, Bybit, MetaMask, Bitstamp jne.)
+- [x] Unit testit: binanceStatement (12), binanceTrades (12), krakenLedger (15) — kaikki läpi
 
 ---
 

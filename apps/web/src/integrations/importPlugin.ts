@@ -16,14 +16,26 @@ export interface FetchPanelProps {
   ctx: ImportContext;
 }
 
+export interface CsvUploadFormProps {
+  ctx: ImportContext;
+}
+
+export interface ApiCapability {
+  ConnectForm: React.FC<ConnectFormProps>;
+  FetchPanel: React.FC<FetchPanelProps>;
+  isConnected: (passphrase: string) => Promise<boolean>;
+  disconnect: () => Promise<void>;
+}
+
+export interface CsvCapability {
+  UploadForm: React.FC<CsvUploadFormProps>;
+}
+
 export interface ImportPlugin {
   descriptor: ProviderDescriptor;
-  /** Inline connect form rendered inside the provider card */
-  ConnectForm: React.FC<ConnectFormProps>;
-  /** Full-width fetch/preview/done panel rendered below the provider grid */
-  FetchPanel: React.FC<FetchPanelProps>;
-  /** Returns true if credentials are saved in vault */
-  isConnected: (passphrase: string) => Promise<boolean>;
-  /** Clears vault credentials */
-  disconnect: () => Promise<void>;
+  /** API-autosync capability (API key + server-side proxy) */
+  api?: ApiCapability;
+  /** CSV upload capability (client-side parsing, ZK-compatible) */
+  csv?: CsvCapability;
+  // At least one of api or csv must be defined
 }

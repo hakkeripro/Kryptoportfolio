@@ -1,6 +1,6 @@
 # Session Context
 
-Paivitetty: 2026-03-16
+Paivitetty: 2026-03-18
 
 ## Projektin nykytila
 
@@ -22,13 +22,70 @@ Ei avoimia P0-bugeja. Kaikki korjattu 2026-03-14.
 - CI: puuttuu typecheck, lint, coverage, audit, preview deploy
 
 ### Seuraava tyovaihe
-Feature 25 Vaihe 1 (Finnish Tax Parity — HMO, blur-gate, OmaVero, issue filter) valmis 2026-03-17.
+Feature 13 Vaihe 2 valmis 2026-03-18 (Binance + Kraken providerit).
 
-Seuraavaksi: Feature 25 Vaihe 2 (wallet-level FIFO + transfer detection) → Feature 26 (Dashboard + UX Polish)
+Seuraavaksi: Feature 26 (Dashboard + UX Polish) tai Feature 13 Vaihe 2B (Northcrypto CSV + Coinmotion CSV)
 
 ---
 
 ## Muutosloki
+
+### 2026-03-18 — Feature 13 Vaihe 2: Binance + Kraken providerit
+
+**Uudet tiedostot:**
+- `packages/core/src/import/binanceStatement.ts` — Binance Statement CSV -mapper (parsinta + event mapping)
+- `packages/core/src/import/binanceTrades.ts` — Binance API-vastauksen mapper (trades, deposits, withdrawals)
+- `packages/core/src/import/binanceAssetMap.ts` — Binance symbol → CoinGecko ID (70+ symbolia)
+- `packages/core/src/import/krakenLedger.ts` — Kraken Ledger-entry mapper (trade pairing refidillä, asset normalisointi)
+- `packages/core/src/import/krakenAssetMap.ts` — Kraken asset-koodi normalisointi (XXBT→BTC, XETH→ETH jne.)
+- `packages/core/src/import/index.ts` — re-export kaikki mapperit
+- `apps/api/src/services/binanceHmac.ts` + `binanceClient.ts` + `binanceV1Fixture.ts` — Binance HMAC-proxy (local)
+- `apps/api/src/services/krakenHmac.ts` + `krakenClient.ts` + `krakenV1Fixture.ts` — Kraken HMAC-proxy (local)
+- `apps/api/src/routes/imports-binance.ts` + `imports-kraken.ts` — Fastify-routet
+- `functions/_lib/binanceHmac.ts` + `krakenHmac.ts` — Web Crypto HMAC (Cloudflare Workers)
+- `functions/api/routes/binance.ts` + `kraken.ts` — Hono-routet
+- `apps/web/src/integrations/binance/` — vault, api, sync, import, plugin (5 tiedostoa)
+- `apps/web/src/integrations/kraken/` — vault, api, sync, import, plugin (5 tiedostoa)
+- `apps/web/src/components/imports/BinanceConnectForm.tsx` + `BinanceFetchPanel.tsx` + `BinanceCsvUploadForm.tsx`
+- `apps/web/src/components/imports/KrakenConnectForm.tsx` + `KrakenFetchPanel.tsx`
+- `apps/web/src/components/imports/CapabilityChoiceScreen.tsx` — API vs CSV -valintanäyttö (Binance)
+
+**Muutetut tiedostot:**
+- `apps/web/src/integrations/importPlugin.ts` — capability-based redesign (ApiCapability, CsvCapability)
+- `apps/web/src/integrations/coinbase/coinbasePlugin.ts` — migraatio `api:` -capabilityyn
+- `apps/web/src/integrations/providerRegistry.ts` — binancePlugin + krakenPlugin; coming-soon lista päivitetty
+- `apps/web/src/components/imports/ProviderCard.tsx` — capability branching + CapabilityChoiceScreen + logot
+- `apps/web/src/components/imports/ProviderGrid.tsx` — `plugin.api.*` käyttö
+- `apps/api/src/server.ts` — rekisteröi Binance + Kraken routet
+- `functions/api/[[path]].ts` — rekisteröi binance + kraken Hono-routet
+- `packages/core/src/index.ts` — `./import/index.js` export (korvaa `./import/coinbaseV2.js`)
+- `packages/core/src/portfolio/lotEngine.ts` — tyyppikorjaus (`acquiredAtISO?` matched-tyyppeihin)
+- `apps/web/src/integrations/providerRegistry.test.ts` — päivitetty capability-mallille
+- `apps/web/src/integrations/coinbase/coinbasePlugin.test.ts` — päivitetty `api!.*` kutsuihin
+
+**Uudet testit:**
+- `packages/core/src/import/binanceStatement.test.ts` — 12 testiä (CSV-parsinta, operaatioiden mappaus)
+- `packages/core/src/import/binanceTrades.test.ts` — 12 testiä (symbol split, API trades/deposits/withdrawals)
+- `packages/core/src/import/krakenLedger.test.ts` — 15 testiä (trade pairing, normalisointi, deduplicate)
+
+**Testit:** 147 → 173 core-testiä, 250 yhteensä (kaikki läpi) ✅, Build OK ✅
+
+---
+
+### 2026-03-17 — Feature 25 Vaihe 2: Wallet-level FIFO + Transfer Detection
+
+**Uudet tiedostot:**
+- `packages/core/src/tax/transferDetection.ts` — `detectSelfTransfers()`: greedy matching, dust-toleranssi (0.5%), aikaikkuna (2h), eri account -tarkistus, high/medium confidence
+- `packages/core/src/tax/transferDetection.test.ts` — 7 unit-testiä (kaikki läpi)
+
+**Muutetut tiedostot:**
+- `packages/core/src/portfolio/lotEngine.ts` — `LotEngineOptions` (walletLevelFifo + selfTransferMatches), wallet-key logiikka, self-transfer cost basis -siirto incoming-lotille
+- `packages/core/src/tax/taxEngine.ts` — `enableTransferDetection` option, yhdistää transfer detection + wallet-level FIFO Finland-profiilille
+- `packages/core/src/index.ts` — `transferDetection` export
+- `packages/core/src/__tests__/lotEngine.test.ts` — 3 uutta testiä (walletLevelFifo, _global fallback, self-transfer cost basis)
+- `apps/web/src/pages/TaxPage.tsx` — `enableTransferDetection: isFinland` generate-kutsuun
+
+**Testit:** 137 → 147 core-testiä (kaikki läpi), 205 yhteensä ✅
 
 ### 2026-03-17 — Feature 25 Vaihe 1: Finnish Tax Parity
 
