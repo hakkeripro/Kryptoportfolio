@@ -15,12 +15,13 @@ interface Props {
   setBusy: (v: boolean) => void;
 }
 
-const COUNTRY_OPTIONS: { value: TaxCountry; label: string; flag: string; comingSoon?: boolean }[] = [
-  { value: 'FI', label: 'Finland', flag: '🇫🇮' },
-  { value: 'SE', label: 'Sweden', flag: '🇸🇪', comingSoon: true },
-  { value: 'DE', label: 'Germany', flag: '🇩🇪', comingSoon: true },
-  { value: 'OTHER', label: 'Other', flag: '🌍' },
-];
+const COUNTRY_OPTIONS: { value: TaxCountry; label: string; flag: string; comingSoon?: boolean }[] =
+  [
+    { value: 'FI', label: 'Finland', flag: '🇫🇮' },
+    { value: 'SE', label: 'Sweden', flag: '🇸🇪', comingSoon: true },
+    { value: 'DE', label: 'Germany', flag: '🇩🇪', comingSoon: true },
+    { value: 'OTHER', label: 'Other', flag: '🌍' },
+  ];
 
 export default function TaxProfileCard({ settings, loading, error, busy, setBusy }: Props) {
   const { t } = useTranslation();

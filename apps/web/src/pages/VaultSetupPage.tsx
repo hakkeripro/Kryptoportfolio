@@ -16,12 +16,13 @@ function errToMsg(e: unknown): string {
 // passkey step removed from normal flow (deferred to dashboard banner)
 type Step = 'country' | 'passphrase' | 'done';
 
-const COUNTRY_OPTIONS: { value: TaxCountry; label: string; flag: string; comingSoon?: boolean }[] = [
-  { value: 'FI', label: 'Finland', flag: '🇫🇮' },
-  { value: 'SE', label: 'Sweden', flag: '🇸🇪', comingSoon: true },
-  { value: 'DE', label: 'Germany', flag: '🇩🇪', comingSoon: true },
-  { value: 'OTHER', label: 'Other', flag: '🌍' },
-];
+const COUNTRY_OPTIONS: { value: TaxCountry; label: string; flag: string; comingSoon?: boolean }[] =
+  [
+    { value: 'FI', label: 'Finland', flag: '🇫🇮' },
+    { value: 'SE', label: 'Sweden', flag: '🇸🇪', comingSoon: true },
+    { value: 'DE', label: 'Germany', flag: '🇩🇪', comingSoon: true },
+    { value: 'OTHER', label: 'Other', flag: '🌍' },
+  ];
 
 const STEP_NUMBERS: Record<Step, number> = {
   country: 1,

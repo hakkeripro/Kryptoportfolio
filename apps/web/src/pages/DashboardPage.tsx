@@ -402,9 +402,7 @@ export default function DashboardPage() {
         <SetupProgressBanner onImport={() => nav('/transactions/import')} />
       )}
       <PartialDataWarning count={unmappedCount} onMap={() => nav('/settings/assets')} />
-      {!!passphrase && (
-        <PasskeyBanner onSetup={() => nav('/settings')} />
-      )}
+      {!!passphrase && <PasskeyBanner onSetup={() => nav('/settings')} />}
 
       {/* ── Hero: Total portfolio value ── */}
       <motion.div

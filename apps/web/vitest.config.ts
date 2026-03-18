@@ -16,7 +16,7 @@ export default defineConfig({
       '**/dist/**',
       '**/.{idea,git,cache,output,temp}/**',
       'tests-e2e/**',
-      'playwright.config.{ts,js,mjs,cjs}'
-    ]
-  }
+      'playwright.config.{ts,js,mjs,cjs}',
+    ],
+  },
 });

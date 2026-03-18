@@ -104,8 +104,14 @@ async function cmdRun() {
 
     console.log(`  RUN   ${f}`);
     try {
-      // Execute the migration SQL
-      await sql(sqlText);
+      // Split into individual statements (neon serverless doesn't support multi-statement queries)
+      const statements = sqlText
+        .split(/;\s*(?:\n|$)/)
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0 && !s.startsWith('--'));
+      for (const stmt of statements) {
+        await sql(stmt, []);
+      }
       // Record it as applied
       await sql`INSERT INTO schema_migrations (name) VALUES (${f})`;
       console.log(`  OK    ${f}`);

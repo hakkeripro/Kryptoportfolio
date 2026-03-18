@@ -174,7 +174,10 @@ function SidebarContent() {
     <>
       {/* Brand */}
       <div className="px-5 py-4 border-b border-white/10">
-        <Link to="/home" className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity">
+        <Link
+          to="/home"
+          className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity"
+        >
           <Shield className="h-6 w-6 text-[#FF8400]" />
           <span className="font-semibold tracking-tight text-white text-sm">PrivateLedger</span>
         </Link>
@@ -258,7 +261,10 @@ export default function Sidebar() {
             </div>
           </SheetContent>
         </Sheet>
-        <Link to="/home" className="ml-3 inline-flex items-center gap-2 hover:opacity-80 transition-opacity">
+        <Link
+          to="/home"
+          className="ml-3 inline-flex items-center gap-2 hover:opacity-80 transition-opacity"
+        >
           <Shield className="h-5 w-5 text-[#FF8400]" />
           <span className="font-semibold text-white text-sm tracking-tight">PrivateLedger</span>
         </Link>

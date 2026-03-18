@@ -40,12 +40,12 @@ export default defineConfig(({ mode }) => ({
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         // Extra runtime handlers for Web Push.
         // The file lives in /public so it will be copied to the dist root.
-        importScripts: ['sw-push.js']
+        importScripts: ['sw-push.js'],
       },
       devOptions: {
-        enabled: mode === 'development'
-      }
-    })
+        enabled: mode === 'development',
+      },
+    }),
   ],
   server: {
     port: 5173,
@@ -57,8 +57,8 @@ export default defineConfig(({ mode }) => ({
         // Override when needed: set VITE_API_PROXY_TARGET, e.g. http://127.0.0.1:8790
         target: process.env.VITE_API_PROXY_TARGET ?? 'http://127.0.0.1:8788',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
-      }
-    }
-  }
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
+  },
 }));
