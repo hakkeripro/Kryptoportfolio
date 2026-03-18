@@ -177,8 +177,8 @@ export default function SignupWithVaultPage() {
               // YOUR VAULT
             </div>
             <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-4 py-3 text-[11px] font-mono text-white/40 leading-relaxed">
-              Your vault passphrase encrypts your data on your device.
-              Unlike your login password, we cannot reset it — by design.
+              Your vault passphrase encrypts your data on your device. Unlike your login password,
+              we cannot reset it — by design.
             </div>
 
             <PassphraseGenerator onAccept={handleAcceptGenerated} />
@@ -198,7 +198,9 @@ export default function SignupWithVaultPage() {
                 placeholder={t('vaultSetup.passphrasePlaceholder')}
               />
               {ppTooShort && (
-                <p className="text-xs text-rose-400 mt-1">Passphrase must be at least 6 characters.</p>
+                <p className="text-xs text-rose-400 mt-1">
+                  Passphrase must be at least 6 characters.
+                </p>
               )}
             </div>
 
@@ -273,7 +275,10 @@ export default function SignupWithVaultPage() {
             </Link>
           </p>
           <p>
-            <Link to="/vault/setup?offline=1" className="text-xs text-white/30 hover:text-white/50 transition-colors">
+            <Link
+              to="/vault/setup?offline=1"
+              className="text-xs text-white/30 hover:text-white/50 transition-colors"
+            >
               Use without account →
             </Link>
           </p>

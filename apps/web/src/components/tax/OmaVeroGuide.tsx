@@ -59,9 +59,7 @@ export function OmaVeroGuide({ report }: OmaVeroGuideProps) {
   const hmoSaving = report.hmoTotalSavingBase;
 
   // HMO-adjusted cost basis = actual cost basis + HMO savings (when applied)
-  const hmoCostBasis = hmoSaving
-    ? String(Number(costBasisBase) + Number(hmoSaving))
-    : null;
+  const hmoCostBasis = hmoSaving ? String(Number(costBasisBase) + Number(hmoSaving)) : null;
 
   return (
     <Card data-testid="panel-omavero-guide">
@@ -108,7 +106,11 @@ export function OmaVeroGuide({ report }: OmaVeroGuideProps) {
           <div className="rounded-lg border border-[#FF8400]/20 bg-[#FF8400]/[0.03] px-4 py-3 text-[12px] text-white/60">
             HMO sovellettu {hmoAppliedCount} myynnissä — säästö{' '}
             <span className="text-[#FF8400] font-semibold">
-              {Number(hmoSaving).toLocaleString('fi-FI', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {cur}
+              {Number(hmoSaving).toLocaleString('fi-FI', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}{' '}
+              {cur}
             </span>
           </div>
           <div className="mt-2">

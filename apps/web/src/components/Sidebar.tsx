@@ -27,13 +27,7 @@ interface NavSection {
   items: { to: string; icon: typeof Home; label: string; testId: string; badge?: number }[];
 }
 
-function NavItem({
-  to,
-  icon: Icon,
-  label,
-  testId,
-  badge,
-}: NavSection['items'][number]) {
+function NavItem({ to, icon: Icon, label, testId, badge }: NavSection['items'][number]) {
   const location = useLocation();
   const isActive = location.pathname === to;
 

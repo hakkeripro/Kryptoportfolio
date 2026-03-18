@@ -1,10 +1,7 @@
 import { useRef, useState } from 'react';
 import { Upload } from 'lucide-react';
 import { Button } from '../ui';
-import {
-  parseBinanceStatementCsv,
-  mapBinanceStatementToEvents,
-} from '@kp/core';
+import { parseBinanceStatementCsv, mapBinanceStatementToEvents } from '@kp/core';
 import {
   buildBinancePreviewEvents,
   commitBinanceImport,
@@ -34,7 +31,8 @@ export function BinanceCsvUploadForm({ ctx }: CsvUploadFormProps) {
       const rows = parseBinanceStatementCsv(text);
       const { events: raw, issues } = mapBinanceStatementToEvents(rows);
       const ledgerEvents = buildBinancePreviewEvents(raw);
-      const { newEvents: ne, duplicateExternalRefs: dups } = await computeBinanceDedupe(ledgerEvents);
+      const { newEvents: ne, duplicateExternalRefs: dups } =
+        await computeBinanceDedupe(ledgerEvents);
       setEvents(ledgerEvents);
       setNewEvents(ne);
       setDupCount(dups.length);
@@ -85,7 +83,10 @@ export function BinanceCsvUploadForm({ ctx }: CsvUploadFormProps) {
             type="file"
             accept=".csv"
             className="hidden"
-            onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleFile(f); }}
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) void handleFile(f);
+            }}
           />
         </div>
       )}
@@ -119,7 +120,14 @@ export function BinanceCsvUploadForm({ ctx }: CsvUploadFormProps) {
               >
                 Import {newEvents.length} transactions
               </Button>
-              <Button variant="outline" size="sm" onClick={() => { setStatus('idle'); setFileName(''); }}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setStatus('idle');
+                  setFileName('');
+                }}
+              >
                 Cancel
               </Button>
             </div>

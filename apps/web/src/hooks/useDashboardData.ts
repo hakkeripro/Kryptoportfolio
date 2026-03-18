@@ -29,9 +29,7 @@ export function useDashboardData() {
       const latest = (await db.portfolioSnapshots.orderBy('dayISO').last()) ?? null;
       const snaps = await db.portfolioSnapshots.orderBy('dayISO').reverse().limit(120).toArray();
       const assets = await db.assets.toArray();
-      const ledgerEventCount = await db.ledgerEvents
-        .filter((e) => !e.isDeleted)
-        .count();
+      const ledgerEventCount = await db.ledgerEvents.filter((e) => !e.isDeleted).count();
       // Recent 2 days of live price points for 24h change calculation
       const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString();
       const recentPricePoints = await db.pricePoints

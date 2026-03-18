@@ -17,12 +17,21 @@ export function KrakenConnectForm({ ctx, onConnected }: ConnectFormProps) {
   const [err, setErr] = useState<string | null>(null);
 
   async function connect() {
-    if (!ctx.passphrase) { setErr('Vault is locked — unlock first'); return; }
-    if (!ctx.token) { setErr('Not authenticated'); return; }
+    if (!ctx.passphrase) {
+      setErr('Vault is locked — unlock first');
+      return;
+    }
+    if (!ctx.token) {
+      setErr('Not authenticated');
+      return;
+    }
     setErr(null);
     setLoading(true);
     try {
-      await krakenVerify(ctx.apiBase, ctx.token, { apiKey: apiKey.trim(), apiSecret: apiSecret.trim() });
+      await krakenVerify(ctx.apiBase, ctx.token, {
+        apiKey: apiKey.trim(),
+        apiSecret: apiSecret.trim(),
+      });
       const cfg = await loadKrakenIntegration(ctx.passphrase);
       await saveKrakenIntegration(ctx.passphrase, {
         ...cfg,
@@ -70,8 +79,8 @@ export function KrakenConnectForm({ ctx, onConnected }: ConnectFormProps) {
         />
       </label>
       <div className="text-caption text-content-tertiary">
-        Read-only API key required. Enable "Query Ledger Entries" permission only.
-        Do not enable trading or withdrawal permissions.
+        Read-only API key required. Enable "Query Ledger Entries" permission only. Do not enable
+        trading or withdrawal permissions.
       </div>
       <Button
         variant="default"

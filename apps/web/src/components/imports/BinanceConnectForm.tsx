@@ -17,12 +17,21 @@ export function BinanceConnectForm({ ctx, onConnected }: ConnectFormProps) {
   const [err, setErr] = useState<string | null>(null);
 
   async function connect() {
-    if (!ctx.passphrase) { setErr('Vault is locked — unlock first'); return; }
-    if (!ctx.token) { setErr('Not authenticated'); return; }
+    if (!ctx.passphrase) {
+      setErr('Vault is locked — unlock first');
+      return;
+    }
+    if (!ctx.token) {
+      setErr('Not authenticated');
+      return;
+    }
     setErr(null);
     setLoading(true);
     try {
-      await binanceVerify(ctx.apiBase, ctx.token, { apiKey: apiKey.trim(), apiSecret: apiSecret.trim() });
+      await binanceVerify(ctx.apiBase, ctx.token, {
+        apiKey: apiKey.trim(),
+        apiSecret: apiSecret.trim(),
+      });
       const cfg = await loadBinanceIntegration(ctx.passphrase);
       await saveBinanceIntegration(ctx.passphrase, {
         ...cfg,

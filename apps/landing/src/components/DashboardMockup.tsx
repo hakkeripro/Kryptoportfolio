@@ -52,7 +52,11 @@ export default function DashboardMockup() {
     }, 3800);
     // Alert badge after 4.5s
     const t3 = setTimeout(() => setAlertVisible(true), 4500);
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
   }, []);
 
   return (
@@ -141,7 +145,9 @@ export default function DashboardMockup() {
                   </linearGradient>
                   <clipPath id="chartClip">
                     <motion.rect
-                      x="0" y="0" height="100"
+                      x="0"
+                      y="0"
+                      height="100"
                       initial={{ width: 0 }}
                       whileInView={{ width: 300 }}
                       viewport={{ once: true }}
@@ -189,7 +195,9 @@ export default function DashboardMockup() {
                       </span>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-white leading-none mb-0.5">{asset.symbol}</p>
+                      <p className="text-sm font-medium text-white leading-none mb-0.5">
+                        {asset.symbol}
+                      </p>
                       <p className="text-[10px] font-mono text-white/30">{asset.amount}</p>
                     </div>
                   </div>
@@ -207,7 +215,8 @@ export default function DashboardMockup() {
                       ) : (
                         <TrendingDown className="w-2.5 h-2.5" />
                       )}
-                      {asset.change >= 0 ? '+' : ''}{asset.change}%
+                      {asset.change >= 0 ? '+' : ''}
+                      {asset.change}%
                     </p>
                   </div>
                 </motion.div>

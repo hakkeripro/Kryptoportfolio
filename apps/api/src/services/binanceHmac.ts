@@ -8,9 +8,7 @@ export function signBinanceRequest(queryString: string, apiSecret: string): stri
   return createHmac('sha256', apiSecret).update(queryString).digest('hex');
 }
 
-export function buildBinanceQueryString(
-  params: Record<string, string | number | boolean>,
-): string {
+export function buildBinanceQueryString(params: Record<string, string | number | boolean>): string {
   return Object.entries(params)
     .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`)
     .join('&');

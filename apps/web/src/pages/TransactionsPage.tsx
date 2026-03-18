@@ -134,7 +134,9 @@ export default function TransactionsPage() {
   const [showForm, setShowForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('ALL');
-  const [issueFilter, setIssueFilter] = useState<'ALL' | 'ISSUES' | 'MISSING_VALUE' | 'UNMATCHED_TRANSFER'>('ALL');
+  const [issueFilter, setIssueFilter] = useState<
+    'ALL' | 'ISSUES' | 'MISSING_VALUE' | 'UNMATCHED_TRANSFER'
+  >('ALL');
 
   const dbState = useDbQuery(
     async (db) => {

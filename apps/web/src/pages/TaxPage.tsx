@@ -329,9 +329,7 @@ export default function TaxPage() {
               />
               <span className="text-[12px] text-content-secondary">
                 HMO
-                {!hmoGate.allowed && (
-                  <span className="ml-1 text-[#FF8400]">🔒</span>
-                )}
+                {!hmoGate.allowed && <span className="ml-1 text-[#FF8400]">🔒</span>}
               </span>
             </label>
           )}
@@ -400,10 +398,20 @@ export default function TaxPage() {
       {/* Disposals table — blurred for free users */}
       <motion.div variants={fadeInUp} initial="hidden" animate="show">
         {taxViewGate.allowed ? (
-          <DisposalsTable report={report} assetsById={assetsById} t={t} baseCurrency={baseCurrency} />
+          <DisposalsTable
+            report={report}
+            assetsById={assetsById}
+            t={t}
+            baseCurrency={baseCurrency}
+          />
         ) : (
           <BlurOverlay onUpgrade={taxViewGate.openUpgrade}>
-            <DisposalsTable report={report} assetsById={assetsById} t={t} baseCurrency={baseCurrency} />
+            <DisposalsTable
+              report={report}
+              assetsById={assetsById}
+              t={t}
+              baseCurrency={baseCurrency}
+            />
           </BlurOverlay>
         )}
       </motion.div>
@@ -533,8 +541,9 @@ export default function TaxPage() {
       )}
 
       {/* OmaVero Guide — Finland profile + report generated + Pro */}
-      {report && isFinland && (
-        omaveroGate.allowed ? (
+      {report &&
+        isFinland &&
+        (omaveroGate.allowed ? (
           <OmaVeroGuide report={report} />
         ) : (
           <Card data-testid="panel-omavero-locked">
@@ -553,8 +562,7 @@ export default function TaxPage() {
               </button>
             </div>
           </Card>
-        )
-      )}
+        ))}
 
       {report?.warnings?.length ? (
         <Card>

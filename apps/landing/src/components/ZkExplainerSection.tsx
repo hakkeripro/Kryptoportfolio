@@ -14,7 +14,7 @@ const STEPS = [
     number: '02',
     title: 'We store an envelope',
     description:
-      'Our server receives an encrypted blob. Without your passphrase, it\'s mathematically unreadable — even to us. We never see your balances, trades, or portfolio value.',
+      "Our server receives an encrypted blob. Without your passphrase, it's mathematically unreadable — even to us. We never see your balances, trades, or portfolio value.",
   },
   {
     icon: Unlock,
@@ -35,8 +35,7 @@ export default function ZkExplainerSection() {
             // HOW_IT_WORKS
           </p>
           <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-5">
-            Zero-knowledge,{' '}
-            <span className="text-[#FF8400]">zero trust required</span>
+            Zero-knowledge, <span className="text-[#FF8400]">zero trust required</span>
           </h2>
           <p className="text-white/50 text-lg max-w-xl mx-auto">
             You don't have to trust us. The math doesn't allow it.
@@ -91,10 +90,13 @@ export default function ZkExplainerSection() {
             <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
             <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
             <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
-            <span className="text-[10px] text-white/20 ml-2 uppercase tracking-[0.1em]">vault.ts — client-side encryption</span>
+            <span className="text-[10px] text-white/20 ml-2 uppercase tracking-[0.1em]">
+              vault.ts — client-side encryption
+            </span>
           </div>
           <pre className="text-xs leading-6 overflow-x-auto">
-            <span className="text-white/30">{'// Your passphrase never leaves the browser'}</span>{'\n'}
+            <span className="text-white/30">{'// Your passphrase never leaves the browser'}</span>
+            {'\n'}
             <span className="text-[#FF8400]/80">const</span>
             <span className="text-white/70"> key </span>
             <span className="text-white/40">= await </span>
@@ -107,12 +109,14 @@ export default function ZkExplainerSection() {
             <span className="text-[#FF8400]/80">false</span>
             <span className="text-white/40">, [</span>
             <span className="text-[#B6FFCE]/70">"encrypt"</span>
-            <span className="text-white/40">]);</span>{'\n'}
+            <span className="text-white/40">]);</span>
+            {'\n'}
             <span className="text-[#FF8400]/80">const</span>
             <span className="text-white/70"> ciphertext </span>
             <span className="text-white/40">= await </span>
             <span className="text-[#B2B2FF]/80">crypto.subtle.encrypt</span>
-            <span className="text-white/40">({'{ name: "AES-GCM", iv }'}, key, plaintext);</span>{'\n'}
+            <span className="text-white/40">({'{ name: "AES-GCM", iv }'}, key, plaintext);</span>
+            {'\n'}
             <span className="text-white/30">{'// ↑ This is all the server ever sees'}</span>
           </pre>
         </motion.div>

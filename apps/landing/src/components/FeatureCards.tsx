@@ -28,7 +28,7 @@ const FEATURES = [
     tag: 'PRIVACY',
     title: 'No tracking, ever',
     description:
-      'No analytics, no cookies, no fingerprinting. We don\'t know what you own, when you trade, or how much you\'re worth. Mathematically.',
+      "No analytics, no cookies, no fingerprinting. We don't know what you own, when you trade, or how much you're worth. Mathematically.",
   },
 ];
 
@@ -42,8 +42,7 @@ export default function FeatureCards() {
             // FEATURES
           </p>
           <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
-            Everything you need,{' '}
-            <span className="text-[#FF8400]">nothing you don't</span>
+            Everything you need, <span className="text-[#FF8400]">nothing you don't</span>
           </h2>
         </div>
 
@@ -64,7 +63,10 @@ export default function FeatureCards() {
 
                 <div className="flex items-start gap-4 mb-4">
                   <div className="w-10 h-10 rounded-xl bg-[#FF8400]/[0.08] border border-[#FF8400]/20 flex items-center justify-center shrink-0 group-hover:bg-[#FF8400]/[0.12] transition-colors">
-                    <Icon className="w-4.5 h-4.5 text-[#FF8400]" style={{ width: '18px', height: '18px' }} />
+                    <Icon
+                      className="w-4.5 h-4.5 text-[#FF8400]"
+                      style={{ width: '18px', height: '18px' }}
+                    />
                   </div>
                   <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-white/20 mt-2.5">
                     {feature.tag}

@@ -12,7 +12,12 @@ interface Props {
   setBusy: (v: boolean) => void;
 }
 
-export default function IntegrationsCard({ settings, autoRefreshIntervalSec: initialInterval, busy, setBusy }: Props) {
+export default function IntegrationsCard({
+  settings,
+  autoRefreshIntervalSec: initialInterval,
+  busy,
+  setBusy,
+}: Props) {
   const { t } = useTranslation();
   const syncNow = useSyncStore((s) => s.syncNow);
   const [autoRefreshIntervalSec, setAutoRefreshIntervalSec] = useState(initialInterval);
@@ -32,7 +37,11 @@ export default function IntegrationsCard({ settings, autoRefreshIntervalSec: ini
       const existing = await db.settings.get('settings_1');
       if (!existing) throw new Error('settings_not_initialized');
       const now = new Date().toISOString();
-      await db.settings.put({ ...existing, autoRefreshIntervalSec, updatedAtISO: now } as typeof existing);
+      await db.settings.put({
+        ...existing,
+        autoRefreshIntervalSec,
+        updatedAtISO: now,
+      } as typeof existing);
       setSaveMsg(t('settings.portfolio.savedMsg'));
     } catch (e) {
       setSaveMsg(e instanceof Error ? e.message : String(e));
@@ -88,9 +97,7 @@ export default function IntegrationsCard({ settings, autoRefreshIntervalSec: ini
             <option value="900">{t('settings.autoRefresh.15min')}</option>
           </select>
         </label>
-        {saveMsg ? (
-          <div className="text-caption text-content-primary">{saveMsg}</div>
-        ) : null}
+        {saveMsg ? <div className="text-caption text-content-primary">{saveMsg}</div> : null}
       </div>
 
       {/* Sync */}

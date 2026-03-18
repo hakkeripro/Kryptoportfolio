@@ -39,10 +39,7 @@ async function binanceFetch<T>(
 
 /** Verify API key by calling GET /api/v3/account */
 export async function binanceVerifyKey(creds: BinanceCreds): Promise<{ canTrade: boolean }> {
-  const data = await binanceFetch<{ canTrade: boolean }>(
-    `${BINANCE_BASE}/api/v3/account`,
-    creds,
-  );
+  const data = await binanceFetch<{ canTrade: boolean }>(`${BINANCE_BASE}/api/v3/account`, creds);
   return { canTrade: data.canTrade };
 }
 
@@ -75,11 +72,7 @@ export async function binanceFetchWithdrawals(
 ): Promise<unknown[]> {
   const params: Record<string, string | number | boolean> = {};
   if (startTime) params.startTime = startTime;
-  return binanceFetch<unknown[]>(
-    `${BINANCE_SAPI}/sapi/v1/capital/withdraw/history`,
-    creds,
-    params,
-  );
+  return binanceFetch<unknown[]>(`${BINANCE_SAPI}/sapi/v1/capital/withdraw/history`, creds, params);
 }
 
 /** Fetch dust conversion history */

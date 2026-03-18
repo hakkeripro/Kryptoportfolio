@@ -35,8 +35,7 @@ export function detectSelfTransfers(
   events: LedgerEvent[],
   options?: { maxTimeDiffHours?: number; dustTolerancePct?: number },
 ): TransferDetectionResult {
-  const maxTimeDiffSec =
-    (options?.maxTimeDiffHours ?? DEFAULT_MAX_TIME_DIFF_HOURS) * 3600;
+  const maxTimeDiffSec = (options?.maxTimeDiffHours ?? DEFAULT_MAX_TIME_DIFF_HOURS) * 3600;
   const dustTolerance = options?.dustTolerancePct ?? DEFAULT_DUST_TOLERANCE_PCT;
 
   // Only TRANSFER events
@@ -57,19 +56,13 @@ export function detectSelfTransfers(
 
   for (const assetEvents of Object.values(byAsset)) {
     // Separate outgoing (amount < 0) and incoming (amount > 0)
-    const outgoing = assetEvents.filter(
-      (e) => new Decimal((e as any).amount ?? '0').lt(0),
-    );
-    const incoming = assetEvents.filter(
-      (e) => new Decimal((e as any).amount ?? '0').gt(0),
-    );
+    const outgoing = assetEvents.filter((e) => new Decimal((e as any).amount ?? '0').lt(0));
+    const incoming = assetEvents.filter((e) => new Decimal((e as any).amount ?? '0').gt(0));
 
     if (outgoing.length === 0 || incoming.length === 0) continue;
 
     // Sort outgoing by timestamp for deterministic greedy processing
-    const sortedOut = [...outgoing].sort((a, b) =>
-      a.timestampISO.localeCompare(b.timestampISO),
-    );
+    const sortedOut = [...outgoing].sort((a, b) => a.timestampISO.localeCompare(b.timestampISO));
 
     for (const outEv of sortedOut) {
       const outAmt = new Decimal((outEv as any).amount ?? '0').abs();
@@ -122,17 +115,11 @@ export function detectSelfTransfers(
   }
 
   const unmatchedOut = transfers
-    .filter(
-      (e) =>
-        new Decimal((e as any).amount ?? '0').lt(0) && !matchedOutIds.has(e.id),
-    )
+    .filter((e) => new Decimal((e as any).amount ?? '0').lt(0) && !matchedOutIds.has(e.id))
     .map((e) => e.id);
 
   const unmatchedIn = transfers
-    .filter(
-      (e) =>
-        new Decimal((e as any).amount ?? '0').gt(0) && !matchedInIds.has(e.id),
-    )
+    .filter((e) => new Decimal((e as any).amount ?? '0').gt(0) && !matchedInIds.has(e.id))
     .map((e) => e.id);
 
   return { matched, unmatchedOut, unmatchedIn };

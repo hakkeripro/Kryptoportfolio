@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  parseBinanceStatementCsv,
-  mapBinanceStatementToEvents,
-} from './binanceStatement.js';
+import { parseBinanceStatementCsv, mapBinanceStatementToEvents } from './binanceStatement.js';
 
 const HEADER = 'UTC_Time,Account,Operation,Coin,Change,Remark\n';
 

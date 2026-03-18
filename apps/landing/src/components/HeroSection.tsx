@@ -9,11 +9,19 @@ export default function HeroSection() {
       {/* Ambient glow blobs */}
       <div
         className="pointer-events-none fixed top-[-200px] left-1/2 -translate-x-1/2 w-[900px] h-[600px] rounded-full opacity-[0.06]"
-        style={{ background: 'radial-gradient(ellipse at center, #FF8400, transparent 70%)', filter: 'blur(80px)', zIndex: 0 }}
+        style={{
+          background: 'radial-gradient(ellipse at center, #FF8400, transparent 70%)',
+          filter: 'blur(80px)',
+          zIndex: 0,
+        }}
       />
       <div
         className="pointer-events-none fixed top-[300px] right-[-100px] w-[500px] h-[500px] rounded-full opacity-[0.04]"
-        style={{ background: 'radial-gradient(ellipse at center, #FF8400, transparent 70%)', filter: 'blur(100px)', zIndex: 0 }}
+        style={{
+          background: 'radial-gradient(ellipse at center, #FF8400, transparent 70%)',
+          filter: 'blur(100px)',
+          zIndex: 0,
+        }}
       />
 
       {/* Navigation */}
@@ -22,7 +30,9 @@ export default function HeroSection() {
           <div className="w-7 h-7 rounded-lg bg-[#FF8400]/10 border border-[#FF8400]/20 flex items-center justify-center">
             <ShieldCheck className="w-4 h-4 text-[#FF8400]" />
           </div>
-          <span className="font-mono text-sm font-semibold tracking-wider text-white">PrivateLedger</span>
+          <span className="font-mono text-sm font-semibold tracking-wider text-white">
+            PrivateLedger
+          </span>
         </div>
         <div className="flex items-center gap-3">
           <a
@@ -51,7 +61,9 @@ export default function HeroSection() {
           className="inline-flex items-center gap-2 bg-[#FF8400]/[0.08] border border-[#FF8400]/20 rounded-full px-4 py-1.5 mb-8"
         >
           <div className="w-1.5 h-1.5 rounded-full bg-[#FF8400] animate-pulse" />
-          <span className="text-[11px] font-mono uppercase tracking-[0.15em] text-[#FF8400]">Zero-knowledge architecture</span>
+          <span className="text-[11px] font-mono uppercase tracking-[0.15em] text-[#FF8400]">
+            Zero-knowledge architecture
+          </span>
         </motion.div>
 
         {/* Headline */}
@@ -73,9 +85,9 @@ export default function HeroSection() {
           transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
           className="text-lg text-white/50 max-w-2xl mx-auto leading-relaxed mb-10"
         >
-          Your transactions are encrypted on your device before they leave it.
-          Our servers store only ciphertext — mathematically impossible to decrypt
-          without your passphrase. Not even us.
+          Your transactions are encrypted on your device before they leave it. Our servers store
+          only ciphertext — mathematically impossible to decrypt without your passphrase. Not even
+          us.
         </motion.p>
 
         {/* CTAs */}
@@ -109,7 +121,9 @@ export default function HeroSection() {
           className="mt-16 flex items-center gap-6 text-white/20"
         >
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-mono uppercase tracking-[0.15em]">Finnish tax compliant</span>
+            <span className="text-[10px] font-mono uppercase tracking-[0.15em]">
+              Finnish tax compliant
+            </span>
           </div>
           <div className="w-px h-4 bg-white/10" />
           <div className="flex items-center gap-2">

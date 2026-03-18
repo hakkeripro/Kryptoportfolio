@@ -23,7 +23,10 @@ async function krakenPrivate<T>(
   params: Record<string, string | number> = {},
 ): Promise<T> {
   const nonce = String(Date.now() * 1000);
-  const bodyParams = new URLSearchParams({ nonce, ...Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)])) });
+  const bodyParams = new URLSearchParams({
+    nonce,
+    ...Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)])),
+  });
   const body = bodyParams.toString();
   const signature = signKrakenRequest(path, nonce, body, creds.apiSecret);
 

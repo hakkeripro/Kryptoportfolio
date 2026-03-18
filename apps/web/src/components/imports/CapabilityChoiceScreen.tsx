@@ -50,7 +50,8 @@ export function CapabilityChoiceScreen({ plugin, onChoice }: CapabilityChoiceScr
           <div>
             <div className="text-body font-medium text-content-primary">Import via CSV</div>
             <div className="text-caption text-content-tertiary mt-0.5">
-              One-time import from a Statement CSV export. No API key required. 100% private — processed locally.
+              One-time import from a Statement CSV export. No API key required. 100% private —
+              processed locally.
             </div>
           </div>
         </button>

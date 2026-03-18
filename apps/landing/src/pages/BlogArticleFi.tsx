@@ -64,13 +64,18 @@ export default function BlogArticleFi() {
       {/* Nav */}
       <nav className="sticky top-0 z-50 border-b border-white/[0.06] bg-[#111111]/95 backdrop-blur-sm px-6 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-white/50 hover:text-white transition-colors text-sm">
+          <Link
+            to="/"
+            className="flex items-center gap-2 text-white/50 hover:text-white transition-colors text-sm"
+          >
             <ArrowLeft className="w-4 h-4" />
             PrivateLedger
           </Link>
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-[#FF8400]" />
-            <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-white/30">private-ledger.app</span>
+            <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-white/30">
+              private-ledger.app
+            </span>
           </div>
         </div>
       </nav>
@@ -90,13 +95,16 @@ export default function BlogArticleFi() {
           <p className="text-lg text-white/60 leading-relaxed">
             Kryptovaluuttojen verotus Suomessa voi tuntua monimutkaiselta, mutta se noudattaa
             selkeitä periaatteita. Tässä oppaassa käymme läpi kaiken oleellisen: mitä pitää
-            ilmoittaa, miten lasket voitot, HMO-olettaman käytön ja käytännön ohjeet OmaVero-täyttöön.
+            ilmoittaa, miten lasket voitot, HMO-olettaman käytön ja käytännön ohjeet
+            OmaVero-täyttöön.
           </p>
         </header>
 
         {/* Table of contents */}
         <nav className="bg-[#0F0F0F] border border-white/[0.08] rounded-2xl p-6 mb-12">
-          <p className="text-[10px] font-mono uppercase tracking-[0.15em] text-white/30 mb-4">// SISÄLLYSLUETTELO</p>
+          <p className="text-[10px] font-mono uppercase tracking-[0.15em] text-white/30 mb-4">
+            // SISÄLLYSLUETTELO
+          </p>
           <ol className="space-y-2">
             {[
               'Kryptovaluuttojen verovelvollisuus Suomessa',
@@ -109,7 +117,9 @@ export default function BlogArticleFi() {
               'Usein kysytyt kysymykset',
             ].map((item, i) => (
               <li key={i} className="flex items-center gap-3">
-                <span className="text-[10px] font-mono text-white/20 w-5">{String(i + 1).padStart(2, '0')}</span>
+                <span className="text-[10px] font-mono text-white/20 w-5">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
                 <span className="text-sm text-white/60">{item}</span>
               </li>
             ))}
@@ -117,25 +127,29 @@ export default function BlogArticleFi() {
         </nav>
 
         {/* Section 1 */}
-        <Section id="verovelvollisuus" number="1" title="Kryptovaluuttojen verovelvollisuus Suomessa">
+        <Section
+          id="verovelvollisuus"
+          number="1"
+          title="Kryptovaluuttojen verovelvollisuus Suomessa"
+        >
           <p>
-            Verohallinto käsittelee kryptovaluuttoja <strong className="text-white">omaisuutena</strong>, ei valuuttana.
-            Tämä tarkoittaa, että niiden ostaminen ei ole verotapahtuma, mutta{' '}
+            Verohallinto käsittelee kryptovaluuttoja{' '}
+            <strong className="text-white">omaisuutena</strong>, ei valuuttana. Tämä tarkoittaa,
+            että niiden ostaminen ei ole verotapahtuma, mutta{' '}
             <strong className="text-white">kaikki luovutukset ovat</strong>.
           </p>
-          <p className="mt-4">
-            Luovutusvoitto (tai -tappio) lasketaan yksinkertaisesti:
-          </p>
+          <p className="mt-4">Luovutusvoitto (tai -tappio) lasketaan yksinkertaisesti:</p>
           <div className="my-6 bg-[#0F0F0F] border border-white/[0.06] rounded-xl p-5 font-mono text-sm">
             <p className="text-[#B6FFCE]">Luovutusvoitto = Myyntihinta − Hankintahinta − Kulut</p>
           </div>
           <p>
-            Luovutusvoitto on pääomatuloa ja verotetaan 30% (alle 30 000€) tai 34% (yli 30 000€) veroprosentilla.
-            Tappio voidaan vähentää saman vuoden pääomatuloista tai seuraavien 5 vuoden aikana.
+            Luovutusvoitto on pääomatuloa ja verotetaan 30% (alle 30 000€) tai 34% (yli 30 000€)
+            veroprosentilla. Tappio voidaan vähentää saman vuoden pääomatuloista tai seuraavien 5
+            vuoden aikana.
           </p>
           <InfoBox>
-            <strong>Tärkeää:</strong> Crypto-to-crypto vaihto on verotapahtuma Suomessa. BTC → ETH -vaihto
-            realisoi BTC:n luovutusvoiton tai -tappion.
+            <strong>Tärkeää:</strong> Crypto-to-crypto vaihto on verotapahtuma Suomessa. BTC → ETH
+            -vaihto realisoi BTC:n luovutusvoiton tai -tappion.
           </InfoBox>
         </Section>
 
@@ -159,16 +173,16 @@ export default function BlogArticleFi() {
             ))}
           </ul>
           <p className="mt-4 text-white/60">
-            <strong className="text-white">Ei verotettavia:</strong> Ostaminen, siirrot omien lompakkojen
-            välillä (sama omistaja), HODLaus ilman myyntiä.
+            <strong className="text-white">Ei verotettavia:</strong> Ostaminen, siirrot omien
+            lompakkojen välillä (sama omistaja), HODLaus ilman myyntiä.
           </p>
         </Section>
 
         {/* Section 3 */}
         <Section id="hmo" number="3" title="Hankintameno-olettama (HMO) — milloin kannattaa">
           <p>
-            HMO on Verohallinnon sallima vaihtoehtoinen tapa laskea hankintahinta. Sen sijaan
-            että käytät todellista ostohintaa, käytät prosenttiosuuden myyntihinnasta:
+            HMO on Verohallinnon sallima vaihtoehtoinen tapa laskea hankintahinta. Sen sijaan että
+            käytät todellista ostohintaa, käytät prosenttiosuuden myyntihinnasta:
           </p>
           <div className="my-6 grid grid-cols-2 gap-4">
             <div className="bg-[#0F0F0F] border border-white/[0.06] rounded-xl p-5 text-center">
@@ -186,21 +200,26 @@ export default function BlogArticleFi() {
           </p>
           <div className="my-6 bg-[#0F0F0F] border border-white/[0.06] rounded-xl p-5 font-mono text-xs space-y-1.5">
             <p className="text-white/40">// Esimerkki: myyt BTC:tä 5 000€</p>
-            <p className="text-white/70">Todellinen hankintahinta: <span className="text-white">800€</span></p>
-            <p className="text-white/70">HMO (20%): <span className="text-[#FF8400]">1 000€</span></p>
+            <p className="text-white/70">
+              Todellinen hankintahinta: <span className="text-white">800€</span>
+            </p>
+            <p className="text-white/70">
+              HMO (20%): <span className="text-[#FF8400]">1 000€</span>
+            </p>
             <p className="text-white/40 mt-2">// HMO antaa suuremman vähennyksen → käytä HMO:ta</p>
             <p className="text-[#B6FFCE]">Voitto HMO:lla: 4 000€ (vs. 4 200€ ilman)</p>
           </div>
           <InfoBox>
-            HMO:ta ei voi käyttää tappiollisessa kaupassa — se voi vain pienentää voittoa,
-            ei luoda tappiota.
+            HMO:ta ei voi käyttää tappiollisessa kaupassa — se voi vain pienentää voittoa, ei luoda
+            tappiota.
           </InfoBox>
         </Section>
 
         {/* Section 4 */}
         <Section id="omavero" number="4" title="OmaVero step-by-step täyttöohje">
           <p className="mb-6">
-            Kryptovaluuttojen luovutusvoitot ilmoitetaan OmaVeron kautta esitäytetylle veroilmoitukselle.
+            Kryptovaluuttojen luovutusvoitot ilmoitetaan OmaVeron kautta esitäytetylle
+            veroilmoitukselle.
           </p>
           <ol className="space-y-5">
             {[
@@ -231,7 +250,9 @@ export default function BlogArticleFi() {
               },
             ].map((s) => (
               <li key={s.step} className="flex gap-4">
-                <span className="text-[#FF8400] font-mono text-sm font-bold shrink-0 mt-0.5">{s.step}</span>
+                <span className="text-[#FF8400] font-mono text-sm font-bold shrink-0 mt-0.5">
+                  {s.step}
+                </span>
                 <div>
                   <p className="font-semibold text-white mb-1">{s.title}</p>
                   <p className="text-sm text-white/60 leading-relaxed">{s.desc}</p>
@@ -252,16 +273,21 @@ export default function BlogArticleFi() {
 
         {/* Section 5 */}
         <Section id="esimerkki" number="5" title="Käytännön esimerkki: Bitcoin-myynti">
-          <p className="mb-4">Olet ostanut 0.5 BTC vuonna 2023 hintaan 12 000€. Myyt ne 2025 hintaan 25 000€.</p>
+          <p className="mb-4">
+            Olet ostanut 0.5 BTC vuonna 2023 hintaan 12 000€. Myyt ne 2025 hintaan 25 000€.
+          </p>
           <div className="bg-[#0F0F0F] border border-white/[0.06] rounded-xl p-5 font-mono text-sm space-y-2">
             <div className="flex justify-between text-white/70">
-              <span>Myyntihinta:</span><span className="text-white">25 000€</span>
+              <span>Myyntihinta:</span>
+              <span className="text-white">25 000€</span>
             </div>
             <div className="flex justify-between text-white/70">
-              <span>Hankintahinta (todellinen):</span><span className="text-white">12 000€</span>
+              <span>Hankintahinta (todellinen):</span>
+              <span className="text-white">12 000€</span>
             </div>
             <div className="flex justify-between text-white/70">
-              <span>HMO (20% × 25 000):</span><span className="text-[#FF8400]">5 000€</span>
+              <span>HMO (20% × 25 000):</span>
+              <span className="text-[#FF8400]">5 000€</span>
             </div>
             <div className="border-t border-white/[0.06] pt-2 flex justify-between">
               <span className="text-white/50">→ Käytetään todellinen hinta (suurempi)</span>
@@ -271,7 +297,8 @@ export default function BlogArticleFi() {
               <span className="text-[#B6FFCE]">13 000€</span>
             </div>
             <div className="flex justify-between text-white/60">
-              <span>Vero (30%):</span><span>3 900€</span>
+              <span>Vero (30%):</span>
+              <span>3 900€</span>
             </div>
           </div>
         </Section>
@@ -279,17 +306,20 @@ export default function BlogArticleFi() {
         {/* Section 6 */}
         <Section id="staking" number="6" title="Staking, DeFi ja airdropsit">
           <p className="mb-4">
-            <strong className="text-white">Staking:</strong> Palkkiot ovat pääomatuloa vastaanottohetken
-            markkina-arvon mukaan. Myöhempi myynti on erillinen luovutustapahtuma (FIFO-periaate).
+            <strong className="text-white">Staking:</strong> Palkkiot ovat pääomatuloa
+            vastaanottohetken markkina-arvon mukaan. Myöhempi myynti on erillinen luovutustapahtuma
+            (FIFO-periaate).
           </p>
           <p className="mb-4">
-            <strong className="text-white">DeFi:</strong> Liquidity pool -tuotot ja yield farming -palkkiot
-            verotetaan pääomatulona. Likviditeetin lisääminen ja poistaminen poolista saattaa olla
-            verotapahtuma (vaihto) — Verohallinnon kanta vielä osin epäselvä, tulkitse varovaisesti.
+            <strong className="text-white">DeFi:</strong> Liquidity pool -tuotot ja yield farming
+            -palkkiot verotetaan pääomatulona. Likviditeetin lisääminen ja poistaminen poolista
+            saattaa olla verotapahtuma (vaihto) — Verohallinnon kanta vielä osin epäselvä, tulkitse
+            varovaisesti.
           </p>
           <p>
-            <strong className="text-white">Airdropsit:</strong> Verotettavaa vastaanottohetkellä (markkina-arvo).
-            Arvottomat tai erittäin pienet airdropsit saattaa olla käytännössä verovapaita (1000€ rajan alle).
+            <strong className="text-white">Airdropsit:</strong> Verotettavaa vastaanottohetkellä
+            (markkina-arvo). Arvottomat tai erittäin pienet airdropsit saattaa olla käytännössä
+            verovapaita (1000€ rajan alle).
           </p>
         </Section>
 
@@ -332,7 +362,9 @@ export default function BlogArticleFi() {
               >
                 <summary className="flex items-center justify-between px-5 py-4 cursor-pointer text-sm font-medium text-white list-none">
                   {item.q}
-                  <span className="text-white/30 group-open:rotate-45 transition-transform duration-200 ml-3 shrink-0">+</span>
+                  <span className="text-white/30 group-open:rotate-45 transition-transform duration-200 ml-3 shrink-0">
+                    +
+                  </span>
                 </summary>
                 <p className="px-5 pb-4 text-sm text-white/60 leading-relaxed border-t border-white/[0.04] pt-3">
                   {item.a}
@@ -344,20 +376,26 @@ export default function BlogArticleFi() {
 
         {/* Footer nav */}
         <div className="mt-16 pt-8 border-t border-white/[0.06] flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-sm text-white/40 hover:text-white transition-colors">
+          <Link
+            to="/"
+            className="flex items-center gap-2 text-sm text-white/40 hover:text-white transition-colors"
+          >
             <ArrowLeft className="w-4 h-4" />
             Takaisin etusivulle
           </Link>
-          <p className="text-[10px] font-mono text-white/20">
-            Päivitetty: 18.3.2026
-          </p>
+          <p className="text-[10px] font-mono text-white/20">Päivitetty: 18.3.2026</p>
         </div>
       </article>
     </div>
   );
 }
 
-function Section({ id, number, title, children }: {
+function Section({
+  id,
+  number,
+  title,
+  children,
+}: {
   id: string;
   number: string;
   title: string;

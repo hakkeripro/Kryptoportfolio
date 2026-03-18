@@ -20,8 +20,7 @@ function computeHoldingYears(disposal: Disposal): number {
   if (!timestamps.length) return 0; // fallback: 0 years → 20% rate
 
   const earliest = timestamps.reduce((a, b) => (a < b ? a : b));
-  const holdingMs =
-    new Date(disposal.disposedAtISO).getTime() - new Date(earliest).getTime();
+  const holdingMs = new Date(disposal.disposedAtISO).getTime() - new Date(earliest).getTime();
   return holdingMs / (365.25 * 24 * 60 * 60 * 1000);
 }
 

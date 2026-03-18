@@ -9,7 +9,10 @@ vi.mock('@kp/platform-web', () => ({
   ensureWebDbOpen: vi.fn().mockResolvedValue(undefined),
   getWebDb: vi.fn().mockReturnValue({
     ledgerEvents: {
-      toArray: vi.fn().mockResolvedValue([{ id: '1', type: 'BUY' }, { id: '2', type: 'SELL' }]),
+      toArray: vi.fn().mockResolvedValue([
+        { id: '1', type: 'BUY' },
+        { id: '2', type: 'SELL' },
+      ]),
     },
   }),
 }));

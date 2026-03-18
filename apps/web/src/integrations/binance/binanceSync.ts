@@ -19,10 +19,28 @@ import {
 // Common symbols to fetch. In practice, we'd discover these from balance endpoint.
 // For now, cover the most common pairs.
 const DEFAULT_SYMBOLS = [
-  'BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'ADAUSDT', 'XRPUSDT',
-  'DOTUSDT', 'MATICUSDT', 'AVAXUSDT', 'LINKUSDT', 'ATOMUSDT', 'UNIUSDT',
-  'LTCUSDT', 'ETCUSDT', 'XLMUSDT', 'BTCEUR', 'ETHEUR', 'BTCBUSD',
-  'ETHBTC', 'BNBBTC', 'SOLBTC', 'ADABTC',
+  'BTCUSDT',
+  'ETHUSDT',
+  'BNBUSDT',
+  'SOLUSDT',
+  'ADAUSDT',
+  'XRPUSDT',
+  'DOTUSDT',
+  'MATICUSDT',
+  'AVAXUSDT',
+  'LINKUSDT',
+  'ATOMUSDT',
+  'UNIUSDT',
+  'LTCUSDT',
+  'ETCUSDT',
+  'XLMUSDT',
+  'BTCEUR',
+  'ETHEUR',
+  'BTCBUSD',
+  'ETHBTC',
+  'BNBBTC',
+  'SOLBTC',
+  'ADABTC',
 ];
 
 export interface BinanceSyncResult {
@@ -43,13 +61,7 @@ export async function fetchBinanceNewest(
   // Fetch trades for each symbol
   for (const symbol of DEFAULT_SYMBOLS) {
     try {
-      const { trades } = await binanceFetchTrades(
-        apiBase,
-        token,
-        creds,
-        symbol,
-        lastFetchedTs,
-      );
+      const { trades } = await binanceFetchTrades(apiBase, token, creds, symbol, lastFetchedTs);
       if (trades.length > 0) {
         const events = mapBinanceTradesToEvents(trades as BinanceApiTrade[]);
         allEvents.push(...events);

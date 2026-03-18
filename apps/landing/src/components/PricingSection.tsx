@@ -41,9 +41,7 @@ export default function PricingSection() {
           <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-4">
             Simple, <span className="text-[#FF8400]">transparent</span> pricing
           </h2>
-          <p className="text-white/50">
-            Start free. Upgrade when you need the full tax suite.
-          </p>
+          <p className="text-white/50">Start free. Upgrade when you need the full tax suite.</p>
         </div>
 
         {/* Pricing cards */}
@@ -57,7 +55,9 @@ export default function PricingSection() {
             className="bg-[#0F0F0F] border border-white/[0.08] rounded-2xl p-8"
           >
             <div className="mb-6">
-              <p className="text-[10px] font-mono uppercase tracking-[0.15em] text-white/30 mb-3">Free</p>
+              <p className="text-[10px] font-mono uppercase tracking-[0.15em] text-white/30 mb-3">
+                Free
+              </p>
               <div className="flex items-end gap-2">
                 <span className="text-4xl font-bold text-white">€0</span>
                 <span className="text-white/40 mb-1.5 text-sm">/month</span>
@@ -71,7 +71,7 @@ export default function PricingSection() {
               Get started free
             </a>
             <ul className="space-y-3">
-              {FEATURES.filter(f => f.free).map(f => (
+              {FEATURES.filter((f) => f.free).map((f) => (
                 <li key={f.text} className="flex items-center gap-3">
                   <Check className="w-3.5 h-3.5 text-[#B6FFCE] shrink-0" />
                   <span className="text-sm text-white/60">
@@ -97,11 +97,15 @@ export default function PricingSection() {
             {/* Popular badge */}
             <div className="absolute top-5 right-5 flex items-center gap-1.5 bg-[#FF8400]/10 border border-[#FF8400]/20 rounded-full px-3 py-1">
               <Zap className="w-2.5 h-2.5 text-[#FF8400]" />
-              <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-[#FF8400]">Pro</span>
+              <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-[#FF8400]">
+                Pro
+              </span>
             </div>
 
             <div className="mb-6">
-              <p className="text-[10px] font-mono uppercase tracking-[0.15em] text-[#FF8400]/70 mb-3">Pro</p>
+              <p className="text-[10px] font-mono uppercase tracking-[0.15em] text-[#FF8400]/70 mb-3">
+                Pro
+              </p>
               <div className="flex items-end gap-2">
                 <span className="text-4xl font-bold text-white">€4,99</span>
                 <span className="text-white/40 mb-1.5 text-sm">/month</span>
@@ -116,7 +120,7 @@ export default function PricingSection() {
               <ArrowRight className="w-3.5 h-3.5" />
             </a>
             <ul className="space-y-3">
-              {FEATURES.map(f => (
+              {FEATURES.map((f) => (
                 <li key={f.text} className="flex items-center gap-3">
                   <Check className="w-3.5 h-3.5 text-[#B6FFCE] shrink-0" />
                   <span className="text-sm text-white/60">

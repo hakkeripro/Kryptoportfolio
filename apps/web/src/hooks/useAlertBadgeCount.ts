@@ -16,8 +16,7 @@ function useAlerts() {
 export function useAlertBadgeCount(): number {
   const alertsQuery = useAlerts();
   return useMemo(
-    () =>
-      alertsQuery.data.filter((a) => a.triggeredAtISO && !a.acknowledgedAtISO).length,
+    () => alertsQuery.data.filter((a) => a.triggeredAtISO && !a.acknowledgedAtISO).length,
     [alertsQuery.data],
   );
 }

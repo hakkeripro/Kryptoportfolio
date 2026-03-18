@@ -118,9 +118,7 @@ export default function AlertsPage() {
           .toArray();
         if (triggered.length === 0) return;
         const now = new Date().toISOString();
-        await Promise.all(
-          triggered.map((a) => db.alerts.put({ ...a, acknowledgedAtISO: now })),
-        );
+        await Promise.all(triggered.map((a) => db.alerts.put({ ...a, acknowledgedAtISO: now })));
       } catch {
         // Non-critical
       }

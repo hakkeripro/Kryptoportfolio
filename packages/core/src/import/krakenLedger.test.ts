@@ -23,8 +23,22 @@ describe('normalizeKrakenAsset', () => {
 describe('mapKrakenLedgerToEvents', () => {
   it('pairs trade entries by refid into BUY event', () => {
     const entries: KrakenLedgerEntry[] = [
-      { refid: 'ABC-001', time: 1705312200, type: 'trade', asset: 'XXBT', amount: '0.001', fee: '0.0000026' },
-      { refid: 'ABC-001', time: 1705312200, type: 'trade', asset: 'ZUSD', amount: '-42.00', fee: '0' },
+      {
+        refid: 'ABC-001',
+        time: 1705312200,
+        type: 'trade',
+        asset: 'XXBT',
+        amount: '0.001',
+        fee: '0.0000026',
+      },
+      {
+        refid: 'ABC-001',
+        time: 1705312200,
+        type: 'trade',
+        asset: 'ZUSD',
+        amount: '-42.00',
+        fee: '0',
+      },
     ];
     const { events, issues } = mapKrakenLedgerToEvents(entries);
     expect(issues).toHaveLength(0);
@@ -38,7 +52,14 @@ describe('mapKrakenLedgerToEvents', () => {
 
   it('maps deposit to DEPOSIT event', () => {
     const entries: KrakenLedgerEntry[] = [
-      { refid: 'DEP-001', time: 1704000000, type: 'deposit', asset: 'XXBT', amount: '0.01', fee: '0' },
+      {
+        refid: 'DEP-001',
+        time: 1704000000,
+        type: 'deposit',
+        asset: 'XXBT',
+        amount: '0.01',
+        fee: '0',
+      },
     ];
     const { events } = mapKrakenLedgerToEvents(entries);
     expect(events).toHaveLength(1);
@@ -48,7 +69,14 @@ describe('mapKrakenLedgerToEvents', () => {
 
   it('maps withdrawal to WITHDRAW event', () => {
     const entries: KrakenLedgerEntry[] = [
-      { refid: 'WD-001', time: 1704100000, type: 'withdrawal', asset: 'XETH', amount: '-0.5', fee: '0.001' },
+      {
+        refid: 'WD-001',
+        time: 1704100000,
+        type: 'withdrawal',
+        asset: 'XETH',
+        amount: '-0.5',
+        fee: '0.001',
+      },
     ];
     const { events } = mapKrakenLedgerToEvents(entries);
     expect(events).toHaveLength(1);
@@ -59,7 +87,14 @@ describe('mapKrakenLedgerToEvents', () => {
 
   it('maps staking to STAKING_REWARD', () => {
     const entries: KrakenLedgerEntry[] = [
-      { refid: 'STK-001', time: 1704200000, type: 'staking', asset: 'XETH', amount: '0.001', fee: '0' },
+      {
+        refid: 'STK-001',
+        time: 1704200000,
+        type: 'staking',
+        asset: 'XETH',
+        amount: '0.001',
+        fee: '0',
+      },
     ];
     const { events } = mapKrakenLedgerToEvents(entries);
     expect(events).toHaveLength(1);
@@ -76,7 +111,14 @@ describe('mapKrakenLedgerToEvents', () => {
 
   it('maps airdrop to AIRDROP', () => {
     const entries: KrakenLedgerEntry[] = [
-      { refid: 'AIR-001', time: 1704400000, type: 'airdrop', asset: 'SHIB', amount: '1000', fee: '0' },
+      {
+        refid: 'AIR-001',
+        time: 1704400000,
+        type: 'airdrop',
+        asset: 'SHIB',
+        amount: '1000',
+        fee: '0',
+      },
     ];
     const { events } = mapKrakenLedgerToEvents(entries);
     expect(events[0]!.operation).toBe('AIRDROP');
@@ -84,7 +126,14 @@ describe('mapKrakenLedgerToEvents', () => {
 
   it('skips internal transfer entries silently', () => {
     const entries: KrakenLedgerEntry[] = [
-      { refid: 'TRF-001', time: 1704500000, type: 'transfer', asset: 'XXBT', amount: '0.1', fee: '0' },
+      {
+        refid: 'TRF-001',
+        time: 1704500000,
+        type: 'transfer',
+        asset: 'XXBT',
+        amount: '0.1',
+        fee: '0',
+      },
     ];
     const { events } = mapKrakenLedgerToEvents(entries);
     expect(events).toHaveLength(0);
@@ -92,7 +141,14 @@ describe('mapKrakenLedgerToEvents', () => {
 
   it('generates stable externalRef', () => {
     const entries: KrakenLedgerEntry[] = [
-      { refid: 'ABC-002', time: 1705312200, type: 'deposit', asset: 'XXBT', amount: '0.01', fee: '0' },
+      {
+        refid: 'ABC-002',
+        time: 1705312200,
+        type: 'deposit',
+        asset: 'XXBT',
+        amount: '0.01',
+        fee: '0',
+      },
     ];
     const { events } = mapKrakenLedgerToEvents(entries);
     expect(events[0]!.externalRef).toBe('kraken:ledger:ABC-002:XXBT');
@@ -100,8 +156,22 @@ describe('mapKrakenLedgerToEvents', () => {
 
   it('deduplicates same refid+asset across multiple calls', () => {
     const entries: KrakenLedgerEntry[] = [
-      { refid: 'DEP-DUP', time: 1704000000, type: 'deposit', asset: 'XXBT', amount: '0.01', fee: '0' },
-      { refid: 'DEP-DUP', time: 1704000000, type: 'deposit', asset: 'XXBT', amount: '0.01', fee: '0' },
+      {
+        refid: 'DEP-DUP',
+        time: 1704000000,
+        type: 'deposit',
+        asset: 'XXBT',
+        amount: '0.01',
+        fee: '0',
+      },
+      {
+        refid: 'DEP-DUP',
+        time: 1704000000,
+        type: 'deposit',
+        asset: 'XXBT',
+        amount: '0.01',
+        fee: '0',
+      },
     ];
     const { events } = mapKrakenLedgerToEvents(entries);
     expect(events).toHaveLength(1); // deduplicated
@@ -109,7 +179,14 @@ describe('mapKrakenLedgerToEvents', () => {
 
   it('surfaces unpaired trade as issue', () => {
     const entries: KrakenLedgerEntry[] = [
-      { refid: 'UNPAIRED', time: 1705312200, type: 'trade', asset: 'XXBT', amount: '0.001', fee: '0' },
+      {
+        refid: 'UNPAIRED',
+        time: 1705312200,
+        type: 'trade',
+        asset: 'XXBT',
+        amount: '0.001',
+        fee: '0',
+      },
     ];
     const { events, issues } = mapKrakenLedgerToEvents(entries);
     expect(events).toHaveLength(1); // still emitted

@@ -111,7 +111,10 @@ export default function TaxProfileCard({ settings, loading, error, busy, setBusy
         <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-white/20 mb-2">
           Tax country
         </div>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4" data-testid="form-settings-tax-country">
+        <div
+          className="grid grid-cols-2 gap-2 sm:grid-cols-4"
+          data-testid="form-settings-tax-country"
+        >
           {COUNTRY_OPTIONS.map((opt) => (
             <button
               key={opt.value}
@@ -155,9 +158,7 @@ export default function TaxProfileCard({ settings, loading, error, busy, setBusy
           <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-white/20 mb-1">
             {t('settings.portfolio.lotMethod')}
             {isFI && (
-              <span className="ml-1 text-white/30 normal-case tracking-normal">
-                (locked: FIFO)
-              </span>
+              <span className="ml-1 text-white/30 normal-case tracking-normal">(locked: FIFO)</span>
             )}
           </div>
           <select
@@ -213,7 +214,10 @@ export default function TaxProfileCard({ settings, loading, error, busy, setBusy
       )}
 
       {saveMsg ? (
-        <div data-testid="metric-settings-save-status" className="text-caption text-content-primary">
+        <div
+          data-testid="metric-settings-save-status"
+          className="text-caption text-content-primary"
+        >
           {saveMsg}
         </div>
       ) : null}

@@ -87,7 +87,12 @@ function pickLots(
     lot.amountRemaining = toFixed(lotAmt.sub(actual));
     lot.costBasisBaseRemaining = toFixed(lotCost.sub(costPart));
 
-    matched.push({ lotId: lot.lotId, amount: actual, costBasisBase: costPart, acquiredAtISO: lot.acquiredAtISO });
+    matched.push({
+      lotId: lot.lotId,
+      amount: actual,
+      costBasisBase: costPart,
+      acquiredAtISO: lot.acquiredAtISO,
+    });
     cost = cost.add(costPart);
     remaining = remaining.sub(actual);
   };
@@ -260,7 +265,12 @@ export function createLotEngine(settings: Settings, engineOpts: LotEngineOptions
 
       const lots = ensureLots(e.assetId, e.accountId);
       let costBasis: Decimal;
-      let matched: { lotId: string; amount: Decimal; costBasisBase: Decimal; acquiredAtISO?: string }[] = [];
+      let matched: {
+        lotId: string;
+        amount: Decimal;
+        costBasisBase: Decimal;
+        acquiredAtISO?: string;
+      }[] = [];
 
       if (settings.lotMethodDefault === 'AVG_COST') {
         const pool = ensurePool(e.assetId);
@@ -314,7 +324,12 @@ export function createLotEngine(settings: Settings, engineOpts: LotEngineOptions
       // Dispose assetIn
       const lotsIn = ensureLots(e.assetId, e.accountId);
       let costBasis: Decimal;
-      let matched: { lotId: string; amount: Decimal; costBasisBase: Decimal; acquiredAtISO?: string }[] = [];
+      let matched: {
+        lotId: string;
+        amount: Decimal;
+        costBasisBase: Decimal;
+        acquiredAtISO?: string;
+      }[] = [];
       if (settings.lotMethodDefault === 'AVG_COST') {
         const pool = ensurePool(e.assetId);
         const avg = pool.amount.gt(0) ? pool.cost.div(pool.amount) : new Decimal(0);

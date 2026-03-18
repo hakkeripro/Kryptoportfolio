@@ -14,12 +14,11 @@ export default function Footer() {
             style={{ background: 'radial-gradient(ellipse at center, #FF8400, transparent 70%)' }}
           />
           <h3 className="text-3xl md:text-4xl font-bold text-white mb-4 relative">
-            Start tracking privately.<br />
+            Start tracking privately.
+            <br />
             <span className="text-[#FF8400]">Free, forever.</span>
           </h3>
-          <p className="text-white/50 mb-8 relative">
-            No credit card. No tracking. No excuses.
-          </p>
+          <p className="text-white/50 mb-8 relative">No credit card. No tracking. No excuses.</p>
           <a
             href={`${APP_URL}/welcome`}
             className="inline-flex items-center gap-2 bg-[#FF8400] hover:bg-[#FFA040] text-black font-semibold px-8 py-3.5 rounded-xl transition-all hover:shadow-[0_0_30px_rgba(255,132,0,0.3)] relative"

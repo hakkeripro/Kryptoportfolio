@@ -205,10 +205,7 @@ export function mapBinanceStatementToEvents(rows: BinanceStatementRow[]): Binanc
         externalRef: `binance:statement:${row.utcTime}:${row.coin}:airdrop`,
       });
       processedKeys.add(key);
-    } else if (
-      op === 'small assets exchange bnb' ||
-      op === 'small assets exchange bnb (locked)'
-    ) {
+    } else if (op === 'small assets exchange bnb' || op === 'small assets exchange bnb (locked)') {
       // Dust conversion
       events.push({
         timestampISO: ts,

@@ -5,16 +5,26 @@ import { MemoryRouter } from 'react-router-dom';
 // Mock framer-motion: replace all motion.* with plain divs/sections/etc.
 vi.mock('framer-motion', async () => {
   const React = await import('react');
-  const createEl = (tag: string) =>
+  const createEl =
+    (tag: string) =>
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ({ children, initial: _i, animate: _a, whileInView: _w, viewport: _vp, transition: _t, ...rest }: any) =>
+    ({
+      children,
+      initial: _i,
+      animate: _a,
+      whileInView: _w,
+      viewport: _vp,
+      transition: _t,
+      ...rest
+    }: any) =>
       React.createElement(tag, rest, children);
   return {
     motion: new Proxy(
       {},
       {
-        get: (_: unknown, prop: string) => createEl(prop === 'path' || prop === 'rect' ? prop : 'div'),
-      }
+        get: (_: unknown, prop: string) =>
+          createEl(prop === 'path' || prop === 'rect' ? prop : 'div'),
+      },
     ),
     useAnimation: () => ({ start: vi.fn() }),
     useMotionValue: (v: number) => ({ get: () => v, set: vi.fn() }),
@@ -34,7 +44,7 @@ describe('LandingPage', () => {
     const { container } = render(
       <MemoryRouter>
         <LandingPage />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
     expect(container).toBeTruthy();
   });
@@ -43,11 +53,11 @@ describe('LandingPage', () => {
     render(
       <MemoryRouter>
         <LandingPage />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
     // The word "data" appears in the ZK tagline
     const allText = document.body.textContent ?? '';
-    expect(allText.toLowerCase()).toContain("data");
+    expect(allText.toLowerCase()).toContain('data');
   });
 });
 
@@ -56,7 +66,7 @@ describe('PricingSection', () => {
     render(
       <MemoryRouter>
         <PricingSection />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
     expect(screen.getByText('€4,99')).toBeTruthy();
     expect(screen.getByText('€0')).toBeTruthy();
@@ -66,7 +76,7 @@ describe('PricingSection', () => {
     render(
       <MemoryRouter>
         <PricingSection />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
     expect(screen.getAllByText('Portfolio tracking').length).toBeGreaterThan(0);
     expect(screen.getAllByText('HMO-laskuri').length).toBeGreaterThan(0);
@@ -92,7 +102,7 @@ describe('BlogArticleFi', () => {
     const { container } = render(
       <MemoryRouter>
         <BlogArticleFi />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
     expect(container).toBeTruthy();
   });
@@ -101,7 +111,7 @@ describe('BlogArticleFi', () => {
     render(
       <MemoryRouter>
         <BlogArticleFi />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
     const h1 = screen.getByRole('heading', { level: 1 });
     expect(h1.textContent?.toLowerCase()).toContain('verotus');
@@ -111,7 +121,7 @@ describe('BlogArticleFi', () => {
     render(
       <MemoryRouter>
         <BlogArticleFi />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
     const allText = document.body.textContent ?? '';
     expect(allText).toContain('Hankintameno-olettama');
@@ -121,7 +131,7 @@ describe('BlogArticleFi', () => {
     render(
       <MemoryRouter>
         <BlogArticleFi />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
     const allText = document.body.textContent ?? '';
     expect(allText).toContain('OmaVero');

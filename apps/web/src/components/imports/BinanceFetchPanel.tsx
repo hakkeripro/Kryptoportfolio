@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { Button } from '../ui';
-import { loadBinanceIntegration, saveBinanceIntegration } from '../../integrations/binance/binanceVault';
+import {
+  loadBinanceIntegration,
+  saveBinanceIntegration,
+} from '../../integrations/binance/binanceVault';
 import { fetchBinanceNewest } from '../../integrations/binance/binanceSync';
 import {
   buildBinancePreviewEvents,
@@ -28,7 +31,11 @@ export function BinanceFetchPanel({ ctx }: FetchPanelProps) {
     setErr(null);
     try {
       const cfg = await loadBinanceIntegration(ctx.passphrase);
-      if (!cfg.credentials) { setErr('Not connected'); setStatus('error'); return; }
+      if (!cfg.credentials) {
+        setErr('Not connected');
+        setStatus('error');
+        return;
+      }
       const { events: raw, symbolsFetched: sf } = await fetchBinanceNewest(
         ctx.apiBase,
         ctx.token,
@@ -37,7 +44,8 @@ export function BinanceFetchPanel({ ctx }: FetchPanelProps) {
       );
       setSymbolsFetched(sf);
       const ledgerEvents = buildBinancePreviewEvents(raw);
-      const { newEvents: ne, duplicateExternalRefs: dups } = await computeBinanceDedupe(ledgerEvents);
+      const { newEvents: ne, duplicateExternalRefs: dups } =
+        await computeBinanceDedupe(ledgerEvents);
       setEvents(ledgerEvents);
       setNewEvents(ne);
       setDupCount(dups.length);
@@ -73,7 +81,9 @@ export function BinanceFetchPanel({ ctx }: FetchPanelProps) {
       <div className="flex items-center justify-between">
         <div>
           <div className="text-body font-medium text-content-primary">Binance</div>
-          <div className="text-caption text-content-tertiary">Fetch trades, deposits & withdrawals</div>
+          <div className="text-caption text-content-tertiary">
+            Fetch trades, deposits & withdrawals
+          </div>
         </div>
         <Button
           variant="outline"
@@ -96,10 +106,11 @@ export function BinanceFetchPanel({ ctx }: FetchPanelProps) {
       {status === 'preview' && (
         <div className="space-y-3">
           <div className="text-caption text-content-secondary">
-            Found <span className="text-content-primary font-medium">{events.length}</span> transactions
-            from {symbolsFetched} symbols.{' '}
+            Found <span className="text-content-primary font-medium">{events.length}</span>{' '}
+            transactions from {symbolsFetched} symbols.{' '}
             <span className="text-semantic-success">{newEvents.length} new</span>
-            {dupCount > 0 && <span className="text-content-tertiary">, {dupCount} duplicates</span>}.
+            {dupCount > 0 && <span className="text-content-tertiary">, {dupCount} duplicates</span>}
+            .
           </div>
           {newEvents.length > 0 && (
             <div className="flex gap-2">
@@ -111,11 +122,7 @@ export function BinanceFetchPanel({ ctx }: FetchPanelProps) {
               >
                 Import {newEvents.length} transactions
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setStatus('idle')}
-              >
+              <Button variant="outline" size="sm" onClick={() => setStatus('idle')}>
                 Cancel
               </Button>
             </div>
@@ -133,7 +140,8 @@ export function BinanceFetchPanel({ ctx }: FetchPanelProps) {
           className="rounded-button bg-semantic-success/10 px-3 py-2 text-caption text-semantic-success"
           data-testid="badge-binance-import-done"
         >
-          Imported {result.created} transactions. {result.skipped > 0 && `Skipped ${result.skipped} duplicates.`}
+          Imported {result.created} transactions.{' '}
+          {result.skipped > 0 && `Skipped ${result.skipped} duplicates.`}
         </div>
       )}
     </div>

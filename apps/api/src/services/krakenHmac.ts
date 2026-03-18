@@ -10,7 +10,9 @@ export function signKrakenRequest(
   body: string,
   apiSecret: string,
 ): string {
-  const hash = createHash('sha256').update(nonce + body).digest();
+  const hash = createHash('sha256')
+    .update(nonce + body)
+    .digest();
   const message = Buffer.concat([Buffer.from(uriPath), hash]);
   const secretBuf = Buffer.from(apiSecret, 'base64');
   return createHmac('sha512', secretBuf).update(message).digest('base64');

@@ -60,8 +60,7 @@ function ImportSuccessBanner() {
     >
       <CheckCircle2 className="h-4 w-4 shrink-0" />
       <span className="flex-1 text-sm font-mono">
-        {pendingBanner.count} new transactions encrypted &amp; synced from{' '}
-        {pendingBanner.provider}.
+        {pendingBanner.count} new transactions encrypted &amp; synced from {pendingBanner.provider}.
       </span>
       <button
         onClick={clearBanner}
@@ -109,13 +108,7 @@ function SetupProgressBanner({ onImport }: { onImport: () => void }) {
 }
 
 // ── Partial data warning ─────────────────────────────────────────────────────
-function PartialDataWarning({
-  count,
-  onMap,
-}: {
-  count: number;
-  onMap: () => void;
-}) {
+function PartialDataWarning({ count, onMap }: { count: number; onMap: () => void }) {
   if (count === 0) return null;
   return (
     <div
@@ -362,10 +355,7 @@ export default function DashboardPage() {
       {!hasTransactions && !dbState.loading && (
         <SetupProgressBanner onImport={() => nav('/transactions/import')} />
       )}
-      <PartialDataWarning
-        count={unmappedCount}
-        onMap={() => nav('/settings/assets')}
-      />
+      <PartialDataWarning count={unmappedCount} onMap={() => nav('/settings/assets')} />
 
       {/* ── Hero: Total portfolio value ── */}
       <motion.div

@@ -38,12 +38,7 @@ function KrakenLogo() {
   return (
     <svg width="32" height="32" viewBox="0 0 24 24" aria-hidden="true" className="text-purple-400">
       <circle cx="12" cy="12" r="12" fill="currentColor" opacity="0.15" />
-      <path
-        d="M8 7h8M8 12h8M8 17h8"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
+      <path d="M8 7h8M8 12h8M8 17h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }

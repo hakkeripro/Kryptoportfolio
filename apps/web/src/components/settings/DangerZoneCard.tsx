@@ -52,9 +52,7 @@ export default function DangerZoneCard() {
           Export JSON
         </button>
       </div>
-      {exportMsg ? (
-        <div className="text-caption text-content-secondary">{exportMsg}</div>
-      ) : null}
+      {exportMsg ? <div className="text-caption text-content-secondary">{exportMsg}</div> : null}
 
       {/* Delete account */}
       <div className="flex items-center justify-between gap-3 pt-2 border-t border-white/[0.06]">

@@ -107,7 +107,8 @@ export function ValueChart({ data }: { data: { day: string; value: number }[] })
                   : 'bg-red-500/10 text-red-400'
               }`}
             >
-              {periodDelta >= 0 ? '+' : ''}{periodDelta.toFixed(1)}%
+              {periodDelta >= 0 ? '+' : ''}
+              {periodDelta.toFixed(1)}%
             </span>
           )}
         </div>

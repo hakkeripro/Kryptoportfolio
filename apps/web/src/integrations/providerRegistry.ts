@@ -4,11 +4,7 @@ import { binancePlugin } from './binance/binancePlugin';
 import { krakenPlugin } from './kraken/krakenPlugin';
 import type { ProviderDescriptor } from '@kp/core';
 
-export const PROVIDER_REGISTRY: ImportPlugin[] = [
-  coinbasePlugin,
-  binancePlugin,
-  krakenPlugin,
-];
+export const PROVIDER_REGISTRY: ImportPlugin[] = [coinbasePlugin, binancePlugin, krakenPlugin];
 
 export const COMING_SOON_PROVIDERS: ProviderDescriptor[] = [
   // Finnish exchanges (priority)

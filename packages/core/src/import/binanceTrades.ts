@@ -42,9 +42,7 @@ export interface BinanceApiWithdrawal {
  *  Works for common pairs: BTCUSDT, ETHBTC, BNBETH, etc.
  *  Returns undefined for unknown symbols.
  */
-export function splitBinanceSymbol(
-  symbol: string,
-): { base: string; quote: string } | undefined {
+export function splitBinanceSymbol(symbol: string): { base: string; quote: string } | undefined {
   const QUOTES = ['USDT', 'BUSD', 'USDC', 'BTC', 'ETH', 'BNB', 'FDUSD', 'EUR', 'TRY', 'GBP', 'AUD'];
   const upper = symbol.toUpperCase();
   for (const q of QUOTES) {

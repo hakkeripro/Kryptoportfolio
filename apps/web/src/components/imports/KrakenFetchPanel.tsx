@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { Button } from '../ui';
-import { loadKrakenIntegration, saveKrakenIntegration } from '../../integrations/kraken/krakenVault';
+import {
+  loadKrakenIntegration,
+  saveKrakenIntegration,
+} from '../../integrations/kraken/krakenVault';
 import { fetchKrakenNewest } from '../../integrations/kraken/krakenSync';
 import {
   buildKrakenPreviewEvents,
@@ -28,7 +31,11 @@ export function KrakenFetchPanel({ ctx }: FetchPanelProps) {
     setErr(null);
     try {
       const cfg = await loadKrakenIntegration(ctx.passphrase);
-      if (!cfg.credentials) { setErr('Not connected'); setStatus('error'); return; }
+      if (!cfg.credentials) {
+        setErr('Not connected');
+        setStatus('error');
+        return;
+      }
       const { events: raw, totalEntries: total } = await fetchKrakenNewest(
         ctx.apiBase,
         ctx.token,
@@ -37,7 +44,8 @@ export function KrakenFetchPanel({ ctx }: FetchPanelProps) {
       );
       setTotalEntries(total);
       const ledgerEvents = buildKrakenPreviewEvents(raw);
-      const { newEvents: ne, duplicateExternalRefs: dups } = await computeKrakenDedupe(ledgerEvents);
+      const { newEvents: ne, duplicateExternalRefs: dups } =
+        await computeKrakenDedupe(ledgerEvents);
       setEvents(ledgerEvents);
       setNewEvents(ne);
       setDupCount(dups.length);
@@ -95,10 +103,11 @@ export function KrakenFetchPanel({ ctx }: FetchPanelProps) {
       {status === 'preview' && (
         <div className="space-y-3">
           <div className="text-caption text-content-secondary">
-            Fetched <span className="text-content-primary font-medium">{totalEntries}</span> ledger entries
-            → <span className="text-content-primary font-medium">{events.length}</span> transactions.{' '}
-            <span className="text-semantic-success">{newEvents.length} new</span>
-            {dupCount > 0 && <span className="text-content-tertiary">, {dupCount} duplicates</span>}.
+            Fetched <span className="text-content-primary font-medium">{totalEntries}</span> ledger
+            entries → <span className="text-content-primary font-medium">{events.length}</span>{' '}
+            transactions. <span className="text-semantic-success">{newEvents.length} new</span>
+            {dupCount > 0 && <span className="text-content-tertiary">, {dupCount} duplicates</span>}
+            .
           </div>
           {newEvents.length > 0 ? (
             <div className="flex gap-2">
