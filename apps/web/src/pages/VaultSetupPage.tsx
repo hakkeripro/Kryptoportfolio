@@ -47,18 +47,13 @@ export default function VaultSetupPage() {
   const { t } = useTranslation();
   const nav = useNavigate();
   const location = useLocation();
-  const isOffline = new URLSearchParams(location.search).get('offline') === '1';
+  const searchParams = new URLSearchParams(location.search);
+  const isOffline = searchParams.get('offline') === '1';
+  const isOnDevice = searchParams.get('ondevice') === '1';
+  const nextPath = searchParams.get('next') ?? '/home';
   const setupVault = useVaultStore((s) => s.setupVault);
   const email = useAuthStore((s) => s.email);
   const token = useAuthStore((s) => s.token);
-
-  // Guard: vault setup requires auth unless in offline mode
-  if (!token && !isOffline) {
-    return <Navigate to="/welcome" replace />;
-  }
-
-  const isOnDevice = new URLSearchParams(location.search).get('ondevice') === '1';
-  const nextPath = new URLSearchParams(location.search).get('next') ?? '/home';
 
   const [step, setStep] = useState<Step>(isOnDevice ? 'passphrase' : 'country');
   const [selectedCountry, setSelectedCountry] = useState<TaxCountry | null>(null);
@@ -80,6 +75,11 @@ export default function VaultSetupPage() {
     }
     return STEP_NUMBERS[step];
   }, [step, isOnDevice]);
+
+  // Guard: vault setup requires auth unless in offline mode
+  if (!token && !isOffline) {
+    return <Navigate to="/welcome" replace />;
+  }
 
   const totalSteps = isOnDevice ? 2 : TOTAL_STEPS;
 
