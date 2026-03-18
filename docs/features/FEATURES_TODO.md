@@ -458,7 +458,7 @@ Ks. [ISSUE_LOG.md](../ISSUE_LOG.md) tarkemmat kuvaukset.
 - [x] Design system: CSS-tokenit, Tailwind config, 14 UI-komponenttia (Button, Card, Input, Select, Badge, Spinner, Modal, Drawer, Tabs, Tooltip, EmptyState, TokenIcon, KpiCard, Logo)
 - [x] Token-ikonit (CoinGecko iconUrl + letter avatar fallback)
 - [x] Navigaatio: Sidebar (desktop) + BottomTabBar (mobiili), 5 päänäkymää, backward-compat redirectit
-- [x] Welcome-sivu: VaultFolio branding, USP-kortit, CTA-painikkeet
+- [x] Welcome-sivu: PrivateLedger branding, USP-kortit, CTA-painikkeet
 - [x] Dashboard redesign: KPI-kortit, allokaatiodonitsi, arvokaavio, top positions
 - [x] Kaikki sivut migrated design system -tokeneihin
 - [x] Mobile-first: 44px touch targets, swipe-to-close drawer, safe area, standalone PWA
@@ -518,22 +518,23 @@ Ks. [ISSUE_LOG.md](../ISSUE_LOG.md) tarkemmat kuvaukset.
 - [x] Alert badge sidebarin nav-itemissä
 - [x] AlertsPage: acknowledge kaikki kun sivu avataan
 
-### Feature 27: Domain + Landing Page + Markkinointi ❌
+### Feature 27: Domain + Landing Page + Markkinointi ✅
 **Speksi:** [27_domain-landing-page.md](27_domain-landing-page.md)
 **Vaihe 1 — Landing page + domain:**
-- [ ] `apps/landing/` — Vite + React + Tailwind, erillinen Cloudflare Pages -projekti
-- [ ] Domain: `vaultfolio.app` → landing, `app.vaultfolio.app` → nykyinen PWA
-- [ ] Hero + ZK-selitys + animoitu dashboard-mockup (Framer Motion) + pricing
-- [ ] Meta-tagit, OG-image, sitemap.xml, robots.txt
+- [x] `apps/landing/` — Vite + React + Tailwind, erillinen Cloudflare Pages -projekti
+- [ ] Domain: `private-ledger.app` → landing, `app.private-ledger.app` → nykyinen PWA (DNS manuaalinen)
+- [x] Hero + ZK-selitys + animoitu dashboard-mockup (Framer Motion) + pricing
+- [x] Meta-tagit, OG-image, sitemap.xml, robots.txt
 **Vaihe 2 — SEO-artikkeli:**
-- [ ] `/blog/krypto-verotus-suomi-2026` (FI, Article structured data)
+- [x] `/blog/krypto-verotus-suomi-2026` (FI, Article structured data)
 **Vaihe 3 — Launch:**
-- [ ] Show HN -postauksen draft + launch checklist
+- [x] Show HN -postauksen draft + launch checklist
+**Huom:** DNS-konfiguraatio + Cloudflare Pages -projektin luonti tehdään manuaalisesti (ks. `docs/launch/launch-checklist.md`)
 
 ### Feature 28: AI Transaction Classification ❌
 **Speksi:** PRODUCT_ROADMAP_2026.md § 3
 - [ ] Transaktion tyyppiluokittelu epäselvistä kuvauksista (Claude API, client-side)
-- [ ] ZK-yhteensopiva: data ei kulje VaultFolion palvelimen kautta
+- [ ] ZK-yhteensopiva: data ei kulje PrivateLedgern palvelimen kautta
 - [ ] Käyttäjän opt-in ennen AI-kutsua
 
 ### Feature 13 Vaihe 2: Binance + Kraken ✅

@@ -24,7 +24,9 @@
     "migrate:create": "node scripts/migrate.mjs create",
     "test:coverage": "pnpm --filter @kp/core test:coverage",
     "size": "size-limit",
-    "audit:ci": "pnpm audit --prod --audit-level=high"
+    "audit:ci": "pnpm audit --prod --audit-level=high",
+    "dev:landing": "pnpm --filter @kp/landing dev",
+    "build:landing": "pnpm --filter @kp/landing build"
   },
   "size-limit": [
     {

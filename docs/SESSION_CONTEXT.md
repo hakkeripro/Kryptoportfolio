@@ -22,13 +22,46 @@ Ei avoimia P0-bugeja. Kaikki korjattu 2026-03-14.
 - CI: puuttuu typecheck, lint, coverage, audit, preview deploy
 
 ### Seuraava tyovaihe
-Feature 26 valmis 2026-03-18 (Dashboard + UX Polish).
+Feature 27 valmis 2026-03-18 (Domain + Landing Page + Markkinointi).
 
-Seuraavaksi: Feature 27 (Domain + Landing Page) tai Feature 13 Vaihe 2B (Northcrypto CSV + Coinmotion CSV)
+Seuraavaksi: Feature 13 Vaihe 2B (Northcrypto CSV + Coinmotion CSV) tai Feature 28 (AI Transaction Classification)
+
+**Manuaaliset deployment-tehtävät (ei vielä tehty):**
+- DNS: `private-ledger.app` ostettava + osoitettava Cloudflareen
+- Cloudflare Pages: uusi projekti `privateledger-landing`, build: `pnpm --filter @kp/landing build`, output: `dist/`
+- Custom domain `app.private-ledger.app` lisättävä nykyiseen Pages-projektiin
+- OG-kuva (`apps/landing/public/og-image.png`) luotava (1200×630px)
+- Ks. `docs/launch/launch-checklist.md`
 
 ---
 
 ## Muutosloki
+
+### 2026-03-18 — Feature 27: Domain + Landing Page + Markkinointi
+
+**Uudet tiedostot:**
+- `apps/landing/` — uusi itsenäinen Vite+React+Tailwind app (@kp/landing)
+  - `src/pages/LandingPage.tsx` — pääsivu (Hero + DashboardMockup + ZK + Features + Pricing + Footer)
+  - `src/pages/BlogArticleFi.tsx` — `/blog/krypto-verotus-suomi-2026` (FI SEO-artikkeli, structured data)
+  - `src/components/HeroSection.tsx` — hero + nav, ZK-tagline, CTA
+  - `src/components/ZkExplainerSection.tsx` — 3-askel ZK-selitys + koodiesimerkki
+  - `src/components/DashboardMockup.tsx` — Framer Motion animoitu portfolio-preview (mock-data)
+  - `src/components/FeatureCards.tsx` — 4 USP-korttia
+  - `src/components/PricingSection.tsx` — Free/Pro taulukko + vertailutaulukko
+  - `src/components/Footer.tsx` — CTA-banneri + linkit
+  - `src/landing.test.tsx` — 10 unit-testiä (kaikki läpi)
+  - `index.html` — meta-tagit, OG, Twitter Card, canonical, lang="fi"
+  - `public/robots.txt` + `public/sitemap.xml` + `public/favicon.svg`
+- `docs/launch/show-hn-post.md` — Show HN -postauksen draft (EN)
+- `docs/launch/launch-checklist.md` — DNS + Cloudflare + OG-kuva + Show HN launch steps
+
+**Muutetut tiedostot:**
+- `package.json` (root) — `dev:landing` + `build:landing` scriptit
+- `pnpm-workspace.yaml` — ei muutosta (apps/* kattaa landing automaattisesti)
+
+**Testit:** 10 landing unit-testiä ✅, Build OK ✅ (344 kB gzip 108 kB)
+
+---
 
 ### 2026-03-18 — Feature 26: Dashboard + UX Polish
 
@@ -275,7 +308,7 @@ Seuraavaksi: Feature 27 (Domain + Landing Page) tai Feature 13 Vaihe 2B (Northcr
 **Phase C: Branding + Welcome**
 - `apps/web/src/pages/WelcomePage.tsx` — redesigned with USP cards + CTA
 - `apps/web/public/favicon.svg` — shield/keyhole brand icon
-- PWA manifest updates (VaultFolio, theme_color)
+- PWA manifest updates (PrivateLedger, theme_color)
 
 **Phase D: Page Redesigns**
 - DashboardPage + PortfolioPage fully rewritten with UI components
