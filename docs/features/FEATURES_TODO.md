@@ -498,26 +498,37 @@ Ks. [ISSUE_LOG.md](../ISSUE_LOG.md) tarkemmat kuvaukset.
 - [x] **Vaihe 2:** Lompakkokohtainen FIFO (Verohallinnon ohje)
 - [x] **Vaihe 2:** Transfer detection + review UI (omat siirrot pörssien välillä)
 
-### Feature 26: Dashboard + UX Polish ❌
-**Speksi:** PRODUCT_ROADMAP_2026.md § 2.3, 2.4
-- [ ] ValueChart aikajännevalitsin (7D/30D/90D/1Y/ALL)
-- [ ] 24h muutos % per positio
-- [ ] Unrealized P&L % per positio (portfolio-sivu)
-- [ ] Sync-status indikaattori dashboardilla
-- [ ] Sidebar: passiivinen vault sync -status (poistetaan Sync-nappi)
-- [ ] Import success -banneri (joka importin jälkeen)
-- [ ] Setup progress -banneri (häviää 1. importin jälkeen)
-- [ ] Get Started -widget (tyhjä tila)
-- [ ] Alert badge dashboardilla
-- [ ] Onboarding: signup+vault yhdelle näkymälle
-- [ ] Passkey deferred dashboardin banneriin
+### Feature 26: Dashboard + UX Polish ✅
+**Speksi:** [26_dashboard-ux-polish.md](26_dashboard-ux-polish.md)
+**Vaihe 1 — Core UX:**
+- [x] Sidebar: passiivinen vault sync -status (poistettu Sync-nappi, retry vain virheessä)
+- [x] Setup progress -banneri (häviää 1. importin jälkeen)
+- [x] Get Started -widget (tyhjä tila, kun positions.length === 0)
+- [x] Import success -banneri (joka importin jälkeen, auto-dismiss 8s)
+**Vaihe 2 — Dashboard data:**
+- [x] ValueChart aikajännevalitsin (7D/30D/90D/1Y/ALL) + period delta
+- [x] 24h muutos % per positio (lasketaan pricePoints-taulusta)
+- [x] Unrealized P&L % per positio (portfolio-sivu) + uudet sortit
+**Vaihe 3 — Onboarding:**
+- [x] Signup + vault yhdelle sivulle (SignupWithVaultPage)
+- [x] VaultSetupPage: passkey-step poistettu normaalista flowsta (3 steppiä)
+- [ ] Passkey deferred dashboardin banneriin (lykätty — ei kriittinen)
+**Vaihe 4 — Alert badge:**
+- [x] Alert-skeema: triggeredAtISO + acknowledgedAtISO
+- [x] Alert badge sidebarin nav-itemissä
+- [x] AlertsPage: acknowledge kaikki kun sivu avataan
 
 ### Feature 27: Domain + Landing Page + Markkinointi ❌
-**Speksi:** PRODUCT_ROADMAP_2026.md § 1.5, 1.6
-- [ ] Domain (vaultfolio.app tai vaultfolio.fi)
-- [ ] Landing page (ZK-selitys, dashboard-preview, pricing)
-- [ ] Suomenkielinen SEO-artikkeli (Verohallinto + OmaVero)
-- [ ] Show HN -launch
+**Speksi:** [27_domain-landing-page.md](27_domain-landing-page.md)
+**Vaihe 1 — Landing page + domain:**
+- [ ] `apps/landing/` — Vite + React + Tailwind, erillinen Cloudflare Pages -projekti
+- [ ] Domain: `vaultfolio.app` → landing, `app.vaultfolio.app` → nykyinen PWA
+- [ ] Hero + ZK-selitys + animoitu dashboard-mockup (Framer Motion) + pricing
+- [ ] Meta-tagit, OG-image, sitemap.xml, robots.txt
+**Vaihe 2 — SEO-artikkeli:**
+- [ ] `/blog/krypto-verotus-suomi-2026` (FI, Article structured data)
+**Vaihe 3 — Launch:**
+- [ ] Show HN -postauksen draft + launch checklist
 
 ### Feature 28: AI Transaction Classification ❌
 **Speksi:** PRODUCT_ROADMAP_2026.md § 3

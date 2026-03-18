@@ -22,13 +22,36 @@ Ei avoimia P0-bugeja. Kaikki korjattu 2026-03-14.
 - CI: puuttuu typecheck, lint, coverage, audit, preview deploy
 
 ### Seuraava tyovaihe
-Feature 13 Vaihe 2 valmis 2026-03-18 (Binance + Kraken providerit).
+Feature 26 valmis 2026-03-18 (Dashboard + UX Polish).
 
-Seuraavaksi: Feature 26 (Dashboard + UX Polish) tai Feature 13 Vaihe 2B (Northcrypto CSV + Coinmotion CSV)
+Seuraavaksi: Feature 27 (Domain + Landing Page) tai Feature 13 Vaihe 2B (Northcrypto CSV + Coinmotion CSV)
 
 ---
 
 ## Muutosloki
+
+### 2026-03-18 — Feature 26: Dashboard + UX Polish
+
+**Uudet tiedostot:**
+- `apps/web/src/store/useImportSuccessStore.ts` — uusi store import success -banneria varten
+- `apps/web/src/hooks/useAlertBadgeCount.ts` — laskee katsomattomat triggeroituneet hälytykset
+- `apps/web/src/pages/SignupWithVaultPage.tsx` — yhdistetty signup + vault + maa-valinta
+
+**Muutetut tiedostot:**
+- `apps/web/src/store/useSyncStore.ts` — lastSyncAtISO + lastSyncError + try/catch
+- `apps/web/src/components/Sidebar.tsx` — poistettu btn-sync-now, passiivinen sync-status, alert badge
+- `apps/web/src/hooks/useDashboardData.ts` — ledgerEventCount + recentPricePoints
+- `apps/web/src/pages/DashboardPage.tsx` — import success/setup/partial data -bannerit, Get Started widget, 24h-sarake
+- `apps/web/src/components/DashboardCharts.tsx` — 90D + period delta
+- `apps/web/src/pages/PortfolioPage.tsx` — P&L% per positio, sort-valikko pnl-vaihtoehdolla
+- `apps/web/src/pages/VaultSetupPage.tsx` — passkey-step poistettu (3 steppiä)
+- `apps/web/src/app/App.tsx` — /auth/signup → SignupWithVaultPage
+- `apps/web/src/pages/AlertsPage.tsx` — acknowledgeTriggered() mount-effectissä
+- `packages/core/src/domain/alert.ts` — triggeredAtISO + acknowledgedAtISO optional-kentät
+
+**Testit:** 250/250 ✅ (173 core + 2 api + 75 web), Build OK ✅
+
+---
 
 ### 2026-03-18 — Feature 13 Vaihe 2: Binance + Kraken providerit
 
