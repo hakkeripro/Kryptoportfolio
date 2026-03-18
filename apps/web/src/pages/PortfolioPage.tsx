@@ -44,7 +44,7 @@ export default function PortfolioPage() {
 
   const accounts = dbState.data.accounts;
   const [accountFilter, setAccountFilter] = useState('all');
-  const [sort, setSort] = useState<'value' | 'name'>('value');
+  const [sort, setSort] = useState<'value' | 'name' | 'pnl'>('value');
 
   const positions = useMemo(() => {
     const latest = dbState.data.latest;
@@ -56,6 +56,16 @@ export default function PortfolioPage() {
           String(assetsById.get(b.assetId)?.symbol ?? b.assetId),
         ),
       );
+    } else if (sort === 'pnl') {
+      out.sort((a, b) => {
+        const pnlA = d(a.costBasisBase).isZero()
+          ? new Decimal(0)
+          : d(a.unrealizedPnlBase).div(d(a.costBasisBase));
+        const pnlB = d(b.costBasisBase).isZero()
+          ? new Decimal(0)
+          : d(b.unrealizedPnlBase).div(d(b.costBasisBase));
+        return pnlB.cmp(pnlA);
+      });
     } else {
       out.sort((a, b) => d(b.valueBase).cmp(d(a.valueBase)));
     }
@@ -92,13 +102,14 @@ export default function PortfolioPage() {
           </Select>
         </div>
         <div className="w-36">
-          <Select value={sort} onValueChange={(v) => setSort(v as 'value' | 'name')}>
+          <Select value={sort} onValueChange={(v) => setSort(v as 'value' | 'name' | 'pnl')}>
             <SelectTrigger data-testid="sort-positions">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="value">{t('portfolio.sort.value')}</SelectItem>
               <SelectItem value="name">{t('portfolio.sort.name')}</SelectItem>
+              <SelectItem value="pnl">P&amp;L %</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -143,11 +154,27 @@ export default function PortfolioPage() {
                       <div className="text-body font-mono text-content-primary">
                         {fmtMoney(p.valueBase, baseCurrency)}
                       </div>
-                      <div
-                        className={`text-caption font-mono ${pnl.isPositive() ? 'text-semantic-success' : pnl.isNegative() ? 'text-semantic-error' : 'text-content-tertiary'}`}
-                      >
-                        {pnl.isPositive() ? '+' : ''}
-                        {fmtMoney(p.unrealizedPnlBase, baseCurrency)}
+                      <div className="flex items-center justify-end gap-1.5">
+                        <span
+                          className={`text-caption font-mono ${pnl.isPositive() ? 'text-semantic-success' : pnl.isNegative() ? 'text-semantic-error' : 'text-content-tertiary'}`}
+                        >
+                          {pnl.isPositive() ? '+' : ''}
+                          {fmtMoney(p.unrealizedPnlBase, baseCurrency)}
+                        </span>
+                        {!d(p.costBasisBase).isZero() && (
+                          <span
+                            className={`text-[10px] font-mono px-1.5 py-0.5 rounded-full tabular-nums ${
+                              pnl.isPositive()
+                                ? 'bg-emerald-500/10 text-emerald-400'
+                                : pnl.isNegative()
+                                  ? 'bg-red-500/10 text-red-400'
+                                  : 'bg-white/5 text-white/30'
+                            }`}
+                          >
+                            {pnl.isPositive() ? '+' : ''}
+                            {pnl.div(d(p.costBasisBase)).mul(100).toDecimalPlaces(1).toFixed()}%
+                          </span>
+                        )}
                       </div>
                     </div>
                   </li>

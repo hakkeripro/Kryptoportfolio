@@ -10,7 +10,7 @@ import ErrorBoundary from '../components/ErrorBoundary';
 import { Spinner } from '../components/ui';
 
 const WelcomePage = lazy(() => import('../pages/WelcomePage'));
-const SignupPage = lazy(() => import('../pages/SignupPage'));
+const SignupWithVaultPage = lazy(() => import('../pages/SignupWithVaultPage'));
 const SigninPage = lazy(() => import('../pages/SigninPage'));
 const VaultSetupPage = lazy(() => import('../pages/VaultSetupPage'));
 const UnlockPage = lazy(() => import('../pages/UnlockPage'));
@@ -56,7 +56,7 @@ export default function App() {
 
             {/* Auth routes (no shell needed but AppShell hides sidebar for unauthenticated) */}
             <Route path="/welcome" element={<WelcomePage />} />
-            <Route path="/auth/signup" element={<SignupPage />} />
+            <Route path="/auth/signup" element={<SignupWithVaultPage />} />
             <Route path="/auth/signin" element={<SigninPage />} />
             <Route path="/vault/setup" element={<VaultSetupPage />} />
             <Route path="/vault/unlock" element={<UnlockPage />} />

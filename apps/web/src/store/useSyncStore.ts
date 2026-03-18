@@ -34,6 +34,8 @@ const SyncPayloadSchema = z.object({
 export type SyncState = {
   deviceId: string;
   lastSyncCursor: number;
+  lastSyncAtISO: string | null;
+  lastSyncError: string | null;
   syncNow: () => Promise<{ uploaded: number; pulled: number } | null>;
 };
 
@@ -56,59 +58,73 @@ export const useSyncStore = create<SyncState>()(
     (set, get) => ({
       deviceId: getOrCreateDeviceId(),
       lastSyncCursor: 0,
+      lastSyncAtISO: null,
+      lastSyncError: null,
 
       syncNow: async () => {
         const { token, apiBase } = useAuthStore.getState();
         const { passphrase } = useVaultStore.getState();
         if (!token || !passphrase) return null;
+        set({ lastSyncError: null });
+        try {
+          await ensureWebDbOpen();
+          const db = getWebDb();
+          const payload = {
+            schemaVersion: 1,
+            exportedAtISO: new Date().toISOString(),
+            assets: await db.assets.toArray(),
+            accounts: await db.accounts.toArray(),
+            settings: await db.settings.toArray(),
+            ledgerEvents: await db.ledgerEvents.toArray(),
+            alerts: await db.alerts.toArray(),
+          };
+          SyncPayloadSchema.parse(payload);
 
-        await ensureWebDbOpen();
-        const db = getWebDb();
-        const payload = {
-          schemaVersion: 1,
-          exportedAtISO: new Date().toISOString(),
-          assets: await db.assets.toArray(),
-          accounts: await db.accounts.toArray(),
-          settings: await db.settings.toArray(),
-          ledgerEvents: await db.ledgerEvents.toArray(),
-          alerts: await db.alerts.toArray(),
-        };
-        SyncPayloadSchema.parse(payload);
+          const afterCursor0 = get().lastSyncCursor;
+          const env = await createSyncEnvelope({
+            passphrase,
+            deviceId: get().deviceId,
+            id: `env_${uuid()}`,
+            payload,
+          });
+          const up = await uploadEnvelope(apiBase, token, env);
+          const pulled = await pullEnvelopes(apiBase, token, afterCursor0);
+          const pulledCount = pulled.envelopes.length;
+          const maxCursor = Math.max(
+            Number(up?.cursor ?? 0),
+            Number(pulled.envelopes.at(-1)?.cursor ?? 0),
+            Number(afterCursor0 ?? 0),
+          );
+          if (maxCursor > get().lastSyncCursor) set({ lastSyncCursor: maxCursor });
 
-        const afterCursor0 = get().lastSyncCursor;
-        const env = await createSyncEnvelope({
-          passphrase,
-          deviceId: get().deviceId,
-          id: `env_${uuid()}`,
-          payload,
-        });
-        const up = await uploadEnvelope(apiBase, token, env);
-        const pulled = await pullEnvelopes(apiBase, token, afterCursor0);
-        const pulledCount = pulled.envelopes.length;
-        const maxCursor = Math.max(
-          Number(up?.cursor ?? 0),
-          Number(pulled.envelopes.at(-1)?.cursor ?? 0),
-          Number(afterCursor0 ?? 0),
-        );
-        if (maxCursor > get().lastSyncCursor) set({ lastSyncCursor: maxCursor });
+          for (const e of pulled.envelopes) {
+            const decoded = await openSyncEnvelope({ passphrase, envelope: e });
+            const dp = SyncPayloadSchema.parse(decoded);
+            await upsertByTimestamp(db.assets, dp.assets);
+            await upsertByTimestamp(db.accounts, dp.accounts);
+            await upsertByTimestamp(db.settings, dp.settings);
+            await upsertByTimestamp(db.ledgerEvents, dp.ledgerEvents);
+            await upsertByTimestamp(db.alerts, dp.alerts);
+          }
 
-        for (const e of pulled.envelopes) {
-          const decoded = await openSyncEnvelope({ passphrase, envelope: e });
-          const dp = SyncPayloadSchema.parse(decoded);
-          await upsertByTimestamp(db.assets, dp.assets);
-          await upsertByTimestamp(db.accounts, dp.accounts);
-          await upsertByTimestamp(db.settings, dp.settings);
-          await upsertByTimestamp(db.ledgerEvents, dp.ledgerEvents);
-          await upsertByTimestamp(db.alerts, dp.alerts);
+          if (pulledCount > 0) await rebuildDerivedCaches({ daysBack: 365 });
+          set({ lastSyncAtISO: new Date().toISOString() });
+          return { uploaded: 1, pulled: pulledCount };
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : String(err);
+          set({ lastSyncError: msg });
+          throw err;
         }
-
-        if (pulledCount > 0) await rebuildDerivedCaches({ daysBack: 365 });
-        return { uploaded: 1, pulled: pulledCount };
       },
     }),
     {
       name: 'kp_sync_v3',
-      partialize: (s) => ({ deviceId: s.deviceId, lastSyncCursor: s.lastSyncCursor }),
+      partialize: (s) => ({
+        deviceId: s.deviceId,
+        lastSyncCursor: s.lastSyncCursor,
+        lastSyncAtISO: s.lastSyncAtISO,
+        lastSyncError: s.lastSyncError,
+      }),
     },
   ),
 );

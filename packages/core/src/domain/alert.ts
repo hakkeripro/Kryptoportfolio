@@ -28,6 +28,8 @@ export const AlertSchema = z.object({
   snoozedUntilISO: IsoString.optional(),
   isEnabled: z.boolean(),
   lastTriggeredAtISO: IsoString.optional(),
+  triggeredAtISO: IsoString.optional(),     // when last triggered (for badge)
+  acknowledgedAtISO: IsoString.optional(),  // when user viewed Alerts page
   source: AlertSourceEnum,
 });
 

@@ -21,11 +21,12 @@ const TOOLTIP_STYLE = {
   backdropFilter: 'blur(8px)',
 };
 
-type TimeRange = '7D' | '30D' | '1Y' | 'ALL';
+type TimeRange = '7D' | '30D' | '90D' | '1Y' | 'ALL';
 
 const RANGE_DAYS: Record<TimeRange, number> = {
   '7D': 7,
   '30D': 30,
+  '90D': 90,
   '1Y': 365,
   ALL: 9999,
 };
@@ -87,12 +88,31 @@ export function ValueChart({ data }: { data: { day: string; value: number }[] })
 
   const filtered = data.slice(-RANGE_DAYS[range]);
 
+  const periodDelta =
+    filtered.length >= 2 && filtered[0]!.value !== 0
+      ? ((filtered.at(-1)!.value - filtered[0]!.value) / filtered[0]!.value) * 100
+      : null;
+
   return (
     <Card data-testid="chart-portfolio-value" className="p-5">
       <div className="flex items-center justify-between mb-3">
-        <CardTitle>{t('dashboard.chart.portfolioValue')}</CardTitle>
+        <div className="flex items-center gap-2">
+          <CardTitle>{t('dashboard.chart.portfolioValue')}</CardTitle>
+          {periodDelta != null && (
+            <span
+              data-testid="chart-period-delta"
+              className={`text-[10px] font-mono px-1.5 py-0.5 rounded-full tabular-nums ${
+                periodDelta >= 0
+                  ? 'bg-emerald-500/10 text-emerald-400'
+                  : 'bg-red-500/10 text-red-400'
+              }`}
+            >
+              {periodDelta >= 0 ? '+' : ''}{periodDelta.toFixed(1)}%
+            </span>
+          )}
+        </div>
         <div className="flex gap-1">
-          {(['7D', '30D', '1Y', 'ALL'] as TimeRange[]).map((r) => (
+          {(['7D', '30D', '90D', '1Y', 'ALL'] as TimeRange[]).map((r) => (
             <button
               key={r}
               onClick={() => setRange(r)}

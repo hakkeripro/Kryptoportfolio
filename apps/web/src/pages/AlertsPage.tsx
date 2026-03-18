@@ -107,6 +107,27 @@ export default function AlertsPage() {
   const apiBase = useAuthStore((s) => s.apiBase);
   const token = useAuthStore((s) => s.token);
 
+  // Acknowledge all triggered alerts when user visits this page
+  useEffect(() => {
+    async function acknowledgeTriggered() {
+      try {
+        await ensureWebDbOpen();
+        const db = getWebDb();
+        const triggered = await db.alerts
+          .filter((a) => !!a.triggeredAtISO && !a.acknowledgedAtISO)
+          .toArray();
+        if (triggered.length === 0) return;
+        const now = new Date().toISOString();
+        await Promise.all(
+          triggered.map((a) => db.alerts.put({ ...a, acknowledgedAtISO: now })),
+        );
+      } catch {
+        // Non-critical
+      }
+    }
+    void acknowledgeTriggered();
+  }, []);
+
   const alertsQ = useDbQuery(
     async (db) => {
       const rows = await db.alerts.toArray();

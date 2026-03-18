@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
@@ -14,18 +14,26 @@ import {
   RefreshCw,
   Shield,
   Menu,
+  Circle,
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from './ui/sheet';
 import { useVaultStore } from '../store/useVaultStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { useSyncStore } from '../store/useSyncStore';
+import { useAlertBadgeCount } from '../hooks/useAlertBadgeCount';
 
 interface NavSection {
   label: string;
-  items: { to: string; icon: typeof Home; label: string; testId: string }[];
+  items: { to: string; icon: typeof Home; label: string; testId: string; badge?: number }[];
 }
 
-function NavItem({ to, icon: Icon, label, testId }: NavSection['items'][number]) {
+function NavItem({
+  to,
+  icon: Icon,
+  label,
+  testId,
+  badge,
+}: NavSection['items'][number]) {
   const location = useLocation();
   const isActive = location.pathname === to;
 
@@ -43,17 +51,84 @@ function NavItem({ to, icon: Icon, label, testId }: NavSection['items'][number])
       >
         <Icon className={`h-[18px] w-[18px] ${isActive ? 'text-[#FF8400]' : ''}`} />
         {label}
+        {badge != null && badge > 0 && (
+          <span
+            data-testid="badge-alert-count"
+            className="ml-auto flex items-center justify-center h-4 min-w-4 px-1 rounded-full
+              bg-[#FF8400] text-black text-[9px] font-bold font-mono tabular-nums"
+          >
+            {badge > 99 ? '99+' : badge}
+          </span>
+        )}
       </motion.div>
     </NavLink>
+  );
+}
+
+function formatRelativeTime(isoString: string): string {
+  const now = Date.now();
+  const ts = new Date(isoString).getTime();
+  const diffSec = Math.floor((now - ts) / 1000);
+  if (diffSec < 60) return 'just now';
+  if (diffSec < 3600) return `${Math.floor(diffSec / 60)} min ago`;
+  if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}h ago`;
+  return new Date(isoString).toLocaleDateString();
+}
+
+function SyncStatus() {
+  const { t } = useTranslation();
+  const token = useAuthStore((s) => s.token);
+  const lastSyncAtISO = useSyncStore((s) => s.lastSyncAtISO);
+  const lastSyncError = useSyncStore((s) => s.lastSyncError);
+  const syncNow = useSyncStore((s) => s.syncNow);
+  // Force re-render every 30s so relative time stays fresh
+  const [, tick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => tick((n) => n + 1), 30_000);
+    return () => clearInterval(id);
+  }, []);
+
+  if (!token) return null;
+
+  if (lastSyncError) {
+    return (
+      <div className="flex items-center gap-2 px-3 py-2 text-xs text-red-400">
+        <Circle className="h-2.5 w-2.5 fill-red-500 text-red-500 shrink-0" />
+        <span className="flex-1 truncate">
+          {t('nav.syncFailed', { defaultValue: 'Sync failed' })}
+        </span>
+        <button
+          data-testid="btn-sync-retry"
+          onClick={() => void syncNow()}
+          className="shrink-0 text-white/50 hover:text-white transition-colors"
+          title="Retry sync"
+        >
+          <RefreshCw className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      data-testid="sync-status"
+      className="flex items-center gap-2 px-3 py-2 text-xs text-white/30"
+    >
+      <Circle className="h-2 w-2 fill-white/20 text-white/20 shrink-0" />
+      <span className="truncate">
+        {lastSyncAtISO
+          ? `Vault backed up · ${formatRelativeTime(lastSyncAtISO)}`
+          : t('nav.syncNeverSynced', { defaultValue: 'Not synced yet' })}
+      </span>
+    </div>
   );
 }
 
 function SidebarContent() {
   const { t } = useTranslation();
   const { passphrase, lockVault } = useVaultStore();
-  const token = useAuthStore((s) => s.token);
   const email = useAuthStore((s) => s.email);
-  const syncNow = useSyncStore((s) => s.syncNow);
+  const alertBadge = useAlertBadgeCount();
 
   const sections: NavSection[] = [
     {
@@ -87,6 +162,7 @@ function SidebarContent() {
           icon: Bell,
           label: t('nav.alerts', { defaultValue: 'Alerts' }),
           testId: 'nav-alerts',
+          badge: alertBadge,
         },
         {
           to: '/transactions/import',
@@ -126,19 +202,8 @@ function SidebarContent() {
       </nav>
 
       {/* Footer */}
-      <div className="px-3 py-4 border-t border-white/10 space-y-2">
-        {token && (
-          <button
-            data-testid="btn-sync-now"
-            onClick={() => void syncNow()}
-            className="flex items-center gap-2 w-full px-3 py-2 rounded-md text-xs
-              text-white/60 hover:text-white hover:bg-white/5
-              transition-colors duration-150"
-          >
-            <RefreshCw className="h-4 w-4" />
-            {t('nav.sync')}
-          </button>
-        )}
+      <div className="px-0 py-4 border-t border-white/10 space-y-0.5">
+        <SyncStatus />
         {passphrase ? (
           <button
             data-testid="btn-lock"
