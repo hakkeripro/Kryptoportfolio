@@ -1,6 +1,6 @@
 # Features TODO - Master List
 
-**Paivitetty:** 2026-03-14
+**Paivitetty:** 2026-03-18
 **Tarkoitus:** Kaikkien ominaisuuksien seuranta. Feature ID on pysyva tunniste.
 **Bugit:** [ISSUE_LOG.md](../ISSUE_LOG.md)
 **Backlog:** [BACKLOG.md](../BACKLOG.md)
@@ -336,11 +336,10 @@ Ks. [ISSUE_LOG.md](../ISSUE_LOG.md) tarkemmat kuvaukset.
 
 ## SUUNNITTEILLA (ADR olemassa)
 
-### Feature 12: Auth/Vault UX Redesign 🚧
-**Status:** 🚧 TOTEUTUKSESSA (core + UI valmis, E2E-testit kesken)
+### Feature 12: Auth/Vault UX Redesign ✅
+**Status:** ✅ VALMIS (2026-03-18)
 **ADR:** ADR-018
 **Speksi:** [12_auth-vault-ux.md](12_auth-vault-ux.md)
-**TODO:** [12_auth-vault-ux_TODO.md](12_auth-vault-ux_TODO.md)
 **Edellyttaa:** Vaihe 0 (T-003 ✅) + P0-bugi KP-UI-001 ✅
 
 **Tavoite:** Passkey/WebAuthn + yksi Vault Passphrase per kayttaja (multi-device)
@@ -353,11 +352,11 @@ Ks. [ISSUE_LOG.md](../ISSUE_LOG.md) tarkemmat kuvaukset.
 - [x] PUT /v1/auth/password -endpoint (Fastify + Hono)
 - [x] Backward compat: /onboarding → /welcome, /unlock → /vault/unlock
 - [x] E2E-testit paivitetty uuteen flowiin
-- [ ] Erilliset E2E-testit (auth-signup-flow, auth-signin-flow, auth-offline-flow, account-change-password)
-- [ ] Multi-device e2e -testaus (manuaalinen)
-- [ ] **/welcome-sivu pelkistys:** poista USP-kortit + markkinointisisältö → pelkkä "Luo tili / Kirjaudu / Offline" -näkymä. Nykyinen /welcome näyttää markkinointisivulta, mikä sekoittaa navigaatiorakennetta (ks. KP-UX-003).
+- [x] Erilliset E2E-testit: auth-signup-flow, auth-signin-flow, auth-offline-flow, account-change-password
+- [ ] Multi-device e2e -testaus (manuaalinen — ei automatisoitavissa)
+- [x] **/welcome-sivu pelkistys:** USP-kortit poistettu, pelkkä logo + "Luo tili / Kirjaudu / Offline" (ks. KP-UX-003)
 
-**Ratkaisee:** KP-UX-001
+**Ratkaisee:** KP-UX-001, KP-UX-003
 
 ---
 
@@ -553,6 +552,38 @@ Ks. [ISSUE_LOG.md](../ISSUE_LOG.md) tarkemmat kuvaukset.
 
 ---
 
+### Feature 29: Alert Delivery Diagnostics ❌
+**Status:** ❌ EI ALOITETTU
+**Prioriteetti:** P1
+**Ratkaisee:** KP-ALERT-002
+
+**Tavoite:** Diagnosoida ja korjata push-ilmoitusten toimimattomuus tuotannossa. Lisätä diagnostiikka-UI ja "Test notification" -nappi.
+
+- [ ] Diagnostiikka-osio AlertsPage:lle: VAPID-avain asetettu? Subscription aktiivinen? Server rules count?
+- [ ] "Send test notification" -nappi (kutsuu POST /v1/push/test)
+- [ ] POST /v1/push/test -endpoint (Hono + Fastify): lähettää testiviesti tilatulle subscriptiolle
+- [ ] Selkeät virheilmoitukset puuttuvista edellytyksistä (ei VAPID, ei subscription, HTTPS vaaditaan)
+- [ ] Unit-testi: push/test-endpoint
+- [ ] E2E-testi: diagnostiikkaosio näkyy kun alerts-sivu avataan
+
+---
+
+### Feature 30: Asset Mapping Auto-suggest ❌
+**Status:** ❌ EI ALOITETTU
+**Prioriteetti:** P1
+**Ratkaisee:** KP-DATA-001
+
+**Tavoite:** Vähentää manuaalityötä asset mappingissa. CoinGecko symbol search → automaattinen ehdotus kun uusi tuntematon symboli havaitaan.
+
+- [ ] CoinGecko `/search` -endpoint proxyn kautta (Hono + Fastify)
+- [ ] UnmappedAssetsQueue: per-rivi "Suggested: BTC → bitcoin" + yhdellä klikkauksella hyväksy
+- [ ] Fuzzy match client-puolella (assetCatalog symbol → coingeckoId): ei API-kutsua jos löytyy suoraan
+- [ ] Manuaalinen override säilyy (haku + confirm)
+- [ ] Unit-testi: auto-suggest logiikka (@kp/core tai web)
+- [ ] E2E-testi: unmapped asset näyttää ehdotuksen
+
+---
+
 ## EI TOTEUTETTU (backlogissa)
 
 ### Feature 15: Dashboard Alert Popup ❌
@@ -640,11 +671,11 @@ Ks. [ISSUE_LOG.md](../ISSUE_LOG.md) tarkemmat kuvaukset.
 |-----------|-------|
 | Vaihe 0 (tekninen velka) | 8/8 ✅ |
 | P0-bugit | 4/4 ✅ |
-| Toteutetut featuret | 13 (01-12, 22-23) + 21 |
+| Toteutetut featuret | 16 (01-14, 22-27) + 21 + 13v2 |
 | Toteutuksessa | 0 |
-| Suunnitteilla 2026 | 6 (24-28, 13v2) — ks. PRODUCT_ROADMAP_2026.md |
+| Suunniteltu (ei aloitettu) | 3 (28, 29, 30) |
 | Backlog | 5 (15-17, 19-20) |
-| Avoimet P1-bugit | 5 |
+| Avoimet P1-bugit | 2 (KP-ALERT-002 → F29, KP-DATA-001 → F30) |
 | Avoimet P2/P3-bugit | 4 |
 
 ### Toteutusjarjestys
@@ -664,6 +695,8 @@ Feature 23: Premium UI shadcn/ui + Framer Motion ✅ VALMIS
 → Feature 13 Vaihe 2: Binance + Kraken
 → Feature 26: Dashboard + UX Polish
 → Feature 27: Domain + Landing Page
+→ Feature 29: Alert Delivery Diagnostics (KP-ALERT-002)
+→ Feature 30: Asset Mapping Auto-suggest (KP-DATA-001)
 → Feature 28: AI Transaction Classification
 → Feature 15-20: backlogista prioriteettien mukaan
 

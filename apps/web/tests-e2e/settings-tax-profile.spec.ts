@@ -47,9 +47,9 @@ test.describe('Feature 24: Settings Tax Profile', () => {
 
     await expect(page.getByTestId('card-tax-profile')).toBeVisible();
 
-    // Select Sweden to make a change
+    // Select Other to make a change (Sweden/DE are coming-soon disabled)
     const countrySelector = page.getByTestId('form-settings-tax-country');
-    await countrySelector.getByText('Sweden').click();
+    await countrySelector.getByText('Other').click();
 
     // Save
     await page.getByTestId('btn-settings-save-tax-profile').click();

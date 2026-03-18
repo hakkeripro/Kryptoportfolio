@@ -78,10 +78,9 @@ export async function signupAndSetupVault(page: any) {
 export async function setupVaultOffline(page: any) {
   await page.goto('/vault/setup?offline=1');
 
-  // Country step: skip
-  if (await page.getByTestId('btn-country-skip').isVisible()) {
-    await page.getByTestId('btn-country-skip').click();
-  }
+  // Country step: wait for it then skip
+  await page.getByTestId('btn-country-skip').waitFor({ state: 'visible', timeout: 8_000 });
+  await page.getByTestId('btn-country-skip').click();
 
   await page.getByTestId('form-vault-passphrase').fill('passphrase123');
   await page.getByTestId('form-vault-passphrase-confirm').fill('passphrase123');

@@ -1,6 +1,6 @@
 # Issue log (bugit + tuoteaukot)
 
-Päivitetty: 2026-03-18
+Päivitetty: 2026-03-18 (siivous: KP-UI-003, KP-TAX-001 merkitty korjatuiksi)
 
 Prioriteetit:
 - **P0** = estää käytön / rikkoo peruspolun / data integrity / turvallisuus
@@ -44,14 +44,16 @@ Prioriteetit:
 **Hypoteeseja:** VAPID env puuttuu, runner/cron ei käy, push permission/HTTPS, tai KP-ALERT-001 tyhjensi säännöt.  
 **Korjaus:** diagnostiikka UI (VAPID ok? subscription ok? server rules count?), sekä “Test notification”.
 
-### KP-UI-003: Imports-sivu sekamelska eikä skaalaudu tuleville integroinneille
-**Korjaus:** siirry provider-registry UI:hin + connect wizard (API ensisijainen, CSV toissijainen).
+### ~~KP-UI-003: Imports-sivu sekamelska eikä skaalaudu tuleville integroinneille~~ ✅ KORJATTU
+**Korjaus:** Provider-registry UI + connect wizard toteutettu Feature 13:ssa.
+**Korjattu:** 2026-03-16
 
 ### KP-DATA-001: Asset mapping vaatii liikaa manuaalityötä
 **Korjaus:** auto-suggest (CoinGecko symbol search) + user override; mapping queue UX säilyy.
 
-### KP-TAX-001: Verolaskelmat: maille sopivuus epäselvä + Suomen hankintameno-olettama puuttuu
-**Korjaus:** tax profile UI (“Country”) + selkeä disclaimer + FI: hankintameno-olettama optiona.
+### ~~KP-TAX-001: Verolaskelmat: maille sopivuus epäselvä + Suomen hankintameno-olettama puuttuu~~ ✅ KORJATTU
+**Korjaus:** Tax Profile UI (maa + HMO) toteutettu Feature 24:ssä. FI hankintameno-olettama (20%/40%) toteutettu Feature 25:ssä.
+**Korjattu:** 2026-03-17
 
 ### ~~KP-UI-006: Sidebar-logo ei navigoinut mihinkään~~ ✅ KORJATTU
 **Oire:** Desktop-sidebarin ja mobiiliheaderin "PrivateLedger"-logo oli `<span>`, ei linkki.
@@ -80,3 +82,7 @@ Prioriteetit:
 - KP-BRAND-001: Logo + värimaailma eivät ole yhtenäisiä kaikkialla
 - KP-UI-005: Sync-nappi epäselvä (ei selitystä eikä tulosraporttia)
 - KP-MAINT-001: Kuolleita/tuplakomponentteja (layout) → siivous
+
+### KP-TEST-001: settings-tax-profile E2E-testi yrittää klikata disabled Swedeä
+**Oire:** `settings-tax-profile.spec.ts` testi "TaxProfileCard: save settings shows success message" yrittää klikata Sweden-painiketta, mutta se on `disabled` (`comingSoon: true`). Testi aiheuttaa timeout.
+**Korjaus:** Vaihda testi käyttämään Finland (FI) tai Other — molemmat ovat enabled.

@@ -3,7 +3,7 @@ import { resetApp, signupAndSetupVault, spaNavigate } from './helpers';
 
 test.describe('Feature 22: UI/UX Redesign', () => {
   /* ── Welcome page ────────────────────────────────── */
-  test('welcome page renders branding, USP cards, and CTA buttons', async ({ page }) => {
+  test('welcome page renders logo and CTA buttons', async ({ page }) => {
     await page.goto('/welcome');
     await expect(page.getByTestId('page-welcome')).toBeVisible();
 
@@ -11,16 +11,6 @@ test.describe('Feature 22: UI/UX Redesign', () => {
     await expect(
       page.getByTestId('page-welcome').locator('svg[aria-label="PrivateLedger"]'),
     ).toBeVisible();
-
-    // Tagline
-    await expect(
-      page.getByText('The only crypto tracker that never sees your data.'),
-    ).toBeVisible();
-
-    // 3 USP cards (scoped to welcome page to avoid sidebar duplicate)
-    await expect(page.getByTestId('page-welcome').getByText('Zero-Knowledge Encryption')).toBeVisible();
-    await expect(page.getByTestId('page-welcome').getByText('Multi-Exchange Import')).toBeVisible();
-    await expect(page.getByTestId('page-welcome').getByText('Tax Reports')).toBeVisible();
 
     // CTA buttons
     await expect(page.getByTestId('btn-signup')).toBeVisible();
