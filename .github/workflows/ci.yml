@@ -168,3 +168,38 @@ jobs:
         env:
           CI: "1"
         run: pnpm test:e2e
+
+  deploy-landing:
+    name: Deploy landing (privateledger-landing)
+    runs-on: ubuntu-latest
+    needs: [quality, test]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+          run_install: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build landing
+        run: pnpm --filter @kp/landing build
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: b88555ea91c7ef1cb3d83634ded4f436
+          command: pages deploy apps/landing/dist --project-name=privateledger-landing --commit-dirty=true
