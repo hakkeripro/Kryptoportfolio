@@ -1,704 +1,363 @@
-# Features TODO - Master List
+# Features TODO — Master List
 
-**Paivitetty:** 2026-03-18
-**Tarkoitus:** Kaikkien ominaisuuksien seuranta. Feature ID on pysyva tunniste.
+**Päivitetty:** 2026-03-19
+**Strategia:** Roadmap v2 — beta-valmius → tuote kuntoon → toiminimi → launch → kasvu
 **Bugit:** [ISSUE_LOG.md](../ISSUE_LOG.md)
-**Backlog:** [BACKLOG.md](../BACKLOG.md)
-**ADR:t:** [adr/](../adr/)
 
 ---
 
-## ⚡ VAIHE 0: Tekninen velka + siivous (ENNEN uusia featureita)
+## TOTEUTETUT ✅
 
-**Miksi ensin:** Nykyinen koodipohja on hauras ydinpoluilla (sync, alerts, state). Uusien ominaisuuksien rakentaminen hauraalle pohjalle moninkertaistaa tyomäärän myohemmin. Testikattavuus on liian matala AI-kehitykseen — AI tuottaa hauraata koodia ilman testeja.
-
-### T-001: CI pipeline kuntoon ✅
-**Prioriteetti:** Kriittinen (kaikki muu nojaa tahan)
-**Tyomaara:** 1-2h
-
-- [x] TypeScript type check (`tsc --noEmit`) CI:hin
-- [x] ESLint + Prettier setup + CI step
-- [x] Vitest coverage-raportti (threshold aluksi 30%)
-- [x] `pnpm audit` dependency security check
-- [x] Bundle size tracking (size-limit, 500 kB gzip raja)
-- [x] `.github/workflows/ci.yml` paivitys
-
-**Valmis kun:** PR ei mene läpi ilman type check + lint + test + audit.
-
----
-
-### T-002: Hosted API monolith hajotus ✅
-**Prioriteetti:** Kriittinen
-**Tyomaara:** 2-3h
-**Kohde:** `functions/api/[[path]].ts` (1082 rivia → moduuleihin)
-
-- [x] `functions/api/` → erilliset route-tiedostot (auth, sync, alerts, coinbase, coingecko, push, runner)
-- [x] `functions/_lib/` → yhteiset palvelut sailyvat + uudet: `pushSender.ts`, `alertEval.ts`
-- [x] Poista runtime ALTER TABLE -migraatiot → siirrä `scripts/migrations/`
-- [x] Poista in-memory Map cache ilman evictiota → bounded cache (MAX_CACHE_SIZE=200)
-- [x] Testaa: `pnpm test:e2e` — 5/6 lapaistava (1 pre-existing bugi)
-
-**Valmis kun:** Yksikaan route-tiedosto ei ole yli 200 rivia. Ei runtime-skeemamuutoksia.
-
----
-
-### T-003: useAppStore hajotus ✅
-**Prioriteetti:** Kriittinen
-**Tyomaara:** 2-3h
-**Kohde:** `apps/web/src/store/useAppStore.ts` (278 rivia, 5 konseptia)
-
-- [x] `useAuthStore.ts` — login, register, token, email (78 rivia)
-- [x] `useVaultStore.ts` — passphrase, vaultReady, vaultSetup, lock/unlock (93 rivia)
-- [x] `useSyncStore.ts` — syncNow, lastSyncCursor, deviceId (97 rivia)
-- [x] Korjaa: `apiFetch()` JSON.parse try-catch → `apiFetch.ts` (16 rivia)
-- [x] Korjaa: `syncNow()` virheenkasittely (ei enaa hiljaisesti epäonnistuva)
-- [x] Middleware/koordinointi storeiden valilla: `getState()` cross-store reads
-- [x] Testaa: `pnpm test:e2e` lapaistava (5/6, 1 pre-existing bugi)
-
-**Valmis kun:** Yksikaan store-tiedosto ei ole yli 100 rivia. Virheet nakyy kayttajalle.
-
----
-
-### T-004: API-logiikan duplikaation poisto ✅
-**Prioriteetti:** Korkea
-**Tyomaara:** 3-4h
-**Ongelma:** Auth, sync ja alerts logiikka on kirjoitettu kahdesti (Fastify + Hono) eri tyylilla.
-
-- [x] Tunnista jaettu bisneslogiikka: auth (hash/verify, JWT), sync (envelope CRUD), alerts (eval)
-- [x] Siirrä yhteinen logiikka `packages/core/src/api/` tai uuteen `packages/api-shared/`
-- [x] Fastify-routet kutsuvat yhteistä logiikkaa
-- [x] Hono-routet kutsuvat yhteistä logiikkaa
-- [x] Yhtenaiset virheviestit ja -koodit
-- [x] Testaa: `pnpm test` + `pnpm test:e2e`
-
-**Valmis kun:** Bisneslogiikkaa on YKSI versio. Route-handlerit ovat ohuita adaptereita.
-
----
-
-### T-005: Testikattavuus ydinpoluille ✅
-**Prioriteetti:** Korkea
-**Tyomaara:** 3-4h
-
-- [x] Lot engine: edge case -testit (tyhjä portfolio, negatiiviset maarat, LIFO, HIFO, AVG_COST, TRANSFER, REWARD)
-- [x] Tax engine: skenaariot (pelkat ostot, rewards+disposals, swap chains, multi-year, ZERO/FMV)
-- [x] Alert eval: kaikki 6 tyyppia, cooldown, snooze, disabled, puuttuvat kentat
-- [x] Ledger: normalisointi, replacement, tombstone, feeInvariants, feeValueBaseOrZero
-- [ ] Sync: konfliktiresoluutio, osittainen kirjoitus, concurrent access (siirretty)
-- [ ] Vault: setup, unlock, corrupted blob, wrong passphrase (siirretty)
-- [x] E2E: virhepolut (vaara salasana, duplikaatti email, tuntematon email)
-
-**Tila:** Core coverage 58.7% (> 50% tavoite). 91 unit-testia, 3 E2E-virhepolkua. Sync/Vault-testit siirretty.
-
----
-
-### T-006: Web-komponenttien siivous ✅
-**Prioriteetti:** Keskitaso
-**Tyomaara:** 2-3h
-
-- [x] `SettingsPage.tsx` (574r) → hajota alacomponentteihin (PortfolioSettingsCard, SecurityCard, NotificationsCard, SyncCard, AdvancedCard)
-- [x] `PortfolioPage.tsx` (366r) → ekstrahtoi TokenDetailDrawer omaksi komponentiksi
-- [x] `DashboardPage.tsx` (349r) → ekstrahtoi `useDashboardData` hook
-- [x] DB-kyselyt pois page-komponenteista → custom hookit (`usePortfolioData`, `useDashboardData`)
-- [x] Poista `as any` -castit (SettingsPage, PortfolioPage, DashboardPage — korvattu oikeilla tyypeilla)
-- [x] App.tsx: lisaa React.lazy() code splitting sivuille
-
-**Toteutus (2026-03-14):**
-- SettingsPage: 574r → 61r (logiikka 5 alikomponeenttiin `components/settings/`)
-- PortfolioPage: 366r → 150r (TokenDetailDrawer → `components/TokenDetailDrawer.tsx`)
-- DashboardPage: 349r → 322r (DB-kysely → `hooks/useDashboardData.ts`; dashboard-refresh-logiikka sailytetty)
-- `as any` poistettu SettingsPage/PortfolioPage/DashboardPage kriittisilta poluilta (Settings-tyypin kentat, position-tyypit, lot-tyypit)
-- React.lazy() + Suspense kaikille 12 sivulle — Vite code splitting tuottaa erilliset chunkit
-
----
-
-### T-007: Dexie-indeksit + DB-optimoinnit ✅
-**Prioriteetti:** Keskitaso
-**Tyomaara:** 1h
-
-- [x] `pricePoints`: compound index `[assetId+timestampISO]`
-- [x] `portfolioSnapshots`: compound index tarvittaessa → ei tarvita, `&dayISO` PK riittaa
-- [x] Tarkista kaikki kyselyt — indeksit vastaavat kayttoa
-- [x] Dexie versio-bump + migraatio (v2 → v3)
-
-**Valmis kun:** Ei full-table-scaneja yleisimmissa kyselyissa.
-
-**Toteutus (2026-03-14):**
-- Dexie v3: compound index `[assetId+timestampISO]` pricePoints-tauluun
-- PortfolioPage: ledgerEvents.filter() → where('assetId') + where('type').equals('SWAP') (indeksoitu haku)
-- portfolioSnapshots: kaikki kyselyt kayttavat dayISO PK:ta, ei tarvetta compound-indeksille
-
----
-
-### T-008: Repo-siivous (turha roska pois) ✅
-**Prioriteetti:** Keskitaso
-**Tyomaara:** 30min
-
-Nama tiedostot ovat vanhentuneita / korvattu uusilla:
-
-- [x] Poista `docs/NEXT_AI_PROMPT.md` → korvattu `CLAUDE.md`:llä
-- [x] Poista `docs/AI_HANDOFF.md` → korvattu `CLAUDE.md`:lla + `FEATURES_TODO.md`:lla
-- [x] Poista `docs/next-steps.md` → korvattu `FEATURES_TODO.md`:llä + `BACKLOG.md`:lla
-- [x] Paivita `docs/README.md` → viittaa uuteen rakenteeseen (CLAUDE.md, FEATURES_TODO, SESSION_CONTEXT)
-- [x] Siirrä `docs/known-limitations.md` sisalto relevantteihin feature-spekseihin, sitten poista
-- [x] Tarkista `apps/web/src/` kuolleet/tupla-komponentit (KP-MAINT-001), poista
-- [x] Paivita `docs/PROJECT_STATE.md` viittaamaan uuteen rakenteeseen
-
-**Valmis kun:** Ei paallekkaisia/vanhentuneita dokumentteja. Yksi selkea polku: CLAUDE.md → FEATURES_TODO → feature-speksit.
-
----
-
-### Vaiheen 0 yhteenveto
-
-| # | Tehtava | Prioriteetti | Tyomaara | Riippuvuudet |
-|---|---------|-------------|----------|-------------|
-| T-001 | CI pipeline ✅ | Kriittinen | 1-2h | — |
-| T-002 | Hosted API hajotus ✅ | Kriittinen | 2-3h | — |
-| T-003 | useAppStore hajotus ✅ | Kriittinen | 2-3h | — |
-| T-004 | API-duplikaation poisto ✅ | Korkea | 3-4h | T-002 |
-| T-005 | Testikattavuus ✅ | Korkea | 3-4h | T-001 |
-| T-006 | Web-komponenttien siivous ✅ | Keskitaso | 2-3h | T-003 |
-| T-007 | Dexie-indeksit ✅ | Keskitaso | 1h | — |
-| T-008 | Repo-siivous ✅ | Keskitaso | 30min | — |
-
-**Suositeltu jarjestys:** T-001 → T-008 → T-002 → T-003 → T-004 → T-005 → T-007 → T-006
+| Feature | Kuvaus |
+|---------|--------|
+| T-001..T-008 | Tekninen velka: CI, API-monolith, store-hajotus, duplikaation poisto, testikattavuus, komponenttisiivous, Dexie-indeksit, repo-siivous |
+| Feature 01 | Core Domain + Monorepo |
+| Feature 02 | Append-Only Ledger |
+| Feature 03 | Coinbase Import (API + CSV) |
+| Feature 04 | Portfolio + Lot Engine (FIFO/LIFO/HIFO/AVG) |
+| Feature 05 | Tax Engine (realized disposals, income events) |
+| Feature 06 | Vault + Encryption (WebCrypto zero-knowledge) |
+| Feature 07 | Login + E2E Sync (register/login, encrypted envelopes) |
+| Feature 08 | Web PWA (React + Vite, Tailwind, Zustand, React Router) |
+| Feature 09 | Asset Catalog + CoinGecko Mapping |
+| Feature 10 | Alerts + Web Push (CRUD, server eval, VAPID) |
+| Feature 11 | Hosted MVP (Cloudflare Pages + Neon Postgres) |
+| Feature 12 | Auth/Vault UX Redesign (Welcome, Signup, Signin, VaultSetup, Unlock) |
+| Feature 13 | Imports Plugin Registry + Binance + Kraken (API + CSV) |
+| Feature 14 | Billing + Feature Gating (infra, Free/Pro plan, GateWall — ei Stripea vielä) |
+| Feature 21 | AI-kehitysympäristö + workflow (CLAUDE.md, skillit, konventiot) |
+| Feature 22 | UI/UX Redesign + Design System (shadcn/ui, tokens, i18n EN+FI) |
+| Feature 23 | Premium UI (Framer Motion, Geist, animated KPI) |
+| Feature 24 | Settings + Tax Profile (maa, lot method, HMO) |
+| Feature 25 | Finnish Tax Parity (HMO-laskuri, transfer detection, OmaVero guide) |
+| Feature 26 | Dashboard + UX Polish (sync status, bannerit, P&L%, alert badge) |
+| Feature 27 | Domain + Landing Page (private-ledger.app, SEO, blogi) |
 
 ---
 ---
 
-## TOTEUTETUT
+## TOTEUTUSJONOSSA
 
-### Feature 01: Core Domain + Monorepo ✅
-**Status:** ✅ TOTEUTETTU
-**ADR:** ADR-001
-**Paketti:** `packages/core`
-
-- [x] pnpm monorepo (apps/*, packages/*)
-- [x] Zod-skeemat: Asset, Account, LedgerEvent, Price, Portfolio, Tax, Alert, Settings
-- [x] UUID + Decimal.js + date-fns -apukirjastot
-- [x] TypeScript strict mode, ES2022
-- [x] Build pipeline (core → platform-web → apps)
+> **Järjestys:** Vaihe 0 → Vaihe 1 → Vaihe 2 (toiminimi, hallinnollinen) → Vaihe 3 (launch) → Vaihe 4 (kasvu)
 
 ---
 
-### Feature 02: Append-Only Ledger ✅
-**Status:** ✅ TOTEUTETTU
-**ADR:** ADR-002
-**Paketti:** `packages/core`
+## VAIHE 0 — Beta-valmius
 
-- [x] LedgerEvent-skeemat (BUY, SELL, SWAP, TRANSFER, REWARD, STAKING_REWARD, AIRDROP, LP/LEND/BORROW)
-- [x] Replacement-malli (`replacesEventId`)
-- [x] Tombstone-poistot
-- [x] Swap-normalisointi (ADR-004)
-- [x] Deterministiset kulut (ADR-005)
+*Tavoite: tuote toimii luotettavasti, globaalisti saavutettavissa, riittävä pörssikattavuus*
 
 ---
 
-### Feature 03: Coinbase Import ✅
-**Status:** ✅ TOTEUTETTU (bugi KP-IMPORT-001)
-**ADR:** ADR-012
-**Paketti:** `packages/core` + `apps/web`
-**Speksi:** [docs/integrations/coinbase.md](../integrations/coinbase.md)
+### TASK: KP-TEST-001 korjaus ✅
+**Työmäärä:** 15 min
 
-- [x] Coinbase CDP Secret API Key (ES256) -autentikointi
-- [x] Import stepper: connect → fetch → preview → resolve issues → commit
-- [x] Issue resolution UI (FX / fee value / swap valuation / reward FMV)
-- [x] Autosync UI (status, cursor, "Run now")
-- [x] Deduplikointi (externalRef)
-
-**Avoimet bugit:** ~~KP-IMPORT-001~~ ✅ korjattu
+- [x] `settings-tax-profile.spec.ts` — vaihda testi klikkaamaan Finland tai Other (Sweden on `comingSoon: true` → disabled nappi)
 
 ---
 
-### Feature 04: Portfolio + Lot Engine ✅
-**Status:** ✅ TOTEUTETTU
-**ADR:** ADR-003, ADR-008
-**Paketti:** `packages/core`
+### TASK: Beta-banneri ✅
+**Työmäärä:** 1h
 
-- [x] Lot engine: FIFO (default), LIFO, HIFO, AVG_COST
-- [x] Veroprofiilit (lot method per tax year)
-- [x] Portfolio snapshots: streaming rebuild
-- [x] Incremental replace (earliest changed day)
-- [x] Dashboard + Portfolio -sivut
+- [x] AppShell: kiinteä infobanneri ylhäällä — "PrivateLedger is currently in beta. Features and data formats may change."
+- [x] `apps/landing/`: sama banneri headerin alle
+- [ ] Poistetaan Feature 42:ssa (launch)
 
 ---
 
-### Feature 05: Tax Engine ✅
-**Status:** ✅ TOTEUTETTU
-**ADR:** ADR-013
-**Paketti:** `packages/core` + `apps/web`
+### Feature 31: Multi-device Vault ⬜
+**Prioriteetti:** Kriittinen — koko tuotteen suurin UX-ongelma
+**Speksi:** Luo `docs/features/31_multi-device-vault.md`
 
-- [x] Realized disposals per tax year
-- [x] Income events (rewards, staking, airdrops)
-- [x] Year-end holdings summary
-- [x] Tax report -sivu
+**Ongelma:** Uudella laitteella vault passphrase pitää syöttää uudelleen. Suurin osa käyttäjistä ei muista sitä → dead end.
 
-**Avoimet bugit:** KP-TAX-001 (maakohtaisuus + FI hankintameno-olettama puuttuu)
+**Ratkaisu (zero-knowledge säilyy):**
+- Vault passphrase salataan PBKDF2-avaimella (johdettu login-salasanasta + per-user salt)
+- Salattu blob tallennetaan palvelimelle (`users.vault_key_blob`)
+- Uudella laitteella: kirjaudu sisään → blob haetaan → dekryptaus login-salasanalla → vault auki automaattisesti
+- Palvelin ei koskaan näe passphrasea selkotekstinä ✓
 
----
-
-### Feature 06: Vault + Encryption ✅
-**Status:** ✅ TOTEUTETTU (bugeja)
-**ADR:** ADR-011
-**Paketti:** `packages/platform-web`
-
-- [x] WebCrypto vault (zero-knowledge)
-- [x] Vault setup + lock/unlock
-- [x] Dexie IndexedDB -skeema
-- [x] Onboarding flow
-
-**Avoimet bugit:** ~~KP-UI-001~~ ✅ korjattu
+- [ ] DB-migraatio: `users.vault_key_blob TEXT`, `users.vault_key_salt TEXT`
+- [ ] `PUT /v1/vault/key` — tallenna salattu blob (auth required) — Hono + Fastify
+- [ ] `GET /v1/vault/key` — hae blob (auth required) — Hono + Fastify
+- [ ] `packages/platform-web`: `encryptVaultKeyBlob(passphrase, loginPassword)` + `decryptVaultKeyBlob(blob, loginPassword)` WebCrytolla
+- [ ] VaultSetupPage: tallenna blob palvelimelle automaattisesti setup-vaiheessa
+- [ ] SigninPage: hae blob → dekryptaa → avaa vault → /home (ei passphrase-promptia)
+- [ ] Fallback: jos blob puuttuu (vanhat käyttäjät) → passphrase-syöttö + blob luodaan ja tallennetaan kerralla
+- [ ] Passphrase ei näy käyttäjälle normaalisti — vain Settings → Advanced → "Show recovery passphrase"
+- [ ] Unit-testit: encryptVaultKeyBlob + decryptVaultKeyBlob + wrong password → throw
+- [ ] E2E-testi: uusi laite kirjautuu → vault auki ilman passphrase-syöttöä
 
 ---
 
-### Feature 07: Login + E2E Sync ✅
-**Status:** ✅ TOTEUTETTU
-**ADR:** ADR-011
-**Paketti:** `packages/platform-web` + `apps/api`
+### Feature 32: Onboarding Simplification ⬜
+**Prioriteetti:** Kriittinen — ensivaikutelma
+**Edellyttää:** Feature 31
 
-- [x] Register / Login (email + password)
-- [x] Device registration
-- [x] E2E encrypted sync envelopes (upload + pull)
-- [x] Serveri tallentaa vain ciphertext-kirjekuoria
-
----
-
-### Feature 08: Web PWA (UI) ✅
-**Status:** ✅ TOTEUTETTU
-**Paketti:** `apps/web`
-
-- [x] React + Vite PWA (Workbox service worker)
-- [x] Tailwind + Zustand + React Router
-- [x] Dashboard (portfolio overview)
-- [x] Portfolio (holdings)
-- [x] Transactions (virtualized list + detail drawer + tombstone delete)
-- [x] Settings-sivu
-- [x] Accounts-sivu
+- [ ] SignupWithVaultPage: 2 steppiä max (email + salasana → maa) — vault ja blob generoituvat taustalla hiljaa
+- [ ] Passphrase-käsitettä ei näytetä onboardingissa lainkaan
+- [ ] VaultSetupPage jää vain "recovery" -polkuun (`/vault/setup?recovery=1`), ei normaali flow
+- [ ] Dashboard: "Connect your first exchange" -hero isosti kun ei yhtään importtia (ei pieni banneri)
+- [ ] E2E-testi: päivitetty uuteen flowhin
 
 ---
 
-### Feature 09: Asset Catalog + CoinGecko Mapping ✅
-**Status:** ✅ TOTEUTETTU
-**ADR:** ADR-006, ADR-007
-**Paketti:** `packages/core` + `apps/web`
+### Feature 33: Multi-currency (USD / EUR / GBP) ⬜
+**Prioriteetti:** Kriittinen kansainväliselle käyttäjälle
 
-- [x] Asset catalog (`assetCatalog.ts`)
-- [x] CoinGecko ID search + manuaalinen linkitys
-- [x] "Unmapped assets" -jono
-- [x] Price provider cache (ADR-007)
-
-**Avoimet bugit:** KP-UI-002 (auto-refresh settings key), KP-DATA-001 (liikaa manuaalityota)
+- [ ] `settings.displayCurrency` kenttä Settings-skeemaan (USD, EUR, GBP, SEK — laajennettavissa)
+- [ ] Valuuttavalitsin Settings:iin
+- [ ] CoinGecko-pyynnöt: `vs_currency` parametri muuttuu valuutan mukaan
+- [ ] Dashboard, Portfolio, Tax: kaikki rahasummat valitussa valuutassa
+- [ ] Valuutan vaihto päivittää näkymät reaaliaikaisesti (Zustand reactive)
+- [ ] Unit-testit: currency display + store
 
 ---
 
-### Feature 10: Alerts + Web Push ✅
-**Status:** ✅ TOTEUTETTU (bugeja)
-**ADR:** ADR-010, ADR-017
-**Paketti:** `packages/core` + `apps/web` + `apps/api` + `apps/runner`
+### Feature 34: International Mode ⬜
+**Prioriteetti:** Korkea — avaa globaalin markkinan
 
-- [x] Alert CRUD UI
-- [x] Server alert eval (`serverAlertEval.ts`)
-- [x] Mirror state push + trigger log
-- [x] Web push subscribe/unsubscribe
-- [x] Cloudflare Worker runner (cron 15 min)
-- [x] VAPID-avaimet + push-lahetys
-
-**Avoimet bugit:** ~~KP-ALERT-001~~ ✅ korjattu, KP-ALERT-002 (push ei toimi tuotannossa)
+- [ ] `taxCountry === 'FI'` → kaikki tax-ominaisuudet kuten aiemmin
+- [ ] `taxCountry !== 'FI'` → Tax-sivu: "Finnish tax calculation included. Your country coming soon." — ei blur-gateä, ei Pro-myyntiä
+- [ ] Pro-tilauksia myydään toistaiseksi vain FI-käyttäjille
+- [ ] Landing page: "Available worldwide for portfolio tracking. Finnish tax reports included."
+- [ ] Settings: maa-valinta selittää mitä ominaisuuksia maa saa
 
 ---
 
-### Feature 11: Hosted MVP (Cloudflare + Neon) ✅
-**Status:** ✅ TOTEUTETTU
-**Paketti:** `functions/` + `apps/runner`
-**Runbook:** [hosted/PHASE5](../hosted/PHASE5_HOSTED_STAGING_RUNBOOK.md), [hosted/PHASE6](../hosted/PHASE6_ALERTS_PUSH_RUNBOOK.md)
+### Feature 29: Alert Delivery Diagnostics ⬜
+**Prioriteetti:** P1 — ratkaisee KP-ALERT-002
 
-- [x] Cloudflare Pages Functions (Hono)
-- [x] Neon Postgres (serverless)
-- [x] Skeema: `functions/_lib/db.ts` (`HOSTED_SCHEMA_SQL`)
-- [x] Migraatiot: `scripts/migrations/`
-- [x] Auth, sync, alerts, coingecko, imports, push -endpointit
-- [x] CI: GitHub Actions (unit + build + e2e)
-
----
----
-
-## VAIHE 1: P0-bugien korjaus
-
-Korjataan FEATURES_TODO Vaiheen 0 jalkeen (tai rinnakkain T-tehtavien kanssa jos bugi estaa kehitysta).
-Ks. [ISSUE_LOG.md](../ISSUE_LOG.md) tarkemmat kuvaukset.
-
-- [x] **KP-UI-001:** Vault passphrase session bug ✅ (korjattu T-003 store-hajotuksessa, e2e-testi lisätty)
-- [x] **KP-UI-002:** Price auto-refresh settings key (`settings` vs `settings_1`) ✅
-- [x] **KP-ALERT-001:** Server alerts enable/replace semantics ✅
-- [x] **KP-IMPORT-001:** Coinbase JSON key flow ✅
-
----
----
-
-## SUUNNITTEILLA (ADR olemassa)
-
-### Feature 12: Auth/Vault UX Redesign ✅
-**Status:** ✅ VALMIS (2026-03-18)
-**ADR:** ADR-018
-**Speksi:** [12_auth-vault-ux.md](12_auth-vault-ux.md)
-**Edellyttaa:** Vaihe 0 (T-003 ✅) + P0-bugi KP-UI-001 ✅
-
-**Tavoite:** Passkey/WebAuthn + yksi Vault Passphrase per kayttaja (multi-device)
-
-- [x] Route-uudistus: Welcome, Signup, Signin, Vault Setup Wizard, Vault Unlock
-- [x] Vault Setup Wizard (passphrase + passkey step + done)
-- [x] Vault Unlock redesign (passkey primary, passphrase fallback)
-- [x] Account-sivu: passkeys, change password, change vault passphrase
-- [x] Offline-only -polku (kaytto ilman tilia)
-- [x] PUT /v1/auth/password -endpoint (Fastify + Hono)
-- [x] Backward compat: /onboarding → /welcome, /unlock → /vault/unlock
-- [x] E2E-testit paivitetty uuteen flowiin
-- [x] Erilliset E2E-testit: auth-signup-flow, auth-signin-flow, auth-offline-flow, account-change-password
-- [ ] Multi-device e2e -testaus (manuaalinen — ei automatisoitavissa)
-- [x] **/welcome-sivu pelkistys:** USP-kortit poistettu, pelkkä logo + "Luo tili / Kirjaudu / Offline" (ks. KP-UX-003)
-
-**Ratkaisee:** KP-UX-001, KP-UX-003
+- [ ] AlertsPage: diagnostiikkaosio — VAPID asetettu? Push subscription aktiivinen? Server rules count?
+- [ ] "Send test notification" -nappi
+- [ ] `POST /v1/push/test` endpoint (Hono + Fastify): lähettää testiviesti tilatulle subscriptiolle
+- [ ] Selkeät virheilmoitukset puuttuvista edellytyksistä (ei VAPID, ei subscription, vaatii HTTPS)
+- [ ] Jos tuotannossa ei saada toimimaan → feature piilotetaan beta-bannerilla
+- [ ] Unit-testi: push/test endpoint
+- [ ] E2E-testi: diagnostiikkaosio näkyy
 
 ---
 
-### Feature 13: Imports Plugin Registry ✅
-**Status:** ✅ VALMIS (Vaihe 1 toteutettu 2026-03-16)
-**ADR:** ADR-019
-**Speksi:** [13_imports-registry.md](13_imports-registry.md)
-**Playbook:** [EXCHANGE_INTEGRATION_PLAYBOOK.md](../EXCHANGE_INTEGRATION_PLAYBOOK.md)
-**Edellyttaa:** Vaihe 0 (T-002 ✅, T-004 ✅), Feature 22+23 ✅
+### Feature 35: Exchange Coverage — Beta-kattaus ⬜
+**Prioriteetti:** Kriittinen — ilman riittävää kattavuutta palvelu ei kiinnosta
 
-**Tavoite:** Provider registry -arkkitehtuuri + wizard-UI. Skaalautuu uusille integraatioille.
+Lisättävät mapperit `packages/core/src/import/` + UI + backend:
 
-**Vaihe 1 (MVP — toteutettu 2026-03-16):**
-- [x] `ProviderDescriptor` / `ImportPlugin` -tyypit (`@kp/core` + `apps/web`)
-- [x] `providerRegistry.ts` + coming-soon -placeholderit
-- [x] Provider grid UI (`ProviderGrid`, `ProviderCard`, `ImportWizard`)
-- [x] Coinbase: migrointi registryyn (`coinbasePlugin.ts`)
-- [x] `ImportsPage.tsx` refaktorointi (1007r → ~25r)
-- [x] Unit-testit: providerRegistry.test.ts + coinbasePlugin.test.ts (8 testia)
-- [x] E2E-testi: imports-provider-grid.spec.ts (provider grid + coming-soon kortit)
+| Provider | Tyyppi | Huomio |
+|----------|--------|--------|
+| Northcrypto | CSV | FIN-FSA säännelty, Suomen #1 |
+| Coinmotion | CSV | Suomi |
+| Bybit | CSV (API vaihe 4:ssä) | EU:n kasvava #2 Binancen jälkeen |
+| OKX | CSV | Globaali top-5 |
+| Ledger Live | CSV export | Suosituin hardware wallet |
 
-**Vaihe 2 (myöhemmin):**
-- [ ] Binance-provider (HMAC API)
-- [ ] MEXC-provider (HMAC API)
-
-**Vaihe 3 (backlog):**
-- [ ] Bitvavo-provider
-- [ ] Ledger-provider (CSV)
-- [ ] MetaMask-provider (osoitetuonti)
-
-**Ratkaisee:** KP-UI-003
+- [ ] Northcrypto: CSV mapper (`northcryptoLedger.ts`) + asset map + UI + testit (min. 10 testiä)
+- [ ] Coinmotion: CSV mapper (`coinmotionLedger.ts`) + asset map + UI + testit
+- [ ] Bybit: CSV mapper (`bybitStatement.ts`) + asset map + UI + testit
+- [ ] OKX: CSV mapper (`okxStatement.ts`) + asset map + UI + testit
+- [ ] Ledger Live: CSV mapper (`ledgerLive.ts`) + UI + testit
+- [ ] providerRegistry.ts: coming-soon → active per provider
+- [ ] E2E: fixture-pohjainen per provider
 
 ---
 
-### Feature 14: Billing + Feature Gating ✅
-**Status:** ✅ VALMIS (2026-03-16)
-**ADR:** ADR-020
-**Speksi:** [14_billing-feature-gating.md](14_billing-feature-gating.md)
-**Edellyttää:** Feature 13 (Imports Registry)
+### Feature 36: Wallet-osoite Import ⬜
+**Prioriteetti:** Korkea — Web3-segmentti, avaa ison käyttäjäryhmän
 
-**Tavoite:** Freemium-maksumuuri — vain verolaskenta + veroraportit (PDF/CSV) ovat premium. Kaikki muu free.
-
-**Vaihe 1 (MVP — tämä feature):**
-- [x] `Plan`-tyyppi + `isFeatureAllowed` (`packages/core/src/billing/planTypes.ts`)
-- [x] DB-migraatio: `users.plan` + `users.plan_expires_at` (Neon)
-- [x] JWT: plan claim loginiin + refreshiin
-- [x] `GET /v1/billing/plan` + `POST /v1/billing/activate` endpointit (Hono + Fastify)
-- [x] `planCache` Dexieen (platform-web, v4)
-- [x] `useAuthStore`: plan-kenttä + `fetchPlan()` action
-- [x] `useFeatureGate(feature)` hook (yksi paikka kaikille tarkistuksille)
-- [x] `UpgradeModal` + `GateWall` komponentit
-- [x] `TaxPage` gating: täysi raportti + export premium
-- [x] `AccountPage`: billing-osio (nykyinen plan + upgrade-linkki)
-- [x] Unit-testit: `planTypes.test.ts` (9 testiä) + `billing.test.tsx` (8 testiä)
-
-**Vaihe 2 (myöhemmin, erillinen feature):**
-- [ ] Stripe Checkout session + webhook
-- [ ] Subscription management
-
----
----
-
-## SEURAAVA VAIHE: UI/UX Remontti
-
-### Feature 23: Premium UI — shadcn/ui + Framer Motion ✅
-**Status:** ✅ VALMIS (2026-03-16)
-**Prioriteetti:** Kriittinen — toteutettu Feature 22 jälkeen
-**Speksi:** `docs/features/23_ui_premium.md`
-
-**Tavoite:** Premium-tason UI-kokemus: shadcn/ui-komponentit, Framer Motion -animaatiot, Geist-fontti.
-
-**Toteutettu:**
-- [x] shadcn/ui: Card, Button, Input, Select, Dialog, Sheet, Table, Tabs, Badge, Tooltip, DropdownMenu jne.
-- [x] Framer Motion: stagger entrance, fadeInUp, animated KPI counters (useSpring/useTransform)
-- [x] Geist-fontti, JetBrains Mono, Obsidian dark theme (shadcn CSS variables)
-- [x] Dashboard: animated KPI cards + unit suffix, AllocationBars, ValueChart, stagger entrance
-- [x] Kaikki sivut päivitetty: Transactions, Tax, Alerts, Import, Settings, Auth
-- [x] AppShell: poistettu AnimatePresence/motion.main (E2E stability fix)
-- [x] KpiCard: animated number counter + currency unit prop
-
-**Bugifixit:**
-- [x] passphraseGenerator deduplicate while-loop (oli yksi retry — saattoi kuitenkin törmätä jo valittuun)
-- [x] AppShell y-transform poisto (Playwright E2E stability)
-- [x] KpiCard currency unit (E2E test currency suffix)
-
-**Testitulos:** Unit 155/155 ✅, E2E 17/17 ✅, CI kaikki 5 jobbia vihreä
-**Release:** Deployttu Cloudflare Pages → `kryptoportfolio.pages.dev` 2026-03-16
+- [ ] Ethereum-osoite (julkinen): `GET /v1/wallet/ethereum/:address` → Etherscan API → LedgerEvent-mappausta
+- [ ] ERC-20 token-siirrot mukaan (USDT, USDC, yleisimmät)
+- [ ] Bitcoin-osoite: Blockstream API → LedgerEvent-mappausta
+- [ ] UI: WalletAddressForm (osoite-input + tarkistussumman validointi + import preview)
+- [ ] ProviderCard: "Ethereum Wallet" + "Bitcoin Wallet" registryyn
+- [ ] API-avain tallennetaan env:iin (ei käyttäjän vault — julkisia API:ja)
+- [ ] Unit-testit: osoitevalidointi + tx-mappausta
+- [ ] E2E: fixture-pohjainen
 
 ---
 
-### Feature 22: UI/UX Redesign + Design System ✅
-**Status:** ✅ VALMIS (2026-03-15)
-**Prioriteetti:** Kriittinen — tehdaan ENNEN Feature 13 (Imports) ja Feature 14 (Billing)
-**Edellyttaa:** Feature 12 valmis, PRODUCT_VISION.md
+### Feature 37: Import FetchPanel → Drawer ⬜
+**Prioriteetti:** P2 UX — siirretty Feature 26 backlogista
 
-**Tavoite:** Tuote naytetaan ja tuntuu luotettavalta, ammattimaiselta ja helppokayttoiselta.
-
-**Toteutettu:**
-- [x] Design system: CSS-tokenit, Tailwind config, 14 UI-komponenttia (Button, Card, Input, Select, Badge, Spinner, Modal, Drawer, Tabs, Tooltip, EmptyState, TokenIcon, KpiCard, Logo)
-- [x] Token-ikonit (CoinGecko iconUrl + letter avatar fallback)
-- [x] Navigaatio: Sidebar (desktop) + BottomTabBar (mobiili), 5 päänäkymää, backward-compat redirectit
-- [x] Welcome-sivu: PrivateLedger branding, USP-kortit, CTA-painikkeet
-- [x] Dashboard redesign: KPI-kortit, allokaatiodonitsi, arvokaavio, top positions
-- [x] Kaikki sivut migrated design system -tokeneihin
-- [x] Mobile-first: 44px touch targets, swipe-to-close drawer, safe area, standalone PWA
-- [x] Branding: Logo (SVG), favicon, PWA manifest, "Obsidian" dark theme
-- [x] i18n: react-i18next, EN+FI (~320 käännösavainta), kielivalitsin
-
-**Testit:**
-- Unit: 50 testiä (44 UI-komponenttia + 6 i18n locale-validointia)
-- E2E: 7 testiä (welcome page, navigation, redirectit, language switch, mobile viewport)
-
-**Huom:** i18n-avaimet on kytketty pääsivuille. Muutamilla sekundäärisivuilla (Imports, Alerts, Assets, Account, Transactions) on vain otsikot käännetty — yksityiskohtaiset käännökset voidaan lisätä jatkokehityksessä.
-
----
----
-
-## SUUNNITELTU 2026 — Tuoteparannukset
-
-> **Täydellinen suunnitelma:** [`docs/PRODUCT_ROADMAP_2026.md`](../PRODUCT_ROADMAP_2026.md)
-> Laadittu kaupallinen + UX-arviointisessiossa 2026-03-17.
-
-### Feature 24: Settings-sivu siivous + Tax Profile ✅
-**Status:** ✅ VALMIS (2026-03-17)
-**Speksi:** [24_settings-tax-profile.md](24_settings-tax-profile.md)
-**Edellyttää:** Feature 13 ✅, Feature 14 ✅, Feature 22/23 ✅
-- [x] Settings-sivu uudelleenorganisointi (Account / Tax Profile / Notifications / Integrations / Danger Zone)
-- [x] Tax Profile -osio: maa, base currency, lot method, HMO default
-- [x] `taxCountry` + `hmoEnabled` Settings-skeemaan
-- [x] Maa-valinta onboardingiin (VaultSetupWizard)
-
-### Feature 25: Finnish Tax Parity ✅
-**Speksi:** [25_finnish-tax-parity.md](25_finnish-tax-parity.md)
-**Prioriteetti:** P1 — kriittinen kilpailupariteetti
-- [x] **Vaihe 1:** HMO-laskuri (20%/40%, automaattinen omistusaikalaskenta)
-- [x] **Vaihe 1:** Blur-gate verolaskennan tuloksille (Free-käyttäjille)
-- [x] **Vaihe 1:** OmaVero copy-paste -opas (Pro-gated)
-- [x] **Vaihe 1:** Tax issue -filter TransactionsPage:lla
-- [x] **Vaihe 2:** Lompakkokohtainen FIFO (Verohallinnon ohje)
-- [x] **Vaihe 2:** Transfer detection + review UI (omat siirrot pörssien välillä)
-
-### Feature 26: Dashboard + UX Polish ✅
-**Speksi:** [26_dashboard-ux-polish.md](26_dashboard-ux-polish.md)
-**Vaihe 1 — Core UX:**
-- [x] Sidebar: passiivinen vault sync -status (poistettu Sync-nappi, retry vain virheessä)
-- [x] Setup progress -banneri (häviää 1. importin jälkeen)
-- [x] Get Started -widget (tyhjä tila, kun positions.length === 0)
-- [x] Import success -banneri (joka importin jälkeen, auto-dismiss 8s)
-**Vaihe 2 — Dashboard data:**
-- [x] ValueChart aikajännevalitsin (7D/30D/90D/1Y/ALL) + period delta
-- [x] 24h muutos % per positio (lasketaan pricePoints-taulusta)
-- [x] Unrealized P&L % per positio (portfolio-sivu) + uudet sortit
-**Vaihe 3 — Onboarding:**
-- [x] Signup + vault yhdelle sivulle (SignupWithVaultPage)
-- [x] VaultSetupPage: passkey-step poistettu normaalista flowsta (3 steppiä)
-- [ ] Passkey deferred dashboardin banneriin (lykätty — ei kriittinen)
-**Vaihe 4 — Alert badge:**
-- [x] Alert-skeema: triggeredAtISO + acknowledgedAtISO
-- [x] Alert badge sidebarin nav-itemissä
-- [x] AlertsPage: acknowledge kaikki kun sivu avataan
-**Vaihe 5 — Import UX (backlog):**
-- [ ] **Import FetchPanel → Drawer:** ConnectFormsit + FetchPanellit avataan Sheet/Drawer-komponentissa inlinen sijaan. Tällä hetkellä FetchPanel renderöityy koko levyisenä osiona gridin alla → sivu kasvaa luvattomasti kun useampi pörssi yhdistetty (ks. KP-UX-002).
-
-### Feature 27: Domain + Landing Page + Markkinointi ✅
-**Speksi:** [27_domain-landing-page.md](27_domain-landing-page.md)
-**Vaihe 1 — Landing page + domain:**
-- [x] `apps/landing/` — Vite + React + Tailwind, erillinen Cloudflare Pages -projekti
-- [ ] Domain: `private-ledger.app` → landing, `app.private-ledger.app` → nykyinen PWA (DNS manuaalinen)
-- [x] Hero + ZK-selitys + animoitu dashboard-mockup (Framer Motion) + pricing
-- [x] Meta-tagit, OG-image, sitemap.xml, robots.txt
-- [x] **Korjaukset 2026-03-18:** i18n (EN+FI, selaimen kielen autodetektio), kielivalitsin naviin, poistettu GitHub-linkki + "Open source" badge, korjattu "1 exchange" → kaikki ilmaiseksi, "HMO-laskuri" → englanti, SE+DE maa-valinta disabled "Coming soon"
-**Vaihe 2 — SEO-artikkeli:**
-- [x] `/blog/krypto-verotus-suomi-2026` (FI, Article structured data)
-**Vaihe 3 — Launch:**
-- [x] Show HN -postauksen draft + launch checklist
-**Huom:** DNS-konfiguraatio + Cloudflare Pages -projektin luonti tehdään manuaalisesti (ks. `docs/launch/launch-checklist.md`)
-
-### Feature 28: AI Transaction Classification ❌
-**Speksi:** PRODUCT_ROADMAP_2026.md § 3
-- [ ] Transaktion tyyppiluokittelu epäselvistä kuvauksista (Claude API, client-side)
-- [ ] ZK-yhteensopiva: data ei kulje PrivateLedgern palvelimen kautta
-- [ ] Käyttäjän opt-in ennen AI-kutsua
-
-### Feature 13 Vaihe 2: Binance + Kraken ✅
-**Speksi:** [13v2_imports-phase2.md](13v2_imports-phase2.md)
-**Vaihe 2B (erillinen speksi):** Northcrypto CSV + Coinmotion CSV
-**Vaihe 3 (erillinen speksi):** MetaMask (korkea prioriteetti)
-- [x] A: ImportPlugin capability-redesign (api + csv) + Coinbase-migraatio
-- [x] B: Binance plugin (HMAC API + Statement CSV mapper + UI + backend proxy)
-- [x] C: Kraken plugin (HMAC API + Ledger mapper + UI + backend proxy)
-- [x] D: Coming-soon lista päivitetty (Northcrypto, Coinmotion, Bybit, MetaMask, Bitstamp jne.)
-- [x] Unit testit: binanceStatement (12), binanceTrades (12), krakenLedger (15) — kaikki läpi
+- [ ] ConnectForm + FetchPanel renderöidään Sheet/Drawer-komponentissa inlinen sijaan
+- [ ] ProviderCard: klikkaus avaa Drawerin
+- [ ] Sivu ei kasva kun useampi pörssi yhdistetty
+- [ ] Drawer sulkeutuu onnistuneen importin jälkeen (success state)
 
 ---
 
-### Feature 29: Alert Delivery Diagnostics ❌
-**Status:** ❌ EI ALOITETTU
-**Prioriteetti:** P1
-**Ratkaisee:** KP-ALERT-002
+## VAIHE 1 — Tuote kuntoon
 
-**Tavoite:** Diagnosoida ja korjata push-ilmoitusten toimimattomuus tuotannossa. Lisätä diagnostiikka-UI ja "Test notification" -nappi.
-
-- [ ] Diagnostiikka-osio AlertsPage:lle: VAPID-avain asetettu? Subscription aktiivinen? Server rules count?
-- [ ] "Send test notification" -nappi (kutsuu POST /v1/push/test)
-- [ ] POST /v1/push/test -endpoint (Hono + Fastify): lähettää testiviesti tilatulle subscriptiolle
-- [ ] Selkeät virheilmoitukset puuttuvista edellytyksistä (ei VAPID, ei subscription, HTTPS vaaditaan)
-- [ ] Unit-testi: push/test-endpoint
-- [ ] E2E-testi: diagnostiikkaosio näkyy kun alerts-sivu avataan
+*Tavoite: tax export toimii, UX on CoinStats-tasoa, landing page kansainvälinen*
 
 ---
 
-### Feature 30: Asset Mapping Auto-suggest ❌
-**Status:** ❌ EI ALOITETTU
-**Prioriteetti:** P1
-**Ratkaisee:** KP-DATA-001
+### Feature 38: Tax Export CSV + PDF ⬜
+**Prioriteetti:** Kriittinen — tämä on se mitä Pro-käyttäjä ostaa
+**FI only**
 
-**Tavoite:** Vähentää manuaalityötä asset mappingissa. CoinGecko symbol search → automaattinen ehdotus kun uusi tuntematon symboli havaitaan.
+- [ ] CSV: Verohallinnon formaatti — päivä, tyyppi, asset, määrä, hankintahinta €, myyntihinta €, voitto/tappio €
+- [ ] PDF: react-pdf (ei print-window) — PrivateLedger branding, verovuosi, yhteenveto + taulukkko
+- [ ] Filename: `privateledger-veroraportti-2025.csv` / `.pdf`
+- [ ] Download-napit TaxPage:lla (Pro-gated, UpgradeModal → Checkout)
+- [ ] Unit-testit: CSV-formaatin kenttien validointi + edge caset (ei myyntejä, vain tuloja)
 
-- [ ] CoinGecko `/search` -endpoint proxyn kautta (Hono + Fastify)
-- [ ] UnmappedAssetsQueue: per-rivi "Suggested: BTC → bitcoin" + yhdellä klikkauksella hyväksy
-- [ ] Fuzzy match client-puolella (assetCatalog symbol → coingeckoId): ei API-kutsua jos löytyy suoraan
+---
+
+### Feature 30: Asset Mapping Auto-suggest ⬜
+**Prioriteetti:** P1 — ratkaisee KP-DATA-001
+
+- [ ] `GET /v1/coingecko/search?q=` proxy (Hono + Fastify)
+- [ ] UnmappedAssetsQueue: "Suggested: BTC → bitcoin" + hyväksy yhdellä klikkauksella
+- [ ] Fuzzy match client-puolella ensin (assetCatalog symbol) — ei API-kutsua jos löytyy suoraan
 - [ ] Manuaalinen override säilyy (haku + confirm)
-- [ ] Unit-testi: auto-suggest logiikka (@kp/core tai web)
+- [ ] Unit-testit: auto-suggest logiikka
 - [ ] E2E-testi: unmapped asset näyttää ehdotuksen
 
 ---
 
-## EI TOTEUTETTU (backlogissa)
+### Feature 39: Dashboard UX v2 ⬜
+**Prioriteetti:** Korkea — ensivaikutelma tuotteesta
+**Inspiraatio:** CoinStats UX
 
-### Feature 15: Dashboard Alert Popup ❌
-**Kuvaus:** Jokaiselle positiolle "⏰" ikoni → "Create alert" modal (price/allocation/P&L)
-
----
-
-### Feature 16: Pricing/FX Caching ❌
-**ADR:** ADR-007 (laajennus)
-**Kuvaus:** Smarter cache + backoff, parempi UX puuttuville valuaatioille. "Last price update" UI.
-
----
-
-### Feature 17: Strategy MVP ❌
-**ADR:** ADR-009
-**Kuvaus:** Target allocation, drift alert, rebalance suggestions (paper). Ei automaattisia tradeja.
+- [ ] Kokonaisarvo + 24h muutos iso ja etusijalla — nykyistä visuaalisesti vahvempi
+- [ ] Per-asset sparkline-kaaviot (7D) position-listassa (lightweight-charts tai recharts)
+- [ ] "Connect your first exchange" hero-widget koko leveyteen kun ei importtia
+- [ ] Portfolio allocation donut päivitetty (selkeämmät labelit)
+- [ ] Performance: liveQuery optimointi jos sparkline hidastaa
 
 ---
 
-### ~~Feature 18: Branding + Token Icons~~ → yhdistetty Feature 22:een
-**Kuvaus:** Sisaltyy nyt Feature 22: UI/UX Redesign -kokonaisuuteen.
+### Feature 40: Landing Page v2 ⬜
+**Prioriteetti:** Korkea — kansainvälinen positiointi
+
+- [ ] Headline: "Privacy-first crypto portfolio tracker" (ei FI-first)
+- [ ] Subheadline: "Works worldwide. Finnish tax reports included."
+- [ ] Exchange-logot hero-osiossa (kaikki 10 betaan tulevaa)
+- [ ] Kiinteä hinnoittelu näkyviin (ei "~29–49€")
+- [ ] Beta-banneri koordinoitu Feature 42:n kanssa (poistetaan launchia varten)
 
 ---
 
-### Feature 19: Native Parity (Expo) ❌
+## VAIHE 2 — Toiminimi (hallinnollinen)
+
+> **PRH.fi rekisteröinti, ~75€.** Tehdään kun Vaihe 0 + Vaihe 1 on valmis.
+> Vaihe 3 (Stripe) alkaa vasta kun Y-tunnus on saatu.
+
+---
+
+## VAIHE 3 — Launch
+
+---
+
+### Feature 41: Stripe Integration ⬜
+**Prioriteetti:** Kriittinen — ilman tätä ei tuloja
+**Edellyttää:** Toiminimi (Y-tunnus)
+
+- [ ] Stripe business-tili (Y-tunnus + FI pankkitili)
+- [ ] `POST /v1/billing/checkout` — luo Checkout Session, redirect Stripeen (Hono + Fastify)
+- [ ] `POST /v1/billing/portal` — Stripe Customer Portal (cancel, update, invoice)
+- [ ] Webhook `customer.subscription.created/updated/deleted` → päivittää `users.plan` + `plan_expires_at`
+- [ ] DB-migraatio: `users.stripe_customer_id TEXT`
+- [ ] Hinnoittelu: **2,99 €/kk tai 24,99 €/vuosi** (FI Pro — muut maat myöhemmin)
+- [ ] UpgradeModal: "Join waitlist" → oikea Stripe Checkout -linkki
+- [ ] AccountPage: nykyinen plan + voimassaoloaika + "Manage subscription" → Stripe Portal
+- [ ] Unit-testit: webhook handler (created/updated/deleted)
+- [ ] E2E-testi: upgrade flow Stripe test modessa
+
+---
+
+### Feature 42: Launch — Beta Off ⬜
+**Edellyttää:** Feature 41 valmis + toiminimi rekisteröity
+
+- [ ] Beta-banneri poistetaan (AppShell + landing page)
+- [ ] Landing page final: kiinteä hinnoittelu, ei beta-mainintaa, exchange-logot
+- [ ] OG-kuva (`apps/landing/public/og-image.png`, 1200×630px)
+- [ ] DNS tarkistus: `private-ledger.app` + `app.private-ledger.app`
+- [ ] Cloudflare Pages: landing-projekti tuotannossa
+- [ ] Smoke test tuotannossa ennen markkinointia
+- [ ] Show HN -postaus (`docs/launch/show-hn-post.md`)
+
+---
+
+## VAIHE 4 — Kasvu (post-launch)
+
+*Järjestys tarkentuu käyttäjäpalautteen perusteella*
+
+---
+
+### Feature 43: Multi-country Tax ⬜
+**Järjestys:** Ruotsi → Saksa → Hollanti (EU-first)
+
+- [ ] Tax engine: maakohtaiset säännöt (lot method default, verokannat, raporttirakenne)
+- [ ] Tax Profile: lisää maita Settings:iin (SE, DE, NL...)
+- [ ] Export: maakohtainen CSV-formaatti per maa
+- [ ] Pro myytäville maille avautuu
+
+---
+
+### Feature 44: Lisää Pörssejä ⬜
+Käyttäjäpalautteen mukaan priorisoituna:
+
+- [ ] Bitstamp (API)
+- [ ] Bitfinex (CSV)
+- [ ] Gate.io (CSV)
+- [ ] Bybit API (Feature 35:stä oli CSV — tässä vaiheessa API)
+- [ ] Solana-lompakko (Solana Beach / Helius API)
+
+---
+
+### Feature 28: AI Transaction Classification ⬜
+
+- [ ] Tuntemattomien / epäselvien transaktioiden luokittelu (Claude API, client-side kutsu)
+- [ ] ZK-yhteensopiva: data ei kulje PrivateLedger-palvelimen kautta
+- [ ] Käyttäjän opt-in ennen jokaista AI-kutsua
+- [ ] Ehdotus + käyttäjä hyväksyy/hylkää
+
+---
+
+### Feature 45: OmaVero XML Export ⬜
+
+- [ ] Verohallinnon virallinen XML-formaatti (ilmoittaminen.fi)
+- [ ] Suora lataus — ei copy-paste
+- [ ] Pro-gated (FI)
+
+---
+
+### Feature 19: Native iOS/Android ⬜ (backlog)
 **ADR:** ADR-014
-**Kuvaus:** Mobiilisovellus (React Native / Expo) samoilla core-paketeilla. Push + alerts + imports parity.
+**Edellyttää:** Web-versio vakaa ja kannattava
+
+- [ ] React Native / Expo — käyttää samoja @kp/core -paketteja
+- [ ] Push notifications natiivisti
+- [ ] Biometria vault-unlockiin
 
 ---
 
-### Feature 20: AI Insights + Trading Bot ❌
+### Feature 20: AI Insights ⬜ (backlog)
 **ADR:** ADR-015
-**Kuvaus:** "AI insights" (ei toimeksiantoja aluksi). "Auto-trading" vain erillisella opt-inilla + riskivaroitukset + audit log.
+
+- [ ] Portfolio-analyysi (ei automaattisia kauppoja)
+- [ ] "What-if" skenaariot verolaskentaan
+- [ ] Erillinen opt-in + audit log
 
 ---
----
 
-## META
+## Avoimet bugit
 
-### Feature 21: AI-kehitysymparisto + workflow ✅
-**Status:** ✅ TOTEUTETTU
-**Toteutettu:** 2026-03-14
-**Edellyttaa:** Vaihe 0 valmis (erityisesti T-001 CI, T-008 siivous)
-**Speksi:** [docs/features/21_ai-workflow.md](21_ai-workflow.md)
+| ID | Kuvaus | Prioriteetti | Linkitetty featureen |
+|----|--------|-------------|----------------------|
+| KP-ALERT-002 | Push-ilmoitukset eivät toimi tuotannossa | P1 | Feature 29 |
+| KP-DATA-001 | Asset mapping vaatii liikaa manuaalityötä | P1 | Feature 30 |
+| KP-TEST-001 | settings-tax-profile E2E klikkaa disabled Swedeä | P3 | TASK yllä |
+| KP-UX-002 | Import FetchPanel inline — ei skaalaudu | P2 | Feature 37 |
 
-**Tavoite:** Sovitaan miten projektia kehitetaan tasta eteenpäin AI:lla. Dokumentoidaan skillit, MCP:t, toimintatavat ja laatuvaatimukset.
-
-#### Skillit (Claude Code slash-komennot)
-- [x] `/spec-feature <nro>` — Luo feature-speksi (vaatimukset, tekninen suunnitelma, testaussuunnitelma)
-- [x] `/implement-feature <nro>` — Lataa valmis speksi, aloittaa toteutuksen
-- [x] `/fix-bugs` — Lataa ISSUE_LOG, priorisoi ja korjaa jarjestyksessa
-- [x] `/generate-feature-summary <speksi>` — Luo CHEAT_SHEET.md + TODO.md feature-speksista
-- [x] `/update-session` — Paivittaa SESSION_CONTEXT.md, FEATURES_TODO.md ja bugilistat
-
-#### MCP-integraatiot (arvioitu — ei tarvetta)
-- [x] Supabase MCP → ei relevantti (Neon Postgres, ei Supabase)
-- [x] Cloudflare MCP → ei tarvetta, `wrangler` CLI riittaa
-- [x] GitHub MCP → ei tarvetta, `gh` CLI riittaa
-- [x] CoinGecko API → ei tarvetta, testifixturet riittavat
-- [x] Arvio: MCP:t lisaavat monimutkaisuutta ilman merkittavaa hyotya
-
-#### CI/CD workflow
-- [x] PR-pipeline: lint → typecheck → test (coverage 30%) → build → e2e → audit → bundle size
-- [ ] Main merge: deploy staging → smoke test (toteutetaan deploy-featuren yhteydessa)
-- [ ] Release tag: deploy production (toteutetaan deploy-featuren yhteydessa)
-- [x] Coverage threshold: 30% (vitest config, CI failaa)
-
-#### Laatuvaatimukset (CLAUDE.md:ssa)
-- [x] "Jokainen feature vaatii testit ENNEN kuin merkitaan valmiiksi"
-- [x] "Yksikaan tiedosto ei saa ylittaa 300 rivia ilman perustelua"
-- [x] "Ei `as any` casteja kriittisilla poluilla"
-- [x] "Feature-speksi ENNEN koodia" (ei improvisoitua arkkitehtuuria)
-
-#### Kehityksen rytmi (dokumentoitu CLAUDE.md:ssa)
-- [x] Yksi feature tai yksi bugikorjaus per AI-sessio
-- [x] Session lopussa: `/update-session` + commit
-- [x] Session-tyoskentely -osio CLAUDE.md:ssa (aloitus + lopetus -tarkistuslistat)
-
----
 ---
 
 ## Yhteenveto
 
-| Kategoria | Maara |
-|-----------|-------|
-| Vaihe 0 (tekninen velka) | 8/8 ✅ |
-| P0-bugit | 4/4 ✅ |
-| Toteutetut featuret | 16 (01-14, 22-27) + 21 + 13v2 |
-| Toteutuksessa | 0 |
-| Suunniteltu (ei aloitettu) | 3 (28, 29, 30) |
-| Backlog | 5 (15-17, 19-20) |
-| Avoimet P1-bugit | 2 (KP-ALERT-002 → F29, KP-DATA-001 → F30) |
-| Avoimet P2/P3-bugit | 4 |
-
-### Toteutusjarjestys
-
-```
-VAIHE 0: Tekninen velka ✅ VALMIS
-VAIHE 1: P0-bugit ✅ VALMIS
-Feature 21: AI-kehitysymparisto ✅ VALMIS
-Feature 12: Auth/Vault UX ✅ VALMIS
-Feature 22: UI/UX Redesign + Design System ✅ VALMIS
-Feature 23: Premium UI shadcn/ui + Framer Motion ✅ VALMIS
-
-→ Feature 13: Imports Registry ✅
-→ Feature 14: Billing ✅
-→ Feature 24: Settings siivous + Tax Profile
-→ Feature 25: Finnish Tax Parity (HMO, transfer detection, OmaVero)
-→ Feature 13 Vaihe 2: Binance + Kraken
-→ Feature 26: Dashboard + UX Polish
-→ Feature 27: Domain + Landing Page
-→ Feature 29: Alert Delivery Diagnostics (KP-ALERT-002)
-→ Feature 30: Asset Mapping Auto-suggest (KP-DATA-001)
-→ Feature 28: AI Transaction Classification
-→ Feature 15-20: backlogista prioriteettien mukaan
-
-Täydellinen suunnitelma: docs/PRODUCT_ROADMAP_2026.md
-```
+| Vaihe | Sisältö | Tavoite |
+|-------|---------|---------|
+| **Vaihe 0** | TASK×2, F31, F32, F33, F34, F29, F35, F36, F37 | Beta toimii globaalisti, 10 integraatiota |
+| **Vaihe 1** | F38, F30, F39, F40 | Tax export toimii, UX polished, landing kansainvälinen |
+| **Vaihe 2** | — | Toiminimi PRH (hallinnollinen) |
+| **Vaihe 3** | F41, F42 | Stripe live + beta pois = launch |
+| **Vaihe 4** | F43, F44, F28, F45, F19, F20 | Kasvu: muut maat, AI, native |

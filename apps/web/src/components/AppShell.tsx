@@ -5,6 +5,11 @@ import BottomTabBar from './BottomTabBar';
 export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen safe-area-top bg-[#111111] relative">
+      {/* Beta banner — fixed at very top */}
+      <div className="fixed top-0 inset-x-0 z-50 flex items-center justify-center h-8 bg-[#FF8400]/[0.12] border-b border-[#FF8400]/[0.2] text-[11px] font-mono tracking-wide text-[#FF8400]/90">
+        PrivateLedger is currently in beta. Features and data formats may change.
+      </div>
+
       {/* Ambient brand glow — fixed behind all content */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden="true">
         <div className="absolute top-[-15%] left-[30%] w-[900px] h-[900px] rounded-full bg-[#FF8400]/[0.05] blur-[220px]" />
@@ -13,8 +18,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       </div>
 
       <Sidebar />
-      {/* pt-[5.5rem] on mobile = 3.5rem header + 2rem gap; md:pt-8 = original spacing on desktop */}
-      <main className="relative md:ml-60 px-4 sm:px-6 md:px-10 pt-[5.5rem] md:pt-8 pb-20 md:pb-8">
+      {/* pt-[7.5rem] on mobile = 2rem banner + 3.5rem header + 2rem gap; md:pt-16 = 2rem banner + original spacing */}
+      <main className="relative md:ml-60 px-4 sm:px-6 md:px-10 pt-[7.5rem] md:pt-16 pb-20 md:pb-8">
         {children}
       </main>
       <BottomTabBar />

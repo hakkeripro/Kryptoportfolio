@@ -83,6 +83,6 @@ Prioriteetit:
 - KP-UI-005: Sync-nappi epäselvä (ei selitystä eikä tulosraporttia)
 - KP-MAINT-001: Kuolleita/tuplakomponentteja (layout) → siivous
 
-### KP-TEST-001: settings-tax-profile E2E-testi yrittää klikata disabled Swedeä
+### KP-TEST-001: settings-tax-profile E2E-testi yrittää klikata disabled Swedeä ✅ KORJATTU 2026-03-19
 **Oire:** `settings-tax-profile.spec.ts` testi "TaxProfileCard: save settings shows success message" yrittää klikata Sweden-painiketta, mutta se on `disabled` (`comingSoon: true`). Testi aiheuttaa timeout.
 **Korjaus:** Vaihda testi käyttämään Finland (FI) tai Other — molemmat ovat enabled.
