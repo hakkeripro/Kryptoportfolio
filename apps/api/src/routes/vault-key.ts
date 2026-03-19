@@ -30,10 +30,11 @@ export function registerVaultKeyRoutes(app: FastifyInstance) {
   app.put('/v1/vault/key', { preHandler: requireAuth }, async (req, reply) => {
     const userId = getUserId(req);
     const body = PutVaultKeySchema.parse(req.body);
-    app.db.exec(
-      'UPDATE users SET vaultKeyBlob=?, vaultKeySalt=? WHERE id=?',
-      [JSON.stringify(body.blob), body.salt, userId],
-    );
+    app.db.exec('UPDATE users SET vaultKeyBlob=?, vaultKeySalt=? WHERE id=?', [
+      JSON.stringify(body.blob),
+      body.salt,
+      userId,
+    ]);
     return reply.send({ ok: true });
   });
 }

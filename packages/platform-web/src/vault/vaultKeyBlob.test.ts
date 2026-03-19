@@ -14,7 +14,9 @@ describe('vaultKeyBlob', () => {
   it('throws InvalidKeyError for wrong loginPassword', async () => {
     const passphrase = 'my-vault-passphrase';
     const { blob } = await encryptVaultKeyBlob(passphrase, 'correctPassword');
-    await expect(decryptVaultKeyBlob(blob, 'wrongPassword')).rejects.toBeInstanceOf(InvalidKeyError);
+    await expect(decryptVaultKeyBlob(blob, 'wrongPassword')).rejects.toBeInstanceOf(
+      InvalidKeyError,
+    );
   });
 
   it('throws InvalidKeyError for different loginPassword', async () => {

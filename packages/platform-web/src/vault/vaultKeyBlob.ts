@@ -26,10 +26,7 @@ export async function encryptVaultKeyBlob(
  * Decrypt the vault passphrase blob using the user's login password.
  * Throws InvalidKeyError on wrong password or corrupted blob.
  */
-export async function decryptVaultKeyBlob(
-  blob: VaultBlob,
-  loginPassword: string,
-): Promise<string> {
+export async function decryptVaultKeyBlob(blob: VaultBlob, loginPassword: string): Promise<string> {
   try {
     const payload = await openVaultBlob(loginPassword, blob);
     if (typeof payload?.[PAYLOAD_KEY] !== 'string') throw new InvalidKeyError();

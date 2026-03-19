@@ -2,11 +2,14 @@ import { test, expect } from '@playwright/test';
 import { resetApp, signupAndSetupVault, waitForToken } from './helpers';
 
 test.describe('auth: signin flow', () => {
-  test('signin → new-device vault setup → dashboard', async ({ page, request }) => {
+  test('signin → new-device auto-unlock via vault key blob → dashboard', async ({
+    page,
+    request,
+  }) => {
     await resetApp(page, request);
     const email = await signupAndSetupVault(page);
 
-    // Wipe only client state — keep API user in DB
+    // Wipe only client state — keep API user + vault key blob in DB
     await page.evaluate(async () => {
       localStorage.clear();
       sessionStorage.clear();
@@ -25,14 +28,7 @@ test.describe('auth: signin flow', () => {
     await page.getByTestId('btn-signin').click();
     await waitForToken(page);
 
-    // Redirects to vault setup (ondevice=1) because no local vault exists
-    await expect(page).toHaveURL(/\/vault\/setup/, { timeout: 10_000 });
-
-    // Enter existing passphrase on new device
-    await page.getByTestId('form-vault-passphrase').fill('passphrase123');
-    await page.getByTestId('btn-create-vault').click();
-
-    // ondevice=1 mode: navigates directly to /home (no done step)
+    // Feature 31: vault key blob fetched from server → auto-unlock → direct to /home
     await expect(page).toHaveURL(/\/home/, { timeout: 10_000 });
     await expect(page.getByTestId('metric-total-value')).toBeVisible();
   });

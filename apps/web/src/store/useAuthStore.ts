@@ -38,10 +38,7 @@ export type AuthState = {
   /** Sign in and automatically unlock the vault using the server-stored key blob.
    *  Returns { autoUnlocked: true } if vault was unlocked automatically,
    *  or { autoUnlocked: false } if no blob found (fallback to manual passphrase). */
-  signInAndUnlockVault: (
-    email: string,
-    password: string,
-  ) => Promise<{ autoUnlocked: boolean }>;
+  signInAndUnlockVault: (email: string, password: string) => Promise<{ autoUnlocked: boolean }>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   /** Upload the vault key blob to the server (used after VaultSetup). */
   uploadVaultKeyBlob: (passphrase: string, loginPassword: string) => Promise<void>;
