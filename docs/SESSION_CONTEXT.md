@@ -1,6 +1,6 @@
 # Session Context
 
-Paivitetty: 2026-03-18
+Paivitetty: 2026-03-19
 
 ## Projektin nykytila
 
@@ -22,20 +22,59 @@ Ei avoimia P0-bugeja. Kaikki korjattu 2026-03-14.
 - CI: puuttuu typecheck, lint, coverage, audit, preview deploy
 
 ### Seuraava tyovaihe
-Feature 27 valmis 2026-03-18 (Domain + Landing Page + Markkinointi).
 
-Seuraavaksi: Feature 13 Vaihe 2B (Northcrypto CSV + Coinmotion CSV) tai Feature 28 (AI Transaction Classification)
+**Strateginen uudelleenarviointi tehty 2026-03-19.** Roadmap v2 kirjoitettu.
 
-**Manuaaliset deployment-tehtävät (ei vielä tehty):**
-- DNS: `private-ledger.app` ostettava + osoitettava Cloudflareen
-- Cloudflare Pages: uusi projekti `privateledger-landing`, build: `pnpm --filter @kp/landing build`, output: `dist/`
-- Custom domain `app.private-ledger.app` lisättävä nykyiseen Pages-projektiin
-- OG-kuva (`apps/landing/public/og-image.png`) luotava (1200×630px)
-- Ks. `docs/launch/launch-checklist.md`
+Järjestys: Vaihe 0 (beta-valmius) → Vaihe 1 (tuote kuntoon) → Vaihe 2 (toiminimi) → Vaihe 3 (launch: Stripe + beta pois)
+
+**Vaihe 0 — aloitetaan:**
+1. ~~TASK: KP-TEST-001 korjaus~~ ✅
+2. ~~TASK: Beta-banneri~~ ✅
+3. ~~Feature 31: Multi-device Vault~~ ✅ (2026-03-19)
+4. Feature 32: Onboarding Simplification
+5. Feature 33: Multi-currency (USD/EUR/GBP)
+6. Feature 34: International Mode (portfolio-only ei-FI käyttäjille)
+7. Feature 29: Alert Delivery Diagnostics
+8. Feature 35: Exchange Coverage (Northcrypto, Coinmotion, Bybit, OKX, Ledger Live)
+9. Feature 36: Wallet-osoite Import (Ethereum + Bitcoin)
+10. Feature 37: Import FetchPanel → Drawer
+
+Ks. `docs/features/FEATURES_TODO.md` ja `docs/PRODUCT_ROADMAP_2026.md`
+
+**Manuaaliset deployment-tehtävät (käyttäjän mukaan DNS jo tehty):**
+- Cloudflare Pages: `privateledger-landing` projekti (build: `pnpm --filter @kp/landing build`, output: `dist/`)
+- OG-kuva (`apps/landing/public/og-image.png`, 1200×630px) — tehdään launchia varten (Feature 42)
 
 ---
 
 ## Muutosloki
+
+### 2026-03-19 — Feature 31: Multi-device Vault
+
+**Uudet tiedostot:**
+- `packages/platform-web/src/vault/vaultKeyBlob.ts` — `encryptVaultKeyBlob` + `decryptVaultKeyBlob` (PBKDF2/AES-GCM, zero-knowledge)
+- `packages/platform-web/src/vault/vaultKeyBlob.test.ts` — 6 unit-testiä
+- `scripts/migrations/2026-03-19-add-vault-key-blob.sql` — DB-migraatio
+- `apps/api/src/routes/vault-key.ts` — Fastify `GET/PUT /v1/vault/key`
+- `functions/api/routes/vault-key.ts` — Hono `GET/PUT /v1/vault/key`
+- `apps/web/tests-e2e/multi-device-vault.spec.ts` — 3 E2E-testiä
+
+**Muutetut tiedostot:**
+- `packages/platform-web/src/index.ts` — `vaultKeyBlob.js` export lisätty
+- `functions/_lib/db.ts` — `HOSTED_SCHEMA_SQL`: `vault_key_blob` + `vault_key_salt` kolumnit
+- `apps/api/src/db/db.ts` — `ensureColumn`: `vaultKeyBlob` + `vaultKeySalt`
+- `apps/api/src/server.ts` — rekisteröi `vault-key` route
+- `functions/api/[[path]].ts` — rekisteröi `vaultKey` Hono-route
+- `apps/web/src/store/useAuthStore.ts` — `signInAndUnlockVault` + `uploadVaultKeyBlob` + `changePassword` re-enkryptaa blobin
+- `apps/web/src/pages/SigninPage.tsx` — käyttää `signInAndUnlockVault`; fallback passphrase-lomake jos blob puuttuu
+- `apps/web/src/pages/SignupWithVaultPage.tsx` — `uploadVaultKeyBlob` automaattisesti signup-vaiheen lopussa
+- `apps/web/src/pages/AccountPage.tsx` — `RecoveryPassphraseSection` (Show/Hide)
+
+**Testit:** 266 unit-testiä ✅ (173 core + 10 landing + 6 platform-web + 2 api + 75 web)
+
+**Deploy-muistio:** Aja `DATABASE_URL="..." pnpm migrate:run` Neon-kantaan ennen julkaisua.
+
+---
 
 ### 2026-03-18 — Feature 27: Domain + Landing Page + Markkinointi
 

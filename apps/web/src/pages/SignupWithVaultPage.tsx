@@ -42,6 +42,7 @@ export default function SignupWithVaultPage() {
   const nav = useNavigate();
   const { t } = useTranslation();
   const register = useAuthStore((s) => s.register);
+  const uploadVaultKeyBlob = useAuthStore((s) => s.uploadVaultKeyBlob);
   const setupVault = useVaultStore((s) => s.setupVault);
 
   // Account fields
@@ -88,6 +89,10 @@ export default function SignupWithVaultPage() {
       if (selectedCountry) {
         await saveCountryToSettings(selectedCountry);
       }
+      // Upload vault key blob so future logins on new devices auto-unlock the vault
+      await uploadVaultKeyBlob(passphrase, password).catch(() => {
+        // Non-fatal: vault is set up locally; blob can be uploaded next signin
+      });
       nav('/home', { replace: true });
     } catch (err) {
       setError(errToMsg(err));

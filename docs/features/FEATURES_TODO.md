@@ -32,6 +32,7 @@
 | Feature 25 | Finnish Tax Parity (HMO-laskuri, transfer detection, OmaVero guide) |
 | Feature 26 | Dashboard + UX Polish (sync status, bannerit, P&L%, alert badge) |
 | Feature 27 | Domain + Landing Page (private-ledger.app, SEO, blogi) |
+| Feature 31 | Multi-device Vault (vault key blob, auto-unlock, fallback, recovery passphrase) |
 
 ---
 ---
@@ -64,28 +65,19 @@
 
 ---
 
-### Feature 31: Multi-device Vault ⬜
-**Prioriteetti:** Kriittinen — koko tuotteen suurin UX-ongelma
-**Speksi:** Luo `docs/features/31_multi-device-vault.md`
+### Feature 31: Multi-device Vault ✅
+**Toteutettu:** 2026-03-19
+**Speksi:** `docs/features/31_multi-device-vault.md`
 
-**Ongelma:** Uudella laitteella vault passphrase pitää syöttää uudelleen. Suurin osa käyttäjistä ei muista sitä → dead end.
-
-**Ratkaisu (zero-knowledge säilyy):**
-- Vault passphrase salataan PBKDF2-avaimella (johdettu login-salasanasta + per-user salt)
-- Salattu blob tallennetaan palvelimelle (`users.vault_key_blob`)
-- Uudella laitteella: kirjaudu sisään → blob haetaan → dekryptaus login-salasanalla → vault auki automaattisesti
-- Palvelin ei koskaan näe passphrasea selkotekstinä ✓
-
-- [ ] DB-migraatio: `users.vault_key_blob TEXT`, `users.vault_key_salt TEXT`
-- [ ] `PUT /v1/vault/key` — tallenna salattu blob (auth required) — Hono + Fastify
-- [ ] `GET /v1/vault/key` — hae blob (auth required) — Hono + Fastify
-- [ ] `packages/platform-web`: `encryptVaultKeyBlob(passphrase, loginPassword)` + `decryptVaultKeyBlob(blob, loginPassword)` WebCrytolla
-- [ ] VaultSetupPage: tallenna blob palvelimelle automaattisesti setup-vaiheessa
-- [ ] SigninPage: hae blob → dekryptaa → avaa vault → /home (ei passphrase-promptia)
-- [ ] Fallback: jos blob puuttuu (vanhat käyttäjät) → passphrase-syöttö + blob luodaan ja tallennetaan kerralla
-- [ ] Passphrase ei näy käyttäjälle normaalisti — vain Settings → Advanced → "Show recovery passphrase"
-- [ ] Unit-testit: encryptVaultKeyBlob + decryptVaultKeyBlob + wrong password → throw
-- [ ] E2E-testi: uusi laite kirjautuu → vault auki ilman passphrase-syöttöä
+- [x] DB-migraatio: `users.vault_key_blob TEXT`, `users.vault_key_salt TEXT`
+- [x] `PUT /v1/vault/key` + `GET /v1/vault/key` — Hono + Fastify
+- [x] `packages/platform-web`: `encryptVaultKeyBlob` + `decryptVaultKeyBlob` (PBKDF2/AES-GCM)
+- [x] `SignupWithVaultPage`: tallentaa blob automaattisesti signup-vaiheen lopussa
+- [x] `SigninPage`: `signInAndUnlockVault` — hae blob → dekryptaa → vault auki → /home
+- [x] Fallback: jos blob puuttuu → passphrase-syöttö SigninPagessa → blob luodaan ja tallennetaan
+- [x] `AccountPage`: "Recovery Passphrase" -osio (Show/Hide)
+- [x] Unit-testit: 6 testiä `vaultKeyBlob.test.ts` ✅
+- [x] E2E-testit: `multi-device-vault.spec.ts` (3 testiä)
 
 ---
 

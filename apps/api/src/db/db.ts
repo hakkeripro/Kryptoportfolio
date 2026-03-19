@@ -109,6 +109,10 @@ export async function initDb(dbFile: string) {
   ensureColumn('users', 'plan', "plan TEXT NOT NULL DEFAULT 'free'");
   ensureColumn('users', 'planExpiresAt', 'planExpiresAt TEXT');
 
+  // Feature 31: multi-device vault key blob
+  ensureColumn('users', 'vaultKeyBlob', 'vaultKeyBlob TEXT');
+  ensureColumn('users', 'vaultKeySalt', 'vaultKeySalt TEXT');
+
   const persist = async () => {
     const data = db.export();
     fs.writeFileSync(abs, Buffer.from(data));

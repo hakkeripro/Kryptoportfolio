@@ -12,6 +12,7 @@ import { runner } from './routes/runner';
 import { billing } from './routes/billing';
 import { binance } from './routes/binance';
 import { kraken } from './routes/kraken';
+import { vaultKey } from './routes/vault-key';
 
 type Bindings = Env;
 
@@ -49,6 +50,7 @@ app.route('/', runner);
 app.route('/', billing);
 app.route('/', binance);
 app.route('/', kraken);
+app.route('/', vaultKey);
 
 // --- Test-only reset (matches local Fastify API contract) ---
 app.post('/__test/reset', async (c) => {

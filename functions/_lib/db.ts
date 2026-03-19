@@ -39,7 +39,9 @@ CREATE TABLE IF NOT EXISTS users (
   password_hash TEXT NOT NULL,
   created_at_iso TEXT NOT NULL,
   plan TEXT NOT NULL DEFAULT 'free',
-  plan_expires_at TIMESTAMPTZ
+  plan_expires_at TIMESTAMPTZ,
+  vault_key_blob TEXT,
+  vault_key_salt TEXT
 );
 
 CREATE TABLE IF NOT EXISTS devices (

@@ -219,6 +219,49 @@ function ChangePassphraseSection() {
   );
 }
 
+function RecoveryPassphraseSection() {
+  const passphrase = useVaultStore((s) => s.passphrase);
+  const [revealed, setRevealed] = useState(false);
+
+  if (!passphrase) return null;
+
+  return (
+    <div className="rounded-xl border border-border bg-surface-raised p-4 space-y-3">
+      <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/30">
+        // RECOVERY PASSPHRASE
+      </div>
+      <p className="text-sm text-content-secondary">
+        Store this somewhere safe. It lets you recover your vault if you forget your password.
+      </p>
+      {revealed ? (
+        <div className="space-y-2">
+          <div
+            data-testid="recovery-passphrase-value"
+            className="rounded-lg bg-surface-base border border-border px-3 py-2 text-sm font-mono break-all select-all"
+          >
+            {passphrase}
+          </div>
+          <button
+            onClick={() => setRevealed(false)}
+            className="text-xs text-content-tertiary hover:text-content-secondary"
+          >
+            Hide
+          </button>
+        </div>
+      ) : (
+        <button
+          data-testid="btn-show-recovery-passphrase"
+          onClick={() => setRevealed(true)}
+          className="rounded-lg border border-border bg-surface-base hover:bg-surface-raised
+            px-3 py-2 text-sm font-medium transition-colors"
+        >
+          Show recovery passphrase
+        </button>
+      )}
+    </div>
+  );
+}
+
 function BillingSection() {
   const plan = useAuthStore((s) => s.plan);
   const planExpiresAt = useAuthStore((s) => s.planExpiresAt);
@@ -276,6 +319,8 @@ export default function AccountPage() {
       {email && <p className="text-sm text-content-secondary">{email}</p>}
 
       <BillingSection />
+
+      <RecoveryPassphraseSection />
 
       <PasskeysSection />
 

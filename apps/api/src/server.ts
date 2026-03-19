@@ -13,6 +13,7 @@ import { registerBinanceImportRoutes } from './routes/imports-binance.js';
 import { registerKrakenImportRoutes } from './routes/imports-kraken.js';
 import { registerCoingeckoRoutes } from './routes/coingecko.js';
 import { registerBillingRoutes } from './routes/billing.js';
+import { registerVaultKeyRoutes } from './routes/vault-key.js';
 import { startAlertRunner } from './runner/alertRunner.js';
 
 const EnvSchema = z.object({
@@ -99,6 +100,7 @@ registerBinanceImportRoutes(app);
 registerKrakenImportRoutes(app);
 registerCoingeckoRoutes(app);
 registerBillingRoutes(app);
+registerVaultKeyRoutes(app);
 
 // Runner (server-side alerts)
 startAlertRunner(app);
