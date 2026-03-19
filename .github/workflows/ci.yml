@@ -198,8 +198,7 @@ jobs:
         run: pnpm --filter @kp/landing build
 
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: b88555ea91c7ef1cb3d83634ded4f436
-          command: pages deploy apps/landing/dist --project-name=privateledger-landing --commit-dirty=true
+        run: npx wrangler@3 pages deploy apps/landing/dist --project-name=privateledger-landing --commit-dirty=true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: b88555ea91c7ef1cb3d83634ded4f436
