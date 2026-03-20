@@ -1,22 +1,17 @@
 import { useMemo, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { useVaultStore } from '../store/useVaultStore';
+import { useAuthStore } from '../store/useAuthStore';
 import { Logo } from '../components/ui';
-import {
-  getStoredPasskeyWrap,
-  isPasskeySupported,
-  unwrapPassphraseWithPasskey,
-} from '../vault/passkey';
 
-function errToMsg(e: unknown, t: (k: string) => string): string {
+function errToMsg(e: unknown): string {
   const msg = e instanceof Error ? e.message : String(e);
-  if (msg.includes('Decryption') || msg.includes('decrypt'))
-    return t('unlock.error.wrongPassphrase');
-  if (msg.includes('passkey_cancelled')) return t('unlock.error.passkeyCancelled');
-  if (msg.includes('hmac_secret_not_supported') || msg.includes('prf_not_supported'))
-    return t('unlock.error.passkeyNotSupported');
+  if (msg.includes('Decryption') || msg.includes('decrypt') || msg.includes('Wrong password'))
+    return 'Incorrect password. Please try again.';
+  if (msg.includes('vault_not_found'))
+    return "We couldn't restore your vault. Please sign out and sign in again.";
+  if (msg.includes('not_authenticated')) return 'Session expired. Please sign in again.';
   return msg;
 }
 
@@ -29,41 +24,31 @@ export default function UnlockPage() {
     return q ?? '/home';
   }, [location.search]);
 
-  const unlockVault = useVaultStore((s) => s.unlockVault);
-  const [passphrase, setPassphrase] = useState('');
-  const [remember, setRemember] = useState(true);
+  const unlockWithPassword = useAuthStore((s) => s.unlockWithPassword);
+  const logout = useAuthStore((s) => s.logout);
+
+  const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const hasPasskey = useMemo(() => !!getStoredPasskeyWrap(), []);
-  const passkeyOk = useMemo(() => isPasskeySupported() && hasPasskey, [hasPasskey]);
-
-  const unlockWithPasskey = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!password || busy) return;
     setError(null);
     setBusy(true);
     try {
-      const p = await unwrapPassphraseWithPasskey();
-      await unlockVault(p, { rememberSession: remember });
+      await unlockWithPassword(password);
       nav(next, { replace: true });
     } catch (e) {
-      setError(errToMsg(e, t));
+      setError(errToMsg(e));
     } finally {
       setBusy(false);
     }
   };
 
-  const unlockWithPassphrase = async (e?: React.FormEvent) => {
-    e?.preventDefault();
-    setError(null);
-    setBusy(true);
-    try {
-      await unlockVault(passphrase, { rememberSession: remember });
-      nav(next, { replace: true });
-    } catch (e) {
-      setError(errToMsg(e, t));
-    } finally {
-      setBusy(false);
-    }
+  const handleSignOut = () => {
+    logout();
+    nav('/welcome', { replace: true });
   };
 
   return (
@@ -71,59 +56,57 @@ export default function UnlockPage() {
       data-testid="page-unlock"
       className="min-h-screen flex flex-col items-center justify-center px-4"
     >
-      <div className="w-full max-w-sm space-y-6">
+      <div className="w-full max-w-sm space-y-8">
         {/* Logo */}
         <div className="flex justify-center">
           <Logo size="sm" />
         </div>
 
         {/* Title */}
-        <div className="text-center">
-          <h1 className="text-heading-1 font-heading text-content-primary">{t('unlock.title')}</h1>
-          <p className="text-caption text-content-secondary mt-1">{t('unlock.description')}</p>
+        <div className="text-center space-y-2">
+          <div className="text-3xl">🔒</div>
+          <h1 className="text-2xl font-bold text-white">
+            {t('unlock.title', { defaultValue: 'Session expired' })}
+          </h1>
+          <p className="text-sm text-content-secondary">
+            {t('unlock.description', { defaultValue: 'Enter your password to continue.' })}
+          </p>
         </div>
 
-        {/* Passphrase form */}
-        <form onSubmit={unlockWithPassphrase} className="space-y-4">
+        {/* Password form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-body font-medium text-content-primary mb-1.5">
-              {t('unlock.passphrase.title')}
+            <label className="block text-sm text-content-secondary mb-1">
+              {t('unlock.passphrase.title', { defaultValue: 'Password' })}
             </label>
             <input
               data-testid="form-unlock-passphrase"
               type="password"
-              placeholder={t('unlock.passphrase.placeholder')}
-              value={passphrase}
-              onChange={(e) => setPassphrase(e.target.value)}
-              className="w-full rounded-input bg-surface-base border border-border px-3 py-2.5 text-body
+              autoComplete="current-password"
+              placeholder={t('unlock.passphrase.placeholder', { defaultValue: 'Your password' })}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full rounded-lg bg-surface-base border border-border px-3 py-2.5 text-sm
                 focus:outline-none focus:border-brand/50 transition-colors"
             />
           </div>
 
-          <label className="flex items-center gap-2 text-caption text-content-secondary cursor-pointer">
-            <input
-              type="checkbox"
-              checked={remember}
-              onChange={(e) => setRemember(e.target.checked)}
-              className="rounded border-border accent-brand"
-            />
-            {t('unlock.remember', { defaultValue: 'Remember me (24 hours)' })}
-          </label>
-
           <button
             data-testid="btn-unlock-passphrase"
             type="submit"
-            disabled={busy || passphrase.length < 1}
-            className="w-full rounded-button bg-brand hover:bg-brand-dark disabled:opacity-60
-              px-4 py-2.5 text-body font-medium transition-colors shadow-glow-brand"
+            disabled={busy || password.length < 1}
+            className="w-full rounded-lg bg-brand hover:bg-brand-dark disabled:opacity-60
+              px-4 py-2.5 text-sm font-semibold transition-colors shadow-glow-brand"
           >
-            {busy ? t('unlock.btn.unlocking') : t('unlock.btn.unlock')}
+            {busy
+              ? t('unlock.btn.unlocking', { defaultValue: 'Unlocking…' })
+              : t('unlock.btn.unlock', { defaultValue: 'Continue →' })}
           </button>
 
           {error && (
             <motion.div
               data-testid="alert-unlock-error"
-              className="rounded-button border border-semantic-error/30 bg-semantic-error/5 p-3 text-caption text-semantic-error"
+              className="rounded-lg border border-semantic-error/30 bg-semantic-error/5 p-3 text-sm text-semantic-error"
               animate={{ x: [0, -8, 8, -6, 6, -4, 4, 0] }}
               transition={{ duration: 0.5, ease: 'easeInOut' }}
             >
@@ -132,26 +115,14 @@ export default function UnlockPage() {
           )}
         </form>
 
-        {/* Passkey option */}
-        {passkeyOk && (
-          <div className="text-center space-y-2 pt-2 border-t border-border-subtle">
-            <button
-              data-testid="btn-unlock-passkey"
-              disabled={busy}
-              onClick={() => void unlockWithPasskey()}
-              className="text-body text-content-secondary hover:text-content-primary underline transition-colors"
-            >
-              {t('unlock.btn.unlockPasskey')}
-            </button>
-          </div>
-        )}
-
-        {/* Biometric hint */}
-        {!passkeyOk && isPasskeySupported() && (
-          <p className="text-center text-[0.625rem] text-content-tertiary border-t border-border-subtle pt-3">
-            {t('unlock.passkey.tip')}
-          </p>
-        )}
+        <div className="text-center">
+          <button
+            onClick={handleSignOut}
+            className="text-sm text-content-tertiary hover:text-content-secondary underline transition-colors"
+          >
+            Sign out →
+          </button>
+        </div>
       </div>
     </div>
   );

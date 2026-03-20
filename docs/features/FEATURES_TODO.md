@@ -81,15 +81,54 @@
 
 ---
 
-### Feature 32: Onboarding Simplification ⬜
-**Prioriteetti:** Kriittinen — ensivaikutelma
+### Feature 32: Auth Simplification — Transparent Vault, No User Passphrase ⬜
+**Prioriteetti:** P0 — pre-requisite featureille 46 ja 47
 **Edellyttää:** Feature 31
+**Speksi:** `docs/features/32_auth-simplification.md`
 
-- [ ] SignupWithVaultPage: 2 steppiä max (email + salasana → maa) — vault ja blob generoituvat taustalla hiljaa
-- [ ] Passphrase-käsitettä ei näytetä onboardingissa lainkaan
-- [ ] VaultSetupPage jää vain "recovery" -polkuun (`/vault/setup?recovery=1`), ei normaali flow
-- [ ] Dashboard: "Connect your first exchange" -hero isosti kun ei yhtään importtia (ei pieni banneri)
-- [ ] E2E-testi: päivitetty uuteen flowhin
+- [ ] `generateVaultKey()` — uusi funktio (`platform-web/vault/vaultKey.ts`), 256-bit satunnainen avain
+- [ ] `register()` — auto-generoi vault-avain, blob-upload **pakollinen** (ei non-fatal)
+- [ ] `login()` — hakee blobbin, avaa vaultin automaattisesti, ei fallback-lomaketta
+- [ ] `unlockWithPassword()` — uusi store-funktio, käytetään UnlockPagella
+- [ ] `SignupPage.tsx` — uusi (korvaa SignupWithVaultPage): email + salasana + veromaa, ei passphrase-kenttiä
+- [ ] `SigninPage.tsx` — pelkistetty: email + salasana → /home, ei fallback-lomaketta
+- [ ] `UnlockPage.tsx` — pyytää login-salasanaa passphrasen sijaan
+- [ ] `WelcomePage.tsx` — redirect-logiikka päivitetty (ei vault/setup -ohjausta)
+- [ ] Poistetaan: `SignupWithVaultPage.tsx`, `VaultSetupPage.tsx`, `PassphraseGenerator.tsx`
+- [ ] Poistetaan: `/vault/setup` -reitti App.tsx:stä
+- [ ] Unit-testit: `vaultKey.test.ts` + `useAuthStore` päivitys
+- [ ] E2E-testit: signup, signin, unlock — kaikki ilman passphrase-kenttiä
+
+---
+
+### Feature 46: Google OAuth + Transparent PIN Vault ⬜
+**Prioriteetti:** P0 — nopea kirjautuminen, kasvattaa konversiota
+**Edellyttää:** Feature 32
+**Speksi:** `docs/features/46_google-oauth.md` (kirjoitetaan ennen toteutusta)
+
+- [ ] Google OAuth 2.0 Authorization Code Flow (PKCE)
+- [ ] Backend: `POST /v1/auth/oauth/google` — vastaanottaa code, vaihtaa tokeniin, luo/löytää käyttäjä
+- [ ] Vault-avain OAuth-käyttäjälle: auto-generoitu, salattu käyttäjän PIN-koodilla (4-6 numeroa)
+- [ ] Uusi sivu: `OAuthCallbackPage.tsx` — käsittelee Google-paluun
+- [ ] SignupPage + WelcomePage: "Continue with Google" -nappi
+- [ ] Ensikäyttö: PIN-valinta (kerran) → vault auki
+- [ ] Uusi laite: Google-kirjautuminen → PIN → vault auki automaattisesti
+- [ ] E2E-testi: Google OAuth mock + PIN-flow
+
+---
+
+### Feature 47: Passkey / WebAuthn ⬜
+**Prioriteetti:** P1 — paras mahdollinen UX (biometria)
+**Edellyttää:** Feature 46
+**Speksi:** `docs/features/47_passkey-webauthn.md` (kirjoitetaan ennen toteutusta)
+
+- [ ] WebAuthn Credential Creation (rekisteröinti) — platform authenticator
+- [ ] WebAuthn Authentication — Touch ID / Face ID / Windows Hello
+- [ ] Vault-avain salataan WebAuthn-assertion-derived key:llä
+- [ ] Backend: credential storage + challenge endpoint
+- [ ] UI: "Add passkey" AccountPage Security-osioon
+- [ ] Fallback: password-login säilyy aina vaihtoehtona
+- [ ] E2E-testi: WebAuthn mock
 
 ---
 

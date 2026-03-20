@@ -14,14 +14,12 @@ test.describe('Feature 31: Multi-device Vault', () => {
     page,
     request,
   }) => {
-    // ── Signup ──
+    // ── Signup (Feature 32: no vault passphrase, auto-generated key) ──
     const email = `e2e_f31_${Date.now()}@example.com`;
     await page.goto('/auth/signup');
     await page.getByTestId('form-email').fill(email);
     await page.getByTestId('form-password').fill('supersecret1');
     await page.getByTestId('form-password-confirm').fill('supersecret1');
-    await page.getByTestId('form-vault-passphrase').fill('correct-horse-staple');
-    await page.getByTestId('form-vault-passphrase-confirm').fill('correct-horse-staple');
     await page.getByTestId('btn-signup').click();
     await expect(page).toHaveURL(/\/home/, { timeout: 15_000 });
     await waitForToken(page);
@@ -58,11 +56,8 @@ test.describe('Feature 31: Multi-device Vault', () => {
     await page.getByTestId('form-password').fill('supersecret1');
     await page.getByTestId('btn-signin').click();
 
-    // Should land on /home automatically — no passphrase prompt
+    // Should land on /home automatically — no passphrase prompt needed
     await expect(page).toHaveURL(/\/home/, { timeout: 15_000 });
-    await expect(page.getByTestId('fallback-form')).not.toBeVisible().catch(() => {
-      // fallback-form not in DOM is OK
-    });
   });
 
   test('VaultSetupPage stores blob after setup: GET /v1/vault/key returns non-null', async ({
@@ -74,8 +69,6 @@ test.describe('Feature 31: Multi-device Vault', () => {
     await page.getByTestId('form-email').fill(email);
     await page.getByTestId('form-password').fill('supersecret1');
     await page.getByTestId('form-password-confirm').fill('supersecret1');
-    await page.getByTestId('form-vault-passphrase').fill('my-test-passphrase');
-    await page.getByTestId('form-vault-passphrase-confirm').fill('my-test-passphrase');
     await page.getByTestId('btn-signup').click();
     await expect(page).toHaveURL(/\/home/, { timeout: 15_000 });
     await waitForToken(page);

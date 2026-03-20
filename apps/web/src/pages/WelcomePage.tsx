@@ -11,12 +11,10 @@ export default function WelcomePage() {
   const { t } = useTranslation();
   const token = useAuthStore((s) => s.token);
   const vaultReady = useVaultStore((s) => s.vaultReady);
-  const vaultSetup = useVaultStore((s) => s.vaultSetup);
   const passphrase = useVaultStore((s) => s.passphrase);
 
   // Authenticated users should not see the welcome page
-  if (vaultReady && token) {
-    if (!vaultSetup) return <Navigate to="/vault/setup?ondevice=1" replace />;
+  if (token && vaultReady) {
     if (!passphrase) return <Navigate to="/vault/unlock" replace />;
     return <Navigate to="/home" replace />;
   }

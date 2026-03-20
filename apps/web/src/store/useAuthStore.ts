@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { z } from 'zod';
 import { registerDevice } from '@kp/platform-web';
-import { encryptVaultKeyBlob, decryptVaultKeyBlob, type VaultBlob } from '@kp/platform-web';
+import { encryptVaultKeyBlob, decryptVaultKeyBlob, generateVaultKey, type VaultBlob } from '@kp/platform-web';
 import type { Plan } from '@kp/core';
 import { apiFetch } from './apiFetch';
 import { useSyncStore } from './useSyncStore';
@@ -35,13 +35,9 @@ export type AuthState = {
   setApiBase: (s: string) => void;
   register: (email: string, password: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
-  /** Sign in and automatically unlock the vault using the server-stored key blob.
-   *  Returns { autoUnlocked: true } if vault was unlocked automatically,
-   *  or { autoUnlocked: false } if no blob found (fallback to manual passphrase). */
-  signInAndUnlockVault: (email: string, password: string) => Promise<{ autoUnlocked: boolean }>;
+  /** Unlock vault when session expired but token still valid. Fetches blob from server. */
+  unlockWithPassword: (password: string) => Promise<void>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
-  /** Upload the vault key blob to the server (used after VaultSetup). */
-  uploadVaultKeyBlob: (passphrase: string, loginPassword: string) => Promise<void>;
   fetchPlan: () => Promise<void>;
   logout: () => void;
 };
@@ -62,6 +58,8 @@ export const useAuthStore = create<AuthState>()(
 
       register: async (email: string, password: string) => {
         const base = get().apiBase;
+
+        // 1. Register account
         const r = await apiFetch<unknown>(base, '/v1/auth/register', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
@@ -75,12 +73,28 @@ export const useAuthStore = create<AuthState>()(
           plan: (parsed.plan as Plan) ?? 'free',
           planExpiresAt: parsed.planExpiresAt ?? null,
         });
+
+        // 2. Register device
         const deviceId = useSyncStore.getState().deviceId;
         await registerDevice(base, parsed.token, deviceId, 'web');
+
+        // 3. Generate random vault key and set up local vault
+        const vaultKey = generateVaultKey();
+        await useVaultStore.getState().setupVault(vaultKey);
+
+        // 4. Upload blob to server — REQUIRED (throws on failure)
+        const { blob, saltBase64 } = await encryptVaultKeyBlob(vaultKey, password);
+        await apiFetch(base, '/v1/vault/key', {
+          method: 'PUT',
+          headers: { 'content-type': 'application/json', authorization: `Bearer ${parsed.token}` },
+          body: JSON.stringify({ blob, salt: saltBase64 }),
+        });
       },
 
       login: async (email: string, password: string) => {
         const base = get().apiBase;
+
+        // 1. Authenticate
         const r = await apiFetch<unknown>(base, '/v1/auth/login', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
@@ -94,41 +108,31 @@ export const useAuthStore = create<AuthState>()(
           plan: (parsed.plan as Plan) ?? 'free',
           planExpiresAt: parsed.planExpiresAt ?? null,
         });
+
+        // 2. Register device
         const deviceId = useSyncStore.getState().deviceId;
         await registerDevice(base, parsed.token, deviceId, 'web');
+
+        // 3. Fetch blob and auto-unlock vault
+        const kr = await apiFetch<unknown>(base, '/v1/vault/key', {
+          headers: { authorization: `Bearer ${parsed.token}` },
+        });
+        const { blob, salt } = VaultKeyResponseSchema.parse(kr);
+        if (!blob || !salt) throw new Error('vault_not_found');
+        const vaultKey = await decryptVaultKeyBlob(blob as VaultBlob, password);
+        await useVaultStore.getState().setupVault(vaultKey);
       },
 
-      signInAndUnlockVault: async (email: string, password: string) => {
-        const { login, apiBase } = get();
-        await login(email, password);
-        const { token } = get();
-        if (!token) throw new Error('login_failed');
-
-        // Fetch server-stored vault key blob
+      unlockWithPassword: async (password: string) => {
+        const { token, apiBase } = get();
+        if (!token) throw new Error('not_authenticated');
         const r = await apiFetch<unknown>(apiBase, '/v1/vault/key', {
           headers: { authorization: `Bearer ${token}` },
         });
         const { blob, salt } = VaultKeyResponseSchema.parse(r);
-
-        if (blob && salt) {
-          // Decrypt passphrase and set up vault locally
-          const passphrase = await decryptVaultKeyBlob(blob as VaultBlob, password);
-          await useVaultStore.getState().setupVault(passphrase);
-          return { autoUnlocked: true };
-        }
-
-        return { autoUnlocked: false };
-      },
-
-      uploadVaultKeyBlob: async (passphrase: string, loginPassword: string) => {
-        const { apiBase, token } = get();
-        if (!token) return;
-        const { blob, saltBase64 } = await encryptVaultKeyBlob(passphrase, loginPassword);
-        await apiFetch(apiBase, '/v1/vault/key', {
-          method: 'PUT',
-          headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
-          body: JSON.stringify({ blob, salt: saltBase64 }),
-        });
+        if (!blob || !salt) throw new Error('vault_not_found');
+        const vaultKey = await decryptVaultKeyBlob(blob as VaultBlob, password);
+        await useVaultStore.getState().setupVault(vaultKey);
       },
 
       changePassword: async (currentPassword: string, newPassword: string) => {
@@ -155,7 +159,7 @@ export const useAuthStore = create<AuthState>()(
           }),
         });
 
-        // If we sent a new blob, also update it via /v1/vault/key
+        // Also update blob via /v1/vault/key
         if (newVaultKeyBlob && newVaultKeySalt) {
           await apiFetch(apiBase, '/v1/vault/key', {
             method: 'PUT',

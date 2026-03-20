@@ -11,7 +11,7 @@ test.describe('auth: signup flow', () => {
     await expect(page.getByTestId('btn-offline')).toBeVisible();
   });
 
-  test('signup → vault setup → dashboard (happy path)', async ({ page, request }) => {
+  test('signup → dashboard (happy path, vault auto-generated)', async ({ page, request }) => {
     await resetApp(page, request);
     await signupAndSetupVault(page);
     await expect(page.getByTestId('metric-total-value')).toBeVisible();

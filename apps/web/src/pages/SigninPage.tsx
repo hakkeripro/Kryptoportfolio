@@ -2,34 +2,28 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/useAuthStore';
-import { useVaultStore } from '../store/useVaultStore';
+import { Logo } from '../components/ui';
 
 export default function SigninPage() {
   const { t } = useTranslation();
   const nav = useNavigate();
-  const signInAndUnlockVault = useAuthStore((s) => s.signInAndUnlockVault);
-  const uploadVaultKeyBlob = useAuthStore((s) => s.uploadVaultKeyBlob);
-  const setupVault = useVaultStore((s) => s.setupVault);
+  const login = useAuthStore((s) => s.login);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  // Fallback state: shown when no blob found on server (legacy user or first login on new device)
-  const [needsFallback, setNeedsFallback] = useState(false);
-  const [fallbackPassphrase, setFallbackPassphrase] = useState('');
-  const [fallbackBusy, setFallbackBusy] = useState(false);
-
   function errToMsg(e: unknown): string {
     const msg = e instanceof Error ? e.message : String(e);
     if (msg.includes('invalid_credentials')) return t('signin.error.invalidCredentials');
+    if (msg.includes('vault_not_found'))
+      return "We couldn't restore your vault. This may happen if your account was created with an older version of the app. Please sign out and create a new account, or contact support.";
     if (msg.includes('fetch')) return t('signin.error.serverUnreachable');
     return msg;
   }
 
   const canSubmit = email && password && !busy;
-  const canFallback = fallbackPassphrase.length >= 6 && !fallbackBusy;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,34 +31,12 @@ export default function SigninPage() {
     setError(null);
     setBusy(true);
     try {
-      const { autoUnlocked } = await signInAndUnlockVault(email, password);
-      if (autoUnlocked) {
-        nav('/home', { replace: true });
-      } else {
-        // No blob on server — show passphrase fallback
-        setNeedsFallback(true);
-      }
+      await login(email, password);
+      nav('/home', { replace: true });
     } catch (err) {
       setError(errToMsg(err));
     } finally {
       setBusy(false);
-    }
-  };
-
-  const handleFallbackSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!canFallback) return;
-    setError(null);
-    setFallbackBusy(true);
-    try {
-      await setupVault(fallbackPassphrase);
-      // Store blob on server so future logins are automatic
-      await uploadVaultKeyBlob(fallbackPassphrase, password);
-      nav('/home', { replace: true });
-    } catch (err) {
-      setError('Wrong passphrase or vault error. Please try again.');
-    } finally {
-      setFallbackBusy(false);
     }
   };
 
@@ -73,11 +45,20 @@ export default function SigninPage() {
       data-testid="page-signin"
       className="min-h-screen flex flex-col items-center justify-center px-4"
     >
-      <div className="w-full max-w-sm space-y-6">
-        <h1 className="text-2xl font-bold text-center">{t('signin.title')}</h1>
+      <div className="w-full max-w-sm space-y-8">
+        {/* Logo */}
+        <div className="flex justify-center">
+          <Logo size="sm" />
+        </div>
 
-        {!needsFallback ? (
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <h1 className="text-2xl font-bold text-center text-white">{t('signin.title')}</h1>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-3">
+            <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/30">
+              // SIGN IN
+            </div>
+
             <div>
               <label className="block text-sm text-content-secondary mb-1">
                 {t('signin.email.label')}
@@ -89,7 +70,8 @@ export default function SigninPage() {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
+                className="w-full rounded-lg bg-surface-base border border-border px-3 py-2 text-sm
+                  focus:outline-none focus:border-brand/50 transition-colors"
               />
             </div>
 
@@ -104,62 +86,28 @@ export default function SigninPage() {
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
+                className="w-full rounded-lg bg-surface-base border border-border px-3 py-2 text-sm
+                  focus:outline-none focus:border-brand/50 transition-colors"
               />
             </div>
+          </div>
 
-            <button
-              data-testid="btn-signin"
-              type="submit"
-              disabled={!canSubmit}
-              className="w-full rounded-lg bg-brand hover:bg-brand-dark disabled:opacity-60 px-4 py-2 text-sm font-medium"
-            >
-              {busy ? t('signin.btn.loading') : t('signin.btn.submit')}
-            </button>
+          <button
+            data-testid="btn-signin"
+            type="submit"
+            disabled={!canSubmit}
+            className="w-full rounded-lg bg-brand hover:bg-brand-dark disabled:opacity-60 px-4 py-3
+              text-sm font-semibold transition-colors shadow-glow-brand"
+          >
+            {busy ? t('signin.btn.loading') : t('signin.btn.submit')}
+          </button>
 
-            {error && (
-              <div data-testid="signin-error" className="text-sm text-semantic-error">
-                {error}
-              </div>
-            )}
-          </form>
-        ) : (
-          <form onSubmit={handleFallbackSubmit} className="space-y-4" data-testid="fallback-form">
-            <div className="rounded-xl border border-border bg-surface-raised p-4 text-sm text-content-secondary">
-              Enter your vault passphrase to continue. Once entered, future logins on this device
-              will unlock automatically.
+          {error && (
+            <div data-testid="signin-error" className="text-sm text-semantic-error text-center">
+              {error}
             </div>
-
-            <div>
-              <label className="block text-sm text-content-secondary mb-1">Vault passphrase</label>
-              <input
-                data-testid="form-vault-passphrase-fallback"
-                type="password"
-                required
-                autoComplete="current-password"
-                value={fallbackPassphrase}
-                onChange={(e) => setFallbackPassphrase(e.target.value)}
-                className="w-full rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
-                placeholder="Your vault passphrase"
-              />
-            </div>
-
-            <button
-              data-testid="btn-fallback-continue"
-              type="submit"
-              disabled={!canFallback}
-              className="w-full rounded-lg bg-brand hover:bg-brand-dark disabled:opacity-60 px-4 py-2 text-sm font-medium"
-            >
-              {fallbackBusy ? 'Unlocking…' : 'Continue'}
-            </button>
-
-            {error && (
-              <div data-testid="signin-error" className="text-sm text-semantic-error">
-                {error}
-              </div>
-            )}
-          </form>
-        )}
+          )}
+        </form>
 
         <p className="text-center text-sm text-content-tertiary">
           {t('signin.signupPrompt')}{' '}

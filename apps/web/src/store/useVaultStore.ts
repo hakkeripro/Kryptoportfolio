@@ -29,7 +29,6 @@ export type VaultState = {
   loadVaultStatus: () => Promise<void>;
   setupVault: (passphrase: string) => Promise<void>;
   unlockVault: (passphrase: string, opts?: { rememberSession?: boolean }) => Promise<void>;
-  changePassphrase: (currentPassphrase: string, newPassphrase: string) => Promise<void>;
   lockVault: () => void;
 };
 
@@ -85,21 +84,6 @@ export const useVaultStore = create<VaultState>()((set) => ({
     VaultCheckSchema.parse(payload);
     if (opts?.rememberSession !== false) rememberSessionPassphrase(passphrase);
     set({ passphrase, vaultReady: true, vaultSetup: true });
-  },
-
-  changePassphrase: async (currentPassphrase: string, newPassphrase: string) => {
-    await ensureWebDbOpen();
-    const blobJson = await getMeta('vault_blob');
-    if (!blobJson) throw new Error('vault_not_setup');
-    // Verify current passphrase opens the vault
-    const blob = JSON.parse(blobJson);
-    const payload = await openVaultBlob(currentPassphrase, blob);
-    VaultCheckSchema.parse(payload);
-    // Re-encrypt with new passphrase
-    const newBlob = await createVaultBlob(newPassphrase, { check: 'kp_v3' });
-    await setMeta('vault_blob', JSON.stringify(newBlob));
-    rememberSessionPassphrase(newPassphrase);
-    set({ passphrase: newPassphrase });
   },
 
   lockVault: () => {

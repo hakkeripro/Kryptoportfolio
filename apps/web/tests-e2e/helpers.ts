@@ -51,18 +51,15 @@ export async function resetApp(page: any, request: any) {
 }
 
 /**
- * New auth flow: combined signup + vault setup page → dashboard
+ * Feature 32: simplified signup (no vault passphrase) → direct to dashboard
  */
 export async function signupAndSetupVault(page: any) {
   const email = `e2e_${Date.now()}@example.com`;
 
-  // Combined signup + vault setup page
   await page.goto('/auth/signup');
   await page.getByTestId('form-email').fill(email);
   await page.getByTestId('form-password').fill('supersecret1');
   await page.getByTestId('form-password-confirm').fill('supersecret1');
-  await page.getByTestId('form-vault-passphrase').fill('passphrase123');
-  await page.getByTestId('form-vault-passphrase-confirm').fill('passphrase123');
   await page.getByTestId('btn-signup').click();
 
   // Wait for redirect to dashboard

@@ -147,120 +147,6 @@ function ChangePasswordSection() {
   );
 }
 
-function ChangePassphraseSection() {
-  const changePassphrase = useVaultStore((s) => s.changePassphrase);
-  const [current, setCurrent] = useState('');
-  const [next, setNext] = useState('');
-  const [confirm, setConfirm] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-
-  const mismatch = confirm.length > 0 && next !== confirm;
-  const canSubmit = current && next.length >= 6 && next === confirm && !busy;
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setSuccess(false);
-    setBusy(true);
-    try {
-      await changePassphrase(current, next);
-      setSuccess(true);
-      setCurrent('');
-      setNext('');
-      setConfirm('');
-    } catch (err) {
-      setError('Wrong current passphrase or decryption failed.');
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-3">
-      <div className="font-medium">Change vault passphrase</div>
-      <input
-        data-testid="form-current-passphrase"
-        type="password"
-        placeholder="Current passphrase"
-        value={current}
-        onChange={(e) => setCurrent(e.target.value)}
-        className="w-full rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
-      />
-      <input
-        data-testid="form-new-passphrase"
-        type="password"
-        placeholder="New passphrase (min 6 characters)"
-        value={next}
-        onChange={(e) => setNext(e.target.value)}
-        className="w-full rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
-      />
-      <input
-        data-testid="form-confirm-passphrase"
-        type="password"
-        placeholder="Confirm new passphrase"
-        value={confirm}
-        onChange={(e) => setConfirm(e.target.value)}
-        className="w-full rounded-lg bg-surface-base border border-border px-3 py-2 text-sm"
-      />
-      {mismatch && <p className="text-xs text-rose-400">Passphrases do not match</p>}
-      <button
-        data-testid="btn-change-passphrase"
-        type="submit"
-        disabled={!canSubmit}
-        className="rounded-lg bg-brand hover:bg-brand-dark disabled:opacity-60 px-3 py-2 text-sm font-medium"
-      >
-        {busy ? 'Changing…' : 'Change passphrase'}
-      </button>
-      {error && <div className="text-sm text-semantic-error">{error}</div>}
-      {success && <div className="text-sm text-semantic-success">Vault passphrase changed.</div>}
-    </form>
-  );
-}
-
-function RecoveryPassphraseSection() {
-  const passphrase = useVaultStore((s) => s.passphrase);
-  const [revealed, setRevealed] = useState(false);
-
-  if (!passphrase) return null;
-
-  return (
-    <div className="rounded-xl border border-border bg-surface-raised p-4 space-y-3">
-      <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/30">
-        // RECOVERY PASSPHRASE
-      </div>
-      <p className="text-sm text-content-secondary">
-        Store this somewhere safe. It lets you recover your vault if you forget your password.
-      </p>
-      {revealed ? (
-        <div className="space-y-2">
-          <div
-            data-testid="recovery-passphrase-value"
-            className="rounded-lg bg-surface-base border border-border px-3 py-2 text-sm font-mono break-all select-all"
-          >
-            {passphrase}
-          </div>
-          <button
-            onClick={() => setRevealed(false)}
-            className="text-xs text-content-tertiary hover:text-content-secondary"
-          >
-            Hide
-          </button>
-        </div>
-      ) : (
-        <button
-          data-testid="btn-show-recovery-passphrase"
-          onClick={() => setRevealed(true)}
-          className="rounded-lg border border-border bg-surface-base hover:bg-surface-raised
-            px-3 py-2 text-sm font-medium transition-colors"
-        >
-          Show recovery passphrase
-        </button>
-      )}
-    </div>
-  );
-}
 
 function BillingSection() {
   const plan = useAuthStore((s) => s.plan);
@@ -320,15 +206,11 @@ export default function AccountPage() {
 
       <BillingSection />
 
-      <RecoveryPassphraseSection />
-
       <PasskeysSection />
 
       <div className="rounded-xl border border-border bg-surface-raised p-4 space-y-6">
         <div className="text-lg font-medium">Security</div>
         <ChangePasswordSection />
-        <hr className="border-border" />
-        <ChangePassphraseSection />
       </div>
 
       <div className="rounded-xl border border-border bg-surface-raised p-4 space-y-3">
