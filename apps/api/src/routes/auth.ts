@@ -86,6 +86,44 @@ export function registerAuthRoutes(app: FastifyInstance) {
     return reply.send({ ok: true });
   });
 
+  // Mock endpoint for E2E tests (no real Google connection)
+  // Accepts any code — uses email from 'mock-google-email' header or defaults to mock@google.test
+  app.post('/v1/auth/oauth/google', async (req, reply) => {
+    const body = req.body as { code?: string; codeVerifier?: string; redirectUri?: string };
+    if (!body.code || !body.codeVerifier || !body.redirectUri) {
+      return reply.code(400).send({ error: 'missing_params' });
+    }
+    const mockEmail = (req.headers['x-mock-google-email'] as string | undefined) ?? 'mock@google.test';
+    const googleSub = `google-sub-${mockEmail.replace(/[^a-z0-9]/g, '-')}`;
+    const email = mockEmail.toLowerCase().trim();
+
+    let user = app.db.getOne<{ id: string; createdAtISO: string; plan: string | null; googleSub: string | null }>(
+      'SELECT id,createdAtISO,plan,googleSub FROM users WHERE googleSub=?',
+      [googleSub],
+    );
+    if (!user) {
+      const existingByEmail = app.db.getOne<{ id: string; googleSub: string | null }>(
+        'SELECT id,googleSub FROM users WHERE email=?',
+        [email],
+      );
+      if (existingByEmail && !existingByEmail.googleSub) {
+        return reply.code(409).send({ error: 'email_taken_password' });
+      }
+      const userId = newId('usr');
+      const createdAtISO = new Date().toISOString();
+      app.db.exec('INSERT INTO users(id,email,googleSub,createdAtISO) VALUES (?,?,?,?)', [
+        userId,
+        email,
+        googleSub,
+        createdAtISO,
+      ]);
+      user = { id: userId, createdAtISO, plan: 'free', googleSub };
+    }
+    const plan = user.plan ?? 'free';
+    const token = await signToken(app, user.id, email, plan);
+    return reply.send({ user: { id: user.id, email, createdAtISO: user.createdAtISO }, token, plan, planExpiresAt: null });
+  });
+
   app.get('/v1/me', { preHandler: requireAuth }, async (req) => {
     const userId = getUserId(req);
     const user = app.db.getOne<{ id: string; email: string; createdAtISO: string }>(

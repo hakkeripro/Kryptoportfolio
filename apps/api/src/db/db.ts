@@ -7,7 +7,8 @@ const MIGRATIONS: string[] = [
   `CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
       email TEXT NOT NULL UNIQUE,
-      passwordHash TEXT NOT NULL,
+      passwordHash TEXT,
+      googleSub TEXT UNIQUE,
       createdAtISO TEXT NOT NULL
     );`,
   `CREATE TABLE IF NOT EXISTS devices (
@@ -112,6 +113,9 @@ export async function initDb(dbFile: string) {
   // Feature 31: multi-device vault key blob
   ensureColumn('users', 'vaultKeyBlob', 'vaultKeyBlob TEXT');
   ensureColumn('users', 'vaultKeySalt', 'vaultKeySalt TEXT');
+
+  // Feature 46: Google OAuth
+  ensureColumn('users', 'googleSub', 'googleSub TEXT');
 
   const persist = async () => {
     const data = db.export();

@@ -37,4 +37,10 @@ export function registerVaultKeyRoutes(app: FastifyInstance) {
     ]);
     return reply.send({ ok: true });
   });
+
+  app.delete('/v1/vault/key', { preHandler: requireAuth }, async (req, reply) => {
+    const userId = getUserId(req);
+    app.db.exec('UPDATE users SET vaultKeyBlob=NULL, vaultKeySalt=NULL WHERE id=?', [userId]);
+    return reply.send({ ok: true });
+  });
 }

@@ -1,6 +1,6 @@
 # Session Context
 
-Paivitetty: 2026-03-19
+Paivitetty: 2026-03-20
 
 ## Projektin nykytila
 
@@ -48,6 +48,36 @@ Ks. `docs/features/FEATURES_TODO.md` ja `docs/PRODUCT_ROADMAP_2026.md`
 ---
 
 ## Muutosloki
+
+### 2026-03-20 — Feature 46: Google OAuth + Transparent PIN Vault
+
+**Uudet tiedostot:**
+- `scripts/migrations/2026-03-20-google-oauth.sql` — `password_hash` nullable, `google_sub` UNIQUE + CHECK constraint
+- `apps/web/src/lib/googleOAuth.ts` — PKCE-helper (`initiateGoogleOAuth`)
+- `apps/web/src/pages/OAuthCallbackPage.tsx` — OAuth callback + PIN setup/enter + vault reset
+- `apps/web/tests-e2e/auth-google-oauth.spec.ts` — 6 E2E-testiä (ensirekisteröinti, palaava käyttäjä, väärä PIN, vault reset, email_taken_password, access_denied)
+
+**Muutetut tiedostot:**
+- `functions/_lib/db.ts` — `HOSTED_SCHEMA_SQL` päivitetty (password_hash nullable, google_sub), `Env` type: GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET
+- `functions/api/routes/auth.ts` — `POST /v1/auth/oauth/google` (Google token exchange + userinfo + create/find user)
+- `functions/api/routes/vault-key.ts` — `DELETE /v1/vault/key`
+- `apps/api/src/db/db.ts` — users-taulu nullable passwordHash, googleSub kolumni, ensureColumn
+- `apps/api/src/routes/auth.ts` — mock `POST /v1/auth/oauth/google` (E2E-testejä varten)
+- `apps/api/src/routes/vault-key.ts` — `DELETE /v1/vault/key`
+- `apps/web/src/store/useAuthStore.ts` — `authMethod` field + `loginWithGoogle` + `setupOAuthVault` + `unlockWithPin` + `resetVault`
+- `apps/web/src/app/App.tsx` — `/auth/callback` reitti lisätty
+- `apps/web/src/pages/SigninPage.tsx` — "Continue with Google" -nappi
+- `apps/web/src/pages/SignupPage.tsx` — "Continue with Google" -nappi
+- `apps/web/src/pages/UnlockPage.tsx` — auth-method haarautuminen (PIN vs salasana)
+
+**Testit:** 266 unit-testiä ✅ (kaikki läpäisty). E2E: 6 uutta testiä (ei ajettu — vaatii dev-serverin).
+
+**Deploy-muistio:**
+1. Aja DB-migraatio: `DATABASE_URL="..." pnpm migrate:run`
+2. Lisää Cloudflare Pages env: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `VITE_GOOGLE_CLIENT_ID`
+3. Luo Google Cloud Console OAuth 2.0 -client, redirect URI: `https://app.vaultfolio.fi/auth/callback`
+
+---
 
 ### 2026-03-19 — Feature 31: Multi-device Vault
 

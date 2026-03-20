@@ -26,17 +26,24 @@ const VaultKeyResponseSchema = z.object({
   salt: z.string().nullable(),
 });
 
+export type AuthMethod = 'password' | 'oauth';
+
 export type AuthState = {
   apiBase: string;
   token: string | null;
   email: string | null;
   plan: Plan;
   planExpiresAt: string | null;
+  authMethod: AuthMethod | null;
   setApiBase: (s: string) => void;
   register: (email: string, password: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
+  loginWithGoogle: (code: string, codeVerifier: string, redirectUri: string) => Promise<void>;
+  setupOAuthVault: (pin: string) => Promise<void>;
   /** Unlock vault when session expired but token still valid. Fetches blob from server. */
   unlockWithPassword: (password: string) => Promise<void>;
+  unlockWithPin: (pin: string) => Promise<void>;
+  resetVault: () => Promise<void>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   fetchPlan: () => Promise<void>;
   logout: () => void;
@@ -50,6 +57,7 @@ export const useAuthStore = create<AuthState>()(
       email: null,
       plan: 'free' as Plan,
       planExpiresAt: null,
+      authMethod: null,
 
       setApiBase: (s: string) => {
         const v = String(s ?? '').trim();
@@ -72,6 +80,7 @@ export const useAuthStore = create<AuthState>()(
           email,
           plan: (parsed.plan as Plan) ?? 'free',
           planExpiresAt: parsed.planExpiresAt ?? null,
+          authMethod: 'password',
         });
 
         // 2. Register device
@@ -107,6 +116,7 @@ export const useAuthStore = create<AuthState>()(
           email,
           plan: (parsed.plan as Plan) ?? 'free',
           planExpiresAt: parsed.planExpiresAt ?? null,
+          authMethod: 'password',
         });
 
         // 2. Register device
@@ -123,6 +133,44 @@ export const useAuthStore = create<AuthState>()(
         await useVaultStore.getState().setupVault(vaultKey);
       },
 
+      loginWithGoogle: async (code: string, codeVerifier: string, redirectUri: string) => {
+        const base = get().apiBase;
+
+        const r = await apiFetch<unknown>(base, '/v1/auth/oauth/google', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ code, codeVerifier, redirectUri }),
+        });
+        const parsed = AuthResponseSchema.parse(r);
+        if (!parsed.token || !parsed.user) throw new Error(parsed.error ?? 'oauth_failed');
+        set({
+          token: parsed.token,
+          email: parsed.user.email,
+          plan: (parsed.plan as Plan) ?? 'free',
+          planExpiresAt: parsed.planExpiresAt ?? null,
+          authMethod: 'oauth',
+        });
+
+        // Register device
+        const deviceId = useSyncStore.getState().deviceId;
+        await registerDevice(base, parsed.token, deviceId, 'web');
+      },
+
+      setupOAuthVault: async (pin: string) => {
+        const { token, apiBase } = get();
+        if (!token) throw new Error('not_authenticated');
+
+        const vaultKey = generateVaultKey();
+        await useVaultStore.getState().setupVault(vaultKey);
+
+        const { blob, saltBase64 } = await encryptVaultKeyBlob(vaultKey, pin);
+        await apiFetch(apiBase, '/v1/vault/key', {
+          method: 'PUT',
+          headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
+          body: JSON.stringify({ blob, salt: saltBase64 }),
+        });
+      },
+
       unlockWithPassword: async (password: string) => {
         const { token, apiBase } = get();
         if (!token) throw new Error('not_authenticated');
@@ -133,6 +181,28 @@ export const useAuthStore = create<AuthState>()(
         if (!blob || !salt) throw new Error('vault_not_found');
         const vaultKey = await decryptVaultKeyBlob(blob as VaultBlob, password);
         await useVaultStore.getState().setupVault(vaultKey);
+      },
+
+      unlockWithPin: async (pin: string) => {
+        const { token, apiBase } = get();
+        if (!token) throw new Error('not_authenticated');
+        const r = await apiFetch<unknown>(apiBase, '/v1/vault/key', {
+          headers: { authorization: `Bearer ${token}` },
+        });
+        const { blob } = VaultKeyResponseSchema.parse(r);
+        if (!blob) throw new Error('vault_not_found');
+        const vaultKey = await decryptVaultKeyBlob(blob as VaultBlob, pin);
+        await useVaultStore.getState().setupVault(vaultKey);
+      },
+
+      resetVault: async () => {
+        const { token, apiBase } = get();
+        if (!token) throw new Error('not_authenticated');
+        await apiFetch(apiBase, '/v1/vault/key', {
+          method: 'DELETE',
+          headers: { authorization: `Bearer ${token}` },
+        });
+        await useVaultStore.getState().lockVault();
       },
 
       changePassword: async (currentPassword: string, newPassword: string) => {
@@ -186,7 +256,7 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      logout: () => set({ token: null, email: null, plan: 'free', planExpiresAt: null }),
+      logout: () => set({ token: null, email: null, plan: 'free', planExpiresAt: null, authMethod: null }),
     }),
     {
       name: 'kp_auth_v3',
@@ -196,6 +266,7 @@ export const useAuthStore = create<AuthState>()(
         email: s.email,
         plan: s.plan,
         planExpiresAt: s.planExpiresAt,
+        authMethod: s.authMethod,
       }),
       merge: (persisted: any, current: any) => {
         const merged = { ...current, ...(persisted ?? {}) };

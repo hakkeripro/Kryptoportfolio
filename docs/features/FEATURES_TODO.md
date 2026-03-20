@@ -101,27 +101,29 @@
 
 ---
 
-### Feature 46: Google OAuth + Transparent PIN Vault ⬜
+### Feature 46: Google OAuth + Transparent PIN Vault ✅
 **Prioriteetti:** P0 — nopea kirjautuminen, kasvattaa konversiota
 **Edellyttää:** Feature 32
-**Speksi:** `docs/features/46_google-oauth.md` (kirjoitetaan ennen toteutusta)
+**Speksi:** `docs/features/46_google-oauth.md` ✅
+**Toteutettu:** 2026-03-20
 
-- [ ] Google OAuth 2.0 Authorization Code Flow (PKCE)
-- [ ] Backend: `POST /v1/auth/oauth/google` — vastaanottaa code, vaihtaa tokeniin, luo/löytää käyttäjä
-- [ ] Vault-avain OAuth-käyttäjälle: auto-generoitu, salattu käyttäjän PIN-koodilla (4-6 numeroa)
-- [ ] Uusi sivu: `OAuthCallbackPage.tsx` — käsittelee Google-paluun
-- [ ] SignupPage + WelcomePage: "Continue with Google" -nappi
-- [ ] Ensikäyttö: PIN-valinta (kerran) → vault auki
-- [ ] Uusi laite: Google-kirjautuminen → PIN → vault auki automaattisesti
-- [ ] E2E-testi: Google OAuth mock + PIN-flow
+- [x] Google OAuth 2.0 Authorization Code Flow (PKCE)
+- [x] Backend: `POST /v1/auth/oauth/google` — vastaanottaa code, vaihtaa tokeniin, luo/löytää käyttäjä
+- [x] Vault-avain OAuth-käyttäjälle: auto-generoitu, salattu käyttäjän PIN-koodilla (4-6 numeroa)
+- [x] Uusi sivu: `OAuthCallbackPage.tsx` — käsittelee Google-paluun
+- [x] SignupPage + SigninPage: "Continue with Google" -nappi
+- [x] Ensikäyttö: PIN-valinta (kerran) → vault auki
+- [x] Uusi laite: Google-kirjautuminen → PIN → vault auki automaattisesti
+- [x] E2E-testi: Google OAuth mock + PIN-flow
 
 ---
 
-### Feature 47: Passkey / WebAuthn ⬜
-**Prioriteetti:** P1 — paras mahdollinen UX (biometria)
+### Feature 47: Passkey / WebAuthn + Salasanan palautus ⬜
+**Prioriteetti:** P1 — paras mahdollinen UX (biometria) + tilitoiminnot
 **Edellyttää:** Feature 46
 **Speksi:** `docs/features/47_passkey-webauthn.md` (kirjoitetaan ennen toteutusta)
 
+**Passkey / WebAuthn:**
 - [ ] WebAuthn Credential Creation (rekisteröinti) — platform authenticator
 - [ ] WebAuthn Authentication — Touch ID / Face ID / Windows Hello
 - [ ] Vault-avain salataan WebAuthn-assertion-derived key:llä
@@ -129,6 +131,13 @@
 - [ ] UI: "Add passkey" AccountPage Security-osioon
 - [ ] Fallback: password-login säilyy aina vaihtoehtona
 - [ ] E2E-testi: WebAuthn mock
+
+**Salasanan palautus (email-käyttäjät):**
+- [ ] `POST /v1/auth/password-reset/request` — lähettää reset-koodin sähköpostiin
+- [ ] `POST /v1/auth/password-reset/confirm` — vahvistaa koodin, asettaa uuden salasanan
+- [ ] **Vault-data menetetään** salasanan palautuksessa (ZK-rajoite: vault-blob salattu vanhalla salasanalla, serveri ei voi re-enkryptoida) — käyttäjälle näytetään selkeä varoitus ennen reset-linkin lähettämistä
+- [ ] Reset-flow jälkeen: PIN-setup-näkymä (sama kuin OAuth-käyttäjällä) → uusi vault-avain → tyhjä vault
+- [ ] E2E-testi: reset-flow + varoitusteksti näkyy
 
 ---
 

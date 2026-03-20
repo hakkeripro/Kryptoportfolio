@@ -46,4 +46,13 @@ vaultKey.put('/v1/vault/key', async (c) => {
   return json({ ok: true });
 });
 
+vaultKey.delete('/v1/vault/key', async (c) => {
+  const { userId } = await requireAuth(c.env.JWT_SECRET, c.req.raw).catch(() => {
+    throw new Error('unauthorized');
+  });
+  const sql = getSql(c.env);
+  await sql`UPDATE users SET vault_key_blob = NULL, vault_key_salt = NULL WHERE id = ${userId}`;
+  return json({ ok: true });
+});
+
 export { vaultKey };

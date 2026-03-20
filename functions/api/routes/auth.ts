@@ -81,6 +81,84 @@ auth.put('/v1/auth/password', async (c) => {
   return json({ ok: true });
 });
 
+const OAuthGoogleSchema = z.object({
+  code: z.string().min(1),
+  codeVerifier: z.string().min(1),
+  redirectUri: z.string().url(),
+});
+
+auth.post('/v1/auth/oauth/google', async (c) => {
+  const body = OAuthGoogleSchema.parse(await readJson(c.req.raw));
+  const clientId = c.env.GOOGLE_CLIENT_ID;
+  const clientSecret = c.env.GOOGLE_CLIENT_SECRET;
+  if (!clientId || !clientSecret) return json({ error: 'oauth_not_configured' }, { status: 501 });
+
+  // Exchange code for tokens
+  const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'authorization_code',
+      code: body.code,
+      client_id: clientId,
+      client_secret: clientSecret,
+      redirect_uri: body.redirectUri,
+      code_verifier: body.codeVerifier,
+    }),
+  });
+  if (!tokenRes.ok) return json({ error: 'oauth_token_exchange_failed' }, { status: 400 });
+  const tokenData = (await tokenRes.json()) as { access_token?: string };
+  const accessToken = tokenData.access_token;
+  if (!accessToken) return json({ error: 'oauth_no_access_token' }, { status: 400 });
+
+  // Fetch user info
+  const userRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+    headers: { authorization: `Bearer ${accessToken}` },
+  });
+  if (!userRes.ok) return json({ error: 'oauth_userinfo_failed' }, { status: 400 });
+  const userInfo = (await userRes.json()) as {
+    sub?: string;
+    email?: string;
+    email_verified?: boolean;
+  };
+  if (!userInfo.sub || !userInfo.email || !userInfo.email_verified) {
+    return json({ error: 'oauth_unverified_email' }, { status: 400 });
+  }
+
+  const sql = getSql(c.env);
+  const googleSub = userInfo.sub;
+  const email = normalizeEmail(userInfo.email);
+
+  // Check if already registered with this google_sub
+  const byGoogleSub = await sql<{ id: string; plan: string; plan_expires_at: string | null; created_at_iso: string }[]>`
+    SELECT id, plan, plan_expires_at, created_at_iso FROM users WHERE google_sub = ${googleSub} LIMIT 1
+  `;
+  if (byGoogleSub.length) {
+    const u = byGoogleSub[0];
+    const plan = u.plan ?? 'free';
+    const token = await signToken(c.env.JWT_SECRET, u.id, email, plan);
+    return json({ user: { id: u.id, email, createdAtISO: u.created_at_iso }, token, plan, planExpiresAt: u.plan_expires_at ?? null });
+  }
+
+  // Check if email is taken by a password user
+  const byEmail = await sql<{ id: string; google_sub: string | null }[]>`
+    SELECT id, google_sub FROM users WHERE email = ${email} LIMIT 1
+  `;
+  if (byEmail.length && !byEmail[0].google_sub) {
+    return json({ error: 'email_taken_password' }, { status: 409 });
+  }
+
+  // Create new OAuth user
+  const userId = newId('usr');
+  const createdAtISO = new Date().toISOString();
+  await sql`
+    INSERT INTO users (id, email, google_sub, created_at_iso, plan)
+    VALUES (${userId}, ${email}, ${googleSub}, ${createdAtISO}, 'free')
+  `;
+  const token = await signToken(c.env.JWT_SECRET, userId, email, 'free');
+  return json({ user: { id: userId, email, createdAtISO }, token, plan: 'free', planExpiresAt: null });
+});
+
 auth.get('/v1/me', async (c) => {
   const { userId } = await requireAuth(c.env.JWT_SECRET, c.req.raw).catch(() => {
     throw new Error('unauthorized');

@@ -4,6 +4,10 @@ export type Env = {
   DATABASE_URL: string;
   JWT_SECRET: string;
 
+  // Google OAuth
+  GOOGLE_CLIENT_ID?: string;
+  GOOGLE_CLIENT_SECRET?: string;
+
   // Optional knobs for hosted MVP
   COINGECKO_BASE_URL?: string;
   COINGECKO_DEMO_API_KEY?: string;
@@ -36,12 +40,14 @@ export const HOSTED_SCHEMA_SQL = `
 CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
   email TEXT NOT NULL UNIQUE,
-  password_hash TEXT NOT NULL,
+  password_hash TEXT,
+  google_sub TEXT UNIQUE,
   created_at_iso TEXT NOT NULL,
   plan TEXT NOT NULL DEFAULT 'free',
   plan_expires_at TIMESTAMPTZ,
   vault_key_blob TEXT,
-  vault_key_salt TEXT
+  vault_key_salt TEXT,
+  CONSTRAINT users_auth_method_check CHECK (password_hash IS NOT NULL OR google_sub IS NOT NULL)
 );
 
 CREATE TABLE IF NOT EXISTS devices (
