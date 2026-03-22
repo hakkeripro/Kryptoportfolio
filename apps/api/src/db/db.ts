@@ -117,6 +117,28 @@ export async function initDb(dbFile: string) {
   // Feature 46: Google OAuth
   ensureColumn('users', 'googleSub', 'googleSub TEXT');
 
+  // Feature 47: WebAuthn credentials
+  db.run(`CREATE TABLE IF NOT EXISTS webauthn_credentials (
+    id             TEXT PRIMARY KEY,
+    userId         TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    publicKey      TEXT NOT NULL,
+    signCount      INTEGER NOT NULL DEFAULT 0,
+    prfSalt        TEXT NOT NULL,
+    vaultKeyBlob   TEXT,
+    deviceName     TEXT,
+    createdAtISO   TEXT NOT NULL
+  )`);
+  db.run('CREATE INDEX IF NOT EXISTS webauthn_credentials_user_idx ON webauthn_credentials(userId)');
+
+  // Feature 47: Password reset tokens
+  db.run(`CREATE TABLE IF NOT EXISTS password_reset_tokens (
+    id           TEXT PRIMARY KEY,
+    userId       TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    expiresAtISO TEXT NOT NULL,
+    usedAtISO    TEXT
+  )`);
+  db.run('CREATE INDEX IF NOT EXISTS password_reset_tokens_user_idx ON password_reset_tokens(userId)');
+
   const persist = async () => {
     const data = db.export();
     fs.writeFileSync(abs, Buffer.from(data));

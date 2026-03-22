@@ -4,16 +4,22 @@ import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/useAuthStore';
 import { Logo } from '../components/ui';
 import { initiateGoogleOAuth } from '../lib/googleOAuth';
+import { isPasskeyAvailable } from '../lib/webauthn';
 
 export default function SigninPage() {
   const { t } = useTranslation();
   const nav = useNavigate();
   const login = useAuthStore((s) => s.login);
+  const signInWithPasskey = useAuthStore((s) => s.signInWithPasskey);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState(false);
+  const [passkeyBusy, setPasskeyBusy] = useState(false);
+
+  const passkeySupported = isPasskeyAvailable();
 
   function errToMsg(e: unknown): string {
     const msg = e instanceof Error ? e.message : String(e);
@@ -21,10 +27,12 @@ export default function SigninPage() {
     if (msg.includes('vault_not_found'))
       return "We couldn't restore your vault. This may happen if your account was created with an older version of the app. Please sign out and create a new account, or contact support.";
     if (msg.includes('fetch')) return t('signin.error.serverUnreachable');
+    if (msg.includes('passkey_prf_not_supported'))
+      return "Your device or browser doesn't support passkeys with PRF. Use your password instead.";
+    if (msg.includes('passkey_cancelled')) return 'Passkey authentication was cancelled.';
+    if (msg.includes('credential_not_found')) return 'No passkey found. Please sign in with your password.';
     return msg;
   }
-
-  const [googleBusy, setGoogleBusy] = useState(false);
 
   const canSubmit = email && password && !busy;
 
@@ -35,6 +43,19 @@ export default function SigninPage() {
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Google sign in failed');
       setGoogleBusy(false);
+    }
+  };
+
+  const handlePasskeySignIn = async () => {
+    setError(null);
+    setPasskeyBusy(true);
+    try {
+      await signInWithPasskey(email || undefined);
+      nav('/home', { replace: true });
+    } catch (err) {
+      setError(errToMsg(err));
+    } finally {
+      setPasskeyBusy(false);
     }
   };
 
@@ -53,6 +74,8 @@ export default function SigninPage() {
     }
   };
 
+  const anyBusy = busy || googleBusy || passkeyBusy;
+
   return (
     <div
       data-testid="page-signin"
@@ -66,12 +89,35 @@ export default function SigninPage() {
 
         <h1 className="text-2xl font-bold text-center text-white">{t('signin.title')}</h1>
 
+        {/* Passkey */}
+        {passkeySupported && (
+          <button
+            data-testid="btn-passkey-signin"
+            type="button"
+            onClick={handlePasskeySignIn}
+            disabled={anyBusy}
+            className="w-full flex items-center justify-center gap-3 rounded-lg
+              bg-white/[0.04] border border-white/[0.08] px-4 py-2.5 text-sm font-medium
+              text-white hover:bg-[#FF8400]/[0.04] hover:border-[#FF8400]/30
+              disabled:opacity-60 transition-colors"
+          >
+            {passkeyBusy ? (
+              <span className="h-4 w-4 border-2 border-white/40 border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <svg className="h-4 w-4 text-[#FF8400]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+              </svg>
+            )}
+            {passkeyBusy ? 'Authenticating…' : 'Sign in with passkey'}
+          </button>
+        )}
+
         {/* Google OAuth */}
         <button
           data-testid="btn-google-signin"
           type="button"
           onClick={handleGoogleSignIn}
-          disabled={googleBusy || busy}
+          disabled={anyBusy}
           className="w-full flex items-center justify-center gap-3 rounded-lg bg-white text-gray-800
             border border-white/20 px-4 py-2.5 text-sm font-medium hover:bg-gray-50
             disabled:opacity-60 transition-colors"
@@ -118,9 +164,18 @@ export default function SigninPage() {
             </div>
 
             <div>
-              <label className="block text-sm text-content-secondary mb-1">
-                {t('signin.password.label')}
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-sm text-content-secondary">
+                  {t('signin.password.label')}
+                </label>
+                <Link
+                  to="/auth/forgot-password"
+                  data-testid="link-forgot-password"
+                  className="text-xs text-content-tertiary hover:text-brand transition-colors"
+                >
+                  Forgot password?
+                </Link>
+              </div>
               <input
                 data-testid="form-password"
                 type="password"

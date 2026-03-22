@@ -118,26 +118,30 @@
 
 ---
 
-### Feature 47: Passkey / WebAuthn + Salasanan palautus ⬜
+### Feature 47: Passkey / WebAuthn + Salasanan palautus ✅ VALMIS (2026-03-22)
 **Prioriteetti:** P1 — paras mahdollinen UX (biometria) + tilitoiminnot
 **Edellyttää:** Feature 46
-**Speksi:** `docs/features/47_passkey-webauthn.md` (kirjoitetaan ennen toteutusta)
+**Speksi:** `docs/features/47_passkey-webauthn.md` ✅
 
-**Passkey / WebAuthn:**
-- [ ] WebAuthn Credential Creation (rekisteröinti) — platform authenticator
-- [ ] WebAuthn Authentication — Touch ID / Face ID / Windows Hello
-- [ ] Vault-avain salataan WebAuthn-assertion-derived key:llä
-- [ ] Backend: credential storage + challenge endpoint
-- [ ] UI: "Add passkey" AccountPage Security-osioon
-- [ ] Fallback: password-login säilyy aina vaihtoehtona
-- [ ] E2E-testi: WebAuthn mock
+**Passkey / WebAuthn (PRF-pohjainen):**
+- [ ] WebAuthn Credential Creation — platform authenticator + PRF extension (Chrome 116+, Safari 17+)
+- [ ] WebAuthn Authentication — Touch ID / Face ID / Windows Hello → PRF output → vault-avain (ei PIN-tarvetta)
+- [ ] Vault-avain derivoidaan HKDF(prfOutput) — tallennetaan `webauthn_credentials.vault_key_blob`:iin per credential
+- [ ] Backend: `webauthn_credentials`-taulu, register-options/register/auth-options/auth/list/delete-endpointit
+- [ ] Signup-flow: "Create with passkey" (email + biometria, ei salasanaa)
+- [ ] Signin-flow: "Sign in with passkey" + discoverable credential
+- [ ] AccountPage Security-osio: passkey-lista + "Add passkey" + poisto
+- [ ] UnlockPage: passkey-haara — automaattinen PRF-unlock, ei syöttökenttää
+- [ ] PRF ei tueta → selkeä virheilmoitus, fallback password/PIN
+- [ ] E2E-testi: WebAuthn mock + PRF mock
 
 **Salasanan palautus (email-käyttäjät):**
-- [ ] `POST /v1/auth/password-reset/request` — lähettää reset-koodin sähköpostiin
-- [ ] `POST /v1/auth/password-reset/confirm` — vahvistaa koodin, asettaa uuden salasanan
-- [ ] **Vault-data menetetään** salasanan palautuksessa (ZK-rajoite: vault-blob salattu vanhalla salasanalla, serveri ei voi re-enkryptoida) — käyttäjälle näytetään selkeä varoitus ennen reset-linkin lähettämistä
-- [ ] Reset-flow jälkeen: PIN-setup-näkymä (sama kuin OAuth-käyttäjällä) → uusi vault-avain → tyhjä vault
-- [ ] E2E-testi: reset-flow + varoitusteksti näkyy
+- [ ] `POST /v1/auth/password-reset/request` — lähettää reset-linkin Resend API:n kautta (TTL 1h)
+- [ ] `POST /v1/auth/password-reset/confirm` — validoi token, asettaa uuden salasanan, tyhjentää vault-blobbin
+- [ ] **Vault-data menetetään** — ZK-rajoite, selkeä ⚠-varoitus sekä sähköpostissa että ResetPasswordPage:lla
+- [ ] `ForgotPasswordPage.tsx` + `ResetPasswordPage.tsx` uudet sivut
+- [ ] Uusi taulu `password_reset_tokens`
+- [ ] E2E-testi: reset-flow + varoitusteksti näkyy (`data-testid="vault-loss-warning"`)
 
 ---
 

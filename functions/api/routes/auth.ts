@@ -159,6 +159,106 @@ auth.post('/v1/auth/oauth/google', async (c) => {
   return json({ user: { id: userId, email, createdAtISO }, token, plan: 'free', planExpiresAt: null });
 });
 
+// ---------------------------------------------------------------------------
+// Feature 47: Password reset
+// ---------------------------------------------------------------------------
+
+const PasswordResetRequestSchema = z.object({ email: z.string().email() });
+
+auth.post('/v1/auth/password-reset/request', async (c) => {
+  const body = PasswordResetRequestSchema.parse(await readJson(c.req.raw));
+  const email = normalizeEmail(body.email);
+  const sql = getSql(c.env);
+
+  // Always return { ok: true } — never reveal if email is registered
+  const rows = await sql<{ id: string; password_hash: string | null }[]>`
+    SELECT id, password_hash FROM users WHERE email = ${email} LIMIT 1
+  `;
+
+  if (rows.length && rows[0].password_hash !== null) {
+    const userId = rows[0].id;
+    const token = Array.from(crypto.getRandomValues(new Uint8Array(32)))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+    const expiresAtISO = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1h
+
+    await sql`
+      INSERT INTO password_reset_tokens (id, user_id, expires_at_iso)
+      VALUES (${token}, ${userId}, ${expiresAtISO})
+    `;
+
+    const resendApiKey = c.env.RESEND_API_KEY;
+    if (resendApiKey) {
+      const resetUrl = `https://app.vaultfolio.fi/auth/reset-password?token=${token}`;
+      await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          authorization: `Bearer ${resendApiKey}`,
+        },
+        body: JSON.stringify({
+          from: 'VaultFolio <noreply@vaultfolio.fi>',
+          to: email,
+          subject: 'Reset your VaultFolio password',
+          html: `
+<p>Someone requested a password reset for your VaultFolio account.</p>
+<p style="color:#d97706;font-weight:bold;">⚠ Warning: Resetting your password will permanently delete all your encrypted portfolio data. This cannot be undone.</p>
+<p><a href="${resetUrl}" style="background:#FF8400;color:#fff;padding:12px 24px;text-decoration:none;border-radius:6px;display:inline-block;">Reset password →</a></p>
+<p>This link expires in 1 hour. If you didn't request this, ignore this email.</p>
+`,
+        }),
+      });
+    }
+  }
+
+  return json({ ok: true });
+});
+
+const PasswordResetConfirmSchema = z.object({
+  token: z.string().min(64).max(64),
+  newPassword: z.string().min(8).max(128),
+});
+
+auth.post('/v1/auth/password-reset/confirm', async (c) => {
+  const body = PasswordResetConfirmSchema.parse(await readJson(c.req.raw));
+  const sql = getSql(c.env);
+
+  const tokens = await sql<{
+    id: string;
+    user_id: string;
+    expires_at_iso: string;
+    used_at_iso: string | null;
+  }[]>`
+    SELECT id, user_id, expires_at_iso, used_at_iso
+    FROM password_reset_tokens
+    WHERE id = ${body.token}
+    LIMIT 1
+  `;
+
+  if (!tokens.length || tokens[0].used_at_iso !== null) {
+    return json({ error: 'invalid_or_used_token' }, { status: 400 });
+  }
+  const tokenRow = tokens[0];
+  if (new Date(tokenRow.expires_at_iso) < new Date()) {
+    return json({ error: 'token_expired' }, { status: 400 });
+  }
+
+  const { hashPassword: _hashPw } = await import('../../_lib/auth');
+  const newHash = await _hashPw(body.newPassword);
+  const now = new Date().toISOString();
+
+  await sql`
+    UPDATE users
+    SET password_hash = ${newHash}, vault_key_blob = NULL, vault_key_salt = NULL
+    WHERE id = ${tokenRow.user_id}
+  `;
+  await sql`
+    UPDATE password_reset_tokens SET used_at_iso = ${now} WHERE id = ${body.token}
+  `;
+
+  return json({ ok: true });
+});
+
 auth.get('/v1/me', async (c) => {
   const { userId } = await requireAuth(c.env.JWT_SECRET, c.req.raw).catch(() => {
     throw new Error('unauthorized');

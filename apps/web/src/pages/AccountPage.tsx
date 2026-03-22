@@ -1,34 +1,43 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/useAuthStore';
-import { useVaultStore } from '../store/useVaultStore';
 import { UpgradeModal } from '../components/billing/UpgradeModal';
-import {
-  isPasskeySupported,
-  listPasskeyWraps,
-  removePasskeyWrap,
-  createOrReplacePasskeyWrap,
-} from '../vault/passkey';
+import { isPasskeyAvailable } from '../lib/webauthn';
 
 function errToMsg(e: unknown): string {
-  if (e instanceof Error) return e.message;
-  return String(e);
+  const msg = e instanceof Error ? e.message : String(e);
+  if (msg.includes('passkey_prf_not_supported'))
+    return "Your device or browser doesn't support passkeys with PRF.";
+  if (msg.includes('passkey_cancelled')) return 'Passkey setup was cancelled.';
+  if (msg.includes('cannot_remove_last_auth_method'))
+    return 'Cannot remove the last authentication method. Add a password or another passkey first.';
+  return msg;
 }
 
 function PasskeysSection() {
-  const passphrase = useVaultStore((s) => s.passphrase);
-  const supported = isPasskeySupported();
-  const [wraps, setWraps] = useState(() => listPasskeyWraps());
+  const token = useAuthStore((s) => s.token);
+  const passkeys = useAuthStore((s) => s.passkeys);
+  const fetchPasskeys = useAuthStore((s) => s.fetchPasskeys);
+  const registerPasskey = useAuthStore((s) => s.registerPasskey);
+  const deletePasskey = useAuthStore((s) => s.deletePasskey);
+
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deviceName, setDeviceName] = useState('');
+
+  const supported = isPasskeyAvailable();
+
+  useEffect(() => {
+    if (token) void fetchPasskeys();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   const handleAdd = async () => {
-    if (!passphrase) return;
     setError(null);
     setBusy(true);
     try {
-      await createOrReplacePasskeyWrap(passphrase);
-      setWraps(listPasskeyWraps());
+      await registerPasskey(deviceName.trim() || 'My Device');
+      setDeviceName('');
     } catch (e) {
       setError(errToMsg(e));
     } finally {
@@ -36,47 +45,76 @@ function PasskeysSection() {
     }
   };
 
-  const handleRemove = (credId: string) => {
-    removePasskeyWrap(credId);
-    setWraps(listPasskeyWraps());
+  const handleRemove = async (credentialId: string) => {
+    setError(null);
+    try {
+      await deletePasskey(credentialId);
+    } catch (e) {
+      setError(errToMsg(e));
+    }
   };
 
+  if (!token) return null;
+
   return (
-    <div className="rounded-xl border border-border bg-surface-raised p-4 space-y-3">
-      <div className="font-medium">Passkeys</div>
-      {!supported && (
-        <p className="text-sm text-content-secondary">Your device does not support passkeys.</p>
-      )}
-      {wraps.length === 0 ? (
-        <p className="text-sm text-content-secondary">No passkeys configured on this device.</p>
-      ) : (
-        <ul className="space-y-2">
-          {wraps.map((w) => (
-            <li key={w.credIdBase64} className="flex items-center justify-between text-sm">
-              <span className="text-content-secondary">
-                Passkey &middot; {new Date(w.createdAtISO).toLocaleDateString()}
-              </span>
-              <button
-                onClick={() => handleRemove(w.credIdBase64)}
-                className="text-xs text-rose-400 hover:text-semantic-error"
-              >
-                Remove
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-      {supported && (
-        <button
-          data-testid="btn-add-passkey"
-          disabled={busy}
-          onClick={handleAdd}
-          className="rounded-lg bg-brand hover:bg-brand-dark disabled:opacity-60 px-3 py-2 text-sm font-medium"
-        >
-          {busy ? 'Adding…' : 'Add Passkey'}
-        </button>
-      )}
-      {error && <div className="text-sm text-semantic-error">{error}</div>}
+    <div className="rounded-xl border border-white/[0.08] bg-[#0F0F0F] p-4 space-y-4">
+      <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/30">
+        // SECURITY
+      </div>
+
+      <div className="space-y-3">
+        <div className="text-sm font-medium text-white/70">Passkeys</div>
+
+        {!supported && (
+          <p className="text-sm text-content-secondary">Your device does not support passkeys.</p>
+        )}
+
+        {passkeys.length === 0 ? (
+          <p className="text-sm text-content-secondary">No passkeys registered.</p>
+        ) : (
+          <ul className="space-y-2">
+            {passkeys.map((p) => (
+              <li key={p.id} className="flex items-center justify-between text-sm">
+                <span className="text-content-secondary font-mono">
+                  {p.deviceName ?? 'Passkey'}{' '}
+                  <span className="text-white/30">&middot; {new Date(p.createdAtISO).toLocaleDateString()}</span>
+                </span>
+                <button
+                  data-testid={`btn-remove-passkey-${p.id}`}
+                  onClick={() => handleRemove(p.id)}
+                  className="text-xs text-rose-400 hover:text-semantic-error transition-colors"
+                >
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {supported && (
+          <div className="flex gap-2 pt-1">
+            <input
+              data-testid="input-passkey-device-name"
+              type="text"
+              placeholder="Device name (optional)"
+              value={deviceName}
+              onChange={(e) => setDeviceName(e.target.value)}
+              className="flex-1 rounded-lg bg-surface-base border border-border px-3 py-1.5 text-sm
+                focus:outline-none focus:border-brand/50 transition-colors"
+            />
+            <button
+              data-testid="btn-add-passkey"
+              disabled={busy}
+              onClick={handleAdd}
+              className="rounded-lg bg-brand hover:bg-brand-dark disabled:opacity-60 px-3 py-1.5 text-sm font-medium transition-colors"
+            >
+              {busy ? 'Adding…' : '+ Add passkey'}
+            </button>
+          </div>
+        )}
+
+        {error && <div className="text-sm text-semantic-error">{error}</div>}
+      </div>
     </div>
   );
 }

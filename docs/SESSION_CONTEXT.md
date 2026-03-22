@@ -1,6 +1,6 @@
 # Session Context
 
-Paivitetty: 2026-03-20
+Paivitetty: 2026-03-22
 
 ## Projektin nykytila
 
@@ -48,6 +48,43 @@ Ks. `docs/features/FEATURES_TODO.md` ja `docs/PRODUCT_ROADMAP_2026.md`
 ---
 
 ## Muutosloki
+
+### 2026-03-22 — Feature 47: Passkey / WebAuthn + Salasanan palautus
+
+**Uudet tiedostot:**
+- `scripts/migrations/2026-03-22-passkey-webauthn.sql` — `webauthn_credentials`-taulu
+- `scripts/migrations/2026-03-22-password-reset.sql` — `password_reset_tokens`-taulu
+- `packages/platform-web/src/crypto/hkdf.ts` — HKDF-derivointi PRF-outputista vault-avaimeksi
+- `functions/api/routes/passkey.ts` — WebAuthn-endpointit (hosted): register-options, register, auth-options, auth, credentials list/delete
+- `apps/api/src/routes/passkey.ts` — WebAuthn mock (local dev / E2E)
+- `apps/web/src/lib/webauthn.ts` — Frontend WebAuthn-apufunktiot
+- `apps/web/src/pages/ForgotPasswordPage.tsx` — uusi sivu
+- `apps/web/src/pages/ResetPasswordPage.tsx` — uusi sivu
+- `apps/web/tests-e2e/auth-passkey.spec.ts` — E2E-testit
+- `apps/web/tests-e2e/auth-password-reset.spec.ts` — E2E-testit
+
+**Muutetut tiedostot:**
+- `functions/_lib/db.ts` — `HOSTED_SCHEMA_SQL` päivitetty (webauthn_credentials + password_reset_tokens), `Env` type: `RESEND_API_KEY`
+- `functions/api/routes/auth.ts` — password-reset endpointit (request + confirm)
+- `functions/api/[[path]].ts` — passkey-router rekisteröity
+- `apps/api/src/db/db.ts` — uudet taulut local dev -migraatioihin
+- `apps/api/src/routes/auth.ts` — password-reset mock (palauttaa `_testToken` E2E-testeille)
+- `apps/api/src/server.ts` — registerPasskeyRoutes
+- `apps/web/src/store/useAuthStore.ts` — `passkeys`-kenttä, `registerPasskey`/`signInWithPasskey`/`unlockWithPasskey`/`deletePasskey`/`fetchPasskeys`/`requestPasswordReset`/`confirmPasswordReset`
+- `apps/web/src/app/App.tsx` — `/auth/forgot-password` + `/auth/reset-password` reitit
+- `apps/web/src/pages/SigninPage.tsx` — passkey-nappi + "Forgot password?" -linkki
+- `apps/web/src/pages/SignupPage.tsx` — "Create with passkey" -vaihtoehto
+- `apps/web/src/pages/UnlockPage.tsx` — passkey-haara (automaattinen PRF-unlock)
+- `apps/web/src/pages/AccountPage.tsx` — Security-osio päivitetty server-backed passkeilla
+
+**Testit:** 268+ unit-testiä ✅ (kaikki läpäisty). E2E: 9 uutta testiä.
+
+**Deploy-muistio:**
+1. Aja DB-migraatiot: `DATABASE_URL="..." pnpm migrate:run`
+2. Lisää `RESEND_API_KEY` Cloudflare Pages -dashboardiin
+3. Vahvista `vaultfolio.fi` Resend-dashboardissa (SPF/DKIM)
+
+---
 
 ### 2026-03-20 — Feature 46: Google OAuth + Transparent PIN Vault
 

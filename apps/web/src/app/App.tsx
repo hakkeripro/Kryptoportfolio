@@ -23,6 +23,8 @@ const AssetsPage = lazy(() => import('../pages/AssetsPage'));
 const AccountsPage = lazy(() => import('../pages/AccountsPage'));
 const AccountPage = lazy(() => import('../pages/AccountPage'));
 const OAuthCallbackPage = lazy(() => import('../pages/OAuthCallbackPage'));
+const ForgotPasswordPage = lazy(() => import('../pages/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('../pages/ResetPasswordPage'));
 const ImportsPage = lazy(() => import('../pages/ImportsPage'));
 const TaxPage = lazy(() => import('../pages/TaxPage'));
 
@@ -62,6 +64,8 @@ export default function App() {
             <Route path="/vault/setup" element={<VaultSetupPage />} />
             <Route path="/vault/unlock" element={<UnlockPage />} />
             <Route path="/auth/callback" element={<OAuthCallbackPage />} />
+            <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
 
             {/* 5 main views */}
             <Route

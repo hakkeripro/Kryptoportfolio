@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
@@ -82,14 +82,48 @@ export default function UnlockPage() {
   const authMethod = useAuthStore((s) => s.authMethod);
   const unlockWithPassword = useAuthStore((s) => s.unlockWithPassword);
   const unlockWithPin = useAuthStore((s) => s.unlockWithPin);
+  const unlockWithPasskey = useAuthStore((s) => s.unlockWithPasskey);
   const logout = useAuthStore((s) => s.logout);
 
   const isOAuth = authMethod === 'oauth';
+  const isPasskey = authMethod === 'passkey';
 
   const [password, setPassword] = useState('');
   const [pin, setPin] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Auto-trigger passkey authentication
+  useEffect(() => {
+    if (!isPasskey) return;
+    setBusy(true);
+    setError(null);
+    unlockWithPasskey()
+      .then(() => nav(next, { replace: true }))
+      .catch((e: unknown) => {
+        const msg = e instanceof Error ? e.message : String(e);
+        if (msg.includes('passkey_prf_not_supported')) {
+          setError("Your device or browser doesn't support passkeys with PRF. Please sign out and use your password.");
+        } else if (msg.includes('passkey_cancelled')) {
+          setError('Authentication was cancelled. Tap the button below to try again.');
+        } else {
+          setError(errToMsg(e, false));
+        }
+        setBusy(false);
+      });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPasskey]);
+
+  const handlePasskeyRetry = () => {
+    setBusy(true);
+    setError(null);
+    unlockWithPasskey()
+      .then(() => nav(next, { replace: true }))
+      .catch((e: unknown) => {
+        setError(errToMsg(e, false));
+        setBusy(false);
+      });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,6 +150,62 @@ export default function UnlockPage() {
     logout();
     nav('/welcome', { replace: true });
   };
+
+  // Passkey unlock branch
+  if (isPasskey) {
+    return (
+      <div
+        data-testid="page-unlock"
+        className="min-h-screen flex flex-col items-center justify-center px-4"
+      >
+        <div className="w-full max-w-sm space-y-8 text-center">
+          <div className="flex justify-center">
+            <Logo size="sm" />
+          </div>
+
+          <div className="space-y-4">
+            <div className={`mx-auto w-16 h-16 rounded-full flex items-center justify-center ${busy ? 'animate-pulse bg-[#FF8400]/20' : 'bg-white/[0.04]'}`}>
+              <svg className="w-8 h-8 text-[#FF8400]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+              </svg>
+            </div>
+
+            <div>
+              <h1 className="text-2xl font-bold text-white">
+                {busy ? 'Authenticating…' : 'Unlock with passkey'}
+              </h1>
+              <p className="text-sm text-content-secondary mt-1">
+                {busy ? 'Use Touch ID, Face ID, or your device PIN.' : 'Tap below to authenticate.'}
+              </p>
+            </div>
+          </div>
+
+          {error && (
+            <div data-testid="alert-unlock-error" className="rounded-lg border border-semantic-error/30 bg-semantic-error/5 p-3 text-sm text-semantic-error text-left">
+              {error}
+            </div>
+          )}
+
+          {!busy && (
+            <button
+              data-testid="btn-passkey-unlock"
+              onClick={handlePasskeyRetry}
+              className="w-full rounded-lg bg-brand hover:bg-brand-dark px-4 py-3 text-sm font-semibold transition-colors shadow-glow-brand"
+            >
+              Authenticate →
+            </button>
+          )}
+
+          <button
+            onClick={handleSignOut}
+            className="text-sm text-content-tertiary hover:text-content-secondary underline transition-colors"
+          >
+            Sign out →
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

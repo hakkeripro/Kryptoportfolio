@@ -6,6 +6,7 @@ import { ensureWebDbOpen, getWebDb } from '@kp/platform-web';
 import { useAuthStore } from '../store/useAuthStore';
 import { Logo } from '../components/ui';
 import { initiateGoogleOAuth } from '../lib/googleOAuth';
+import { isPasskeyAvailable } from '../lib/webauthn';
 
 const COUNTRY_OPTIONS: { value: TaxCountry; label: string; flag: string }[] = [
   { value: 'FI', label: 'Finland', flag: '🇫🇮' },
@@ -34,6 +35,8 @@ export default function SignupPage() {
   const nav = useNavigate();
   const { t } = useTranslation();
   const register = useAuthStore((s) => s.register);
+  const registerPasskey = useAuthStore((s) => s.registerPasskey);
+  const passkeySupported = isPasskeyAvailable();
 
   function errToMsg(e: unknown): string {
     const msg = e instanceof Error ? e.message : String(e);
@@ -51,6 +54,33 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [googleBusy, setGoogleBusy] = useState(false);
+  const [passkeyBusy, setPasskeyBusy] = useState(false);
+
+  function passkeyErrToMsg(e: unknown): string {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (msg.includes('passkey_prf_not_supported'))
+      return "Your device or browser doesn't support passkeys with PRF. Please create an account with a password instead.";
+    if (msg.includes('passkey_cancelled')) return 'Passkey setup was cancelled.';
+    return msg;
+  }
+
+  const handlePasskeySignUp = async () => {
+    if (!email) {
+      setError('Please enter your email address first.');
+      return;
+    }
+    setError(null);
+    setPasskeyBusy(true);
+    try {
+      await registerPasskey('My Device');
+      if (selectedCountry) await saveCountryToSettings(selectedCountry);
+      nav('/home', { replace: true });
+    } catch (err) {
+      setError(passkeyErrToMsg(err));
+    } finally {
+      setPasskeyBusy(false);
+    }
+  };
 
   const handleGoogleSignUp = async () => {
     setGoogleBusy(true);
@@ -96,6 +126,29 @@ export default function SignupPage() {
         </div>
 
         <h1 className="text-2xl font-bold text-center text-white">{t('signup.title')}</h1>
+
+        {/* Passkey signup */}
+        {passkeySupported && (
+          <button
+            data-testid="btn-passkey-signup"
+            type="button"
+            onClick={handlePasskeySignUp}
+            disabled={passkeyBusy || busy || googleBusy}
+            className="w-full flex items-center justify-center gap-3 rounded-lg
+              bg-white/[0.04] border border-white/[0.08] px-4 py-2.5 text-sm font-medium
+              text-white hover:bg-[#FF8400]/[0.04] hover:border-[#FF8400]/30
+              disabled:opacity-60 transition-colors"
+          >
+            {passkeyBusy ? (
+              <span className="h-4 w-4 border-2 border-white/40 border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <svg className="h-4 w-4 text-[#FF8400]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+              </svg>
+            )}
+            {passkeyBusy ? 'Setting up passkey…' : 'Create account with passkey'}
+          </button>
+        )}
 
         {/* Google OAuth */}
         <button

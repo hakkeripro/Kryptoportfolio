@@ -124,6 +124,69 @@ export function registerAuthRoutes(app: FastifyInstance) {
     return reply.send({ user: { id: user.id, email, createdAtISO: user.createdAtISO }, token, plan, planExpiresAt: null });
   });
 
+  // Feature 47: Password reset (mock — token returned in response for E2E testing)
+  const PasswordResetRequestSchema = z.object({ email: z.string().email() });
+
+  app.post('/v1/auth/password-reset/request', async (req, reply) => {
+    const body = PasswordResetRequestSchema.parse(req.body);
+    const email = normalizeEmail(body.email);
+
+    const user = app.db.getOne<{ id: string; passwordHash: string | null }>(
+      'SELECT id,passwordHash FROM users WHERE email=?',
+      [email],
+    );
+
+    if (user && user.passwordHash !== null) {
+      const token = Array.from(crypto.getRandomValues(new Uint8Array(32)))
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('');
+      const expiresAtISO = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+      app.db.exec('INSERT INTO password_reset_tokens(id,userId,expiresAtISO) VALUES (?,?,?)', [
+        token,
+        user.id,
+        expiresAtISO,
+      ]);
+      // In test/dev mode: return the token directly (no email sent)
+      return reply.send({ ok: true, _testToken: token });
+    }
+
+    return reply.send({ ok: true });
+  });
+
+  const PasswordResetConfirmSchema = z.object({
+    token: z.string().min(64).max(64),
+    newPassword: z.string().min(8).max(128),
+  });
+
+  app.post('/v1/auth/password-reset/confirm', async (req, reply) => {
+    const body = PasswordResetConfirmSchema.parse(req.body);
+
+    const tokenRow = app.db.getOne<{
+      id: string;
+      userId: string;
+      expiresAtISO: string;
+      usedAtISO: string | null;
+    }>('SELECT id,userId,expiresAtISO,usedAtISO FROM password_reset_tokens WHERE id=?', [body.token]);
+
+    if (!tokenRow || tokenRow.usedAtISO !== null) {
+      return reply.code(400).send({ error: 'invalid_or_used_token' });
+    }
+    if (new Date(tokenRow.expiresAtISO) < new Date()) {
+      return reply.code(400).send({ error: 'token_expired' });
+    }
+
+    const newHash = await hashPassword(body.newPassword);
+    const now = new Date().toISOString();
+
+    app.db.exec(
+      'UPDATE users SET passwordHash=?,vaultKeyBlob=NULL,vaultKeySalt=NULL WHERE id=?',
+      [newHash, tokenRow.userId],
+    );
+    app.db.exec('UPDATE password_reset_tokens SET usedAtISO=? WHERE id=?', [now, body.token]);
+
+    return reply.send({ ok: true });
+  });
+
   app.get('/v1/me', { preHandler: requireAuth }, async (req) => {
     const userId = getUserId(req);
     const user = app.db.getOne<{ id: string; email: string; createdAtISO: string }>(
