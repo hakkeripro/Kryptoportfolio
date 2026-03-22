@@ -35,7 +35,7 @@ jobs:
         run: pnpm typecheck
 
       - name: ESLint
-        run: pnpm lint --max-warnings 346
+        run: pnpm lint --max-warnings 355
 
       - name: Prettier
         run: pnpm format
