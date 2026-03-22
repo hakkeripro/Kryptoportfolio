@@ -5,12 +5,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import { apiFetch } from '../store/apiFetch';
 import { z } from 'zod';
 
-type PageState =
-  | 'loading'
-  | 'pin_setup'
-  | 'pin_enter'
-  | 'vault_reset_confirm'
-  | 'error';
+type PageState = 'loading' | 'pin_setup' | 'pin_enter' | 'vault_reset_confirm' | 'error';
 
 const VaultKeyResponseSchema = z.object({
   blob: z.unknown().nullable(),
@@ -167,7 +162,7 @@ export default function OAuthCallbackPage() {
       nav('/home', { replace: true });
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      if (msg.includes('Decryption') || msg.includes('decrypt')) {
+      if (msg.includes('Decryption') || msg.includes('decrypt') || msg.includes('invalid_key')) {
         setPinError('Incorrect PIN. Please try again.');
       } else {
         setPinError('Something went wrong. Please try again.');
@@ -307,7 +302,7 @@ export default function OAuthCallbackPage() {
           </h1>
           <p className="text-sm text-content-secondary">
             {isSetup
-              ? 'Enter a 4–6 digit PIN. You\'ll use this every time you sign in with Google.'
+              ? "Enter a 4–6 digit PIN. You'll use this every time you sign in with Google."
               : 'Enter your PIN to access your encrypted data.'}
           </p>
         </div>

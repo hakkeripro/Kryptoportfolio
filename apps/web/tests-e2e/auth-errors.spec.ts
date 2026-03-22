@@ -7,13 +7,11 @@ test.describe('auth error paths', () => {
 
     const email = `dup_${Date.now()}@example.com`;
 
-    // Register first user (combined signup+vault page)
+    // Register first user (Feature 32: no vault passphrase on signup)
     await page.goto('/auth/signup');
     await page.getByTestId('form-email').fill(email);
     await page.getByTestId('form-password').fill('supersecret1');
     await page.getByTestId('form-password-confirm').fill('supersecret1');
-    await page.getByTestId('form-vault-passphrase').fill('passphrase123');
-    await page.getByTestId('form-vault-passphrase-confirm').fill('passphrase123');
     await page.getByTestId('btn-signup').click();
     await waitForToken(page);
 
@@ -33,8 +31,6 @@ test.describe('auth error paths', () => {
     await page.getByTestId('form-email').fill(email);
     await page.getByTestId('form-password').fill('supersecret2');
     await page.getByTestId('form-password-confirm').fill('supersecret2');
-    await page.getByTestId('form-vault-passphrase').fill('passphrase123');
-    await page.getByTestId('form-vault-passphrase-confirm').fill('passphrase123');
     await page.getByTestId('btn-signup').click();
 
     // Should show error (email_taken)
@@ -46,13 +42,11 @@ test.describe('auth error paths', () => {
 
     const email = `wrong_pwd_${Date.now()}@example.com`;
 
-    // Register (combined signup+vault page)
+    // Register (Feature 32: no vault passphrase on signup)
     await page.goto('/auth/signup');
     await page.getByTestId('form-email').fill(email);
     await page.getByTestId('form-password').fill('supersecret1');
     await page.getByTestId('form-password-confirm').fill('supersecret1');
-    await page.getByTestId('form-vault-passphrase').fill('passphrase123');
-    await page.getByTestId('form-vault-passphrase-confirm').fill('passphrase123');
     await page.getByTestId('btn-signup').click();
     await waitForToken(page);
 

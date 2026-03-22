@@ -2,7 +2,12 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { z } from 'zod';
 import { registerDevice } from '@kp/platform-web';
-import { encryptVaultKeyBlob, decryptVaultKeyBlob, generateVaultKey, type VaultBlob } from '@kp/platform-web';
+import {
+  encryptVaultKeyBlob,
+  decryptVaultKeyBlob,
+  generateVaultKey,
+  type VaultBlob,
+} from '@kp/platform-web';
 import type { Plan } from '@kp/core';
 import { apiFetch } from './apiFetch';
 import { useSyncStore } from './useSyncStore';
@@ -333,7 +338,9 @@ export const useAuthStore = create<AuthState>()(
           challenge: challengeBytes as unknown as BufferSource,
           user: {
             ...optData.publicKey.user,
-            id: b64urlDecode(optData.publicKey.user.id as unknown as string) as unknown as BufferSource,
+            id: b64urlDecode(
+              optData.publicKey.user.id as unknown as string,
+            ) as unknown as BufferSource,
           },
         };
 
@@ -372,9 +379,9 @@ export const useAuthStore = create<AuthState>()(
             credentialId: result.credentialId,
             clientDataJSON: result.clientDataJSON,
             attestationObject: result.attestationObject,
-            prfSalt: import.meta.env.DEV
-              ? Buffer.from(prfSaltBytes).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
-              : Array.from(prfSaltBytes).map((b) => b.toString(16).padStart(2, '0')).join(''),
+            prfSalt: Array.from(prfSaltBytes)
+              .map((b) => b.toString(16).padStart(2, '0'))
+              .join(''),
             vaultKeyBlob,
             deviceName,
             email: !token ? email : undefined,
@@ -417,7 +424,9 @@ export const useAuthStore = create<AuthState>()(
 
         const requestOptions: PublicKeyCredentialRequestOptions = {
           ...optData.publicKey,
-          challenge: b64urlDecode(optData.publicKey.challenge as unknown as string) as unknown as BufferSource,
+          challenge: b64urlDecode(
+            optData.publicKey.challenge as unknown as string,
+          ) as unknown as BufferSource,
           allowCredentials: (optData.publicKey.allowCredentials ?? []).map((c: any) => ({
             ...c,
             id: b64urlDecode(c.id as string) as unknown as BufferSource,
@@ -463,7 +472,10 @@ export const useAuthStore = create<AuthState>()(
         // 4. Derive vault key from PRF and open vault
         if (parsed.vaultKeyBlob) {
           const prfPassphrase = await deriveVaultPassphraseFromPrf(assertion.prfOutput);
-          const vaultKey = await decryptVaultKeyBlob(parsed.vaultKeyBlob as VaultBlob, prfPassphrase);
+          const vaultKey = await decryptVaultKeyBlob(
+            parsed.vaultKeyBlob as VaultBlob,
+            prfPassphrase,
+          );
           await useVaultStore.getState().setupVault(vaultKey);
         } else {
           // No vault blob yet — need to set up vault
@@ -475,7 +487,10 @@ export const useAuthStore = create<AuthState>()(
           // Store via passkey register (update vault_key_blob)
           await apiFetch(apiBase, '/v1/vault/key', {
             method: 'PUT',
-            headers: { 'content-type': 'application/json', authorization: `Bearer ${parsed.token}` },
+            headers: {
+              'content-type': 'application/json',
+              authorization: `Bearer ${parsed.token}`,
+            },
             body: JSON.stringify({ blob, salt: saltBase64 }),
           });
         }
@@ -497,7 +512,9 @@ export const useAuthStore = create<AuthState>()(
 
         const requestOptions: PublicKeyCredentialRequestOptions = {
           ...optData.publicKey,
-          challenge: b64urlDecode(optData.publicKey.challenge as unknown as string) as unknown as BufferSource,
+          challenge: b64urlDecode(
+            optData.publicKey.challenge as unknown as string,
+          ) as unknown as BufferSource,
           allowCredentials: (optData.publicKey.allowCredentials ?? []).map((c: any) => ({
             ...c,
             id: b64urlDecode(c.id as string) as unknown as BufferSource,
@@ -535,7 +552,9 @@ export const useAuthStore = create<AuthState>()(
           method: 'DELETE',
           headers: { authorization: `Bearer ${token}` },
         });
-        set((s: AuthState) => ({ passkeys: s.passkeys.filter((p: PasskeyInfo) => p.id !== credentialId) }));
+        set((s: AuthState) => ({
+          passkeys: s.passkeys.filter((p: PasskeyInfo) => p.id !== credentialId),
+        }));
       },
 
       fetchPasskeys: async () => {
@@ -581,7 +600,14 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: () =>
-        set({ token: null, email: null, plan: 'free', planExpiresAt: null, authMethod: null, passkeys: [] }),
+        set({
+          token: null,
+          email: null,
+          plan: 'free',
+          planExpiresAt: null,
+          authMethod: null,
+          passkeys: [],
+        }),
     }),
     {
       name: 'kp_auth_v3',

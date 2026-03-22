@@ -65,9 +65,8 @@ test.describe('Feature 24: Settings Tax Profile', () => {
     await resetApp(page, request);
     await page.goto('/auth/signup');
 
-    // Both country selector and passphrase form are on the same combined signup+vault page
+    // Feature 32: signup page has country selector but no vault passphrase
     await expect(page.getByTestId('country-selector')).toBeVisible();
-    await expect(page.getByTestId('form-vault-passphrase')).toBeVisible();
 
     // Can select Finland
     await page.getByTestId('btn-country-fi').click();
