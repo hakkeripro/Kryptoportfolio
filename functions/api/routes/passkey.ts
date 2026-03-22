@@ -330,7 +330,7 @@ passkey.post('/v1/auth/passkey/register-options', async (c) => {
     challengeToken,
     publicKey: {
       challenge: challengeB64,
-      rp: { id: 'app.vaultfolio.fi', name: 'VaultFolio' },
+      rp: { id: 'app.private-ledger.app', name: 'PrivateLedger' },
       user: { id: userIdB64, name: email, displayName: email },
       pubKeyCredParams: [
         { type: 'public-key', alg: -7 },  // ES256
@@ -382,7 +382,7 @@ passkey.post('/v1/auth/passkey/register', async (c) => {
   }
 
   // Verify origin
-  const allowedOrigins = ['https://app.vaultfolio.fi', 'http://localhost:5173'];
+  const allowedOrigins = ['https://app.private-ledger.app', 'http://localhost:5173'];
   if (!allowedOrigins.includes(clientData.origin)) {
     return json({ error: 'invalid_origin' }, { status: 400 });
   }
@@ -399,7 +399,7 @@ passkey.post('/v1/auth/passkey/register', async (c) => {
   const authDataInfo = parseAuthData(authDataRaw);
 
   // Verify RP ID hash
-  const expectedRpIdHash = await sha256('app.vaultfolio.fi');
+  const expectedRpIdHash = await sha256('app.private-ledger.app');
   // Also allow localhost for dev
   const localhostRpIdHash = await sha256('localhost');
   const rpIdHashMatch =
@@ -529,7 +529,7 @@ passkey.post('/v1/auth/passkey/auth-options', async (c) => {
     challengeToken,
     publicKey: {
       challenge: challengeB64,
-      rpId: 'app.vaultfolio.fi',
+      rpId: 'app.private-ledger.app',
       allowCredentials,
       userVerification: 'required',
       extensions: prfEval ? { prf: { eval: prfEval } } : { prf: {} },
@@ -567,7 +567,7 @@ passkey.post('/v1/auth/passkey/auth', async (c) => {
   const expectedChallenge = b64urlEncode(challengeResult.challengeBytes);
   if (clientData.challenge !== expectedChallenge) return json({ error: 'challenge_mismatch' }, { status: 400 });
 
-  const allowedOrigins = ['https://app.vaultfolio.fi', 'http://localhost:5173'];
+  const allowedOrigins = ['https://app.private-ledger.app', 'http://localhost:5173'];
   if (!allowedOrigins.includes(clientData.origin)) return json({ error: 'invalid_origin' }, { status: 400 });
 
   // Look up credential
@@ -590,7 +590,7 @@ passkey.post('/v1/auth/passkey/auth', async (c) => {
   // Verify RP ID hash in authenticatorData
   const authDataBytes = b64urlDecode(body.authenticatorData);
   const rpIdHash = authDataBytes.slice(0, 32);
-  const expectedRpIdHash = await sha256('app.vaultfolio.fi');
+  const expectedRpIdHash = await sha256('app.private-ledger.app');
   const localhostRpIdHash = await sha256('localhost');
   const rpIdHashMatch =
     rpIdHash.every((b, i) => b === new Uint8Array(expectedRpIdHash)[i]) ||

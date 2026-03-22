@@ -189,7 +189,7 @@ auth.post('/v1/auth/password-reset/request', async (c) => {
 
     const resendApiKey = c.env.RESEND_API_KEY;
     if (resendApiKey) {
-      const resetUrl = `https://app.vaultfolio.fi/auth/reset-password?token=${token}`;
+      const resetUrl = `https://app.private-ledger.app/auth/reset-password?token=${token}`;
       await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
@@ -197,7 +197,7 @@ auth.post('/v1/auth/password-reset/request', async (c) => {
           authorization: `Bearer ${resendApiKey}`,
         },
         body: JSON.stringify({
-          from: 'VaultFolio <noreply@vaultfolio.fi>',
+          from: 'PrivateLedger <noreply@private-ledger.app>',
           to: email,
           subject: 'Reset your VaultFolio password',
           html: `
