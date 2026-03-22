@@ -330,10 +330,10 @@ export const useAuthStore = create<AuthState>()(
         const challengeBytes = b64urlDecode(optData.publicKey.challenge as unknown as string);
         const creationOptions: PublicKeyCredentialCreationOptions = {
           ...optData.publicKey,
-          challenge: challengeBytes,
+          challenge: challengeBytes as unknown as BufferSource,
           user: {
             ...optData.publicKey.user,
-            id: b64urlDecode(optData.publicKey.user.id as unknown as string),
+            id: b64urlDecode(optData.publicKey.user.id as unknown as string) as unknown as BufferSource,
           },
         };
 
@@ -417,10 +417,10 @@ export const useAuthStore = create<AuthState>()(
 
         const requestOptions: PublicKeyCredentialRequestOptions = {
           ...optData.publicKey,
-          challenge: b64urlDecode(optData.publicKey.challenge as unknown as string),
+          challenge: b64urlDecode(optData.publicKey.challenge as unknown as string) as unknown as BufferSource,
           allowCredentials: (optData.publicKey.allowCredentials ?? []).map((c: any) => ({
             ...c,
-            id: b64urlDecode(c.id as string),
+            id: b64urlDecode(c.id as string) as unknown as BufferSource,
           })),
         };
 
@@ -497,10 +497,10 @@ export const useAuthStore = create<AuthState>()(
 
         const requestOptions: PublicKeyCredentialRequestOptions = {
           ...optData.publicKey,
-          challenge: b64urlDecode(optData.publicKey.challenge as unknown as string),
+          challenge: b64urlDecode(optData.publicKey.challenge as unknown as string) as unknown as BufferSource,
           allowCredentials: (optData.publicKey.allowCredentials ?? []).map((c: any) => ({
             ...c,
-            id: b64urlDecode(c.id as string),
+            id: b64urlDecode(c.id as string) as unknown as BufferSource,
           })),
         };
 
@@ -535,7 +535,7 @@ export const useAuthStore = create<AuthState>()(
           method: 'DELETE',
           headers: { authorization: `Bearer ${token}` },
         });
-        set((s) => ({ passkeys: s.passkeys.filter((p) => p.id !== credentialId) }));
+        set((s: AuthState) => ({ passkeys: s.passkeys.filter((p: PasskeyInfo) => p.id !== credentialId) }));
       },
 
       fetchPasskeys: async () => {

@@ -85,7 +85,7 @@ export function isPasskeyAvailable(): boolean {
  */
 export async function registerPasskey(
   options: PublicKeyCredentialCreationOptions,
-  prfSalt: ArrayBuffer,
+  prfSalt: Uint8Array | ArrayBuffer,
 ): Promise<PasskeyRegistrationResult> {
   const optionsWithPrf: PublicKeyCredentialCreationOptions = {
     ...options,
