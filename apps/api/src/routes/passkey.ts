@@ -236,7 +236,7 @@ export function registerPasskeyRoutes(app: FastifyInstance) {
     authenticatorData: z.string().optional(),
     clientDataJSON: z.string().optional(),
     signature: z.string().optional(),
-    userHandle: z.string().optional(),
+    userHandle: z.string().nullable().optional(),
   });
 
   app.post('/v1/auth/passkey/auth', async (req, reply) => {

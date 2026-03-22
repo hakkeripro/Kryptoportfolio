@@ -543,7 +543,7 @@ const AuthSchema = z.object({
   authenticatorData: z.string().min(1),
   clientDataJSON: z.string().min(1),
   signature: z.string().min(1),
-  userHandle: z.string().optional(),
+  userHandle: z.string().nullable().optional(),
 });
 
 passkey.post('/v1/auth/passkey/auth', async (c) => {
