@@ -89,7 +89,11 @@ export type AuthState = {
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   fetchPlan: () => Promise<void>;
   // Feature 47: Passkey
-  registerPasskey: (deviceName: string, prfSaltB64?: string) => Promise<void>;
+  registerPasskey: (
+    deviceName: string,
+    prfSaltB64?: string,
+    newUserEmail?: string,
+  ) => Promise<void>;
   signInWithPasskey: (email?: string) => Promise<void>;
   unlockWithPasskey: () => Promise<void>;
   deletePasskey: (credentialId: string) => Promise<void>;
@@ -312,10 +316,11 @@ export const useAuthStore = create<AuthState>()(
       // Feature 47: Passkey actions
       // ---------------------------------------------------------------------------
 
-      registerPasskey: async (deviceName: string, prfSaltB64?: string) => {
+      registerPasskey: async (deviceName: string, prfSaltB64?: string, newUserEmail?: string) => {
         if (!isPasskeyAvailable()) throw new Error('passkey_not_supported');
 
-        const { token, email, apiBase } = get();
+        const { token, email: storeEmail, apiBase } = get();
+        const email = newUserEmail ?? storeEmail;
 
         // 1. Get registration options from server
         const optRes = await apiFetch<unknown>(apiBase, '/v1/auth/passkey/register-options', {
