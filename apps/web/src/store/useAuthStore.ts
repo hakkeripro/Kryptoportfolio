@@ -402,6 +402,22 @@ export const useAuthStore = create<AuthState>()(
           });
           const deviceId = useSyncStore.getState().deviceId;
           await registerDevice(apiBase, parsed.token, deviceId, 'web');
+
+          // Set up vault for new passkey users using PRF output
+          if (result.prfOutput) {
+            const prfPassphrase = await deriveVaultPassphraseFromPrf(result.prfOutput);
+            const vaultKey = generateVaultKey();
+            await useVaultStore.getState().setupVault(vaultKey);
+            const { blob, saltBase64 } = await encryptVaultKeyBlob(vaultKey, prfPassphrase);
+            await apiFetch(apiBase, '/v1/vault/key', {
+              method: 'PUT',
+              headers: {
+                'content-type': 'application/json',
+                authorization: `Bearer ${parsed.token}`,
+              },
+              body: JSON.stringify({ blob, salt: saltBase64 }),
+            });
+          }
         }
 
         // Refresh passkeys list

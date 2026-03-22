@@ -142,19 +142,15 @@ test.describe('Feature 47: Passkey authentication', () => {
     expect(stored?.state?.authMethod).toBe('passkey');
   });
 
-  test('add passkey from AccountPage → appears in list', async ({ page, request }) => {
+  test('add passkey from AccountPage → appears in list', async ({ page }) => {
     await mockWebAuthn(page);
 
-    // Create normal user first
-    await request.post(`${API}/v1/auth/register`, {
-      data: { email: 'passkey-account@test.example', password: 'password12345' },
-    });
-
-    // Sign in normally
-    await page.goto('/auth/signin');
+    // Create user and vault via UI signup (password flow)
+    await page.goto('/auth/signup');
     await page.getByTestId('form-email').fill('passkey-account@test.example');
     await page.getByTestId('form-password').fill('password12345');
-    await page.getByTestId('btn-signin').click();
+    await page.getByTestId('form-password-confirm').fill('password12345');
+    await page.getByTestId('btn-signup').click();
     await expect(page).toHaveURL(/\/home/, { timeout: 15_000 });
 
     // Go to account page
