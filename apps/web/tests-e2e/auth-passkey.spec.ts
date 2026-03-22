@@ -71,12 +71,15 @@ async function mockWebAuthn(page: any) {
         };
       };
 
-      (window.navigator.credentials as any) = {
-        create: mockCreate,
-        get: mockGet,
-        preventSilentAccess: async () => {},
-        store: async () => {},
-      };
+      Object.defineProperty(Navigator.prototype, 'credentials', {
+        get: () => ({
+          create: mockCreate,
+          get: mockGet,
+          preventSilentAccess: async () => {},
+          store: async () => {},
+        }),
+        configurable: true,
+      });
     },
     { credId: MOCK_CREDENTIAL_ID, prfOutput: MOCK_PRF_OUTPUT },
   );

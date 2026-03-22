@@ -21,7 +21,10 @@ export function b64urlEncode(buf: ArrayBuffer | Uint8Array): string {
 }
 
 export function b64urlDecode(s: string): Uint8Array {
-  const padded = s.replace(/-/g, '+').replace(/_/g, '/').padEnd(s.length + ((4 - (s.length % 4)) % 4), '=');
+  const padded = s
+    .replace(/-/g, '+')
+    .replace(/_/g, '/')
+    .padEnd(s.length + ((4 - (s.length % 4)) % 4), '=');
   const bin = atob(padded);
   const bytes = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
@@ -33,20 +36,20 @@ export function b64urlDecode(s: string): Uint8Array {
 // ---------------------------------------------------------------------------
 
 export interface PasskeyRegistrationResult {
-  credentialId: string;           // base64url
-  clientDataJSON: string;         // base64url
-  attestationObject: string;      // base64url
-  prfOutput: ArrayBuffer | null;  // 32 bytes from PRF extension (null if not supported)
+  credentialId: string; // base64url
+  clientDataJSON: string; // base64url
+  attestationObject: string; // base64url
+  prfOutput: ArrayBuffer | null; // 32 bytes from PRF extension (null if not supported)
   prfSupported: boolean;
 }
 
 export interface PasskeyAuthResult {
-  credentialId: string;           // base64url
-  authenticatorData: string;      // base64url
-  clientDataJSON: string;         // base64url
-  signature: string;              // base64url
-  userHandle: string | null;      // base64url
-  prfOutput: ArrayBuffer | null;  // 32 bytes from PRF extension
+  credentialId: string; // base64url
+  authenticatorData: string; // base64url
+  clientDataJSON: string; // base64url
+  signature: string; // base64url
+  userHandle: string | null; // base64url
+  prfOutput: ArrayBuffer | null; // 32 bytes from PRF extension
 }
 
 export class PasskeyPrfNotSupportedError extends Error {
@@ -91,11 +94,13 @@ export async function registerPasskey(
     ...options,
     extensions: {
       ...(options.extensions ?? {}),
-      prf: { evalByCredential: {} },
+      prf: {},
     } as any,
   };
 
-  const cred = (await navigator.credentials.create({ publicKey: optionsWithPrf })) as PublicKeyCredential | null;
+  const cred = (await navigator.credentials.create({
+    publicKey: optionsWithPrf,
+  })) as PublicKeyCredential | null;
   if (!cred) throw new PasskeyCancelledError();
 
   const response = cred.response as AuthenticatorAttestationResponse;
@@ -134,11 +139,15 @@ export async function registerPasskey(
 export async function authenticateWithPasskey(
   options: PublicKeyCredentialRequestOptions,
 ): Promise<PasskeyAuthResult> {
-  const assertion = (await navigator.credentials.get({ publicKey: options })) as PublicKeyCredential | null;
+  const assertion = (await navigator.credentials.get({
+    publicKey: options,
+  })) as PublicKeyCredential | null;
   if (!assertion) throw new PasskeyCancelledError();
 
   const response = assertion.response as AuthenticatorAssertionResponse;
-  const ext = assertion.getClientExtensionResults() as { prf?: { results?: { first?: ArrayBuffer } } };
+  const ext = assertion.getClientExtensionResults() as {
+    prf?: { results?: { first?: ArrayBuffer } };
+  };
   const prfOutput = ext.prf?.results?.first ?? null;
 
   return {
