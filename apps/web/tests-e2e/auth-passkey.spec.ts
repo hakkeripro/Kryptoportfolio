@@ -145,14 +145,24 @@ test.describe('Feature 47: Passkey authentication', () => {
     await page.getByTestId('btn-passkey-signup').click();
     await expect(page).toHaveURL(/\/home/, { timeout: 15_000 });
 
-    // Sign out — clear auth + vault session so loadVaultStatus runs clean
+    // Sign out — clear auth + vault session
+    // Use SPA navigation (no full page reload) to preserve the in-memory WebAuthn mock.
+    // page.goto('/auth/signin') would re-run the init script in a new page context where
+    // navigator.credentials cannot be reliably mocked due to browser security restrictions.
     await page.evaluate(() => {
       localStorage.clear();
       sessionStorage.clear();
     });
 
+    // SPA navigate to sign-in: preserves mock in memory, React Router handles route switch
+    await page.evaluate(() => {
+      window.history.pushState({}, '', '/auth/signin');
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    });
+    await page.waitForTimeout(300);
+
     // Sign in with passkey
-    await page.goto('/auth/signin');
+    await expect(page.getByTestId('btn-passkey-signin')).toBeVisible({ timeout: 5_000 });
     await page.getByTestId('form-email').fill('passkey-signin@test.example');
     await page.getByTestId('btn-passkey-signin').click();
 
