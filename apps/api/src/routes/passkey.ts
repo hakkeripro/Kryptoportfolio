@@ -18,7 +18,9 @@ const pendingChallenges = new Map<string, { exp: number }>();
 function randomHex(n: number): string {
   const arr = new Uint8Array(n);
   crypto.getRandomValues(arr);
-  return Array.from(arr).map((b) => b.toString(16).padStart(2, '0')).join('');
+  return Array.from(arr)
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
 }
 
 function b64urlEncode(buf: ArrayBuffer | Uint8Array): string {
@@ -52,7 +54,10 @@ export function registerPasskeyRoutes(app: FastifyInstance) {
       }
     } else if (body.email) {
       const normalEmail = normalizeEmail(body.email);
-      const u = app.db.getOne<{ id: string; email: string }>('SELECT id,email FROM users WHERE email=?', [normalEmail]);
+      const u = app.db.getOne<{ id: string; email: string }>(
+        'SELECT id,email FROM users WHERE email=?',
+        [normalEmail],
+      );
       userId = u?.id ?? `new:${normalEmail}`;
       email = normalEmail;
     } else {
@@ -120,7 +125,10 @@ export function registerPasskeyRoutes(app: FastifyInstance) {
       }
     } else if (body.email) {
       const normalEmail = normalizeEmail(body.email);
-      const existing = app.db.getOne<{ id: string; email: string }>('SELECT id,email FROM users WHERE email=?', [normalEmail]);
+      const existing = app.db.getOne<{ id: string; email: string }>(
+        'SELECT id,email FROM users WHERE email=?',
+        [normalEmail],
+      );
       if (existing) {
         userId = existing.id;
         userEmail = existing.email;
@@ -128,18 +136,27 @@ export function registerPasskeyRoutes(app: FastifyInstance) {
         userId = newId('usr');
         userEmail = normalEmail;
         const createdAtISO = new Date().toISOString();
-        app.db.exec('INSERT INTO users(id,email,createdAtISO) VALUES (?,?,?)', [userId, userEmail, createdAtISO]);
+        app.db.exec('INSERT INTO users(id,email,createdAtISO) VALUES (?,?,?)', [
+          userId,
+          userEmail,
+          createdAtISO,
+        ]);
       }
     } else {
       return reply.code(400).send({ error: 'email_or_token_required' });
     }
 
     // Use a mock public key (actual ECDSA key is not verified in local dev)
-    const mockPublicKey = b64urlEncode(new TextEncoder().encode(`mock-pubkey-${body.credentialId}`));
+    const mockPublicKey = b64urlEncode(
+      new TextEncoder().encode(`mock-pubkey-${body.credentialId}`),
+    );
     const createdAtISO = new Date().toISOString();
 
     // Insert or update credential
-    const existing = app.db.getOne<{ id: string }>('SELECT id FROM webauthn_credentials WHERE id=?', [body.credentialId]);
+    const existing = app.db.getOne<{ id: string }>(
+      'SELECT id FROM webauthn_credentials WHERE id=?',
+      [body.credentialId],
+    );
     if (existing) {
       app.db.exec('UPDATE webauthn_credentials SET vaultKeyBlob=?,deviceName=? WHERE id=?', [
         body.vaultKeyBlob ? JSON.stringify(body.vaultKeyBlob) : null,
@@ -238,12 +255,16 @@ export function registerPasskeyRoutes(app: FastifyInstance) {
       prfSalt: string;
       vaultKeyBlob: string | null;
       signCount: number;
-    }>('SELECT id,userId,prfSalt,vaultKeyBlob,signCount FROM webauthn_credentials WHERE id=?', [body.credentialId]);
+    }>('SELECT id,userId,prfSalt,vaultKeyBlob,signCount FROM webauthn_credentials WHERE id=?', [
+      body.credentialId,
+    ]);
 
     if (!cred) return reply.code(401).send({ error: 'credential_not_found' });
 
     // Update sign count (mock: just increment)
-    app.db.exec('UPDATE webauthn_credentials SET signCount=signCount+1 WHERE id=?', [body.credentialId]);
+    app.db.exec('UPDATE webauthn_credentials SET signCount=signCount+1 WHERE id=?', [
+      body.credentialId,
+    ]);
 
     const user = app.db.getOne<{
       id: string;
@@ -275,27 +296,52 @@ export function registerPasskeyRoutes(app: FastifyInstance) {
       'SELECT id,deviceName,createdAtISO FROM webauthn_credentials WHERE userId=? ORDER BY createdAtISO ASC',
       [userId],
     );
-    return reply.send({ credentials: creds.map((c) => ({ id: c.id, device_name: c.deviceName, created_at_iso: c.createdAtISO })) });
+    return reply.send({
+      credentials: creds.map((c) => ({
+        id: c.id,
+        device_name: c.deviceName,
+        created_at_iso: c.createdAtISO,
+      })),
+    });
   });
 
   // DELETE /v1/auth/passkey/credentials/:credentialId
-  app.delete('/v1/auth/passkey/credentials/:credentialId', { preHandler: requireAuth }, async (req, reply) => {
-    const userId = getUserId(req);
-    const { credentialId } = req.params as { credentialId: string };
+  app.delete(
+    '/v1/auth/passkey/credentials/:credentialId',
+    { preHandler: requireAuth },
+    async (req, reply) => {
+      const userId = getUserId(req);
+      const { credentialId } = req.params as { credentialId: string };
 
-    const cred = app.db.getOne<{ id: string }>('SELECT id FROM webauthn_credentials WHERE id=? AND userId=?', [credentialId, userId]);
-    if (!cred) return reply.code(404).send({ error: 'not_found' });
+      const cred = app.db.getOne<{ id: string }>(
+        'SELECT id FROM webauthn_credentials WHERE id=? AND userId=?',
+        [credentialId, userId],
+      );
+      if (!cred) return reply.code(404).send({ error: 'not_found' });
 
-    // Check at least one auth method remains
-    const user = app.db.getOne<{ passwordHash: string | null; googleSub: string | null }>('SELECT passwordHash,googleSub FROM users WHERE id=?', [userId]);
-    const passkeyCount = app.db.query<{ id: string }>('SELECT id FROM webauthn_credentials WHERE userId=?', [userId]).length;
-    const remainingPasskeys = passkeyCount - 1;
-    const hasOtherAuth = (user?.passwordHash ?? null) !== null || (user?.googleSub ?? null) !== null || remainingPasskeys > 0;
-    if (!hasOtherAuth) {
-      return reply.code(400).send({ error: 'cannot_remove_last_auth_method' });
-    }
+      // Check at least one auth method remains
+      const user = app.db.getOne<{ passwordHash: string | null; googleSub: string | null }>(
+        'SELECT passwordHash,googleSub FROM users WHERE id=?',
+        [userId],
+      );
+      const passkeyCount = app.db.query<{ id: string }>(
+        'SELECT id FROM webauthn_credentials WHERE userId=?',
+        [userId],
+      ).length;
+      const remainingPasskeys = passkeyCount - 1;
+      const hasOtherAuth =
+        (user?.passwordHash ?? null) !== null ||
+        (user?.googleSub ?? null) !== null ||
+        remainingPasskeys > 0;
+      if (!hasOtherAuth) {
+        return reply.code(400).send({ error: 'cannot_remove_last_auth_method' });
+      }
 
-    app.db.exec('DELETE FROM webauthn_credentials WHERE id=? AND userId=?', [credentialId, userId]);
-    return reply.send({ ok: true });
-  });
+      app.db.exec('DELETE FROM webauthn_credentials WHERE id=? AND userId=?', [
+        credentialId,
+        userId,
+      ]);
+      return reply.send({ ok: true });
+    },
+  );
 }

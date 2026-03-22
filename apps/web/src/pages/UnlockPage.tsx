@@ -103,7 +103,9 @@ export default function UnlockPage() {
       .catch((e: unknown) => {
         const msg = e instanceof Error ? e.message : String(e);
         if (msg.includes('passkey_prf_not_supported')) {
-          setError("Your device or browser doesn't support passkeys with PRF. Please sign out and use your password.");
+          setError(
+            "Your device or browser doesn't support passkeys with PRF. Please sign out and use your password.",
+          );
         } else if (msg.includes('passkey_cancelled')) {
           setError('Authentication was cancelled. Tap the button below to try again.');
         } else {
@@ -111,7 +113,7 @@ export default function UnlockPage() {
         }
         setBusy(false);
       });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPasskey]);
 
   const handlePasskeyRetry = () => {
@@ -164,9 +166,22 @@ export default function UnlockPage() {
           </div>
 
           <div className="space-y-4">
-            <div className={`mx-auto w-16 h-16 rounded-full flex items-center justify-center ${busy ? 'animate-pulse bg-[#FF8400]/20' : 'bg-white/[0.04]'}`}>
-              <svg className="w-8 h-8 text-[#FF8400]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+            <div
+              className={`mx-auto w-16 h-16 rounded-full flex items-center justify-center ${busy ? 'animate-pulse bg-[#FF8400]/20' : 'bg-white/[0.04]'}`}
+            >
+              <svg
+                className="w-8 h-8 text-[#FF8400]"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.5}
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"
+                />
               </svg>
             </div>
 
@@ -181,7 +196,10 @@ export default function UnlockPage() {
           </div>
 
           {error && (
-            <div data-testid="alert-unlock-error" className="rounded-lg border border-semantic-error/30 bg-semantic-error/5 p-3 text-sm text-semantic-error text-left">
+            <div
+              data-testid="alert-unlock-error"
+              className="rounded-lg border border-semantic-error/30 bg-semantic-error/5 p-3 text-sm text-semantic-error text-left"
+            >
               {error}
             </div>
           )}

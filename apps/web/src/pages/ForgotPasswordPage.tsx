@@ -49,8 +49,7 @@ export default function ForgotPasswordPage() {
           <div data-testid="reset-email-sent" className="space-y-4 text-center">
             <div className="text-4xl">📨</div>
             <p className="text-sm text-content-secondary">
-              If an account with that email exists, we've sent a reset link.
-              Check your inbox.
+              If an account with that email exists, we've sent a reset link. Check your inbox.
             </p>
             <p className="text-xs text-white/30">The link expires in 1 hour.</p>
             <Link

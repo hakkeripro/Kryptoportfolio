@@ -6,7 +6,10 @@ import { Logo } from '../components/ui';
 export default function ResetPasswordPage() {
   const nav = useNavigate();
   const location = useLocation();
-  const token = useMemo(() => new URLSearchParams(location.search).get('token') ?? '', [location.search]);
+  const token = useMemo(
+    () => new URLSearchParams(location.search).get('token') ?? '',
+    [location.search],
+  );
 
   const confirmPasswordReset = useAuthStore((s) => s.confirmPasswordReset);
 
@@ -43,10 +46,15 @@ export default function ResetPasswordPage() {
 
   if (!token) {
     return (
-      <div data-testid="page-reset-password" className="min-h-screen flex flex-col items-center justify-center px-4">
+      <div
+        data-testid="page-reset-password"
+        className="min-h-screen flex flex-col items-center justify-center px-4"
+      >
         <div className="w-full max-w-sm space-y-6 text-center">
           <Logo size="sm" />
-          <p className="text-sm text-semantic-error">Invalid reset link. Please request a new one.</p>
+          <p className="text-sm text-semantic-error">
+            Invalid reset link. Please request a new one.
+          </p>
           <Link to="/auth/forgot-password" className="text-sm text-brand hover:underline">
             Request new link →
           </Link>
@@ -80,7 +88,9 @@ export default function ResetPasswordPage() {
           >
             <span className="text-[#FF8400] text-lg leading-none mt-0.5">⚠</span>
             <div className="space-y-1">
-              <p className="text-sm text-[#FF8400]/90 font-medium">This will permanently delete all your encrypted portfolio data.</p>
+              <p className="text-sm text-[#FF8400]/90 font-medium">
+                This will permanently delete all your encrypted portfolio data.
+              </p>
               <p className="text-xs text-[#FF8400]/70">
                 Your account and any active subscription will remain. This cannot be undone.
               </p>
@@ -89,9 +99,7 @@ export default function ResetPasswordPage() {
 
           <div className="space-y-3">
             <div>
-              <label className="block text-sm text-content-secondary mb-1">
-                New password
-              </label>
+              <label className="block text-sm text-content-secondary mb-1">New password</label>
               <input
                 data-testid="form-new-password"
                 type="password"
@@ -103,14 +111,14 @@ export default function ResetPasswordPage() {
                   focus:outline-none focus:border-brand/50 transition-colors"
               />
               {pwTooShort && (
-                <p className="text-xs text-rose-400 mt-1">Password must be at least 8 characters.</p>
+                <p className="text-xs text-rose-400 mt-1">
+                  Password must be at least 8 characters.
+                </p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm text-content-secondary mb-1">
-                Confirm password
-              </label>
+              <label className="block text-sm text-content-secondary mb-1">Confirm password</label>
               <input
                 data-testid="form-confirm-password"
                 type="password"
@@ -121,9 +129,7 @@ export default function ResetPasswordPage() {
                 className="w-full rounded-lg bg-surface-base border border-border px-3 py-2 text-sm
                   focus:outline-none focus:border-brand/50 transition-colors"
               />
-              {pwMismatch && (
-                <p className="text-xs text-rose-400 mt-1">Passwords do not match.</p>
-              )}
+              {pwMismatch && <p className="text-xs text-rose-400 mt-1">Passwords do not match.</p>}
             </div>
           </div>
 
@@ -140,7 +146,9 @@ export default function ResetPasswordPage() {
           {error && (
             <div data-testid="reset-error" className="text-sm text-semantic-error text-center">
               {error}
-              {(error.includes('expired') || error.includes('invalid') || error.includes('used')) && (
+              {(error.includes('expired') ||
+                error.includes('invalid') ||
+                error.includes('used')) && (
                 <div className="mt-2">
                   <Link to="/auth/forgot-password" className="text-brand hover:underline">
                     Request a new link →

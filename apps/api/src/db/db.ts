@@ -128,7 +128,9 @@ export async function initDb(dbFile: string) {
     deviceName     TEXT,
     createdAtISO   TEXT NOT NULL
   )`);
-  db.run('CREATE INDEX IF NOT EXISTS webauthn_credentials_user_idx ON webauthn_credentials(userId)');
+  db.run(
+    'CREATE INDEX IF NOT EXISTS webauthn_credentials_user_idx ON webauthn_credentials(userId)',
+  );
 
   // Feature 47: Password reset tokens
   db.run(`CREATE TABLE IF NOT EXISTS password_reset_tokens (
@@ -137,7 +139,9 @@ export async function initDb(dbFile: string) {
     expiresAtISO TEXT NOT NULL,
     usedAtISO    TEXT
   )`);
-  db.run('CREATE INDEX IF NOT EXISTS password_reset_tokens_user_idx ON password_reset_tokens(userId)');
+  db.run(
+    'CREATE INDEX IF NOT EXISTS password_reset_tokens_user_idx ON password_reset_tokens(userId)',
+  );
 
   const persist = async () => {
     const data = db.export();

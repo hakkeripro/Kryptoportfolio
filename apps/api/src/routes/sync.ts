@@ -85,6 +85,8 @@ export function registerSyncRoutes(app: FastifyInstance) {
       'server_alerts',
       'alert_mirror_state',
       'alert_trigger_logs',
+      'webauthn_credentials',
+      'password_reset_tokens',
     ];
     for (const t of tables) app.db.exec(`DELETE FROM ${t}`);
     await app.db.persist();

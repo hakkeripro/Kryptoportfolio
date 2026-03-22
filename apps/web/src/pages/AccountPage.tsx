@@ -29,7 +29,7 @@ function PasskeysSection() {
 
   useEffect(() => {
     if (token) void fetchPasskeys();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   const handleAdd = async () => {
@@ -77,7 +77,9 @@ function PasskeysSection() {
               <li key={p.id} className="flex items-center justify-between text-sm">
                 <span className="text-content-secondary font-mono">
                   {p.deviceName ?? 'Passkey'}{' '}
-                  <span className="text-white/30">&middot; {new Date(p.createdAtISO).toLocaleDateString()}</span>
+                  <span className="text-white/30">
+                    &middot; {new Date(p.createdAtISO).toLocaleDateString()}
+                  </span>
                 </span>
                 <button
                   data-testid={`btn-remove-passkey-${p.id}`}
@@ -184,7 +186,6 @@ function ChangePasswordSection() {
     </form>
   );
 }
-
 
 function BillingSection() {
   const plan = useAuthStore((s) => s.plan);
