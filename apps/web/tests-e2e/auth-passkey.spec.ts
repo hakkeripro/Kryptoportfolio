@@ -71,15 +71,35 @@ async function mockWebAuthn(page: any) {
         };
       };
 
-      Object.defineProperty(Navigator.prototype, 'credentials', {
-        get: () => ({
-          create: mockCreate,
-          get: mockGet,
-          preventSilentAccess: async () => {},
-          store: async () => {},
-        }),
-        configurable: true,
-      });
+      const mockCredentials = {
+        create: mockCreate,
+        get: mockGet,
+        preventSilentAccess: async () => {},
+        store: async () => {},
+      };
+
+      // Strategy 1: Define own property on the navigator instance (shadows prototype getter)
+      try {
+        Object.defineProperty(window.navigator, 'credentials', {
+          value: mockCredentials,
+          writable: true,
+          configurable: true,
+        });
+      } catch (_e1) {
+        // Strategy 2: Redefine getter on Navigator.prototype
+        try {
+          Object.defineProperty(Navigator.prototype, 'credentials', {
+            get: () => mockCredentials,
+            configurable: true,
+          });
+        } catch (_e2) {
+          // Strategy 3: Patch methods on the existing credentials object
+          if (window.navigator.credentials) {
+            (window.navigator.credentials as any).create = mockCreate;
+            (window.navigator.credentials as any).get = mockGet;
+          }
+        }
+      }
     },
     { credId: MOCK_CREDENTIAL_ID, prfOutput: MOCK_PRF_OUTPUT },
   );
@@ -125,10 +145,11 @@ test.describe('Feature 47: Passkey authentication', () => {
     await page.getByTestId('btn-passkey-signup').click();
     await expect(page).toHaveURL(/\/home/, { timeout: 15_000 });
 
-    // Sign out
-    const auth = await page.evaluate(() => localStorage.removeItem('kp_auth_v3'));
-    void auth;
-    await page.reload();
+    // Sign out — clear auth + vault session so loadVaultStatus runs clean
+    await page.evaluate(() => {
+      localStorage.clear();
+      sessionStorage.clear();
+    });
 
     // Sign in with passkey
     await page.goto('/auth/signin');
