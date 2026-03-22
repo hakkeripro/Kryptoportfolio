@@ -160,7 +160,23 @@ test.describe('Feature 47: Passkey authentication', () => {
     // Sign in with passkey
     await expect(page.getByTestId('btn-passkey-signin')).toBeVisible({ timeout: 5_000 });
     await page.getByTestId('form-email').fill('passkey-signin@test.example');
+
+    // Capture console errors for diagnostics
+    const consoleErrors: string[] = [];
+    page.on('console', (msg: any) => {
+      if (msg.type() === 'error') consoleErrors.push(msg.text());
+    });
+
     await page.getByTestId('btn-passkey-signin').click();
+
+    // Wait a bit, then check for visible error messages before the URL check
+    await page.waitForTimeout(3_000);
+    const errorEl = page.getByTestId('signin-error');
+    const hasError = await errorEl.isVisible().catch(() => false);
+    if (hasError) {
+      const errorText = await errorEl.textContent();
+      throw new Error(`Passkey sign-in failed with UI error: "${errorText}". Console: ${consoleErrors.join(' | ')}`);
+    }
 
     await expect(page).toHaveURL(/\/home/, { timeout: 15_000 });
 
