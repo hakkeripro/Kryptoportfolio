@@ -81,6 +81,12 @@ auth.put('/v1/auth/password', async (c) => {
   return json({ ok: true });
 });
 
+auth.get('/v1/auth/config', (c) => {
+  return json({
+    googleClientId: c.env.GOOGLE_CLIENT_ID ?? null,
+  });
+});
+
 const OAuthGoogleSchema = z.object({
   code: z.string().min(1),
   codeVerifier: z.string().min(1),

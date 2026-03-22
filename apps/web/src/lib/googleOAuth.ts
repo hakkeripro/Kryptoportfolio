@@ -16,10 +16,26 @@ async function sha256Base64Url(input: string): Promise<string> {
     .replace(/=/g, '');
 }
 
-export async function initiateGoogleOAuth() {
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
+/** Fetch the Google client ID from the server (falls back to build-time env). */
+export async function fetchGoogleClientId(apiBase = '/api'): Promise<string | null> {
+  // Build-time env takes priority (set in Cloudflare Pages build vars)
+  const fromEnv = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
+  if (fromEnv) return fromEnv;
+
+  try {
+    const res = await fetch(`${apiBase}/v1/auth/config`);
+    if (!res.ok) return null;
+    const data = (await res.json()) as { googleClientId?: string | null };
+    return data.googleClientId ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function initiateGoogleOAuth(apiBase = '/api') {
+  const clientId = await fetchGoogleClientId(apiBase);
   if (!clientId) {
-    throw new Error('VITE_GOOGLE_CLIENT_ID is not configured');
+    throw new Error('Google sign-in is not available in this environment.');
   }
 
   const codeVerifier = randomBase64Url(64);

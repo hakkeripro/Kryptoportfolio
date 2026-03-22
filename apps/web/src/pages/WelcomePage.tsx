@@ -2,7 +2,6 @@ import { useNavigate, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { Logo } from '../components/ui/Logo';
-import { Button } from '../components/ui/Button';
 import { useAuthStore } from '../store/useAuthStore';
 import { useVaultStore } from '../store/useVaultStore';
 
@@ -41,23 +40,22 @@ export default function WelcomePage() {
 
         {/* CTAs */}
         <div className="w-full space-y-3">
-          <Button
+          <button
             data-testid="btn-signup"
             onClick={() => nav('/auth/signup')}
-            size="lg"
-            className="w-full"
+            className="w-full h-11 rounded-lg bg-brand hover:bg-brand-dark px-8 text-sm font-semibold
+              text-white transition-colors shadow-glow-brand"
           >
             {t('welcome.cta.signup')}
-          </Button>
-          <Button
+          </button>
+          <button
             data-testid="btn-signin"
             onClick={() => nav('/auth/signin')}
-            variant="secondary"
-            size="lg"
-            className="w-full"
+            className="w-full h-11 rounded-lg border border-white/[0.15] bg-transparent hover:bg-white/[0.04]
+              px-8 text-sm font-medium text-content-secondary hover:text-white transition-colors"
           >
             {t('welcome.cta.signin')}
-          </Button>
+          </button>
           <button
             data-testid="btn-offline"
             onClick={() => nav('/vault/setup?offline=1')}

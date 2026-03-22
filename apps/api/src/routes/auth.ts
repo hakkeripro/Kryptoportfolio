@@ -93,14 +93,17 @@ export function registerAuthRoutes(app: FastifyInstance) {
     if (!body.code || !body.codeVerifier || !body.redirectUri) {
       return reply.code(400).send({ error: 'missing_params' });
     }
-    const mockEmail = (req.headers['x-mock-google-email'] as string | undefined) ?? 'mock@google.test';
+    const mockEmail =
+      (req.headers['x-mock-google-email'] as string | undefined) ?? 'mock@google.test';
     const googleSub = `google-sub-${mockEmail.replace(/[^a-z0-9]/g, '-')}`;
     const email = mockEmail.toLowerCase().trim();
 
-    let user = app.db.getOne<{ id: string; createdAtISO: string; plan: string | null; googleSub: string | null }>(
-      'SELECT id,createdAtISO,plan,googleSub FROM users WHERE googleSub=?',
-      [googleSub],
-    );
+    let user = app.db.getOne<{
+      id: string;
+      createdAtISO: string;
+      plan: string | null;
+      googleSub: string | null;
+    }>('SELECT id,createdAtISO,plan,googleSub FROM users WHERE googleSub=?', [googleSub]);
     if (!user) {
       const existingByEmail = app.db.getOne<{ id: string; googleSub: string | null }>(
         'SELECT id,googleSub FROM users WHERE email=?',
@@ -121,7 +124,12 @@ export function registerAuthRoutes(app: FastifyInstance) {
     }
     const plan = user.plan ?? 'free';
     const token = await signToken(app, user.id, email, plan);
-    return reply.send({ user: { id: user.id, email, createdAtISO: user.createdAtISO }, token, plan, planExpiresAt: null });
+    return reply.send({
+      user: { id: user.id, email, createdAtISO: user.createdAtISO },
+      token,
+      plan,
+      planExpiresAt: null,
+    });
   });
 
   // Feature 47: Password reset (mock — token returned in response for E2E testing)
@@ -166,7 +174,9 @@ export function registerAuthRoutes(app: FastifyInstance) {
       userId: string;
       expiresAtISO: string;
       usedAtISO: string | null;
-    }>('SELECT id,userId,expiresAtISO,usedAtISO FROM password_reset_tokens WHERE id=?', [body.token]);
+    }>('SELECT id,userId,expiresAtISO,usedAtISO FROM password_reset_tokens WHERE id=?', [
+      body.token,
+    ]);
 
     if (!tokenRow || tokenRow.usedAtISO !== null) {
       return reply.code(400).send({ error: 'invalid_or_used_token' });
@@ -178,13 +188,17 @@ export function registerAuthRoutes(app: FastifyInstance) {
     const newHash = await hashPassword(body.newPassword);
     const now = new Date().toISOString();
 
-    app.db.exec(
-      'UPDATE users SET passwordHash=?,vaultKeyBlob=NULL,vaultKeySalt=NULL WHERE id=?',
-      [newHash, tokenRow.userId],
-    );
+    app.db.exec('UPDATE users SET passwordHash=?,vaultKeyBlob=NULL,vaultKeySalt=NULL WHERE id=?', [
+      newHash,
+      tokenRow.userId,
+    ]);
     app.db.exec('UPDATE password_reset_tokens SET usedAtISO=? WHERE id=?', [now, body.token]);
 
     return reply.send({ ok: true });
+  });
+
+  app.get('/v1/auth/config', async (_req, reply) => {
+    return reply.send({ googleClientId: process.env.GOOGLE_CLIENT_ID ?? null });
   });
 
   app.get('/v1/me', { preHandler: requireAuth }, async (req) => {

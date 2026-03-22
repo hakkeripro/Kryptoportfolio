@@ -36,6 +36,7 @@ export default function SignupPage() {
   const { t } = useTranslation();
   const register = useAuthStore((s) => s.register);
   const registerPasskey = useAuthStore((s) => s.registerPasskey);
+  const apiBase = useAuthStore((s) => s.apiBase);
   const passkeySupported = isPasskeyAvailable();
 
   function errToMsg(e: unknown): string {
@@ -85,7 +86,7 @@ export default function SignupPage() {
   const handleGoogleSignUp = async () => {
     setGoogleBusy(true);
     try {
-      await initiateGoogleOAuth();
+      await initiateGoogleOAuth(apiBase);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Google sign up failed');
       setGoogleBusy(false);
@@ -127,29 +128,6 @@ export default function SignupPage() {
 
         <h1 className="text-2xl font-bold text-center text-white">{t('signup.title')}</h1>
 
-        {/* Passkey signup */}
-        {passkeySupported && (
-          <button
-            data-testid="btn-passkey-signup"
-            type="button"
-            onClick={handlePasskeySignUp}
-            disabled={passkeyBusy || busy || googleBusy}
-            className="w-full flex items-center justify-center gap-3 rounded-lg
-              bg-white/[0.04] border border-white/[0.08] px-4 py-2.5 text-sm font-medium
-              text-white hover:bg-[#FF8400]/[0.04] hover:border-[#FF8400]/30
-              disabled:opacity-60 transition-colors"
-          >
-            {passkeyBusy ? (
-              <span className="h-4 w-4 border-2 border-white/40 border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <svg className="h-4 w-4 text-[#FF8400]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
-              </svg>
-            )}
-            {passkeyBusy ? 'Setting up passkey…' : 'Create account with passkey'}
-          </button>
-        )}
-
         {/* Google OAuth */}
         <button
           data-testid="btn-google-signup"
@@ -164,10 +142,22 @@ export default function SignupPage() {
             <span className="h-4 w-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
           ) : (
             <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+              <path
+                fill="#4285F4"
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+              />
+              <path
+                fill="#34A853"
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+              />
+              <path
+                fill="#FBBC05"
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"
+              />
+              <path
+                fill="#EA4335"
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+              />
             </svg>
           )}
           {googleBusy ? 'Redirecting…' : 'Continue with Google'}
@@ -201,6 +191,36 @@ export default function SignupPage() {
                   focus:outline-none focus:border-brand/50 transition-colors"
               />
             </div>
+
+            {/* Passkey option — after email field, disabled until email entered */}
+            {passkeySupported && (
+              <>
+                <button
+                  data-testid="btn-passkey-signup"
+                  type="button"
+                  onClick={handlePasskeySignUp}
+                  disabled={!email || passkeyBusy || busy || googleBusy}
+                  className="w-full flex items-center justify-center gap-3 rounded-lg
+                    bg-white/[0.04] border border-white/[0.08] px-4 py-2.5 text-sm font-medium
+                    text-white hover:bg-[#FF8400]/[0.04] hover:border-[#FF8400]/30
+                    disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  {passkeyBusy ? (
+                    <span className="h-4 w-4 border-2 border-white/40 border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <svg className="h-4 w-4 text-[#FF8400]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+                    </svg>
+                  )}
+                  {passkeyBusy ? 'Setting up passkey…' : 'Create account with passkey'}
+                </button>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 h-px bg-white/[0.06]" />
+                  <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-white/20">or use password</span>
+                  <div className="flex-1 h-px bg-white/[0.06]" />
+                </div>
+              </>
+            )}
 
             <div>
               <label className="block text-sm text-content-secondary mb-1">
