@@ -71,32 +71,40 @@ async function mockWebAuthn(page: any) {
         };
       };
 
-      const mockCredentials = {
-        create: mockCreate,
-        get: mockGet,
-        preventSilentAccess: async () => {},
-        store: async () => {},
-      };
-
-      // Strategy 1: Define own property on the navigator instance (shadows prototype getter)
+      // Most reliable strategy: patch CredentialsContainer.prototype methods directly.
+      // This works regardless of whether navigator.credentials is configurable,
+      // because every CredentialsContainer instance inherits from the prototype.
       try {
-        Object.defineProperty(window.navigator, 'credentials', {
-          value: mockCredentials,
-          writable: true,
-          configurable: true,
-        });
-      } catch (_e1) {
-        // Strategy 2: Redefine getter on Navigator.prototype
+        CredentialsContainer.prototype.create = mockCreate as any;
+        CredentialsContainer.prototype.get = mockGet as any;
+      } catch (_e0) {
+        // Fallback: try Object.defineProperty on the prototype methods
         try {
-          Object.defineProperty(Navigator.prototype, 'credentials', {
-            get: () => mockCredentials,
+          Object.defineProperty(CredentialsContainer.prototype, 'create', {
+            value: mockCreate,
+            writable: true,
             configurable: true,
           });
-        } catch (_e2) {
-          // Strategy 3: Patch methods on the existing credentials object
-          if (window.navigator.credentials) {
-            (window.navigator.credentials as any).create = mockCreate;
-            (window.navigator.credentials as any).get = mockGet;
+          Object.defineProperty(CredentialsContainer.prototype, 'get', {
+            value: mockGet,
+            writable: true,
+            configurable: true,
+          });
+        } catch (_e1) {
+          // Last resort: patch navigator.credentials instance
+          try {
+            Object.defineProperty(window.navigator, 'credentials', {
+              value: {
+                create: mockCreate,
+                get: mockGet,
+                preventSilentAccess: async () => {},
+                store: async () => {},
+              },
+              writable: true,
+              configurable: true,
+            });
+          } catch (_e2) {
+            // noop — mock could not be installed
           }
         }
       }
@@ -145,21 +153,9 @@ test.describe('Feature 47: Passkey authentication', () => {
     await page.getByTestId('btn-passkey-signup').click();
     await expect(page).toHaveURL(/\/home/, { timeout: 15_000 });
 
-    // Sign out — clear auth + vault session
-    // Use SPA navigation (no full page reload) to preserve the in-memory WebAuthn mock.
-    // page.goto('/auth/signin') would re-run the init script in a new page context where
-    // navigator.credentials cannot be reliably mocked due to browser security restrictions.
-    await page.evaluate(() => {
-      localStorage.clear();
-      sessionStorage.clear();
-    });
-
-    // SPA navigate to sign-in: preserves mock in memory, React Router handles route switch
-    await page.evaluate(() => {
-      window.history.pushState({}, '', '/auth/signin');
-      window.dispatchEvent(new PopStateEvent('popstate'));
-    });
-    await page.waitForTimeout(300);
+    // Sign out and navigate to sign-in page (full reload).
+    // The CredentialsContainer.prototype mock is re-injected by addInitScript on each load.
+    await page.goto('/auth/signin');
 
     // Sign in with passkey
     await expect(page.getByTestId('btn-passkey-signin')).toBeVisible({ timeout: 5_000 });
