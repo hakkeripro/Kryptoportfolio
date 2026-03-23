@@ -57,13 +57,13 @@ export default function HeroSection() {
           </div>
 
           <a
-            href={`${APP_URL}/welcome`}
+            href={`${APP_URL}/auth/signin`}
             className="text-sm text-white/50 hover:text-white transition-colors px-3 py-1.5"
           >
             {t.nav.signIn}
           </a>
           <a
-            href={`${APP_URL}/welcome`}
+            href={`${APP_URL}/auth/signup`}
             className="flex items-center gap-1.5 text-sm font-medium bg-[#FF8400] hover:bg-[#FF8400]/90 text-black px-4 py-2 rounded-lg transition-all duration-200 hover:shadow-[0_0_20px_rgba(255,132,0,0.25)]"
           >
             {t.nav.getStarted}

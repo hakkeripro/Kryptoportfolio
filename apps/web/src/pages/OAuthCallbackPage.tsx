@@ -118,7 +118,7 @@ export default function OAuthCallbackPage() {
       sessionStorage.removeItem('oauth_state');
       sessionStorage.removeItem('oauth_code_verifier');
 
-      const redirectUri = `${window.location.origin}/auth/callback`;
+      const redirectUri = `${window.location.origin}/auth/oauth/callback`;
 
       try {
         await loginWithGoogle(code, codeVerifier, redirectUri);

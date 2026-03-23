@@ -63,7 +63,7 @@ export default function App() {
             <Route path="/auth/signin" element={<SigninPage />} />
             <Route path="/vault/setup" element={<VaultSetupPage />} />
             <Route path="/vault/unlock" element={<UnlockPage />} />
-            <Route path="/auth/callback" element={<OAuthCallbackPage />} />
+            <Route path="/auth/oauth/callback" element={<OAuthCallbackPage />} />
             <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
 

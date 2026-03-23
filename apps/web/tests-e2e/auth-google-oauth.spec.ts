@@ -3,14 +3,14 @@ import { resetApp, waitForToken } from './helpers';
 
 const API = 'http://localhost:8788';
 
-/** Navigate to /auth/callback with a mock OAuth code+state (state must be in sessionStorage first) */
+/** Navigate to /auth/oauth/callback with a mock OAuth code+state (state must be in sessionStorage first) */
 async function navigateToOAuthCallback(page: any, code = 'mock-google-code') {
   const state = 'mock-state-abc123';
   await page.evaluate((s: string) => {
     sessionStorage.setItem('oauth_state', s);
     sessionStorage.setItem('oauth_code_verifier', 'mock-code-verifier');
   }, state);
-  await page.goto(`/auth/callback?code=${code}&state=${state}`);
+  await page.goto(`/auth/oauth/callback?code=${code}&state=${state}`);
 }
 
 /** Enter a PIN into the 6-digit PIN input */
@@ -201,14 +201,14 @@ test.describe('Feature 46: Google OAuth', () => {
   });
 
   test('error=access_denied: shows cancelled message', async ({ page }) => {
-    await page.goto('/auth/callback?error=access_denied');
+    await page.goto('/auth/oauth/callback?error=access_denied');
     await expect(page.getByTestId('oauth-error')).toBeVisible({ timeout: 5_000 });
     await expect(page.getByTestId('oauth-error')).toContainText('Sign in was cancelled');
   });
 
   test('invalid state: shows invalid request error', async ({ page }) => {
     // No sessionStorage set → state mismatch
-    await page.goto('/auth/callback?code=mock-code&state=wrong-state');
+    await page.goto('/auth/oauth/callback?code=mock-code&state=wrong-state');
     await expect(page.getByTestId('oauth-error')).toBeVisible({ timeout: 5_000 });
     await expect(page.getByTestId('oauth-error')).toContainText('Invalid request');
   });

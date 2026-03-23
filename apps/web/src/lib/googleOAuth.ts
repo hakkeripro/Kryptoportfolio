@@ -48,7 +48,7 @@ export async function initiateGoogleOAuth(apiBase = '/api') {
   const params = new URLSearchParams({
     response_type: 'code',
     client_id: clientId,
-    redirect_uri: `${window.location.origin}/auth/callback`,
+    redirect_uri: `${window.location.origin}/auth/oauth/callback`,
     scope: 'openid email',
     code_challenge: codeChallenge,
     code_challenge_method: 'S256',
